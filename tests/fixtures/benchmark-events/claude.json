@@ -1,0 +1,1 @@
+{"type":"result","subtype":"success","result":"Claude final answer","usage":{"input_tokens":90,"output_tokens":31},"model":"claude-test","nested":{"password":"must-redact"}}

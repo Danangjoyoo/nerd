@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/obra/superpowers.git",
+    "tag": "v6.1.1",
+    "tag_object": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
+    "commit": "d884ae04edebef577e82ff7c4e143debd0bbec99"
+  },
+  "agents": ["claude"],
+  "models": {"claude": "claude-haiku-4-5"},
+  "target": {
+    "id": "claude-haiku-4-5",
+    "display_name": "Claude Haiku 4.5",
+    "reasoning_effort": null
+  },
+  "judge": {
+    "agent": "codex",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "xhigh",
+    "timeout_seconds": 120
+  },
+  "case_files": [
+    "benchmarks/cases/smart.json",
+    "benchmarks/cases/surgery.json",
+    "benchmarks/cases/execute.json",
+    "benchmarks/cases/silent.json"
+  ],
+  "conditions": {
+    "smart": ["nerd-smart", "superpowers-brainstorming"],
+    "surgery": ["nerd-surgery", "superpowers-systematic-debugging"],
+    "execute": ["nerd-execute", "superpowers-executing-plans"],
+    "silent": ["regular", "nerd-silent"]
+  },
+  "repetitions": 3,
+  "parallelism": 1,
+  "seed": 7152026
+}

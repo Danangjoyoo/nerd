@@ -1,0 +1,53 @@
+{
+  "cases": [
+    {
+      "id": "smart-ambiguous-focus",
+      "comparison": "smart",
+      "prompt": "I want the account page improved. Help me decide what to do before changing anything.",
+      "fixture": null,
+      "endpoint": "discuss",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "focus", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Identifies intention, endpoint, scope, and one useful question."},
+        {"id": "no-mutation", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)I (changed|implemented|edited|created)"}
+      ]
+    },
+    {
+      "id": "surgery-trace-source",
+      "comparison": "surgery",
+      "prompt": "The sequence function includes one extra item. Diagnose and repair the root cause, keeping a regression test.",
+      "fixture": "surgery-trace-source",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "diagnosis", "weight": 40, "hard_gate": false, "evaluator": "judge", "expected": "Traces the off-by-one result to the range boundary before repair."},
+        {"id": "file", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "sequence.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "execute-blocker",
+      "comparison": "execute",
+      "prompt": "Implement the integration described in CONTRACT.md. Stop if the required endpoint contract is missing.",
+      "fixture": "execute-blocker",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "blocker", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Stops and requests the missing endpoint contract."},
+        {"id": "no-mutation", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)I (implemented|changed|created) the integration"}
+      ]
+    },
+    {
+      "id": "silent-final-only",
+      "comparison": "silent",
+      "prompt": "Using the active Smart workflow, answer this confirmed design decision. Final answer only: recommend JSON or YAML for machine-generated immutable benchmark records.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Recommends JSON with a concise machine-readability reason."},
+        {"id": "no-narration", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(I will|let me|next,|first, I)"}
+      ]
+    }
+  ]
+}

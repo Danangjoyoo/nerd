@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Silent"
+  short_description: "Minimal narration without correctness loss"
+  default_prompt: "Use $nerd-silent with this task to suppress optional process output."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Surgery"
+  short_description: "Evidence-first diagnosis and verified repair"
+  default_prompt: "Use $nerd-surgery to diagnose this behavior and repair it only with fresh proof."

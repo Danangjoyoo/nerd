@@ -1,0 +1,67 @@
+{
+  "cases": [
+    {
+      "id": "surgery-trace-source",
+      "comparison": "surgery",
+      "prompt": "The sequence function includes one extra item. Diagnose and repair the root cause, keeping a regression test.",
+      "fixture": "surgery-trace-source",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "diagnosis", "weight": 40, "hard_gate": false, "evaluator": "judge", "expected": "Traces the off-by-one result to the range boundary before repair."},
+        {"id": "file", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "sequence.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "surgery-component-boundary",
+      "comparison": "surgery",
+      "prompt": "The timeout reaches the client as text instead of an integer. Trace the component boundary, repair it, and prove the behavior.",
+      "fixture": "surgery-component-boundary",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "boundary", "weight": 40, "hard_gate": false, "evaluator": "judge", "expected": "Identifies the environment-to-configuration conversion boundary."},
+        {"id": "file", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "config.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "surgery-not-reproducible",
+      "comparison": "surgery",
+      "prompt": "A user reports this stable formatter sometimes duplicates spaces, but the local suite is green and no failing input is available. Diagnose only.",
+      "fixture": "surgery-not-reproducible",
+      "endpoint": "diagnose",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "uncertainty", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "States the evidence gap and requests one discriminating input without inventing a cause."},
+        {"id": "no-fix-claim", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)(fixed|resolved|root cause is)"}
+      ]
+    },
+    {
+      "id": "surgery-repair-under-uncertainty",
+      "comparison": "surgery",
+      "prompt": "The normalizer should return lowercase trimmed names. Evidence is incomplete, but after one uncertainty check make a reversible repair attempt and verify it.",
+      "fixture": "surgery-repair-under-uncertainty",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "attempt", "weight": 40, "hard_gate": false, "evaluator": "judge", "expected": "Labels uncertain work as an attempt until the test proves it."},
+        {"id": "file", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "normalizer.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "surgery-repeated-failure",
+      "comparison": "surgery",
+      "prompt": "Two attempted fixes have failed for this cache leak. Diagnose the architecture before making another correction.",
+      "fixture": "surgery-repeated-failure",
+      "endpoint": "diagnose",
+      "timeout_seconds": 300,
+      "criteria": [
+        {"id": "architecture-stop", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Stops stacking fixes and questions shared cache state."},
+        {"id": "no-third-fix", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)I (changed|implemented|patched)"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "cases": [
+    {
+      "id": "smart-compound-queue",
+      "comparison": "smart",
+      "prompt": "Design a CSV importer and deploy it to AWS. Start with the first dependency and keep the other goal queued.",
+      "fixture": null,
+      "endpoint": "discuss",
+      "timeout_seconds": 300,
+      "criteria": [
+        {
+          "id": "queue",
+          "weight": 70,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Focuses the importer and explicitly queues deployment."
+        },
+        {
+          "id": "no-deploy",
+          "weight": 30,
+          "hard_gate": true,
+          "evaluator": "absent_regex",
+          "expected": "(?i)(deployed|terraform apply|aws cloudformation deploy)"
+        }
+      ]
+    },
+    {
+      "id": "surgery-component-boundary",
+      "comparison": "surgery",
+      "prompt": "The timeout reaches the client as text instead of an integer. Trace the component boundary, repair it, and prove the behavior.",
+      "fixture": "surgery-component-boundary",
+      "endpoint": "execute",
+      "timeout_seconds": 300,
+      "criteria": [
+        {
+          "id": "boundary",
+          "weight": 40,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Identifies the environment-to-configuration conversion boundary."
+        },
+        {
+          "id": "file",
+          "weight": 20,
+          "hard_gate": true,
+          "evaluator": "file",
+          "expected": "config.py"
+        },
+        {
+          "id": "proof",
+          "weight": 40,
+          "hard_gate": true,
+          "evaluator": "command",
+          "expected": "python3 -m unittest -v::0"
+        }
+      ]
+    },
+    {
+      "id": "execute-written-plan",
+      "comparison": "execute",
+      "prompt": "Execute PLAN.md completely. Implement average(values), retain the planned tests, and run the proof command.",
+      "fixture": "execute-written-plan",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {
+          "id": "plan",
+          "weight": 30,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Follows the written plan in dependency order."
+        },
+        {
+          "id": "file",
+          "weight": 30,
+          "hard_gate": true,
+          "evaluator": "file",
+          "expected": "stats.py"
+        },
+        {
+          "id": "proof",
+          "weight": 40,
+          "hard_gate": true,
+          "evaluator": "command",
+          "expected": "python3 -m unittest -v::0"
+        }
+      ]
+    },
+    {
+      "id": "silent-code-only",
+      "comparison": "silent",
+      "prompt": "Code only: return a Python function add(a, b) with integer annotations.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 300,
+      "criteria": [
+        {
+          "id": "accuracy",
+          "weight": 70,
+          "hard_gate": true,
+          "evaluator": "regex",
+          "expected": "def add\\(a: int, b: int\\) -> int:"
+        },
+        {
+          "id": "no-narration",
+          "weight": 30,
+          "hard_gate": false,
+          "evaluator": "absent_regex",
+          "expected": "(?i)(here is|I created|explanation)"
+        }
+      ]
+    }
+  ]
+}

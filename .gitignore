@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+benchmarks/.cache/
+benchmarks/work/
+benchmarks/results/*
+!benchmarks/results/.gitkeep

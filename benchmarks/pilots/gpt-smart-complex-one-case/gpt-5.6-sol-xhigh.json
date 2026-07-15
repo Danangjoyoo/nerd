@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/obra/superpowers.git",
+    "tag": "v6.1.1",
+    "tag_object": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
+    "commit": "d884ae04edebef577e82ff7c4e143debd0bbec99"
+  },
+  "agents": ["codex"],
+  "models": {"codex": "gpt-5.6-sol"},
+  "target": {
+    "id": "gpt-5.6-sol-xhigh",
+    "display_name": "GPT 5.6 Sol · xhigh",
+    "reasoning_effort": "xhigh"
+  },
+  "judge": {
+    "agent": "codex",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "xhigh",
+    "timeout_seconds": 120
+  },
+  "case_files": ["benchmarks/pilots/gpt-smart-complex-one-case/cases.json"],
+  "conditions": {
+    "smart": ["nerd-smart", "superpowers-brainstorming"]
+  },
+  "repetitions": 1,
+  "parallelism": 1,
+  "seed": 7152026
+}
