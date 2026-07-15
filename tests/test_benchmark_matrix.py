@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import unittest
 
 from benchmarks.nerdbench.runner import _smoke_specs, load_config, schedule_runs
@@ -49,6 +50,26 @@ class BenchmarkMatrixTests(unittest.TestCase):
         self.assertEqual(judge["agent"], "codex")
         self.assertEqual(judge["model"], "gpt-5.6-terra")
         self.assertEqual(judge["reasoning_effort"], "xhigh")
+
+    def test_xhigh_case_timeouts_allow_full_reasoning(self):
+        minimums = {
+            "smart": 300,
+            "surgery": 300,
+            "silent": 300,
+        }
+        for comparison, minimum in minimums.items():
+            payload = json.loads(
+                (ROOT / f"benchmarks/cases/{comparison}.json").read_text()
+            )
+            self.assertTrue(
+                all(case["timeout_seconds"] >= minimum for case in payload["cases"])
+            )
+        execute = json.loads(
+            (ROOT / "benchmarks/cases/execute.json").read_text()
+        )["cases"]
+        for case in execute:
+            minimum = 300 if case["id"] == "execute-blocker" else 600
+            self.assertGreaterEqual(case["timeout_seconds"], minimum)
 
 
 if __name__ == "__main__":
