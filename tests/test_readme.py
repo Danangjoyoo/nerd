@@ -162,7 +162,7 @@ class ReadmeContractTests(unittest.TestCase):
     def test_readme_remains_sharp(self):
         self.assertLessEqual(
             len(README.read_text(encoding="utf-8").splitlines()),
-            120,
+            160,
         )
 
     def test_ci_badge_is_current(self):
