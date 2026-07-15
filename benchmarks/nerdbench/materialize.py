@@ -10,7 +10,8 @@ from .models import BenchmarkCase
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PINNED_SUPERPOWERS_COMMIT = "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+PINNED_SUPERPOWERS_TAG_OBJECT = "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+PINNED_SUPERPOWERS_COMMIT = "d884ae04edebef577e82ff7c4e143debd0bbec99"
 SUPERPOWERS_TAG = "v6.1.1"
 SUPERPOWERS_URL = "https://github.com/obra/superpowers.git"
 
@@ -56,11 +57,17 @@ def _run(command: list[str], cwd: Path) -> str:
 
 
 def verify_superpowers_checkout(path: Path) -> None:
-    actual = _run(["git", "rev-parse", "HEAD"], path)
-    if actual != PINNED_SUPERPOWERS_COMMIT:
+    actual_commit = _run(["git", "rev-parse", "HEAD"], path)
+    if actual_commit != PINNED_SUPERPOWERS_COMMIT:
         raise ValueError(
             "upstream checkout does not match pinned commit "
-            f"{PINNED_SUPERPOWERS_COMMIT}: {actual}"
+            f"{PINNED_SUPERPOWERS_COMMIT}: {actual_commit}"
+        )
+    actual_tag = _run(["git", "rev-parse", f"refs/tags/{SUPERPOWERS_TAG}"], path)
+    if actual_tag != PINNED_SUPERPOWERS_TAG_OBJECT:
+        raise ValueError(
+            "upstream checkout does not match pinned tag object "
+            f"{PINNED_SUPERPOWERS_TAG_OBJECT}: {actual_tag}"
         )
 
 

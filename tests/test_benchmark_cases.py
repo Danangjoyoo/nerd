@@ -3,6 +3,7 @@ import json
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from benchmarks.nerdbench.cases import load_cases
 
@@ -181,6 +182,18 @@ class MaterializationTests(unittest.TestCase):
             subprocess.run(["git", "commit", "-qm", "wrong"], cwd=path, check=True)
             with self.assertRaisesRegex(ValueError, "pinned commit"):
                 verify_superpowers_checkout(path)
+
+    def test_upstream_verifies_tag_object_and_dereferenced_commit(self):
+        from benchmarks.nerdbench import materialize
+
+        def resolve(command, _cwd):
+            if command[-1] == "HEAD":
+                return "d884ae04edebef577e82ff7c4e143debd0bbec99"
+            return "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+
+        with patch.object(materialize, "_run", side_effect=resolve) as run:
+            materialize.verify_superpowers_checkout(Path("/upstream"))
+        self.assertEqual(run.call_count, 2)
 
 
 if __name__ == "__main__":

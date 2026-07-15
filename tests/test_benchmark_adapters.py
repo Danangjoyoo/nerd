@@ -10,6 +10,7 @@ import unittest
 from benchmarks.nerdbench.adapters import get_adapter
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import (
+    _changed_files,
     create_run_directory,
     condition_prompt,
     load_config,
@@ -129,10 +130,26 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaisesRegex(FileExistsError, "refusing to overwrite"):
                 create_run_directory(root, "20260715T000000Z-deadbee")
 
+    def test_changed_files_preserve_the_first_filename_character(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "bench@example.com"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "Benchmark"], cwd=root, check=True)
+            (root / "sequence.py").write_text("before\n")
+            subprocess.run(["git", "add", "sequence.py"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "baseline"], cwd=root, check=True)
+            (root / "sequence.py").write_text("after\n")
+            self.assertEqual(_changed_files(root), ("sequence.py",))
+
     def test_config_pin_is_exact(self):
         config = load_config(CONFIG)
         self.assertEqual(
             config["upstream"]["commit"],
+            "d884ae04edebef577e82ff7c4e143debd0bbec99",
+        )
+        self.assertEqual(
+            config["upstream"]["tag_object"],
             "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
         )
         self.assertEqual(config["parallelism"], 1)

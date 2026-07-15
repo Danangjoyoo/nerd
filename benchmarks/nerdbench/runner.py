@@ -137,7 +137,13 @@ def _proof_commands(case: BenchmarkCase) -> tuple[str, ...]:
 
 
 def _changed_files(workspace: Path) -> tuple[str, ...]:
-    output = _git_output(["status", "--short"], workspace)
+    output = subprocess.run(
+        ["git", "status", "--short"],
+        cwd=workspace,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
     return tuple(
         line[3:].strip()
         for line in output.splitlines()
@@ -257,6 +263,7 @@ def _manifest(config: dict, run_id: str, planned: int, smoke: bool) -> dict:
         "config": _public_config(config),
         "nerd_commit": _git_output(["rev-parse", "HEAD"]),
         "upstream_commit": config["upstream"]["commit"],
+        "upstream_tag_object": config["upstream"]["tag_object"],
         "platform": platform.platform(),
         "python": platform.python_version(),
         "agent_versions": {
