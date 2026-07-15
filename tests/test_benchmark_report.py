@@ -4,6 +4,7 @@ import unittest
 
 from benchmarks.nerdbench.report import (
     aggregate_results,
+    render_readme_results,
     render_summary_markdown,
     write_report,
 )
@@ -143,6 +144,39 @@ class AggregateReportTests(unittest.TestCase):
             "Patrol",
         ):
             self.assertIn(term, body)
+
+    def test_readme_renderer_uses_release_evidence(self):
+        records, scores = build_fixture()
+        summary = aggregate_results(records, scores, manifest())
+        body = render_readme_results(summary)
+        self.assertIn("| Comparison | Nerd score | Baseline score", body)
+        self.assertIn("Smart vs Superpowers Brainstorming", body)
+        self.assertIn("90.0%", body)
+        self.assertIn("80.0%", body)
+        self.assertIn("-20.00%", body)
+        self.assertIn("Eligible paired output tokens", body)
+        self.assertIn("500", body)
+        self.assertIn("300", body)
+        self.assertIn("-40.0%", body)
+        self.assertIn("5 valid pairs", body)
+        self.assertIn(
+            "benchmarks/results/20260715T000000Z-deadbee/summary.md",
+            body,
+        )
+
+    def test_readme_renderer_rejects_insufficient_evidence(self):
+        records, scores = build_fixture()
+        records = [
+            item for item in records
+            if not item["case_id"].startswith("smart-case-4")
+        ]
+        scores = [
+            item for item in scores
+            if not item["run_id"].startswith("smart--smart-case-4")
+        ]
+        summary = aggregate_results(records, scores, manifest())
+        with self.assertRaisesRegex(ValueError, "not publishable"):
+            render_readme_results(summary)
 
 
 class ReportFileTests(unittest.TestCase):
