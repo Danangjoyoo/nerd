@@ -40,6 +40,7 @@ def load_config(path: Path) -> dict:
         "upstream",
         "agents",
         "models",
+        "judge",
         "case_files",
         "conditions",
         "repetitions",
@@ -50,6 +51,10 @@ def load_config(path: Path) -> dict:
         raise ValueError("benchmark config keys do not match schema")
     if payload["repetitions"] <= 0 or payload["parallelism"] <= 0:
         raise ValueError("repetitions and parallelism must be positive")
+    if payload["judge"].get("agent") != "codex":
+        raise ValueError("the blinded judge agent must be codex")
+    if payload["judge"].get("timeout_seconds", 0) <= 0:
+        raise ValueError("judge timeout must be positive")
     payload["_root"] = path.resolve().parents[1]
     return payload
 

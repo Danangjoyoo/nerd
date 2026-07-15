@@ -12,6 +12,11 @@
     "claude": null,
     "cursor": null
   },
+  "judge": {
+    "agent": "codex",
+    "model": null,
+    "timeout_seconds": 120
+  },
   "case_files": [
     "benchmarks/cases/smart.json",
     "benchmarks/cases/surgery.json",

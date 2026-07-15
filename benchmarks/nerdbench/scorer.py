@@ -5,10 +5,27 @@ from __future__ import annotations
 import random
 import re
 import json
+import hashlib
 from pathlib import Path
+import subprocess
+import time
 
 from .cases import load_cases
+from .adapters import get_adapter
 from .models import BenchmarkCase, RunResult, RunSpec, ScoreResult
+
+
+PAIR_CONDITIONS = {
+    "smart": ("nerd-smart", "superpowers-brainstorming"),
+    "surgery": ("nerd-surgery", "superpowers-systematic-debugging"),
+    "execute": ("nerd-execute", "superpowers-executing-plans"),
+    "silent": ("nerd-silent", "regular"),
+}
+JUDGE_SCHEMA = Path(__file__).resolve().parents[1] / "judge" / "schema.json"
+JUDGE_INSTRUCTIONS = """Evaluate outputs A and B independently against each supplied criterion.
+Use only the user prompt, allowed scope, criterion labels, and the anonymized outputs.
+Do not infer hidden run metadata or aggregate results.
+Return only JSON matching the supplied schema."""
 
 
 def _command_expected(value: str) -> tuple[str, int]:
@@ -93,6 +110,50 @@ def blind_pair(
     return payload, mapping
 
 
+def build_judge_prompt(case: BenchmarkCase, outputs: dict[str, str]) -> str:
+    criterion_labels = {
+        criterion.id: criterion.expected
+        for criterion in case.criteria
+        if criterion.evaluator == "judge"
+    }
+    request = {
+        "user_prompt": case.prompt,
+        "allowed_scope": case.endpoint,
+        "criteria": criterion_labels,
+        "outputs": {"A": outputs["A"], "B": outputs["B"]},
+    }
+    return JUDGE_INSTRUCTIONS + "\n\n" + json.dumps(
+        request,
+        indent=2,
+        sort_keys=True,
+    )
+
+
+def build_judge_command(
+    schema: Path,
+    prompt: str,
+    *,
+    model: str | None = None,
+) -> list[str]:
+    command = [
+        "codex",
+        "exec",
+        "--ephemeral",
+        "--json",
+        "--sandbox",
+        "read-only",
+        "--skip-git-repo-check",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--output-schema",
+        str(schema),
+    ]
+    if model:
+        command.extend(["--model", model])
+    command.append(prompt)
+    return command
+
+
 def validate_judge_result(result: object, criterion_ids: tuple[str, ...]) -> dict:
     if not isinstance(result, dict) or set(result) != {"criteria"}:
         raise ValueError("judge result must contain only criteria")
@@ -121,6 +182,142 @@ def _read_jsonl(path: Path) -> list[dict]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def _case_index(config: dict) -> dict[str, BenchmarkCase]:
+    cases = {}
+    for relative in config["case_files"]:
+        for case in load_cases(config["_root"] / relative):
+            cases[case.id] = case
+    return cases
+
+
+def _pair_seed(seed: int, identity: str) -> int:
+    digest = hashlib.sha256(identity.encode("utf-8")).hexdigest()
+    return seed + int(digest[:8], 16)
+
+
+def judge_tasks(
+    records: list[dict],
+    cases: dict[str, BenchmarkCase],
+    seed: int,
+) -> list[dict]:
+    grouped: dict[tuple, dict[str, dict]] = {}
+    patrol = []
+    for record in records:
+        case = cases[record["case_id"]]
+        if not any(item.evaluator == "judge" for item in case.criteria):
+            continue
+        if case.comparison == "patrol":
+            patrol.append(record)
+            continue
+        identity = (
+            record["case_id"],
+            record["agent"],
+            record.get("model"),
+            int(record["repetition"]),
+        )
+        grouped.setdefault(identity, {})[record["condition"]] = record
+
+    tasks = []
+    for identity, arms in sorted(grouped.items(), key=lambda item: repr(item[0])):
+        case = cases[identity[0]]
+        expected = PAIR_CONDITIONS[case.comparison]
+        if not all(condition in arms for condition in expected):
+            continue
+        left = _run_result(arms[expected[0]])
+        right = _run_result(arms[expected[1]])
+        identity_text = "::".join(str(value) for value in identity)
+        outputs, mapping = blind_pair(
+            left,
+            right,
+            random.Random(_pair_seed(seed, identity_text)),
+        )
+        tasks.append(
+            {
+                "task_id": identity_text,
+                "case_id": case.id,
+                "outputs": outputs,
+                "mapping": mapping,
+            }
+        )
+
+    for record in sorted(patrol, key=lambda item: item["run_id"]):
+        tasks.append(
+            {
+                "task_id": "patrol::" + record["run_id"],
+                "case_id": record["case_id"],
+                "outputs": {"A": record.get("final_text", ""), "B": record.get("final_text", "")},
+                "mapping": {"A": record["run_id"], "B": record["run_id"]},
+            }
+        )
+    return tasks
+
+
+def _invoke_judge(prompt: str, config: dict, workspace: Path) -> tuple[dict, float]:
+    judge = config["judge"]
+    command = build_judge_command(JUDGE_SCHEMA, prompt, model=judge.get("model"))
+    started = time.monotonic()
+    process = subprocess.run(
+        command,
+        cwd=workspace,
+        capture_output=True,
+        text=True,
+        timeout=judge["timeout_seconds"],
+    )
+    elapsed = time.monotonic() - started
+    if process.returncode != 0:
+        raise RuntimeError(
+            f"judge exited {process.returncode}: {process.stderr.strip()}"
+        )
+    final, _, _ = get_adapter("codex").parse(process.stdout, process.stderr)
+    try:
+        result = json.loads(final)
+    except json.JSONDecodeError as error:
+        raise ValueError("judge did not return valid JSON") from error
+    return result, elapsed
+
+
+def judge_result_directory(result_dir: Path, config: dict) -> list[dict]:
+    cases = _case_index(config)
+    records = _read_jsonl(result_dir / "raw.jsonl")
+    tasks = judge_tasks(records, cases, int(config["seed"]))
+    output_path = result_dir / "judges.jsonl"
+    existing = _read_jsonl(output_path)
+    completed = {record["task_id"] for record in existing}
+    workspace = config["_root"] / "benchmarks" / "work" / (
+        result_dir.name + "-judge"
+    )
+    workspace.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("a", encoding="utf-8") as output:
+        for task in tasks:
+            if task["task_id"] in completed:
+                continue
+            case = cases[task["case_id"]]
+            prompt = build_judge_prompt(case, task["outputs"])
+            result, elapsed = _invoke_judge(prompt, config, workspace)
+            criterion_ids = tuple(
+                item.id for item in case.criteria if item.evaluator == "judge"
+            )
+            result = validate_judge_result(result, criterion_ids)
+            if task["mapping"]["A"] == task["mapping"]["B"]:
+                for criterion in result["criteria"].values():
+                    if criterion["A"] != criterion["B"]:
+                        raise ValueError("judge disagreed on duplicated Patrol output")
+            record = {
+                "task_id": task["task_id"],
+                "case_id": case.id,
+                "mapping": task["mapping"],
+                "criteria": result["criteria"],
+                "judge_agent": config["judge"]["agent"],
+                "judge_model": config["judge"].get("model"),
+                "elapsed_seconds": elapsed,
+            }
+            output.write(json.dumps(record, sort_keys=True) + "\n")
+            output.flush()
+            existing.append(record)
+    return existing
 
 
 def _judge_index(result_dir: Path, cases: dict[str, BenchmarkCase]) -> dict[str, dict]:
@@ -175,11 +372,7 @@ def _run_result(record: dict) -> RunResult:
 
 
 def score_result_directory(result_dir: Path, config: dict) -> list[dict]:
-    root = config["_root"]
-    cases = {}
-    for relative in config["case_files"]:
-        for case in load_cases(root / relative):
-            cases[case.id] = case
+    cases = _case_index(config)
     judges = _judge_index(result_dir, cases)
     score_records = []
     for record in _read_jsonl(result_dir / "raw.jsonl"):

@@ -159,6 +159,8 @@ class RunnerTests(unittest.TestCase):
             "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
         )
         self.assertEqual(config["parallelism"], 1)
+        self.assertEqual(config["judge"]["agent"], "codex")
+        self.assertGreater(config["judge"]["timeout_seconds"], 0)
 
     def test_condition_prompt_explicitly_invokes_skill_without_escape(self):
         self.assertEqual(

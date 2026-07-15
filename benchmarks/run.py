@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 from benchmarks.nerdbench.report import publish_readme, write_report
 from benchmarks.nerdbench.runner import load_config, run_matrix, schedule_runs
 from benchmarks.nerdbench.scorer import score_result_directory
+from benchmarks.nerdbench.scorer import judge_result_directory
 
 
 DEFAULT_CONFIG = ROOT / "benchmarks" / "config.json"
@@ -62,6 +63,10 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_result_selector(score)
 
+    judge = subparsers.add_parser("judge", help="blind-judge conversational criteria")
+    judge.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_result_selector(judge)
+
     report = subparsers.add_parser("report", help="derive or check summary artifacts")
     _add_result_selector(report)
     report.add_argument("--check", action="store_true")
@@ -100,6 +105,13 @@ def main(argv: list[str] | None = None) -> int:
         result = _result_dir(args)
         scores = score_result_directory(result, config)
         print(f"{len(scores)} scored agent runs")
+        return 0
+
+    if args.command == "judge":
+        config = _config(args.config)
+        result = _result_dir(args)
+        records = judge_result_directory(result, config)
+        print(f"{len(records)} completed blinded judge tasks")
         return 0
 
     if args.command == "report":
