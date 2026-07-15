@@ -161,6 +161,14 @@ def _diff_hash(workspace: Path) -> str:
     return hashlib.sha256(diff).hexdigest()
 
 
+def _timeout_text(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
+
+
 def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
     materialize_run(case, spec.condition, spec.agent, spec.workspace)
     prompt = condition_prompt(spec.condition, case.prompt)
@@ -182,8 +190,8 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
         stderr = process.stderr
     except subprocess.TimeoutExpired as error:
         exit_code = 124
-        stdout = error.stdout or ""
-        stderr = (error.stderr or "") + "\nbenchmark timeout"
+        stdout = _timeout_text(error.stdout)
+        stderr = _timeout_text(error.stderr) + "\nbenchmark timeout"
     elapsed = time.monotonic() - started
     final, tokens, events = adapter.parse(stdout, stderr)
 

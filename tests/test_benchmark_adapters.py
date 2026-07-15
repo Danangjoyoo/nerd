@@ -11,6 +11,7 @@ from benchmarks.nerdbench.adapters import get_adapter
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import (
     _changed_files,
+    _timeout_text,
     create_run_directory,
     condition_prompt,
     load_config,
@@ -141,6 +142,11 @@ class RunnerTests(unittest.TestCase):
             subprocess.run(["git", "commit", "-qm", "baseline"], cwd=root, check=True)
             (root / "sequence.py").write_text("after\n")
             self.assertEqual(_changed_files(root), ("sequence.py",))
+
+    def test_timeout_streams_are_normalized_from_bytes(self):
+        self.assertEqual(_timeout_text(b"partial output"), "partial output")
+        self.assertEqual(_timeout_text("text output"), "text output")
+        self.assertEqual(_timeout_text(None), "")
 
     def test_config_pin_is_exact(self):
         config = load_config(CONFIG)
