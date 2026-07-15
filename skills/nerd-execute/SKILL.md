@@ -37,7 +37,7 @@ Use a mapping only when the task's boundary or proof is unclear. Pick the single
 Classify the work before repository exploration:
 
 - **Non-code:** Skip repository-pattern context entirely and do not ask about it.
-- **Code:** Before searching repository conventions, configuration, analogues, architecture, or test patterns, ask once: `Repository patterns? This optional scan improves convention matching but adds latency. Run it? (yes/no)` Wait for the answer unless the user already opted in or out.
+- **Code:** Before searching repository conventions, configuration, analogues, architecture, or test patterns. Search for current pattern first, then confirm to follow the existing pattern or not.
 
 If approved, inspect only relevant authority/configuration, the nearest implementation, and the nearest test. If declined, inspect only named target files, mandatory repository instructions, and directly required tests or dependencies. Never create a repository-pattern artifact unless requested.
 
