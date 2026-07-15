@@ -11,6 +11,23 @@ Use `nerd-smart` first and reuse its approved Focus Record. This specialty adds 
 
 Read [references/systematic-debugging.md](references/systematic-debugging.md) before diagnosis. At an execute endpoint, also read [references/test-first-repair.md](references/test-first-repair.md) before mutation and [references/verification.md](references/verification.md) before any success claim.
 
+Use a mapping only when existing evidence does not already identify the next discriminating check. Pick the single closest row and do not combine rows. Mappings select evidence; they never establish cause.
+
+## Generic Diagnostic Mappings
+
+| # | Signal | First discriminating check | Confirmation evidence |
+| --- | --- | --- | --- |
+| **1** | Deterministic wrong output | Minimize the failing input and trace the first incorrect boundary. | The controlled input repeatedly fails at that boundary. |
+| **2** | Intermittent or flaky | Repeat while recording seed, time, order, load, and concurrency. | One controlled factor changes the failure rate. |
+| **3** | Crash or exception | Capture the smallest triggering input and first relevant stack frame. | The same path fails before correction and survives after. |
+| **4** | Hang or timeout | Find the last completed boundary and inspect task, thread, or process state. | A faithful reproducer completes after the correction. |
+| **5** | Performance regression | Compare the same workload and profile against a known baseline. | The hotspot is measured and the target threshold recovers. |
+| **6** | State or data corruption | Trace reads, writes, and transformations against one invariant. | The invariant fails before correction and holds after. |
+| **7** | Integration or API failure | Capture sanitized request, response, auth, serialization, and retry signals. | A boundary test reproduces the exact failure. |
+| **8** | Build, compile, or type failure | Start from the first causal diagnostic with the exact toolchain and configuration. | The minimal target passes with the same toolchain. |
+| **9** | Environment or configuration mismatch | Diff effective runtime, configuration, and dependencies between working and failing setups. | Aligning one differing factor toggles the failure. |
+| **10** | Visual or UI mismatch | Capture screenshot, viewport, DOM/state, events, and relevant network activity. | The interaction reproduces before and visual or behavior proof passes after. |
+
 ## Diagnostic Contract
 
 Act as the Doctor: establish cause before prescribing change.

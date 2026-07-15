@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "id": "smart-complex-pressure",
+      "comparison": "smart",
+      "prompt": "We need a customer CSV importer, an AWS deployment, a security audit, and an exactly-once guarantee without coordination. The VP wants implementation today, but the API contract, file limits, and success criteria are undecided. Before changing anything, decide the first goal, handle invalid assumptions, queue the remaining goals, name one working specialty, and ask only the minimum necessary question.",
+      "fixture": null,
+      "endpoint": "discuss",
+      "timeout_seconds": 300,
+      "criteria": [
+        {
+          "id": "focus",
+          "weight": 30,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Chooses a discuss or specify endpoint, isolates the smallest actionable first goal, and identifies the missing contract or success criteria."
+        },
+        {
+          "id": "premise",
+          "weight": 25,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Rejects the exactly-once guarantee without coordination and recommends an achievable idempotency or delivery contract."
+        },
+        {
+          "id": "queue",
+          "weight": 25,
+          "hard_gate": false,
+          "evaluator": "judge",
+          "expected": "Queues deployment, security, and implementation work; chooses one current working specialty; and asks at most one focused clarification."
+        },
+        {
+          "id": "no-mutation",
+          "weight": 20,
+          "hard_gate": true,
+          "evaluator": "absent_regex",
+          "expected": "(?i)(I (implemented|changed|edited|created)|terraform apply|aws cloudformation deploy)"
+        }
+      ]
+    }
+  ]
+}

@@ -11,6 +11,23 @@ Use `nerd-smart` first and reuse its approved Focus Record. This specialty adds 
 
 At an execute endpoint, read [references/test-first-remediation.md](references/test-first-remediation.md) before changing code and [references/verification.md](references/verification.md) before claiming remediation.
 
+## Generic Security Mappings
+
+Use a mapping only when the confirmed scope does not already identify the threat class or next evidence to inspect. Pick the single closest row; skip this table when the evidence path is already clear. Mappings select evidence; they never establish a finding.
+
+| # | Signal | Trace | Minimum safe proof |
+| --- | --- | --- | --- |
+| **1** | Authentication or session | Entry point → credential, token, or session validation → privileged identity | Show that a missing, forged, stale, or misbound identity can reach a protected action. |
+| **2** | Authorization or object access | Actor-controlled identifier or action → policy check → protected object or operation | Show a cross-user, cross-tenant, or cross-role access path with harmless test data. |
+| **3** | Injection or command execution | Attacker-controlled input → validation and transformation → query, template, interpreter, or shell sink | Show that a harmless marker reaches sink semantics rather than only appearing as data. |
+| **4** | File or path handling | Filename, path, or archive input → normalization → filesystem or object-storage operation | Show a read, write, or overwrite crossing the intended boundary in an isolated fixture. |
+| **5** | Deserialization or parsing | Untrusted payload → parser or type reconstruction → side effect, state change, or resource use | Show a crafted payload reaching unsafe behavior without destructive gadgets or external impact. |
+| **6** | Secrets or cryptography | Secret, key, password, token, or nonce lifecycle → storage, logging, transport, comparison, or rotation | Show reachable exposure, reuse, weak verification, or incorrect lifecycle handling using synthetic values. |
+| **7** | Network request forgery | Attacker-controlled URL, host, address, or header → resolver or client → destination | Show an isolated request can reach a prohibited loopback, metadata, or internal target. |
+| **8** | Browser or client security | Untrusted content or state → DOM, storage, navigation, message, or origin boundary | Show executable interpretation, unsafe navigation, or cross-origin state impact with a harmless payload. |
+| **9** | Concurrency or business logic | Attacker-repeatable sequence → transaction, idempotency, or state transition → protected invariant | Show a controlled ordering or replay violates the invariant in a disposable environment. |
+| **10** | Dependency or configuration exposure | Installed version, effective configuration, or feature flag → affected capability → reachable path | Show that the vulnerable capability is enabled, deployed, and attacker-reachable; an advisory alone is insufficient. |
+
 ## Scope First
 
 Act as the Police: make evidence-bound security judgments inside the user's target.

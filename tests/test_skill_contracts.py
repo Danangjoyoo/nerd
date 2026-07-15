@@ -87,6 +87,34 @@ class SurgeryContractTests(unittest.TestCase):
         )
         self.assertNotIn("superpowers:", body.casefold())
 
+    def test_uses_exactly_ten_optional_generic_diagnostic_mappings(self):
+        body = skill_body("nerd-surgery")
+        mapping = body.split("## Generic Diagnostic Mappings", 1)[1].split(
+            "## Diagnostic Contract", 1
+        )[0]
+        rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
+
+        self.assertEqual(len(rows), 10)
+        assert_terms(
+            self,
+            mapping,
+            (
+                "Deterministic wrong output",
+                "Intermittent or flaky",
+                "Crash or exception",
+                "Hang or timeout",
+                "Performance regression",
+                "State or data corruption",
+                "Integration or API failure",
+                "Build, compile, or type failure",
+                "Environment or configuration mismatch",
+                "Visual or UI mismatch",
+            ),
+        )
+        self.assertIn("Use a mapping only when", body)
+        self.assertIn("Mappings select evidence; they never establish cause", body)
+        self.assertNotIn("lookup at `## Generic Diagnostic Mapping` first", body)
+
 
 class PatrolContractTests(unittest.TestCase):
     def test_preserves_scope_and_finding_records(self):
@@ -120,44 +148,128 @@ class PatrolContractTests(unittest.TestCase):
         )
         self.assertNotIn("superpowers:", body.casefold())
 
+    def test_uses_exactly_ten_optional_generic_security_mappings(self):
+        body = skill_body("nerd-patrol")
+        mapping = body.split("## Generic Security Mappings", 1)[1].split(
+            "## Scope First", 1
+        )[0]
+        rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
+
+        self.assertEqual(len(rows), 10)
+        assert_terms(
+            self,
+            mapping,
+            (
+                "Authentication or session",
+                "Authorization or object access",
+                "Injection or command execution",
+                "File or path handling",
+                "Deserialization or parsing",
+                "Secrets or cryptography",
+                "Network request forgery",
+                "Browser or client security",
+                "Concurrency or business logic",
+                "Dependency or configuration exposure",
+            ),
+        )
+        self.assertIn("Use a mapping only when", body)
+        self.assertIn(
+            "Mappings select evidence; they never establish a finding", body
+        )
+        self.assertNotIn("always scan", body.casefold())
+
 
 class ExecuteContractTests(unittest.TestCase):
-    def test_preserves_build_records(self):
+    def test_uses_fast_track_and_optional_repository_pattern_gate(self):
         body = skill_body("nerd-execute")
         assert_terms(
             self,
             body,
             (
-                "**Build Contract**",
-                "**Build Baseline**",
-                "**Repository Gravity**",
-                "**Build Milestone**",
-                "**Build Checkpoint**",
-                "**Pattern Conflict**",
-                "**Build Conflict**",
-                "**Checkpoint Blocker**",
-                "**Contract Change**",
-                "**Build Result**",
+                "<INHERITANCE>",
+                "<FAST-TRACK>",
+                "nerd-smart",
+                "Repository patterns? This optional scan improves convention matching but adds latency. Run it? (yes/no)",
+                "Non-code",
+                "Code",
+                "Wait for the answer unless the user already opted in or out",
+                "If approved",
+                "If declined",
+                "Never create a repository-pattern artifact",
+                "Execute inline without subagents",
             ),
         )
 
-    def test_preserves_proof_first_execution_contract(self):
+    def test_executes_with_minimal_test_recovery_and_completion_contract(self):
         body = skill_body("nerd-execute")
         assert_terms(
             self,
             body,
             (
-                "proof-first",
+                "Contract: [outcome] | Files: [boundary] | Verify: [targeted check]",
+                "two to five internal items",
+                "do not create milestones, checkpoints, gravity records",
+                "write or update one focused test",
+                "confirm the expected failure",
+                "implement the minimum change",
+                "pre-edit baseline only when",
                 "two evidence-driven correction attempts",
-                "Repository Topology",
-                "Never dispatch subagents",
-                "Silent controls intermediate presentation",
-                "references/plan-execution.md",
-                "references/test-first-build.md",
-                "references/verification.md",
+                "Do not claim success without its output",
+                "**Done:**",
+                "**Verified by:**",
+                "**Not verified**",
             ),
         )
+
+    def test_uses_exactly_ten_optional_generic_proof_mappings(self):
+        body = skill_body("nerd-execute")
+        mapping = body.split("## Generic Mappings", 1)[1].split(
+            "## Gate Repository Pattern Context", 1
+        )[0]
+        rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
+
+        self.assertEqual(len(rows), 10)
+        assert_terms(
+            self,
+            mapping,
+            (
+                "New behavior",
+                "Bug fix",
+                "Refactor",
+                "API or contract",
+                "Persistence or schema",
+                "UI behavior",
+                "Configuration or build",
+                "External integration",
+                "Performance or concurrency",
+                "Documentation or static artifact",
+            ),
+        )
+        self.assertIn("Use a mapping only when", body)
+        self.assertNotIn("always match", body.casefold())
+        self.assertNotIn("Generic Micro-Task Execution Mapping", body)
+
+    def test_removes_obsolete_execute_lifecycle_and_reference_loading(self):
+        body = skill_body("nerd-execute")
+        for obsolete in (
+            "**Build Contract**",
+            "**Build Baseline**",
+            "**Repository Gravity**",
+            "**Build Milestone**",
+            "**Build Checkpoint**",
+            "references/plan-execution.md",
+            "references/test-first-build.md",
+            "references/verification.md",
+        ):
+            self.assertNotIn(obsolete, body)
         self.assertNotIn("superpowers:", body.casefold())
+
+    def test_metadata_describes_the_fast_track_without_mandating_patterns(self):
+        metadata = (SKILLS / "nerd-execute" / "agents" / "openai.yaml").read_text()
+        self.assertIn('short_description: "Lean implementation with optional pattern scan"', metadata)
+        self.assertIn("$nerd-execute", metadata)
+        self.assertIn("test-first workflow and fresh verification", metadata)
+        self.assertNotIn("against repository patterns", metadata)
 
 
 class SilentContractTests(unittest.TestCase):

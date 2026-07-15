@@ -39,14 +39,11 @@ class SkillStructureTests(unittest.TestCase):
                     "test-first-remediation.md",
                     "verification.md",
                 ),
-                "nerd-execute": (
-                    "plan-execution.md",
-                    "test-first-build.md",
-                    "verification.md",
-                ),
+                "nerd-execute": (),
                 "nerd-silent": (),
             },
         )
+        self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())
 
     def test_repository_contract(self):
         self.assertEqual(validate_repository(ROOT), [])

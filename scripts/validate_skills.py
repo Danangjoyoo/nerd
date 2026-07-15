@@ -24,11 +24,7 @@ REQUIRED_REFERENCES = {
         "verification.md",
     ),
     "nerd-patrol": ("test-first-remediation.md", "verification.md"),
-    "nerd-execute": (
-        "plan-execution.md",
-        "test-first-build.md",
-        "verification.md",
-    ),
+    "nerd-execute": (),
     "nerd-silent": (),
 }
 

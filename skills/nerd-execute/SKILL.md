@@ -5,152 +5,63 @@ description: Use when implementing an approved written plan or a small confirmed
 
 # Nerd Execute
 
-## Inheritance
+<INHERITANCE>
+**REQUIRED BASE SKILL:** Use `nerd-smart` first and reuse its approved Focus Record.
+</INHERITANCE>
 
-Use `nerd-smart` first and reuse its approved Focus Record. This specialty adds implementation behavior without reopening the confirmed goal or scope.
+<FAST-TRACK>
+This lean workflow includes the essential plan-execution, test-first, recovery, and completion-evidence rules. Use it without loading separate implementation workflows unless the user explicitly invokes one or an unusual edge case requires a fuller workflow. Execute inline without subagents.
+</FAST-TRACK>
 
-For a written plan, read [references/plan-execution.md](references/plan-execution.md). For behavior changes, read [references/test-first-build.md](references/test-first-build.md) before production edits. Before the final Build Result, read [references/verification.md](references/verification.md).
+## Rules
 
-Never dispatch subagents. Execute inline and use branch integration only when it is part of the confirmed endpoint.
+Use a mapping only when the task's boundary or proof is unclear. Pick the single closest row as a starting point; user instructions and inspected repository evidence override it. Skip mappings for fully specified tasks.
 
-## Establish the Build Contract
+## Generic Mappings
 
-Act as the Builder. Execute one confirmed outcome through either:
+| # | Signal | Contract focus | Targeted proof |
+| --- | --- | --- | --- |
+| **1** | New behavior | Smallest observable behavior and surface | Focused test fails for the missing behavior, then passes. |
+| **2** | Bug fix | Reproduced symptom and smallest correction | Regression test demonstrates red then green. |
+| **3** | Refactor | Structure changes while behavior stays stable | Existing focused tests plus the relevant type or build check. |
+| **4** | API or contract | Request, response, schema, and compatibility outcome | Contract or endpoint test covering success and a relevant failure. |
+| **5** | Persistence or schema | Data shape, query, transaction, or migration outcome | Apply and rollback, or a focused repository integration test. |
+| **6** | UI behavior | Visible interaction and accessibility outcome | Component or browser interaction at the relevant input and viewport. |
+| **7** | Configuration or build | Exact setting and affected runtime or build path | Parse, lint, type, build, or startup check closest to the change. |
+| **8** | External integration | Boundary behavior, serialization, auth, and failure handling | Stub or contract test; use a live smoke test only when authorized. |
+| **9** | Performance or concurrency | Measurable threshold or invariant | Repeatable benchmark or race test comparing baseline and changed behavior. |
+| **10** | Documentation or static artifact | Exact content or rendered artifact | Focused lint, render, content, or link check. |
 
-- **Written plan:** review briefly for blockers, then map it into milestones and checkpoints.
-- **Small explicit task:** use the approved Focus Record plus concrete acceptance criteria.
+## Gate Repository Pattern Context
 
-For an ambiguous multi-step request without a plan, offer a compact plan or request the missing input. After repository inspection and before editing, create the Build Contract. Change it only after approval of a material contract change.
+Classify the work before repository exploration:
 
-## Build Repository Pattern Context
+- **Non-code:** Skip repository-pattern context entirely and do not ask about it.
+- **Code:** Before searching repository conventions, configuration, analogues, architecture, or test patterns, ask once: `Repository patterns? This optional scan improves convention matching but adds latency. Run it? (yes/no)` Wait for the answer unless the user already opted in or out.
 
-Keep a task-relevant repository-session context. Never create a repository pattern file unless explicitly requested. Refresh context when the repository or branch changes, work crosses into a differently patterned module, current code contradicts it, or an anchor changes.
+If approved, inspect only relevant authority/configuration, the nearest implementation, and the nearest test. If declined, inspect only named target files, mandatory repository instructions, and directly required tests or dependencies. Never create a repository-pattern artifact unless requested.
 
-For the first checkpoint, inspect only:
+## Execute Directly
 
-1. Repository authority and relevant formatter, linter, compiler, type, and build configuration.
-2. The nearest working implementation and architecture boundary.
-3. The nearest relevant test and verification pattern.
+Make the first user-facing message only the coding gate or, for fully specified non-code work, the contract. Combine any required skill-use announcement into that message instead of sending setup narration. If essential input is missing, ask one focused question before forming the contract.
 
-Add a lens only when the checkpoint needs it:
+After the gate and any essential clarification, emit one line:
 
-- **Style and contracts:** imports, naming, returns, types, documentation, errors, validation.
-- **Construction and services:** injection, factories, lifecycle, orchestration, dependency direction.
-- **Testing:** unit/integration scope, fixtures, mocks, assertions, and data.
-- **Persistence:** queries, repositories, transactions, migrations, locking, batching, pagination.
-- **Integration and runtime:** authentication, serialization, timeout, retry, idempotency, jobs, logging, metrics, tracing.
-- **Public contracts:** APIs, compatibility, deprecation, generated code, documentation placement.
-- **Repository Topology:** filenames, casing, layout, package roots, manifests, ownership, exports, test placement, build registration. Trigger when creating, moving, or renaming repository units.
+`Contract: [outcome] | Files: [boundary] | Verify: [targeted check]`
 
-Resolve conflicting patterns in this order:
+Track a short checklist internally. Use two to five internal items only for multi-step work; do not create milestones, checkpoints, gravity records, or routine status templates. Ask one focused question only when ambiguity materially changes the result.
 
-1. Direct user instructions and approved Build Contract.
-2. Repository authority files and enforceable configuration.
-3. Closest module-local implementation and tests.
-4. Dominant repository-wide pattern.
-5. Framework or ecosystem convention.
+For behavior changes, write or update one focused test, run it to confirm the expected failure, implement the minimum change, then rerun it. For non-behavior changes, edit directly and run the smallest relevant validation. Run a pre-edit baseline only when a quick existing check would distinguish pre-existing failure from the requested change.
 
-Show Pattern Conflict only when ambiguity materially changes implementation.
+Preserve user-authored and unrelated changes. Keep tests beside the behavior they prove. Do not broaden scope or add infrastructure. After a related failure, make at most two evidence-driven correction attempts using the same targeted check. Then stop with one concise blocker stating the evidence and decision needed.
 
-## Map Milestones and Checkpoints
+## Finish Briefly
 
-Use:
+Run fresh verification scaled to the changed surface. Do not claim success without its output. Report only:
 
-`Build Contract -> optional milestones -> outcome-oriented checkpoints -> silent atomic actions`
+- **Done:** [completed outcome]
+- **Verified by:** [command and result]
 
-- Create a milestone only when two to five checkpoints form one coherent outcome.
-- A checkpoint is a bounded, independently verifiable result that leaves the repository coherent.
-- Split or merge mechanical plan items without prompting.
-- Use proof-first dependency ordering and keep tests with the behavior they prove.
-- A material deliverable or architecture reorder requires Build Conflict.
-- Keep pending details summarized and show only the active milestone and checkpoint.
+Add **Not verified** only when an evidence gap remains. Do not echo diffs or narrate routine tool use unless requested.
 
-## Enforce Evidence Gates
-
-Run the smallest relevant baseline before editing. Use tests first for behavior changes; the expected RED run is evidence.
-
-A checkpoint is verified only after its targeted proof passes. Do not advance while relevant proof fails. A milestone is verified only after all checkpoints and its broader exit proof pass.
-
-For checkpoint failure:
-
-- Recover automatically when the correction stays inside the contract.
-- Make at most two evidence-driven correction attempts and rerun the same proof each time.
-- Exclude a demonstrably pre-existing unrelated failure only when it does not invalidate targeted proof.
-- Show Checkpoint Blocker for ambiguity, repeated failure, or contract change.
-- Never stack unrelated changes or overwrite user-authored work.
-
-Run targeted proof per checkpoint, integration proof per milestone, and fresh repository-standard checks before completion. Build Result maps every acceptance criterion to evidence and lists all gaps.
-
-## Silent Composition
-
-When `nerd-silent` is active, Silent controls intermediate presentation. Maintain the full lifecycle internally, emit only its permitted interaction records, and return the normal complete Build Result.
-
-## Records
-
-**Build Contract**
-- **Outcome:** [One confirmed implementation result]
-- **Acceptance:** [Observable behavior or artifact]
-- **Change boundary:** [Allowed files and explicit exclusions]
-- **Gravity:** [Nearest repository analogue and architecture constraint]
-- **Completion proof:** [Fresh checks required]
-
-**Build Baseline**
-- **Checks:** [Smallest relevant existing verification]
-- **State:** [Passing, pre-existing failure, or unavailable]
-- **Evidence:** [Fresh outcome]
-- **Impact:** [Constraint on checkpoint proof]
-
-**Repository Gravity**
-- **Implementation anchor:** [Nearest working implementation]
-- **Test anchor:** [Nearest relevant test pattern]
-- **Boundaries:** [Architecture layers and dependency direction]
-- **Conventions:** [Relevant typing, errors, naming, and module patterns]
-- **Deviation:** [None or approved reason]
-
-**Build Milestone**
-- **Outcome:** [Coherent repository state]
-- **Gravity:** [Pattern and boundaries]
-- **Checkpoints:** [Two to five deliverables]
-- **Exit proof:** [Broader test or integration check]
-- **State:** Queued / active / verified / blocked
-
-**Build Checkpoint**
-- **Deliverable:** [One coherent result]
-- **Boundary:** [Files or modules allowed]
-- **Repo anchor:** [Nearest analogue or convention]
-- **Proof:** [Targeted test or check]
-- **State:** Pending / active / verified / blocked
-
-**Pattern Conflict**
-- **Area:** [Convention in conflict]
-- **Evidence:** [Competing anchors]
-- **Scope:** [Where each applies]
-- **Recommendation:** [Closest authoritative pattern and reason]
-- **Choose:** Use recommendation / specify pattern
-
-**Build Conflict**
-- **Mismatch:** [Plan versus repository reality]
-- **Impact:** [Why it matters]
-- **Recommendation:** [Smallest compatible adjustment]
-- **Choose:** Adapt plan / follow plan
-
-**Checkpoint Blocker**
-- **Checkpoint:** [Blocked deliverable]
-- **Evidence:** [Fresh failed proof]
-- **Classification:** [Related, pre-existing, or ambiguous]
-- **Impact:** [What cannot be verified]
-- **Recommendation:** [Smallest recovery]
-- **Choose:** Apply recovery / revise checkpoint / stop
-
-**Contract Change**
-- **Need:** [New work required]
-- **Cause:** [Evidence]
-- **Impact:** [Scope or verification consequence]
-- **Recommendation:** [Smallest adjustment]
-- **Choose:** Expand contract / defer change / stop
-
-**Build Result**
-- **Implemented:** [Confirmed outcome]
-- **Verified:** [Fresh checks and acceptance criteria]
-- **Not verified:** [Evidence gaps or none]
-- **Remaining:** [Queued or blocked work or none]
+After changing Nerd Execute, run `python3 scripts/validate_skills.py`.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Nerd Execute"
-  short_description: "Repository-aligned implementation with proof"
-  default_prompt: "Use $nerd-execute to implement this confirmed outcome against repository patterns and verify it."
+  short_description: "Lean implementation with optional pattern scan"
+  default_prompt: "Use $nerd-execute to implement this confirmed outcome with a lean, test-first workflow and fresh verification."
