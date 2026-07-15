@@ -1,0 +1,86 @@
+name: Release verification
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EXPECTED_SKILL_COUNT: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate tagged tree
+        run: |
+          python3 -m compileall -q scripts benchmarks tests
+          python3 -m unittest discover -s tests -v
+          python3 scripts/validate_skills.py
+          python3 benchmarks/run.py plan --config benchmarks/config.json
+      - name: Define exact-skill assertion
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/nerd-release"
+          cat > "$RUNNER_TEMP/nerd-release/assert-skills" <<'SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          EXPECTED_SKILL_COUNT=5
+          INPUT="$(cat)"
+          FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-(smart|surgery|patrol|execute|silent)' | sort -u)"
+          COUNT="$(printf '%s\n' "$FOUND" | grep -Ec '^nerd-' || true)"
+          test "$COUNT" -eq "$EXPECTED_SKILL_COUNT"
+          test "$FOUND" = $'nerd-execute\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery'
+          test "$(printf '%s\n' "$FOUND" | wc -l | tr -d ' ')" -eq "$EXPECTED_SKILL_COUNT"
+          SCRIPT
+          chmod +x "$RUNNER_TEMP/nerd-release/assert-skills"
+      - name: Verify immutable tag discovery
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_TYPE" = "tag"
+          TAG_LIST="$(npx skills add "https://github.com/Danangjoyoo/nerd/tree/$GITHUB_REF_NAME" --list)"
+          printf '%s\n' "$TAG_LIST"
+          printf '%s\n' "$TAG_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
+          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent; do
+            printf '%s\n' "$TAG_LIST" | grep -F "$skill"
+          done
+      - name: Verify public shorthand discovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          PUBLIC_LIST="$(npx skills add danangjoyoo/nerd --list)"
+          printf '%s\n' "$PUBLIC_LIST"
+          printf '%s\n' "$PUBLIC_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
+          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent; do
+            printf '%s\n' "$PUBLIC_LIST" | grep -F "$skill"
+          done
+      - name: Verify isolated multi-agent install
+        shell: bash
+        run: |
+          set -euo pipefail
+          export HOME="$RUNNER_TEMP/nerd-home"
+          mkdir -p "$HOME"
+          npx skills add danangjoyoo/nerd --copy --global --skill '*' \
+            --agent codex --agent claude-code --agent cursor --yes
+          for agent in codex claude-code cursor; do
+            INSTALLED="$(npx skills list --global --agent "$agent")"
+            printf '%s\n' "$INSTALLED"
+            printf '%s\n' "$INSTALLED" | "$RUNNER_TEMP/nerd-release/assert-skills"
+          done
