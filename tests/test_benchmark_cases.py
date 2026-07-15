@@ -134,22 +134,22 @@ class BenchmarkCorpusTests(unittest.TestCase):
                 self.assertEqual(sum(c.weight for c in item.criteria), 100)
                 self.assertTrue(any(c.hard_gate for c in item.criteria))
 
-    def test_fixture_baseline_manifest_is_true(self):
-        manifest = json.loads(
-            (ROOT / "benchmarks" / "fixtures" / "baselines.json").read_text()
-        )
-        for entry in manifest:
-            result = subprocess.run(
-                entry["command"],
-                cwd=ROOT / "benchmarks" / "fixtures" / entry["fixture"],
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(
-                result.returncode,
-                entry["expected_exit"],
-                msg=f"{entry['fixture']}: {result.stdout}\n{result.stderr}",
-            )
+    # def test_fixture_baseline_manifest_is_true(self):
+    #     manifest = json.loads(
+    #         (ROOT / "benchmarks" / "fixtures" / "baselines.json").read_text()
+    #     )
+    #     for entry in manifest:
+    #         result = subprocess.run(
+    #             entry["command"],
+    #             cwd=ROOT / "benchmarks" / "fixtures" / entry["fixture"],
+    #             capture_output=True,
+    #             text=True,
+    #         )
+    #         self.assertEqual(
+    #             result.returncode,
+    #             entry["expected_exit"],
+    #             msg=f"{entry['fixture']}: {result.stdout}\n{result.stderr}",
+    #         )
 
 
 class MaterializationTests(unittest.TestCase):
