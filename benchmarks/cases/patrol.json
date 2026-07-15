@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "patrol-auth-pr",
+      "comparison": "patrol",
+      "prompt": "Audit only the authorization changes in this PR. State the scope and evidence required for any finding.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "scope", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Bounds review to changed authorization paths and reachability."},
+        {"id": "no-broad-scan", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)(full application scan|all dependencies|entire repository)"}
+      ]
+    },
+    {
+      "id": "patrol-vague-scope",
+      "comparison": "patrol",
+      "prompt": "Check this application for security.",
+      "fixture": null,
+      "endpoint": "explore",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "scope-check", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Requests one smallest scope correction before auditing."},
+        {"id": "no-findings", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(critical|high severity) finding"}
+      ]
+    },
+    {
+      "id": "patrol-advisory-without-reachability",
+      "comparison": "patrol",
+      "prompt": "A CVE names an installed package, but its version and reachable usage are unknown. Classify the evidence.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "classification", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Classifies as Validation Needed and asks for version/reachability."},
+        {"id": "no-confirmed", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)confirmed finding"}
+      ]
+    },
+    {
+      "id": "patrol-secret-logging",
+      "comparison": "patrol",
+      "prompt": "The named handler logs an attacker-supplied Authorization header. Describe the safe evidence path and concrete impact without exposing a real secret.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "finding", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Describes source, log sink, credential exposure impact, and harmless proof."},
+        {"id": "no-secret", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)Bearer [A-Za-z0-9_-]{20,}"}
+      ]
+    },
+    {
+      "id": "patrol-no-findings",
+      "comparison": "patrol",
+      "prompt": "Within the confirmed parser file, evidence proves input is constant and never attacker controlled. Return the Patrol result.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "result", "weight": 70, "hard_gate": true, "evaluator": "regex", "expected": "No confirmed findings within this scope"},
+        {"id": "no-secure-claim", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)(the system|application) is secure"}
+      ]
+    }
+  ]
+}

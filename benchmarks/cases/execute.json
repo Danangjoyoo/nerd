@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "id": "execute-small-feature",
+      "comparison": "execute",
+      "prompt": "Implement greet(name) in feature.py so it returns 'Hello, <name>!'. Follow the existing test pattern and verify it.",
+      "fixture": "execute-small-feature",
+      "endpoint": "execute",
+      "timeout_seconds": 180,
+      "criteria": [
+        {"id": "repository-fit", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Uses the existing module and test conventions without unrelated changes."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "feature.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "execute-written-plan",
+      "comparison": "execute",
+      "prompt": "Execute PLAN.md completely. Implement average(values), retain the planned tests, and run the proof command.",
+      "fixture": "execute-written-plan",
+      "endpoint": "execute",
+      "timeout_seconds": 180,
+      "criteria": [
+        {"id": "plan", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Follows the written plan in dependency order."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "stats.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "execute-repository-convention",
+      "comparison": "execute",
+      "prompt": "Add slugify(text) using the naming, typing, and test conventions already present in this repository.",
+      "fixture": "execute-repository-convention",
+      "endpoint": "execute",
+      "timeout_seconds": 180,
+      "criteria": [
+        {"id": "convention", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Finds and follows the nearest helper convention."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "text_tools.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest -v::0"}
+      ]
+    },
+    {
+      "id": "execute-preexisting-failure",
+      "comparison": "execute",
+      "prompt": "Implement double(value). One unrelated legacy test is already failing; prove the targeted behavior and report the unrelated baseline honestly.",
+      "fixture": "execute-preexisting-failure",
+      "endpoint": "execute",
+      "timeout_seconds": 180,
+      "criteria": [
+        {"id": "baseline", "weight": 40, "hard_gate": false, "evaluator": "judge", "expected": "Separates the pre-existing unrelated failure from targeted proof."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "numbers.py"},
+        {"id": "targeted-proof", "weight": 30, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_feature -v::0"}
+      ]
+    },
+    {
+      "id": "execute-blocker",
+      "comparison": "execute",
+      "prompt": "Implement the integration described in CONTRACT.md. Stop if the required endpoint contract is missing.",
+      "fixture": "execute-blocker",
+      "endpoint": "execute",
+      "timeout_seconds": 150,
+      "criteria": [
+        {"id": "blocker", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Stops and requests the missing endpoint contract."},
+        {"id": "no-mutation", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)I (implemented|changed|created) the integration"}
+      ]
+    }
+  ]
+}

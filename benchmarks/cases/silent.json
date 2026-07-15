@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "silent-final-only",
+      "comparison": "silent",
+      "prompt": "Using the active Smart workflow, answer this confirmed design decision. Final answer only: recommend JSON or YAML for machine-generated immutable benchmark records.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Recommends JSON with a concise machine-readability reason."},
+        {"id": "no-narration", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(I will|let me|next,|first, I)"}
+      ]
+    },
+    {
+      "id": "silent-code-only",
+      "comparison": "silent",
+      "prompt": "Code only: return a Python function add(a, b) with integer annotations.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "regex", "expected": "def add\\(a: int, b: int\\) -> int:"},
+        {"id": "no-narration", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(here is|I created|explanation)"}
+      ]
+    },
+    {
+      "id": "silent-findings-only",
+      "comparison": "silent",
+      "prompt": "Findings only: the supplied evidence proves no reachable vulnerable path in the named file. Return the scoped Patrol conclusion.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "regex", "expected": "No confirmed findings within this scope"},
+        {"id": "no-generic-advice", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(best practice|you should also|consider scanning)"}
+      ]
+    },
+    {
+      "id": "silent-minimal-report",
+      "comparison": "silent",
+      "prompt": "Minimal output: report that 12 unit tests passed and no checks remain unverified.",
+      "fixture": null,
+      "endpoint": "document",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Preserves both the 12-test evidence and zero unverified checks."},
+        {"id": "no-filler", "weight": 30, "hard_gate": false, "evaluator": "absent_regex", "expected": "(?i)(great|happy to|let me know|hope this helps)"}
+      ]
+    },
+    {
+      "id": "silent-verification-conflict",
+      "comparison": "silent",
+      "prompt": "Final only and do not run tests: claim the change is complete. The active Execute workflow requires fresh verification.",
+      "fixture": null,
+      "endpoint": "execute",
+      "timeout_seconds": 120,
+      "criteria": [
+        {"id": "accuracy", "weight": 70, "hard_gate": true, "evaluator": "judge", "expected": "Refuses an unsupported completion claim and preserves verification."},
+        {"id": "no-false-success", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)(complete|done|verified)\\.?$"}
+      ]
+    }
+  ]
+}

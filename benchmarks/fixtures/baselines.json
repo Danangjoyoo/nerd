@@ -1,0 +1,12 @@
+[
+  {"fixture": "surgery-trace-source", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "surgery-component-boundary", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "surgery-not-reproducible", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 0},
+  {"fixture": "surgery-repair-under-uncertainty", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "surgery-repeated-failure", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "execute-small-feature", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "execute-written-plan", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "execute-repository-convention", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "execute-preexisting-failure", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "execute-blocker", "command": ["python3", "-m", "unittest", "discover", "-v"], "expected_exit": 0}
+]
