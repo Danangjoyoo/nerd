@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/obra/superpowers.git",
+    "tag": "v6.1.1",
+    "commit": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+  },
+  "agents": ["codex", "claude", "cursor"],
+  "models": {
+    "codex": null,
+    "claude": null,
+    "cursor": null
+  },
+  "case_files": [
+    "benchmarks/cases/smart.json",
+    "benchmarks/cases/surgery.json",
+    "benchmarks/cases/execute.json",
+    "benchmarks/cases/silent.json",
+    "benchmarks/cases/patrol.json"
+  ],
+  "conditions": {
+    "smart": ["nerd-smart", "superpowers-brainstorming"],
+    "surgery": ["nerd-surgery", "superpowers-systematic-debugging"],
+    "execute": ["nerd-execute", "superpowers-executing-plans"],
+    "silent": ["regular", "nerd-silent"],
+    "patrol": ["nerd-patrol"]
+  },
+  "repetitions": 3,
+  "parallelism": 1,
+  "seed": 7152026
+}
