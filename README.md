@@ -9,9 +9,26 @@ Focused operating skills for coding agents: think clearly, diagnose before fixin
 ## Install
 
 ```bash
-npx skills add danangjoyoo/nerd --global --agent claude-code --skill '*' --yes  # Claude Code
-npx skills add danangjoyoo/nerd --global --agent codex --skill '*' --yes        # Codex
-npx skills add danangjoyoo/nerd --global --agent cursor --skill '*' --yes       # Cursor
+# Codex
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent codex \
+  --skill '*' \
+  --yes
+
+# Claude Code
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent claude-code \
+  --skill '*' \
+  --yes
+
+# Cursor
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent cursor \
+  --skill '*' \
+  --yes
 ```
 
 Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}`.

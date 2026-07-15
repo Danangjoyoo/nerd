@@ -73,13 +73,23 @@ class ReadmeContractTests(unittest.TestCase):
 
     def test_install_command_is_current(self):
         body = README.read_text(encoding="utf-8")
-        for agent in ("claude-code", "codex", "cursor"):
+        commands = {
+            "Codex": "codex",
+            "Claude Code": "claude-code",
+            "Cursor": "cursor",
+        }
+        for label, agent in commands.items():
             command = (
-                "npx skills add danangjoyoo/nerd --global "
-                f"--agent {agent} --skill '*' --yes"
+                f"# {label}\n"
+                "npx skills add danangjoyoo/nerd \\\n"
+                "  --global \\\n"
+                f"  --agent {agent} \\\n"
+                "  --skill '*' \\\n"
+                "  --yes"
             )
             self.assertIn(command, body)
         self.assertIn("./scripts/install.sh {claude|codex|cursor|all}", body)
+        self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
 
     def test_every_public_skill_is_listed_once(self):
@@ -178,7 +188,7 @@ class ReadmeContractTests(unittest.TestCase):
     def test_readme_remains_sharp(self):
         self.assertLessEqual(
             len(README.read_text(encoding="utf-8").splitlines()),
-            160,
+            170,
         )
 
     def test_ci_badge_is_current(self):
