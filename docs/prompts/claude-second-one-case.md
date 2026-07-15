@@ -6,7 +6,7 @@ Paste everything below into one Claude Code session opened at the Nerd repositor
 
 You are the benchmark operator for `/Users/danangjoyo.agus/work/playground/mensa`.
 
-Run the second one-case pilot for exactly four Claude targets. This pilot uses one new case per comparison, one repetition, and two paired arms: 8 candidate runs, 4 blinded judge tasks, and 8 scores per target.
+Run the second one-case pilot for exactly four Claude targets. This pilot uses one new case per comparison, one repetition, and two paired arms: 8 candidate runs, 3 blinded judge tasks, and 8 scores per target. Silent has no judge criterion; its criteria are deterministic.
 
 ## Exact targets
 
@@ -33,6 +33,7 @@ The selected cases are exactly:
 - Do not substitute a model, alias, fallback, effort, case, or config.
 - Keep the two arms inside each target sequential; only the four targets run concurrently.
 - Use the pinned Codex judge from each config. A tested Claude model must not judge itself.
+- Run only one judge process per explicit result path; never overlap judge commands.
 - Do not use `--latest`; use each worker's explicit result path printed by `run`.
 - Do not interrupt a quiet candidate process. Use background/long-running execution with at least a one-hour outer timeout.
 - Preserve every timeout, nonzero exit, and harness error.
@@ -108,7 +109,7 @@ Require and report:
 - Manifest has `smoke: false`, `planned_runs: 8`, `repetitions: 1`, and the exact second-pilot case file.
 - `raw.jsonl` has exactly 8 raw records and 8 unique run IDs.
 - The four exact cases each have both expected arms.
-- `judges.jsonl` has exactly 4 unique judge task IDs.
+- `judges.jsonl` has exactly 3 unique judge task IDs.
 - `scores.jsonl` has exactly 8 scores and 8 unique run IDs.
 - Candidate and provider events resolve only to the requested model and effort.
 - Every timeout, nonzero exit, harness error, invalid judge, and token exclusion is counted explicitly.

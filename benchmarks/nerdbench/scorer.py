@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+import fcntl
 import random
 import re
 import json
@@ -26,6 +28,16 @@ JUDGE_INSTRUCTIONS = """Evaluate outputs A and B independently against each supp
 Use only the user prompt, allowed scope, criterion labels, and the anonymized outputs.
 Do not infer hidden run metadata or aggregate results.
 Return only JSON matching the supplied schema."""
+
+
+@contextmanager
+def _exclusive_file_lock(path: Path):
+    with path.open("a", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
 
 
 def _command_expected(value: str) -> tuple[str, int]:
@@ -218,6 +230,18 @@ def _read_jsonl(path: Path) -> list[dict]:
     ]
 
 
+def _judge_task_ids(records: list[dict]) -> set[str]:
+    task_ids = set()
+    for record in records:
+        task_id = record.get("task_id")
+        if not isinstance(task_id, str) or not task_id:
+            raise ValueError("judge record needs a task ID")
+        if task_id in task_ids:
+            raise ValueError(f"duplicate judge task: {task_id}")
+        task_ids.add(task_id)
+    return task_ids
+
+
 def _case_index(config: dict) -> dict[str, BenchmarkCase]:
     cases = {}
     for relative in config["case_files"]:
@@ -334,46 +358,52 @@ def judge_result_directory(result_dir: Path, config: dict) -> list[dict]:
     records = _read_jsonl(result_dir / "raw.jsonl")
     tasks = judge_tasks(records, cases, int(config["seed"]))
     output_path = result_dir / "judges.jsonl"
-    existing = _read_jsonl(output_path)
-    completed = {record["task_id"] for record in existing}
-    workspace = config["_root"] / "benchmarks" / "work" / (
-        result_dir.name + "-judge"
-    )
-    workspace.mkdir(parents=True, exist_ok=True)
+    lock_path = result_dir / "judges.lock"
+    with _exclusive_file_lock(lock_path):
+        existing = _read_jsonl(output_path)
+        completed = _judge_task_ids(existing)
+        workspace = config["_root"] / "benchmarks" / "work" / (
+            result_dir.name + "-judge"
+        )
+        workspace.mkdir(parents=True, exist_ok=True)
 
-    with output_path.open("a", encoding="utf-8") as output:
-        for task in tasks:
-            if task["task_id"] in completed:
-                continue
-            case = cases[task["case_id"]]
-            prompt = build_judge_prompt(case, task["outputs"])
-            result, elapsed = _invoke_judge(prompt, config, workspace, case)
-            criterion_ids = tuple(
-                item.id for item in case.criteria if item.evaluator == "judge"
-            )
-            result = validate_judge_result(result, criterion_ids)
-            if task["mapping"]["A"] == task["mapping"]["B"]:
-                for criterion in result["criteria"].values():
-                    if criterion["A"] != criterion["B"]:
-                        raise ValueError("judge disagreed on duplicated Patrol output")
-            record = {
-                "task_id": task["task_id"],
-                "case_id": case.id,
-                "mapping": task["mapping"],
-                "criteria": result["criteria"],
-                "judge_agent": config["judge"]["agent"],
-                "judge_model": config["judge"].get("model"),
-                "elapsed_seconds": elapsed,
-            }
-            output.write(json.dumps(record, sort_keys=True) + "\n")
-            output.flush()
-            existing.append(record)
-    return existing
+        with output_path.open("a", encoding="utf-8") as output:
+            for task in tasks:
+                if task["task_id"] in completed:
+                    continue
+                case = cases[task["case_id"]]
+                prompt = build_judge_prompt(case, task["outputs"])
+                result, elapsed = _invoke_judge(prompt, config, workspace, case)
+                criterion_ids = tuple(
+                    item.id for item in case.criteria if item.evaluator == "judge"
+                )
+                result = validate_judge_result(result, criterion_ids)
+                if task["mapping"]["A"] == task["mapping"]["B"]:
+                    for criterion in result["criteria"].values():
+                        if criterion["A"] != criterion["B"]:
+                            raise ValueError(
+                                "judge disagreed on duplicated Patrol output"
+                            )
+                record = {
+                    "task_id": task["task_id"],
+                    "case_id": case.id,
+                    "mapping": task["mapping"],
+                    "criteria": result["criteria"],
+                    "judge_agent": config["judge"]["agent"],
+                    "judge_model": config["judge"].get("model"),
+                    "elapsed_seconds": elapsed,
+                }
+                output.write(json.dumps(record, sort_keys=True) + "\n")
+                output.flush()
+                existing.append(record)
+        return existing
 
 
 def _judge_index(result_dir: Path, cases: dict[str, BenchmarkCase]) -> dict[str, dict]:
     index: dict[str, dict] = {}
-    for record in _read_jsonl(result_dir / "judges.jsonl"):
+    records = _read_jsonl(result_dir / "judges.jsonl")
+    _judge_task_ids(records)
+    for record in records:
         mapping = record.get("mapping")
         if not isinstance(mapping, dict) or set(mapping) != {"A", "B"}:
             raise ValueError("judge record mapping must contain A and B")

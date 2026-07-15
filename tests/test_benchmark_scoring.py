@@ -1,6 +1,11 @@
 from pathlib import Path
+import json
 import random
+import tempfile
+import threading
+import time
 import unittest
+from unittest import mock
 
 from benchmarks.nerdbench.models import (
     BenchmarkCase,
@@ -9,9 +14,11 @@ from benchmarks.nerdbench.models import (
     RunSpec,
 )
 from benchmarks.nerdbench.scorer import (
+    _judge_index,
     blind_pair,
     build_judge_command,
     build_judge_prompt,
+    judge_result_directory,
     judge_output_schema,
     score_run,
     validate_judge_result,
@@ -177,6 +184,129 @@ class ScoringTests(unittest.TestCase):
         decision = criteria["properties"]["quality"]
         self.assertEqual(decision["required"], ["A", "B", "evidence"])
         self.assertFalse(decision["additionalProperties"])
+
+    def test_concurrent_judges_invoke_each_task_once(self):
+        case = make_case(
+            (Criterion("quality", 100, True, "judge", "States the endpoint."),)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result_dir = root / "results"
+            result_dir.mkdir()
+            raw = []
+            for run_id, condition in (
+                ("nerd", "nerd-smart"),
+                ("baseline", "superpowers-brainstorming"),
+            ):
+                raw.append(
+                    {
+                        "agent": "codex",
+                        "case_id": "case",
+                        "changed_files": [],
+                        "command_results": {},
+                        "condition": condition,
+                        "elapsed_seconds": 1.0,
+                        "events": [],
+                        "exit_code": 0,
+                        "final_text": run_id,
+                        "model": "test-model",
+                        "output_tokens": 1,
+                        "reasoning_effort": "xhigh",
+                        "repetition": 1,
+                        "run_id": run_id,
+                        "target_id": "test-target",
+                    }
+                )
+            (result_dir / "raw.jsonl").write_text(
+                "".join(json.dumps(item) + "\n" for item in raw),
+                encoding="utf-8",
+            )
+            config = {
+                "_root": root,
+                "seed": 7,
+                "judge": {
+                    "agent": "codex",
+                    "model": "judge-model",
+                    "reasoning_effort": "xhigh",
+                    "timeout_seconds": 30,
+                },
+            }
+            started = threading.Event()
+            invoke_count = 0
+            count_lock = threading.Lock()
+            errors = []
+
+            def fake_invoke(*_args, **_kwargs):
+                nonlocal invoke_count
+                with count_lock:
+                    invoke_count += 1
+                started.set()
+                time.sleep(0.1)
+                return {
+                    "criteria": {
+                        "quality": {
+                            "A": True,
+                            "B": True,
+                            "evidence": "Both state the endpoint.",
+                        }
+                    }
+                }, 0.1
+
+            def run_judge():
+                try:
+                    judge_result_directory(result_dir, config)
+                except Exception as error:  # pragma: no cover - assertion aid
+                    errors.append(error)
+
+            with mock.patch(
+                "benchmarks.nerdbench.scorer._case_index",
+                return_value={"case": case},
+            ), mock.patch(
+                "benchmarks.nerdbench.scorer._invoke_judge",
+                side_effect=fake_invoke,
+            ):
+                first = threading.Thread(target=run_judge)
+                second = threading.Thread(target=run_judge)
+                first.start()
+                self.assertTrue(started.wait(timeout=1))
+                second.start()
+                first.join(timeout=2)
+                second.join(timeout=2)
+
+            self.assertFalse(first.is_alive())
+            self.assertFalse(second.is_alive())
+            self.assertEqual(errors, [])
+            self.assertEqual(invoke_count, 1)
+            judge_records = [
+                json.loads(line)
+                for line in (result_dir / "judges.jsonl").read_text().splitlines()
+            ]
+            self.assertEqual(len(judge_records), 1)
+
+    def test_duplicate_judge_tasks_are_rejected_before_scoring(self):
+        case = make_case(
+            (Criterion("quality", 100, True, "judge", "States the endpoint."),)
+        )
+        record = {
+            "case_id": "case",
+            "criteria": {
+                "quality": {
+                    "A": True,
+                    "B": True,
+                    "evidence": "Both state the endpoint.",
+                }
+            },
+            "mapping": {"A": "nerd", "B": "baseline"},
+            "task_id": "duplicate-task",
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            result_dir = Path(temporary)
+            (result_dir / "judges.jsonl").write_text(
+                json.dumps(record) + "\n" + json.dumps(record) + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "duplicate judge task"):
+                _judge_index(result_dir, {"case": case})
 
 
 if __name__ == "__main__":

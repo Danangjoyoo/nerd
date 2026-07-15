@@ -12,6 +12,7 @@
 
 - Selected cases are exactly `smart-compound-queue`, `surgery-component-boundary`, `execute-written-plan`, and `silent-code-only`.
 - Each target plans exactly 8 candidate runs: 4 cases × 1 repetition × 2 arms.
+- Each target plans exactly 3 blinded judge tasks because Silent has no judge criterion.
 - Use direct `--release` runs; never use smoke mode.
 - Do not modify the original case files or eight 120-run configs.
 - Use one paid attempt per target and explicit result paths for judge, score, and report commands.
@@ -29,7 +30,7 @@
 - Consumes: `benchmarks.nerdbench.runner.load_config` and `schedule_runs`.
 - Produces: A contract requiring four exact non-overlapping cases, eight exact target configs, 8 unique runs per config, and a bounded Claude prompt.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create tests that require:
 
@@ -42,9 +43,9 @@ SECOND_CASES = {
 }
 ```
 
-For every target, assert `repetitions == 1`, the case file is the second-pilot bundle, scheduling returns 8 unique runs, repetitions equal `{1}`, and case IDs equal `SECOND_CASES`. Assert the Claude prompt names all four Claude configs, requires direct `--release`, expects `8`, `4`, and `8`, and forbids `--latest`.
+For every target, assert `repetitions == 1`, the case file is the second-pilot bundle, scheduling returns 8 unique runs, repetitions equal `{1}`, and case IDs equal `SECOND_CASES`. Assert the Claude prompt names all four Claude configs, requires direct `--release`, expects `8`, `3`, and `8`, and forbids `--latest`.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run:
 
@@ -71,11 +72,11 @@ Expected: FAIL because `benchmarks/pilots/second-one-case/cases.json`, its eight
 - Consumes: Existing case objects and base target configs.
 - Produces: Eight direct-run configs that each schedule exactly 8 runs over the same four cases.
 
-- [ ] **Step 1: Copy exact case objects**
+- [x] **Step 1: Copy exact case objects**
 
 Create one `{"cases": [...]}` document containing byte-for-byte JSON object copies of the four selected cases from their source files.
 
-- [ ] **Step 2: Derive target configs**
+- [x] **Step 2: Derive target configs**
 
 For each base config, keep all fields unchanged except:
 
@@ -86,7 +87,7 @@ For each base config, keep all fields unchanged except:
 }
 ```
 
-- [ ] **Step 3: Run the contract test**
+- [x] **Step 3: Run the contract test**
 
 Run:
 
@@ -105,11 +106,11 @@ Expected: the config and case tests PASS while the Claude-prompt test still FAIL
 - Consumes: The four Claude configs from Task 2.
 - Produces: One operator prompt that runs four independent direct pilot shards in parallel.
 
-- [ ] **Step 1: Write the prompt**
+- [x] **Step 1: Write the prompt**
 
-Require preflight checks, exactly 8 planned candidates per config, direct `--release`, one paid attempt per target, long-running/background execution, explicit printed result paths, and exact-path judge → score → report → report-check commands. Require 8 raw, 4 unique judges, and 8 scores for each completed target.
+Require preflight checks, exactly 8 planned candidates per config, direct `--release`, one paid attempt per target, long-running/background execution, explicit printed result paths, and exact-path judge → score → report → report-check commands. Require 8 raw, 3 unique judges, and 8 scores for each completed target.
 
-- [ ] **Step 2: Run the focused tests**
+- [x] **Step 2: Run the focused tests**
 
 Run:
 
@@ -129,7 +130,7 @@ Expected: PASS.
 - Consumes: The four GPT configs and Claude handoff.
 - Produces: Four local GPT result shards plus four externally executed Claude result shards.
 
-- [ ] **Step 1: Run deterministic verification**
+- [x] **Step 1: Run deterministic verification**
 
 Run:
 
@@ -141,15 +142,14 @@ rtk python3 scripts/validate_skills.py
 
 Expected: all tests and validations PASS.
 
-- [ ] **Step 2: Verify every dry plan**
+- [x] **Step 2: Verify every dry plan**
 
 Run `rtk python3 benchmarks/run.py plan --config` for all eight configs. Each final line must equal `8 planned agent runs`.
 
-- [ ] **Step 3: Execute four GPT shards in parallel**
+- [x] **Step 3: Execute four GPT shards in parallel**
 
-Run each GPT config once with direct `--release`. For each explicit result path, run judge, score, report, and report `--check`. Validate 8 raw, 4 judge tasks, 8 scores, exact model/effort pins, and Silent token usage.
+Run each GPT config once with direct `--release`. For each explicit result path, run judge, score, report, and report `--check`. Validate 8 raw, 3 judge tasks, 8 scores, exact model/effort pins, and Silent token usage.
 
-- [ ] **Step 4: Hand off Claude execution**
+- [x] **Step 4: Hand off Claude execution**
 
 Provide `docs/prompts/claude-second-one-case.md` to the user. Claude executes only the four Claude configs and returns exact paths for independent verification.
-
