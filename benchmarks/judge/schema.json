@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Nerd benchmark blinded judge result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["criteria"],
+  "properties": {
+    "criteria": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["A", "B", "evidence"],
+        "properties": {
+          "A": {"type": "boolean"},
+          "B": {"type": "boolean"},
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
