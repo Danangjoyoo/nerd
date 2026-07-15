@@ -9,6 +9,7 @@ import math
 from pathlib import Path
 import random
 import statistics
+import subprocess
 
 
 COMPARISONS = {
@@ -17,6 +18,11 @@ COMPARISONS = {
     "execute": ("nerd-execute", "superpowers-executing-plans"),
     "silent": ("nerd-silent", "regular"),
 }
+
+README_RUN = "<!-- BENCHMARK_RUN:{run_id} -->"
+README_START = "<!-- BENCHMARK_RESULTS:START -->"
+README_END = "<!-- BENCHMARK_RESULTS:END -->"
+PENDING_RESULTS = "Benchmark results pending a complete release run."
 
 
 def _round(value: float) -> float:
@@ -309,6 +315,9 @@ def aggregate_results(
         "nerd_commit": manifest["nerd_commit"],
         "upstream_commit": manifest["upstream_commit"],
         "agent_versions": manifest.get("agent_versions", {}),
+        "agents": manifest.get("config", {}).get("agents", []),
+        "models": manifest.get("config", {}).get("models", {}),
+        "case_files": manifest.get("config", {}).get("case_files", []),
         "repetitions": manifest.get("config", {}).get("repetitions"),
         "comparisons": comparisons,
         "patrol": {
@@ -322,6 +331,161 @@ def _format(value, suffix: str = "") -> str:
     if value is None:
         return "insufficient data"
     return f"{value:.1f}{suffix}"
+
+
+def _signed(value, suffix: str = "", decimals: int = 1) -> str:
+    if value is None:
+        return "insufficient data"
+    return f"{value:+.{decimals}f}{suffix}"
+
+
+def pending_readme_results() -> str:
+    return PENDING_RESULTS
+
+
+def render_readme_results(summary: dict) -> str:
+    """Render only evidence that passed the release publication gate."""
+    if summary.get("publication_state") != "publishable":
+        raise ValueError("benchmark summary is not publishable")
+    comparisons = summary.get("comparisons", {})
+    required = {"smart", "surgery", "execute", "silent"}
+    missing = required.difference(comparisons)
+    if missing:
+        raise ValueError(f"benchmark summary is missing comparisons: {sorted(missing)}")
+
+    labels = {
+        "smart": "Smart vs Superpowers Brainstorming",
+        "surgery": "Surgery vs Superpowers Systematic Debugging",
+        "execute": "Execute vs Superpowers Executing Plans",
+    }
+    lines = [
+        "| Comparison | Nerd score | Baseline score | Score delta | Nerd pass | Baseline pass | p50 latency delta |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    valid_pairs = []
+    for name in ("smart", "surgery", "execute"):
+        item = comparisons[name]
+        treatment = item.get("treatment")
+        baseline = item.get("baseline")
+        if not treatment or not baseline:
+            raise ValueError(f"publishable summary lacks {name} arm metrics")
+        valid_pairs.append(
+            f"{labels[name].split(' vs ', 1)[0]}: {item['valid_pairs']} valid pairs"
+        )
+        lines.append(
+            f"| {labels[name]} | {_format(treatment['mean_score'], '%')} | "
+            f"{_format(baseline['mean_score'], '%')} | "
+            f"{_signed(item['paired']['score_delta'])} | "
+            f"{_format(treatment['pass_rate'], '%')} | "
+            f"{_format(baseline['pass_rate'], '%')} | "
+            f"{_signed(item['paired']['latency_delta_percent'], '%', 2)} |"
+        )
+
+    silent = comparisons["silent"]
+    treatment = silent.get("treatment")
+    baseline = silent.get("baseline")
+    tokens = silent.get("tokens", {})
+    if not treatment or not baseline:
+        raise ValueError("publishable summary lacks Silent arm metrics")
+    if any(tokens.get(key) is None for key in ("regular_median", "silent_median", "saved_percent")):
+        raise ValueError("publishable summary lacks eligible Silent token metrics")
+    silent_pairs = silent.get("valid_pairs", {})
+    valid_pairs.append(
+        f"Silent accuracy: {silent_pairs.get('accuracy', 0)} valid pairs"
+    )
+    valid_pairs.append(
+        f"Silent tokens: {silent_pairs.get('tokens', 0)} valid pairs"
+    )
+    lines.extend(
+        [
+            "",
+            "| Silent comparison | Regular | Silent | Change |",
+            "| --- | ---: | ---: | ---: |",
+            f"| Eligible paired output tokens | {tokens['regular_median']:.0f} | {tokens['silent_median']:.0f} | {-tokens['saved_percent']:.1f}% |",
+            f"| Accuracy score | {_format(baseline['mean_score'], '%')} | {_format(treatment['mean_score'], '%')} | {_signed(silent['paired']['score_delta'])} |",
+            "",
+            f"Valid pairs — {', '.join(valid_pairs)}.",
+        ]
+    )
+    agents = summary.get("agents") or sorted(summary.get("agent_versions", {}))
+    models = summary.get("models") or {}
+    matrix = ", ".join(
+        f"{agent}: {models.get(agent) or 'configured default'}"
+        for agent in agents
+    )
+    created = str(summary.get("created_at", "unknown date")).split("T", 1)[0]
+    lines.extend(
+        [
+            f"Run `{summary['run_id']}` on {created}; {summary.get('repetitions', 'unknown')} repetitions. Agent/model matrix: {matrix or 'recorded in manifest'}.",
+            f"[Review the committed evidence](benchmarks/results/{summary['run_id']}/summary.md).",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def _inside(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def publish_readme(
+    result_dir: Path,
+    readme: Path,
+    *,
+    results_root: Path,
+    repository_root: Path,
+    check: bool = False,
+    allow_historical: bool = False,
+) -> dict:
+    """Synchronize the README benchmark region with committed release evidence."""
+    if not _inside(result_dir, results_root):
+        raise ValueError("result directory must be inside benchmarks/results")
+    summary = json.loads((result_dir / "summary.json").read_text(encoding="utf-8"))
+    rendered = render_readme_results(summary)
+    if not allow_historical:
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repository_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        if summary.get("nerd_commit") != head:
+            raise ValueError("benchmark Nerd commit differs from current HEAD")
+
+    body = readme.read_text(encoding="utf-8")
+    if body.count("<!-- BENCHMARK_RUN:") != 1:
+        raise ValueError("README benchmark run marker is missing or duplicated")
+    if body.count(README_START) != 1 or body.count(README_END) != 1:
+        raise ValueError("README benchmark result markers are missing or duplicated")
+    before_start, remainder = body.split(README_START, 1)
+    _, after_end = remainder.split(README_END, 1)
+    import re
+
+    before_start = re.sub(
+        r"<!-- BENCHMARK_RUN:[^ ]+ -->",
+        README_RUN.format(run_id=summary["run_id"]),
+        before_start,
+        count=1,
+    )
+    expected = (
+        before_start
+        + README_START
+        + "\n"
+        + rendered
+        + "\n"
+        + README_END
+        + after_end
+    )
+    if check:
+        if body != expected:
+            raise ValueError("README benchmark evidence is stale")
+    else:
+        readme.write_text(expected, encoding="utf-8")
+    return summary
 
 
 def render_summary_markdown(summary: dict) -> str:

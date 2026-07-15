@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from benchmarks.nerdbench.report import write_report
+from benchmarks.nerdbench.report import publish_readme, write_report
 from benchmarks.nerdbench.runner import load_config, run_matrix, schedule_runs
 from benchmarks.nerdbench.scorer import score_result_directory
 
@@ -65,6 +65,12 @@ def build_parser() -> argparse.ArgumentParser:
     report = subparsers.add_parser("report", help="derive or check summary artifacts")
     _add_result_selector(report)
     report.add_argument("--check", action="store_true")
+
+    publish = subparsers.add_parser("publish", help="sync release evidence to README")
+    _add_result_selector(publish)
+    publish.add_argument("--readme", default=str(ROOT / "README.md"))
+    publish.add_argument("--check", action="store_true")
+    publish.add_argument("--allow-historical", action="store_true")
     return parser
 
 
@@ -100,6 +106,22 @@ def main(argv: list[str] | None = None) -> int:
         result = _result_dir(args)
         summary = write_report(result, check=args.check)
         print(f"{summary['publication_state']} {summary['run_id']}")
+        return 0
+
+    if args.command == "publish":
+        result = _result_dir(args)
+        readme = Path(args.readme)
+        if not readme.is_absolute():
+            readme = (ROOT / readme).resolve()
+        summary = publish_readme(
+            result,
+            readme,
+            results_root=RESULTS_ROOT,
+            repository_root=ROOT,
+            check=args.check,
+            allow_historical=args.allow_historical,
+        )
+        print(f"synchronized {summary['run_id']}")
         return 0
 
     raise AssertionError(args.command)

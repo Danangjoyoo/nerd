@@ -2,7 +2,7 @@ from pathlib import Path
 import re
 import unittest
 
-from benchmarks.nerdbench.report import pending_readme_results
+from benchmarks.nerdbench.report import pending_readme_results, render_readme_results
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,11 +39,15 @@ class ReadmeContractTests(unittest.TestCase):
         body = README.read_text(encoding="utf-8")
         match = re.search(r"<!-- BENCHMARK_RUN:([^ ]+) -->", body)
         self.assertIsNotNone(match)
-        if match.group(1) != "pending":
-            self.skipTest("README points to published evidence")
         region = body.split(START, 1)[1].split(END, 1)[0].strip()
-        self.assertEqual(region, pending_readme_results())
-        self.assertNotRegex(region, r"\d+(?:\.\d+)?%")
+        if match.group(1) == "pending":
+            self.assertEqual(region, pending_readme_results())
+            self.assertNotRegex(region, r"\d+(?:\.\d+)?%")
+            return
+        summary_path = ROOT / "benchmarks/results" / match.group(1) / "summary.json"
+        self.assertTrue(summary_path.is_file())
+        summary = __import__("json").loads(summary_path.read_text(encoding="utf-8"))
+        self.assertEqual(region, render_readme_results(summary))
 
     def test_readme_remains_sharp(self):
         self.assertLessEqual(
