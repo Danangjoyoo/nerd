@@ -10,9 +10,11 @@
 
 **Depends on:** `docs/plans/2026-07-15-nerd-skills.md` completed and passing.
 
+**Implementation status (2026-07-15):** Tasks 1–7 and the nine-run smoke gate are complete. The 405-run release matrix, frozen evidence, and public metrics remain blocked until `cursor agent login` succeeds; Cursor currently exits with `Authentication required`.
+
 ## Global Constraints
 
-- Pin the upstream baseline to `obra/superpowers` tag `v6.1.1`, commit `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a`.
+- Pin the upstream baseline to `obra/superpowers` tag `v6.1.1`: annotated tag object `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a`, dereferenced source commit `d884ae04edebef577e82ff7c4e143debd0bbec99`.
 - Compare paired runs on the same agent executable, resolved model, case, fixture revision, repetition, and permission mode.
 - Exclude skill installation and fixture-copy time from agent latency.
 - Explicitly invoke the compared skill to measure method quality; test implicit routing separately in deterministic conformance tests.
@@ -81,7 +83,7 @@
 - Produces: `load_cases(path: Path) -> tuple[BenchmarkCase, ...]`.
 - Produces: `score_run(case: BenchmarkCase, run: RunResult, judge: dict | None) -> ScoreResult`.
 
-- [ ] **Step 1: Write failing case-loader tests**
+- [x] **Step 1: Write failing case-loader tests**
 
 Use this minimal contract:
 
@@ -100,13 +102,13 @@ class BenchmarkCaseTests(unittest.TestCase):
             load_cases(DUPLICATE_FIXTURE)
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_cases -v`
 
 Expected: FAIL because `benchmarks.nerdbench.cases` does not exist.
 
-- [ ] **Step 3: Implement immutable data models**
+- [x] **Step 3: Implement immutable data models**
 
 Define these fields exactly:
 
@@ -162,17 +164,17 @@ class ScoreResult:
     criterion_results: dict[str, bool]
 ```
 
-- [ ] **Step 4: Implement strict JSON loading**
+- [x] **Step 4: Implement strict JSON loading**
 
 Reject unknown evaluator kinds, empty prompts, non-positive timeouts, duplicate criterion IDs, weights not totaling `100`, and cases without a hard gate. Keep rubric details in the runner process; write only prompt and fixture into the agent workspace.
 
-- [ ] **Step 5: Run GREEN**
+- [x] **Step 5: Run GREEN**
 
 Run: `python3 -m unittest tests.test_benchmark_cases -v`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit the contracts**
+- [x] **Step 6: Commit the contracts**
 
 ```bash
 git add benchmarks/nerdbench tests/test_benchmark_cases.py tests/test_benchmark_scoring.py
@@ -196,7 +198,7 @@ git commit -m "test: define nerd benchmark contracts"
 - Produces: five cases per public workflow, each with weights totaling `100`.
 - Produces: deterministic fixture setup and proof commands for mutation-capable cases.
 
-- [ ] **Step 1: Add failing corpus-coverage tests**
+- [x] **Step 1: Add failing corpus-coverage tests**
 
 Assert these exact IDs:
 
@@ -240,19 +242,19 @@ EXPECTED_CASES = {
 }
 ```
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_cases.BenchmarkCorpusTests -v`
 
 Expected: FAIL because the case files are missing.
 
-- [ ] **Step 3: Author Smart and Surgery cases**
+- [x] **Step 3: Author Smart and Surgery cases**
 
 Use judge criteria for intention, endpoint, scope, evidence, and unsupported claims. Use deterministic absent-regex hard gates for forbidden mutations, third clarification rounds, unverified success, and multiple stacked hypotheses.
 
 For Surgery fixtures, build small Python repositories with `unittest` tests and one seeded root cause. Store the root-cause oracle only in case criteria outside the copied workspace. Each repair fixture must expose a command such as `python3 -m unittest -v` that fails before repair and passes only after the intended minimal correction.
 
-- [ ] **Step 4: Author Execute cases**
+- [x] **Step 4: Author Execute cases**
 
 Use synthetic Python repositories so correctness is deterministic. Each case must include:
 
@@ -263,13 +265,13 @@ Use synthetic Python repositories so correctness is deterministic. Each case mus
 - For `execute-preexisting-failure`, one unrelated failing test and one passing targeted proof.
 - For `execute-blocker`, a deliberately missing contract input that must stop implementation.
 
-- [ ] **Step 5: Author Silent and Patrol cases**
+- [x] **Step 5: Author Silent and Patrol cases**
 
 Silent pairs use the same active Nerd workflow in both arms; the treatment adds `nerd-silent`. Hard gates require equivalent factual content and required verification evidence. Each case must produce paired accuracy scores, paired wall-clock latency, and provider-reported output-token counts so the report can compare correctness, speed, and savings independently.
 
 Patrol cases are conformance-only and must cover exact scope, reachability, safe proof, validation-needed classification, and no-finding language.
 
-- [ ] **Step 6: Run corpus tests and fixture baselines**
+- [x] **Step 6: Run corpus tests and fixture baselines**
 
 ```bash
 python3 -m unittest tests.test_benchmark_cases -v
@@ -278,7 +280,7 @@ python3 -m unittest discover -s benchmarks/fixtures -p 'test_*.py' -v
 
 Expected: corpus tests pass. Seeded failure fixtures fail only where their case manifest explicitly expects a baseline failure; the fixture test helper records and verifies those expected exit codes.
 
-- [ ] **Step 7: Commit cases and fixtures**
+- [x] **Step 7: Commit cases and fixtures**
 
 ```bash
 git add benchmarks/cases benchmarks/fixtures tests/test_benchmark_cases.py
@@ -299,7 +301,7 @@ git commit -m "test: add nerd benchmark corpus"
 - Produces: `fetch_superpowers(cache_dir: Path) -> Path`, verifying the pinned tag and commit.
 - Produces condition labels: `nerd-smart`, `superpowers-brainstorming`, `nerd-surgery`, `superpowers-systematic-debugging`, `nerd-execute`, `superpowers-executing-plans`, `regular`, `nerd-silent`, and `nerd-patrol`.
 
-- [ ] **Step 1: Write failing isolation tests**
+- [x] **Step 1: Write failing isolation tests**
 
 Assert that materialization:
 
@@ -309,13 +311,13 @@ Assert that materialization:
 - Initializes an isolated Git repository for diff measurement.
 - Rejects an upstream checkout whose HEAD differs from the pinned commit.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_cases.MaterializationTests -v`
 
 Expected: FAIL because `materialize.py` is missing.
 
-- [ ] **Step 3: Implement the pinned upstream fetch**
+- [x] **Step 3: Implement the pinned upstream fetch**
 
 Use the repository-local cache path:
 
@@ -325,9 +327,9 @@ git clone --depth 1 --branch v6.1.1 https://github.com/obra/superpowers.git benc
 git -C benchmarks/.cache/superpowers-v6.1.1 rev-parse HEAD
 ```
 
-Require the exact commit `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a`. Reuse a verified cache; delete and refetch only a mismatched benchmark cache, never a user checkout.
+Require both the exact tag object `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a` and dereferenced commit `d884ae04edebef577e82ff7c4e143debd0bbec99`. Reuse a verified cache; delete and refetch only a mismatched benchmark cache, never a user checkout.
 
-- [ ] **Step 4: Implement condition composition**
+- [x] **Step 4: Implement condition composition**
 
 Materialize these comparison arms:
 
@@ -341,11 +343,11 @@ Materialize these comparison arms:
 
 Use project paths `.agents/skills/`, `.claude/skills/`, and `.cursor/skills/` as appropriate. Prompt each run with an explicit skill invocation; do not include rubric text.
 
-- [ ] **Step 5: Add the release matrix config**
+- [x] **Step 5: Add the release matrix config**
 
 Set five cases per workflow, three repetitions, and all three agents. A full release run therefore schedules `360` paired-comparison agent runs plus `45` Patrol conformance runs. Set `parallelism` to `1` by default to avoid rate-limit and machine-contention distortion.
 
-- [ ] **Step 6: Run GREEN and commit**
+- [x] **Step 6: Run GREEN and commit**
 
 ```bash
 python3 -m unittest tests.test_benchmark_cases.MaterializationTests -v
@@ -369,17 +371,17 @@ git commit -m "feat: isolate nerd benchmark conditions"
 - Produces: `AgentAdapter.parse(stdout, stderr) -> tuple[str, int | None, tuple[dict, ...]]`.
 - Produces: adapter IDs `codex`, `claude`, and `cursor`.
 
-- [ ] **Step 1: Write failing adapter tests**
+- [x] **Step 1: Write failing adapter tests**
 
 Test command safety, workspace selection, non-interactive mode, ephemeral sessions, event parsing, final-text extraction, output-token extraction, and missing-usage behavior.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_adapters -v`
 
 Expected: FAIL because adapters are missing.
 
-- [ ] **Step 3: Implement command builders**
+- [x] **Step 3: Implement command builders**
 
 Build argument vectors equivalent to these templates, substituting the Python variables `workspace` and `prompt` without shell interpolation:
 
@@ -391,11 +393,11 @@ cursor agent -p --output-format json --trust --sandbox enabled --workspace {work
 
 If `model` is configured, pass the adapter's model option; otherwise omit it and record the resolved model from output when available. Never pass bypass-permission or unsandboxed flags.
 
-- [ ] **Step 4: Implement strict event parsing**
+- [x] **Step 4: Implement strict event parsing**
 
 Return the final assistant text and provider-reported output tokens. Preserve unknown events in raw output but never guess token usage. Redact environment-like keys matching `TOKEN`, `SECRET`, `KEY`, `PASSWORD`, or `AUTH` before serialization.
 
-- [ ] **Step 5: Run GREEN and commit**
+- [x] **Step 5: Run GREEN and commit**
 
 ```bash
 python3 -m unittest tests.test_benchmark_adapters -v
@@ -413,25 +415,25 @@ git commit -m "feat: add nerd benchmark agent adapters"
 - Modify: `tests/test_benchmark_adapters.py`
 
 **Interfaces:**
-- Produces: CLI `python3 benchmarks/run.py plan|run|score|report`.
+- Produces: CLI `python3 benchmarks/run.py plan|run|judge|score|report|publish`.
 - Produces: `benchmarks/results/<run-id>/manifest.json`, append-only `raw.jsonl`, and `benchmarks/results/LATEST` containing the newest completed run ID.
 - Produces: `plan` output listing exact runs without invoking agents.
 
-- [ ] **Step 1: Write failing schedule tests**
+- [x] **Step 1: Write failing schedule tests**
 
 Assert that the release matrix produces `405` agent runs, every comparative run has one matched opposite arm, and rerunning an existing `run_id` refuses to overwrite raw results.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_adapters.RunnerTests -v`
 
 Expected: FAIL because the runner is missing.
 
-- [ ] **Step 3: Implement deterministic scheduling**
+- [x] **Step 3: Implement deterministic scheduling**
 
 Generate run IDs from comparison, case, agent, repetition, and condition. Randomize treatment/baseline order using a recorded seed while retaining pair identity. Use `time.monotonic()` immediately before starting the agent process and immediately after it exits.
 
-- [ ] **Step 4: Capture repository evidence**
+- [x] **Step 4: Capture repository evidence**
 
 After every run, record:
 
@@ -441,11 +443,11 @@ After every run, record:
 - Configured fixture proof-command exit codes.
 - Agent executable version, resolved model when available, OS, Python version, Nerd commit, and upstream commit.
 
-- [ ] **Step 5: Implement dry-run and resume behavior**
+- [x] **Step 5: Implement dry-run and resume behavior**
 
 `plan` must never invoke an agent. `run --resume RUN_ID` may append only missing scheduled runs and must preserve the original manifest, seed, and configuration. Define the CLI argument as an actual run ID in `YYYYMMDDTHHMMSSZ-<short-commit>` form.
 
-- [ ] **Step 6: Run GREEN and commit**
+- [x] **Step 6: Run GREEN and commit**
 
 ```bash
 python3 -m unittest tests.test_benchmark_adapters.RunnerTests -v
@@ -471,17 +473,17 @@ Expected dry-run output: `405 planned agent runs` with no new result directory.
 - Produces: randomized labels `A` and `B` for pairwise judge input.
 - Produces: one strict JSON judge result per paired conversational case.
 
-- [ ] **Step 1: Write failing scoring tests**
+- [x] **Step 1: Write failing scoring tests**
 
 Cover weighted scoring, hard-gate failure, threshold behavior, command/file evidence, absent regex, blinded order, and refusal to score malformed judge output.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_scoring -v`
 
 Expected: FAIL because the scorer is incomplete.
 
-- [ ] **Step 3: Implement deterministic evaluators**
+- [x] **Step 3: Implement deterministic evaluators**
 
 Evaluation order must be:
 
@@ -497,11 +499,11 @@ score = sum(c.weight for c in case.criteria if criterion_results[c.id])
 passed = score >= 80 and not hard_gate_failures
 ```
 
-- [ ] **Step 4: Implement blinded pairwise judging**
+- [x] **Step 4: Implement blinded pairwise judging**
 
 The judge sees the user prompt, allowed scope, rubric criterion labels, and anonymized outputs A/B. It must not see skill names, condition labels, latency, token counts, or prior aggregate results. Require one boolean per judge criterion per output plus a one-sentence evidence field. Validate with `benchmarks/judge/schema.json`.
 
-- [ ] **Step 5: Run GREEN and commit**
+- [x] **Step 5: Run GREEN and commit**
 
 ```bash
 python3 -m unittest tests.test_benchmark_scoring -v
@@ -523,17 +525,17 @@ git commit -m "feat: score nerd benchmarks"
 - Produces: `summary.md` suitable for review before README publication.
 - Produces: Wilson 95% intervals for pass rate and seeded bootstrap 95% intervals for mean score and median paired deltas.
 
-- [ ] **Step 1: Write failing report tests**
+- [x] **Step 1: Write failing report tests**
 
 Use a fixed synthetic result set to assert exact accuracy score, pass rate, median latency, p95 latency, output-token totals, paired deltas, interval bounds, and Silent eligibility filtering. The fixture must prove that an ineligible token-saving pair can still contribute valid accuracy and latency samples.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_benchmark_report -v`
 
 Expected: FAIL because the reporter is missing.
 
-- [ ] **Step 3: Implement aggregate definitions**
+- [x] **Step 3: Implement aggregate definitions**
 
 Report for Smart, Surgery, and Execute:
 
@@ -554,11 +556,11 @@ Report for Silent:
 - Median paired tokens saved `%` using `(regular - silent) / regular * 100`.
 - Separate valid-pair counts for accuracy, latency, and token savings, plus every exclusion reason.
 
-- [ ] **Step 4: Prevent unsupported claims**
+- [x] **Step 4: Prevent unsupported claims**
 
 If any requested arm has fewer than five valid paired samples, missing token usage, mismatched model identity, or malformed judge results, set its publication state to `insufficient-data`. Do not compute a headline winner for that comparison.
 
-- [ ] **Step 5: Run GREEN and commit**
+- [x] **Step 5: Run GREEN and commit**
 
 ```bash
 python3 -m unittest tests.test_benchmark_report -v
@@ -581,7 +583,7 @@ git commit -m "feat: report nerd benchmark metrics"
 - Consumes: authenticated local Codex, Claude, and Cursor CLIs.
 - Produces: immutable, sanitized evidence for the README plan.
 
-- [ ] **Step 1: Verify prerequisites without running cases**
+- [x] **Step 1: Verify prerequisites without running cases**
 
 ```bash
 codex --version
@@ -592,10 +594,11 @@ python3 benchmarks/run.py plan --config benchmarks/config.json
 
 Expected: all three executables respond and the plan lists `405` runs.
 
-- [ ] **Step 2: Run one smoke pair per comparison and Patrol**
+- [x] **Step 2: Run one smoke pair per comparison and Patrol**
 
 ```bash
 python3 benchmarks/run.py run --config benchmarks/config.json --smoke
+python3 benchmarks/run.py judge --config benchmarks/config.json --latest
 python3 benchmarks/run.py score --latest
 python3 benchmarks/run.py report --latest
 ```
@@ -606,6 +609,7 @@ Expected: eight comparative runs plus one Patrol run complete, parse, and score;
 
 ```bash
 python3 benchmarks/run.py run --config benchmarks/config.json --release
+python3 benchmarks/run.py judge --config benchmarks/config.json --latest
 python3 benchmarks/run.py score --latest
 python3 benchmarks/run.py report --latest
 ```

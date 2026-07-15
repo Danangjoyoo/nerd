@@ -8,6 +8,8 @@
 
 **Tech Stack:** Markdown, YAML, Python 3 standard library, `unittest`, `npx skills` CLI.
 
+**Implementation status (2026-07-15):** Complete. Exactly five public skills validate and install locally for Codex, Claude Code, and Cursor; Superpowers-derived material remains internal reference knowledge.
+
 ## Global Constraints
 
 - Public skill names are exactly `nerd-smart`, `nerd-surgery`, `nerd-patrol`, `nerd-execute`, and `nerd-silent`.
@@ -79,7 +81,7 @@
 - Produces: CLI `python3 scripts/validate_skills.py [repo-root]`, exiting `0` with `PASS ...` records or `1` with violations.
 - Consumes later: all skill tasks add expectations to the validator tests before creating files.
 
-- [ ] **Step 1: Write the failing structure tests**
+- [x] **Step 1: Write the failing structure tests**
 
 Create tests that define the public contract before any skill exists:
 
@@ -110,13 +112,13 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(validate_repository(ROOT), [])
 ```
 
-- [ ] **Step 2: Run the tests and verify RED**
+- [x] **Step 2: Run the tests and verify RED**
 
 Run: `python3 -m unittest tests.test_skill_structure -v`
 
 Expected: FAIL because `scripts.validate_skills` does not exist.
 
-- [ ] **Step 3: Implement the validator skeleton**
+- [x] **Step 3: Implement the validator skeleton**
 
 Implement these constants and checks:
 
@@ -156,13 +158,13 @@ REQUIRED_REFERENCES = {
 - A stale `brainstorming-smart`, `mensa`, or `superpowers:` runtime reference in public `SKILL.md` files.
 - A missing reference link from its owning `SKILL.md`.
 
-- [ ] **Step 4: Run the tests and verify the contract now fails on missing skills**
+- [x] **Step 4: Run the tests and verify the contract now fails on missing skills**
 
 Run: `python3 -m unittest tests.test_skill_structure -v`
 
 Expected: FAIL with a non-empty violation list naming all five missing skill directories.
 
-- [ ] **Step 5: Add contract tests for routing and records**
+- [x] **Step 5: Add contract tests for routing and records**
 
 Create `tests/test_skill_contracts.py` with helpers that read skill bodies and assert:
 
@@ -177,7 +179,7 @@ ROUTES = {
 
 The tests must preserve the approved Focus Record, Decision Record, Case Record, Patrol Scope, Build Contract, Build Result, Silent Conflict, and final result requirements. They must also assert that Smart names exactly one primary specialty and describes Silent as a modifier.
 
-- [ ] **Step 6: Commit the red contract**
+- [x] **Step 6: Commit the red contract**
 
 ```bash
 git add scripts/validate_skills.py tests/test_skill_structure.py tests/test_skill_contracts.py
@@ -200,7 +202,7 @@ git commit -m "test: define nerd skill contracts"
 - Produces: Silent modifier activation without changing the primary specialty.
 - Consumes: internal `references/brainstorming.md` only for material design or exploration decisions.
 
-- [ ] **Step 1: Add failing Smart behavior assertions**
+- [x] **Step 1: Add failing Smart behavior assertions**
 
 Assert that `nerd-smart/SKILL.md`:
 
@@ -211,13 +213,13 @@ Assert that `nerd-smart/SKILL.md`:
 - Links `references/brainstorming.md` conditionally rather than invoking another skill.
 - Contains no `superpowers:` runtime instruction.
 
-- [ ] **Step 2: Run the targeted test and verify RED**
+- [x] **Step 2: Run the targeted test and verify RED**
 
 Run: `python3 -m unittest tests.test_skill_contracts.SmartContractTests -v`
 
 Expected: FAIL because `skills/nerd-smart/SKILL.md` is missing.
 
-- [ ] **Step 3: Create Smart by adapting the private base skill**
+- [x] **Step 3: Create Smart by adapting the private base skill**
 
 Use `/Users/danangjoyo.agus/.codex/skills/brainstorming-smart/SKILL.md` as the behavioral source and apply these exact transformations:
 
@@ -239,7 +241,7 @@ Create `references/brainstorming.md` as a concise derivative of Superpowers v6.1
 
 Keep this reference at or below 120 lines and remove overlapping Smart rules, long examples, automatic design-document creation, and subagent assumptions.
 
-- [ ] **Step 4: Generate Codex metadata**
+- [x] **Step 4: Generate Codex metadata**
 
 Create:
 
@@ -252,7 +254,7 @@ policy:
   allow_implicit_invocation: true
 ```
 
-- [ ] **Step 5: Add upstream license and run GREEN**
+- [x] **Step 5: Add upstream license and run GREEN**
 
 Copy the full Superpowers v6.1.1 MIT text into `LICENSE.superpowers`.
 
@@ -265,7 +267,7 @@ python3 /Users/danangjoyo.agus/.codex/skills/.system/skill-creator/scripts/quick
 
 Expected: all Smart tests pass and `quick_validate.py` reports a valid skill.
 
-- [ ] **Step 6: Commit Smart**
+- [x] **Step 6: Commit Smart**
 
 ```bash
 git add skills/nerd-smart tests/test_skill_contracts.py
@@ -290,7 +292,7 @@ git commit -m "feat: add nerd smart skill"
 - Produces: Case Record, Diagnosis, Uncertainty Check, Source Request, and Verification Experiment.
 - Loads: debugging knowledge for diagnosis; repair and verification knowledge only at an execute endpoint.
 
-- [ ] **Step 1: Add failing Surgery assertions**
+- [x] **Step 1: Add failing Surgery assertions**
 
 Test the exact record blocks and require the conditional links:
 
@@ -302,13 +304,13 @@ references/verification.md
 
 Assert that diagnosis can stop without mutation, repair under uncertainty is called an attempt, and success is impossible without fresh proof.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_skill_contracts.SurgeryContractTests -v`
 
 Expected: FAIL because Surgery is missing.
 
-- [ ] **Step 3: Adapt the private Surgery skill**
+- [x] **Step 3: Adapt the private Surgery skill**
 
 Use `/Users/danangjoyo.agus/.codex/skills/brainstorming-smart-surgery/SKILL.md` as source. Rename the base and specialty, replace runtime Superpowers invocations with conditional reads of the three internal references, and preserve the exact approved records.
 
@@ -318,11 +320,11 @@ Shorten the upstream methods as follows:
 - `test-first-repair.md`: reproduce failure, observe correct RED, apply one root-cause correction, observe GREEN, retain regression test; maximum 80 lines.
 - `verification.md`: identify proof, run fresh complete command, read exit/output, state only supported claims; maximum 60 lines.
 
-- [ ] **Step 4: Create metadata and license**
+- [x] **Step 4: Create metadata and license**
 
 Use display name `Nerd Surgery`, short description `Evidence-first diagnosis and verified repair`, and a default prompt explicitly naming `$nerd-surgery`. Copy the upstream MIT license.
 
-- [ ] **Step 5: Run GREEN and validate**
+- [x] **Step 5: Run GREEN and validate**
 
 ```bash
 python3 -m unittest tests.test_skill_contracts.SurgeryContractTests -v
@@ -331,7 +333,7 @@ python3 /Users/danangjoyo.agus/.codex/skills/.system/skill-creator/scripts/quick
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Surgery**
+- [x] **Step 6: Commit Surgery**
 
 ```bash
 git add skills/nerd-surgery tests/test_skill_contracts.py
@@ -355,17 +357,17 @@ git commit -m "feat: add nerd surgery skill"
 - Produces: Patrol Scope, Security Finding, Validation Needed, and Patrol Result.
 - Loads: remediation and verification references only when the endpoint authorizes code changes.
 
-- [ ] **Step 1: Add failing Patrol assertions**
+- [x] **Step 1: Add failing Patrol assertions**
 
 Require exact evidence classifications, scope boundaries, safe proof ladder, `No confirmed findings within this scope`, and the rule that an advisory without reachable installed usage is not a finding.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_skill_contracts.PatrolContractTests -v`
 
 Expected: FAIL because Patrol is missing.
 
-- [ ] **Step 3: Adapt the private Patrol skill**
+- [x] **Step 3: Adapt the private Patrol skill**
 
 Use `/Users/danangjoyo.agus/.codex/skills/brainstorming-smart-patrol/SKILL.md` as source. Rename it to `nerd-patrol`, require `nerd-smart` as base, preserve all approved records, and replace Superpowers remediation invocations with conditional internal reference reads.
 
@@ -374,11 +376,11 @@ Keep each reference role-specific and concise:
 - `test-first-remediation.md`: safe failing reproduction, minimal correction, red-green proof.
 - `verification.md`: confirm original exploit path is closed and relevant regression checks pass before claiming remediation.
 
-- [ ] **Step 4: Create metadata and license**
+- [x] **Step 4: Create metadata and license**
 
 Use display name `Nerd Patrol`, short description `Scope-bound security findings with evidence`, and a default prompt explicitly naming `$nerd-patrol`. Copy the upstream MIT license.
 
-- [ ] **Step 5: Run GREEN and validate**
+- [x] **Step 5: Run GREEN and validate**
 
 ```bash
 python3 -m unittest tests.test_skill_contracts.PatrolContractTests -v
@@ -387,7 +389,7 @@ python3 /Users/danangjoyo.agus/.codex/skills/.system/skill-creator/scripts/quick
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Patrol**
+- [x] **Step 6: Commit Patrol**
 
 ```bash
 git add skills/nerd-patrol tests/test_skill_contracts.py
@@ -412,17 +414,17 @@ git commit -m "feat: add nerd patrol skill"
 - Produces: Build Contract, Baseline, optional Repository Gravity, checkpoints, conflicts, and Build Result.
 - Loads: plan execution only for written plans; test-first knowledge for behavior changes; verification before Build Result.
 
-- [ ] **Step 1: Add failing Execute assertions**
+- [x] **Step 1: Add failing Execute assertions**
 
 Require all approved Build records, proof-first checkpoint ordering, two correction attempts, repository topology handling, no subagent dispatch, and Silent presentation precedence.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_skill_contracts.ExecuteContractTests -v`
 
 Expected: FAIL because Execute is missing.
 
-- [ ] **Step 3: Adapt the private Execute skill**
+- [x] **Step 3: Adapt the private Execute skill**
 
 Use `/Users/danangjoyo.agus/.codex/skills/brainstorming-smart-execute/SKILL.md` as source. Rename all family references, preserve the repository-session context and exact record blocks, and replace upstream runtime skill calls with conditional reference reads.
 
@@ -432,11 +434,11 @@ Create concise internal knowledge:
 - `test-first-build.md`: RED, verify correct failure, minimal GREEN, verify full relevant suite, refactor while green; maximum 90 lines.
 - `verification.md`: map every acceptance criterion to fresh evidence and report gaps explicitly; maximum 60 lines.
 
-- [ ] **Step 4: Create metadata and license**
+- [x] **Step 4: Create metadata and license**
 
 Use display name `Nerd Execute`, short description `Repository-aligned implementation with proof`, and a default prompt explicitly naming `$nerd-execute`. Copy the upstream MIT license.
 
-- [ ] **Step 5: Run GREEN and validate**
+- [x] **Step 5: Run GREEN and validate**
 
 ```bash
 python3 -m unittest tests.test_skill_contracts.ExecuteContractTests -v
@@ -445,7 +447,7 @@ python3 /Users/danangjoyo.agus/.codex/skills/.system/skill-creator/scripts/quick
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Execute**
+- [x] **Step 6: Commit Execute**
 
 ```bash
 git add skills/nerd-execute tests/test_skill_contracts.py
@@ -466,21 +468,21 @@ git commit -m "feat: add nerd execute skill"
 - Produces: suppressed process narration and reduced optional work without reducing the final deliverable.
 - Must not: override correctness, verification, authorization, safety, or required user interaction.
 
-- [ ] **Step 1: Add failing Silent assertions**
+- [x] **Step 1: Add failing Silent assertions**
 
 Require explicit/concrete activation, the Economist role, hard narration suppression, permitted interaction records, and the normal complete final result.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_skill_contracts.SilentContractTests -v`
 
 Expected: FAIL because Silent is missing.
 
-- [ ] **Step 3: Adapt the private Cheap skill**
+- [x] **Step 3: Adapt the private Cheap skill**
 
 Use `/Users/danangjoyo.agus/.codex/skills/brainstorming-smart-cheap/SKILL.md` as source. Rename `Cheap` to `Silent`, remove the 100-example narration blacklist in favor of concise category rules, preserve the event record semantics, and keep the complete final result requirement. Target 100–140 lines.
 
-- [ ] **Step 4: Create metadata**
+- [x] **Step 4: Create metadata**
 
 ```yaml
 interface:
@@ -489,7 +491,7 @@ interface:
   default_prompt: "Use $nerd-silent with this task to suppress optional process output."
 ```
 
-- [ ] **Step 5: Run GREEN and validate**
+- [x] **Step 5: Run GREEN and validate**
 
 ```bash
 python3 -m unittest tests.test_skill_contracts.SilentContractTests -v
@@ -498,7 +500,7 @@ python3 /Users/danangjoyo.agus/.codex/skills/.system/skill-creator/scripts/quick
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit Silent**
+- [x] **Step 6: Commit Silent**
 
 ```bash
 git add skills/nerd-silent tests/test_skill_contracts.py
@@ -518,21 +520,21 @@ git commit -m "feat: add nerd silent modifier"
 - Produces: one repository-level attribution record and a passing family validator.
 - Proves: local discovery and copied installation for Codex, Claude Code, and Cursor.
 
-- [ ] **Step 1: Add failing attribution and discovery tests**
+- [x] **Step 1: Add failing attribution and discovery tests**
 
 Assert that `THIRD_PARTY_NOTICES.md` names `obra/superpowers`, version `6.1.1`, Jesse Vincent, and MIT. Assert that every derived skill carries an identical `LICENSE.superpowers`.
 
-- [ ] **Step 2: Run RED**
+- [x] **Step 2: Run RED**
 
 Run: `python3 -m unittest tests.test_skill_structure -v`
 
 Expected: FAIL because the repository notice is missing.
 
-- [ ] **Step 3: Add the notice and complete validator output**
+- [x] **Step 3: Add the notice and complete validator output**
 
 Document that the internal references are shortened derivatives, list the affected Nerd skills, reproduce the upstream MIT text, and link the source repository. Make `validate_skills.py` print one `PASS <skill>` line per public skill plus `PASS routing`, `PASS references`, and `PASS attribution`.
 
-- [ ] **Step 4: Run all deterministic verification**
+- [x] **Step 4: Run all deterministic verification**
 
 ```bash
 python3 -m unittest discover -s tests -v
@@ -546,7 +548,7 @@ Expected:
 - Validator prints all PASS records and exits `0`.
 - The CLI lists exactly the five approved Nerd skills and no reference files.
 
-- [ ] **Step 5: Smoke-install for each supported agent in a temporary directory**
+- [x] **Step 5: Smoke-install for each supported agent in a temporary directory**
 
 Run the installer with `--copy` and verify each target receives all five skill directories:
 
@@ -559,7 +561,7 @@ npx skills list
 
 Expected: Codex, Claude Code, and Cursor discover the five Nerd skills; no internal reference is listed as a skill.
 
-- [ ] **Step 6: Update the renamed Git remote**
+- [x] **Step 6: Update the renamed Git remote**
 
 ```bash
 git remote set-url origin https://github.com/Danangjoyoo/nerd.git
@@ -568,7 +570,7 @@ git remote -v
 
 Expected: fetch and push URLs both end in `Danangjoyoo/nerd.git`.
 
-- [ ] **Step 7: Commit the complete family**
+- [x] **Step 7: Commit the complete family**
 
 ```bash
 git add THIRD_PARTY_NOTICES.md scripts tests skills
