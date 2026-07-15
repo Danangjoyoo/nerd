@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import random
+import re
 import shlex
 import subprocess
 import time
@@ -47,6 +48,7 @@ def load_config(path: Path) -> dict:
         "upstream",
         "agents",
         "models",
+        "target",
         "judge",
         "case_files",
         "conditions",
@@ -58,11 +60,44 @@ def load_config(path: Path) -> dict:
         raise ValueError("benchmark config keys do not match schema")
     if payload["repetitions"] <= 0 or payload["parallelism"] <= 0:
         raise ValueError("repetitions and parallelism must be positive")
+    if set(payload["target"]) != {"id", "display_name", "reasoning_effort"}:
+        raise ValueError("target keys do not match schema")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", payload["target"]["id"]):
+        raise ValueError("target id must use safe lowercase characters")
+    efforts = {
+        None,
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max",
+        "ultra",
+    }
+    if payload["target"]["reasoning_effort"] not in efforts:
+        raise ValueError("unsupported target reasoning effort")
+    if set(payload["judge"]) != {
+        "agent",
+        "model",
+        "reasoning_effort",
+        "timeout_seconds",
+    }:
+        raise ValueError("judge keys do not match schema")
     if payload["judge"].get("agent") != "codex":
         raise ValueError("the blinded judge agent must be codex")
     if payload["judge"].get("timeout_seconds", 0) <= 0:
         raise ValueError("judge timeout must be positive")
-    payload["_root"] = path.resolve().parents[1]
+    if payload["judge"].get("reasoning_effort") not in efforts:
+        raise ValueError("unsupported judge reasoning effort")
+    resolved = path.resolve()
+    try:
+        payload["_root"] = next(
+            parent
+            for parent in resolved.parents
+            if (parent / "benchmarks").is_dir() and (parent / "skills").is_dir()
+        )
+    except StopIteration as error:
+        raise ValueError("benchmark config is outside a Nerd repository") from error
     return payload
 
 
@@ -75,12 +110,20 @@ def _cases(config: dict) -> tuple[BenchmarkCase, ...]:
 
 
 def pair_key(spec: RunSpec) -> tuple:
-    return (spec.case_id, spec.agent, spec.model, spec.repetition)
+    return (
+        spec.target_id,
+        spec.case_id,
+        spec.agent,
+        spec.model,
+        spec.reasoning_effort,
+        spec.repetition,
+    )
 
 
 def schedule_runs(config: dict, workspace_root: Path) -> tuple[RunSpec, ...]:
     rng = random.Random(config["seed"])
     scheduled: list[RunSpec] = []
+    target = config["target"]
     for case in _cases(config):
         try:
             conditions = tuple(config["conditions"][case.comparison])
@@ -93,7 +136,7 @@ def schedule_runs(config: dict, workspace_root: Path) -> tuple[RunSpec, ...]:
                 rng.shuffle(ordered)
                 for condition in ordered:
                     run_id = (
-                        f"{case.comparison}--{case.id}--{agent}--"
+                        f"{case.comparison}--{case.id}--{target['id']}--{agent}--"
                         f"r{repetition}--{condition}"
                     )
                     scheduled.append(
@@ -105,6 +148,8 @@ def schedule_runs(config: dict, workspace_root: Path) -> tuple[RunSpec, ...]:
                             model=model,
                             repetition=repetition,
                             workspace=workspace_root / run_id,
+                            target_id=target["id"],
+                            reasoning_effort=target["reasoning_effort"],
                         )
                     )
     return tuple(scheduled)
@@ -238,6 +283,8 @@ def result_record(result: RunResult, diff_hash: str) -> dict:
         "condition": spec.condition,
         "agent": spec.agent,
         "model": spec.model,
+        "target_id": spec.target_id,
+        "reasoning_effort": spec.reasoning_effort,
         "repetition": spec.repetition,
         "exit_code": result.exit_code,
         "elapsed_seconds": result.elapsed_seconds,
@@ -250,10 +297,10 @@ def result_record(result: RunResult, diff_hash: str) -> dict:
     }
 
 
-def _run_id() -> str:
+def _run_id(config: dict) -> str:
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     commit = _git_output(["rev-parse", "--short=7", "HEAD"])
-    return f"{timestamp}-{commit}"
+    return f"{timestamp}-{commit}-{config['target']['id']}"
 
 
 def _public_config(config: dict) -> dict:
@@ -299,10 +346,13 @@ def _case_index(config: dict) -> dict[str, BenchmarkCase]:
 
 
 def _smoke_specs(specs: tuple[RunSpec, ...]) -> tuple[RunSpec, ...]:
+    if not specs:
+        return ()
+    smoke_agent = specs[0].agent
     chosen = []
     for spec in specs:
         comparison = spec.run_id.split("--", 1)[0]
-        if spec.agent != "codex" or spec.repetition != 1:
+        if spec.agent != smoke_agent or spec.repetition != 1:
             continue
         if spec.case_id != SMOKE_CASES[comparison]:
             continue
@@ -323,9 +373,11 @@ def run_matrix(
             raise FileNotFoundError(f"unknown result run: {resume}")
         run_id = resume
         manifest = json.loads((result_dir / "manifest.json").read_text())
+        if manifest.get("config") != _public_config(config):
+            raise ValueError("resume config differs from original manifest")
         smoke = bool(manifest["smoke"])
     else:
-        run_id = _run_id()
+        run_id = _run_id(config)
         result_dir = create_run_directory(results_root, run_id)
 
     workspace_root = ROOT / "benchmarks" / "work" / run_id
@@ -362,6 +414,8 @@ def run_matrix(
                     "condition": spec.condition,
                     "agent": spec.agent,
                     "model": spec.model,
+                    "target_id": spec.target_id,
+                    "reasoning_effort": spec.reasoning_effort,
                     "repetition": spec.repetition,
                     "exit_code": -1,
                     "elapsed_seconds": 0.0,

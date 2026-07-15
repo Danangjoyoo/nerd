@@ -35,6 +35,8 @@ class RunSpec:
     model: str | None
     repetition: int
     workspace: Path
+    target_id: str = "default"
+    reasoning_effort: str | None = None
 
 
 @dataclass(frozen=True)

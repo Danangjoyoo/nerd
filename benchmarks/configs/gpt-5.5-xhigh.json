@@ -6,16 +6,12 @@
     "tag_object": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
     "commit": "d884ae04edebef577e82ff7c4e143debd0bbec99"
   },
-  "agents": ["codex", "claude", "cursor"],
-  "models": {
-    "codex": null,
-    "claude": null,
-    "cursor": null
-  },
+  "agents": ["codex"],
+  "models": {"codex": "gpt-5.5"},
   "target": {
-    "id": "cross-agent-default",
-    "display_name": "Cross-agent default models",
-    "reasoning_effort": null
+    "id": "gpt-5.5-xhigh",
+    "display_name": "GPT 5.5 · xhigh",
+    "reasoning_effort": "xhigh"
   },
   "judge": {
     "agent": "codex",
@@ -27,15 +23,13 @@
     "benchmarks/cases/smart.json",
     "benchmarks/cases/surgery.json",
     "benchmarks/cases/execute.json",
-    "benchmarks/cases/silent.json",
-    "benchmarks/cases/patrol.json"
+    "benchmarks/cases/silent.json"
   ],
   "conditions": {
     "smart": ["nerd-smart", "superpowers-brainstorming"],
     "surgery": ["nerd-surgery", "superpowers-systematic-debugging"],
     "execute": ["nerd-execute", "superpowers-executing-plans"],
-    "silent": ["regular", "nerd-silent"],
-    "patrol": ["nerd-patrol"]
+    "silent": ["regular", "nerd-silent"]
   },
   "repetitions": 3,
   "parallelism": 1,

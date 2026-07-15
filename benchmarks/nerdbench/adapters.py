@@ -96,6 +96,10 @@ class CodexAdapter(AgentAdapter):
         ]
         if spec.model:
             command.extend(["--model", spec.model])
+        if spec.reasoning_effort:
+            command.extend(
+                ["-c", f'model_reasoning_effort="{spec.reasoning_effort}"']
+            )
         command.append(prompt)
         return command
 
@@ -128,6 +132,8 @@ class ClaudeAdapter(AgentAdapter):
         ]
         if spec.model:
             command.extend(["--model", spec.model])
+        if spec.reasoning_effort:
+            command.extend(["--effort", spec.reasoning_effort])
         command.append(prompt)
         return command
 

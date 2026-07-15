@@ -103,9 +103,11 @@ def _arm_stats(entries: list[dict], seed: int, label: str) -> dict:
 
 def _pair_identity(record: dict) -> tuple:
     return (
+        record.get("target_id", "default"),
         record["case_id"],
         record["agent"],
         record.get("model"),
+        record.get("reasoning_effort"),
         record["repetition"],
     )
 
@@ -315,6 +317,7 @@ def aggregate_results(
         "nerd_commit": manifest["nerd_commit"],
         "upstream_commit": manifest["upstream_commit"],
         "agent_versions": manifest.get("agent_versions", {}),
+        "target": manifest.get("config", {}).get("target", {}),
         "agents": manifest.get("config", {}).get("agents", []),
         "models": manifest.get("config", {}).get("models", {}),
         "case_files": manifest.get("config", {}).get("case_files", []),

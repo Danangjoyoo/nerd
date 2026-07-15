@@ -12,9 +12,9 @@ TARGETS = {
     "gpt-5.6-luna-xhigh": ("codex", "gpt-5.6-luna", "xhigh"),
     "gpt-5.5-xhigh": ("codex", "gpt-5.5", "xhigh"),
     "claude-fable-5-xhigh": ("claude", "claude-fable-5", "xhigh"),
-    "claude-opus-4.8-xhigh": ("claude", "claude-opus-4-8", "xhigh"),
+    "claude-opus-4-8-xhigh": ("claude", "claude-opus-4-8", "xhigh"),
     "claude-sonnet-5-xhigh": ("claude", "claude-sonnet-5", "xhigh"),
-    "claude-haiku-4.5": ("claude", "claude-haiku-4-5", None),
+    "claude-haiku-4-5": ("claude", "claude-haiku-4-5", None),
 }
 
 

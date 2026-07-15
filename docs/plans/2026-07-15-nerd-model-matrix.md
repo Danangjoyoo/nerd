@@ -26,11 +26,11 @@
 
 ## Work
 
-- [ ] Add target and reasoning-effort identity to configs, run specs, adapters, records, pairing, and reports.
-- [ ] Pin the blinded judge model and reasoning effort.
-- [ ] Add four GPT configs and four Claude configs; each plan must contain 120 measured runs.
-- [ ] Add regression tests for command flags, unique run IDs, pairing identity, and result-directory isolation.
-- [ ] Add a Claude handoff prompt that produces sanitized, mergeable artifacts without changing README or Git state.
+- [x] Add target and reasoning-effort identity to configs, run specs, adapters, records, pairing, and reports.
+- [x] Pin the blinded judge model and reasoning effort.
+- [x] Add four GPT configs and four Claude configs; each plan must contain 120 measured runs.
+- [x] Add regression tests for command flags, unique run IDs, pairing identity, and result-directory isolation.
+- [x] Add a Claude handoff prompt that produces sanitized, mergeable artifacts without changing README or Git state.
 - [ ] Run four GPT smoke shards and audit exits, tokens, judging, and report reproducibility.
 - [ ] Run four GPT release shards concurrently, keeping arms sequential inside each shard.
 - [ ] Seal GPT evidence and create a target-to-result index with hashes.

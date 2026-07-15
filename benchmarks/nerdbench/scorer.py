@@ -134,6 +134,7 @@ def build_judge_command(
     prompt: str,
     *,
     model: str | None = None,
+    reasoning_effort: str | None = None,
 ) -> list[str]:
     command = [
         "codex",
@@ -150,6 +151,8 @@ def build_judge_command(
     ]
     if model:
         command.extend(["--model", model])
+    if reasoning_effort:
+        command.extend(["-c", f'model_reasoning_effort="{reasoning_effort}"'])
     command.append(prompt)
     return command
 
@@ -243,16 +246,18 @@ def judge_tasks(
             patrol.append(record)
             continue
         identity = (
+            record.get("target_id", "default"),
             record["case_id"],
             record["agent"],
             record.get("model"),
+            record.get("reasoning_effort"),
             int(record["repetition"]),
         )
         grouped.setdefault(identity, {})[record["condition"]] = record
 
     tasks = []
     for identity, arms in sorted(grouped.items(), key=lambda item: repr(item[0])):
-        case = cases[identity[0]]
+        case = cases[identity[1]]
         expected = PAIR_CONDITIONS[case.comparison]
         if not all(condition in arms for condition in expected):
             continue
@@ -297,7 +302,12 @@ def _invoke_judge(
         json.dumps(judge_output_schema(case), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    command = build_judge_command(schema_path, prompt, model=judge.get("model"))
+    command = build_judge_command(
+        schema_path,
+        prompt,
+        model=judge.get("model"),
+        reasoning_effort=judge.get("reasoning_effort"),
+    )
     started = time.monotonic()
     process = subprocess.run(
         command,
@@ -396,6 +406,8 @@ def _run_result(record: dict) -> RunResult:
         model=record.get("model"),
         repetition=int(record["repetition"]),
         workspace=Path("."),
+        target_id=record.get("target_id", "default"),
+        reasoning_effort=record.get("reasoning_effort"),
     )
     return RunResult(
         spec=spec,
