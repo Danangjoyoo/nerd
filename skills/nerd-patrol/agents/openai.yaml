@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Patrol"
+  short_description: "Scope-bound security findings with evidence"
+  default_prompt: "Use $nerd-patrol to examine this security scope and report evidence-backed findings."
