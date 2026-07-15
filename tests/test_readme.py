@@ -55,6 +55,22 @@ def _graph_rows(body: str, heading: str, next_heading: str):
 
 
 class ReadmeContractTests(unittest.TestCase):
+    def test_header_has_nerd_banner_and_skills_badge(self):
+        body = README.read_text(encoding="utf-8")
+        expected_header = (
+            "# Nerd\n\n"
+            "![Nerd mascot banner](assets/nerd-banner.png)\n\n"
+            "[![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/"
+            "badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml) "
+            "[![skills.sh](https://skills.sh/b/danangjoyoo/nerd)]"
+            "(https://skills.sh/danangjoyoo/nerd)\n"
+        )
+        self.assertTrue(body.startswith(expected_header))
+
+        banner = ROOT / "assets" / "nerd-banner.png"
+        self.assertTrue(banner.is_file())
+        self.assertEqual(banner.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+
     def test_install_command_is_current(self):
         body = README.read_text(encoding="utf-8")
         for agent in ("claude-code", "codex", "cursor"):
