@@ -31,6 +31,7 @@ class WorkflowContractTests(unittest.TestCase):
             'if [ "$RUN_ID" = "pending" ]',
             "Benchmark results pending a complete release run.",
             "python3 benchmarks/run.py publish",
+            "--allow-historical",
             "--check",
         ):
             self.assertIn(command, body)

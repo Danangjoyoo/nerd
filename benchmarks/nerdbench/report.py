@@ -318,6 +318,7 @@ def aggregate_results(
         "agents": manifest.get("config", {}).get("agents", []),
         "models": manifest.get("config", {}).get("models", {}),
         "case_files": manifest.get("config", {}).get("case_files", []),
+        "case_count": len({record["case_id"] for record in records}),
         "repetitions": manifest.get("config", {}).get("repetitions"),
         "comparisons": comparisons,
         "patrol": {
@@ -403,6 +404,7 @@ def render_readme_results(summary: dict) -> str:
             "| --- | ---: | ---: | ---: |",
             f"| Eligible paired output tokens | {tokens['regular_median']:.0f} | {tokens['silent_median']:.0f} | {-tokens['saved_percent']:.1f}% |",
             f"| Accuracy score | {_format(baseline['mean_score'], '%')} | {_format(treatment['mean_score'], '%')} | {_signed(silent['paired']['score_delta'])} |",
+            f"| p50 latency | {_format(baseline['p50_latency_seconds'], 's')} | {_format(treatment['p50_latency_seconds'], 's')} | {_signed(silent['paired']['latency_delta_percent'], '%', 2)} |",
             "",
             f"Valid pairs — {', '.join(valid_pairs)}.",
         ]
@@ -416,7 +418,7 @@ def render_readme_results(summary: dict) -> str:
     created = str(summary.get("created_at", "unknown date")).split("T", 1)[0]
     lines.extend(
         [
-            f"Run `{summary['run_id']}` on {created}; {summary.get('repetitions', 'unknown')} repetitions. Agent/model matrix: {matrix or 'recorded in manifest'}.",
+            f"Run `{summary['run_id']}` on {created}; {summary.get('case_count', 'unknown')} cases; {summary.get('repetitions', 'unknown')} repetitions; Nerd `{summary.get('nerd_commit', 'unknown')}`; Superpowers `{summary.get('upstream_commit', 'unknown')}`. Agent/model matrix: {matrix or 'recorded in manifest'}.",
             f"[Review the committed evidence](benchmarks/results/{summary['run_id']}/summary.md).",
         ]
     )

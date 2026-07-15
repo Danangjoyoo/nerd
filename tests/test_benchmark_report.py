@@ -158,7 +158,14 @@ class AggregateReportTests(unittest.TestCase):
         self.assertIn("500", body)
         self.assertIn("300", body)
         self.assertIn("-40.0%", body)
+        self.assertIn("| p50 latency | 5.0s | 4.0s | -20.00% |", body)
         self.assertIn("5 valid pairs", body)
+        self.assertIn("21 cases", body)
+        self.assertIn("Nerd `deadbeef`", body)
+        self.assertIn(
+            "Superpowers `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a`",
+            body,
+        )
         self.assertIn(
             "benchmarks/results/20260715T000000Z-deadbee/summary.md",
             body,

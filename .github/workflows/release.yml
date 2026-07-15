@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           EXPECTED_SKILL_COUNT=5
           INPUT="$(cat)"
-          FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-(smart|surgery|patrol|execute|silent)' | sort -u)"
+          FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-[a-z0-9-]+' | sort -u)"
           COUNT="$(printf '%s\n' "$FOUND" | grep -Ec '^nerd-' || true)"
           test "$COUNT" -eq "$EXPECTED_SKILL_COUNT"
           test "$FOUND" = $'nerd-execute\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery'

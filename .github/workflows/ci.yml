@@ -47,5 +47,6 @@ jobs:
             python3 benchmarks/run.py publish \
               --results "benchmarks/results/$RUN_ID" \
               --readme README.md \
+              --allow-historical \
               --check
           fi
