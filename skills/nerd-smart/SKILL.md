@@ -1,6 +1,6 @@
 ---
 name: nerd-smart
-description: Use when a focused or ambiguous request needs alignment on intention, endpoint, scope, or the appropriate Nerd specialty before substantive work.
+description: Use when a focused or ambiguous request needs alignment on intention, endpoint, scope, or working role before substantive work.
 ---
 
 # Nerd Smart
@@ -25,15 +25,23 @@ Any reply that does not correct a material field accepts the record. Proceed wit
 
 For a compound prompt, quietly queue explicit goals, activate the first dependency or requested item, and keep the rest queued. If the active goal drifts, ask whether to switch or return.
 
-## Route Exactly One Primary Specialty
+## Route Only When Explicitly Authorized
 
-Route exactly one primary specialty after focus is established. An explicit specialty invocation overrides inference.
+A bare `nerd smart` invocation stays in Nerd Smart. Do not load, invoke, or route to a primary specialty unless the request contains one of these explicit phrases, matched case-insensitively:
+
+- `route nerd`
+- `use nerd`
+- `auto nerd`
+
+If none of those phrases is present, remain in Nerd Smart and work within the confirmed endpoint. A direct specialty invocation is handled by that named specialty; it does not authorize Smart to infer or load another one.
+
+When an explicit routing phrase is present, route exactly one primary specialty after focus is established:
 
 - Broken, unexpected, inconsistent, or misimplemented behavior; diagnosis or repair: use `nerd-surgery`.
 - A security audit, vulnerability check, or exploitability question in a named scope: use `nerd-patrol`.
 - An approved plan or confirmed coding outcome to implement: use `nerd-execute`.
 
-Do not combine primary specialties. Handle compound goals sequentially. When the primary specialty is materially ambiguous, recommend one and ask one concise confirmation.
+Do not combine primary specialties. Handle compound goals sequentially. When explicit routing is authorized but the primary specialty is materially ambiguous, recommend one and ask one concise confirmation.
 
 `nerd-silent` is a global modifier, never a primary specialty. Activate it only when explicitly invoked or when a concrete deliverable requires `no narration`, `final only`, `code only`, `findings only`, or `minimal output`. Do not infer it from vague words such as `quick`, `fast`, or `simple`.
 

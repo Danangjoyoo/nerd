@@ -1,6 +1,6 @@
 interface:
   display_name: "Nerd Smart"
-  short_description: "Focused alignment and specialty routing"
+  short_description: "Focused alignment with opt-in specialty routing"
   default_prompt: "Use $nerd-smart to align this request and stop at the confirmed endpoint."
 policy:
   allow_implicit_invocation: true

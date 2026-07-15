@@ -17,7 +17,32 @@ def assert_terms(test: unittest.TestCase, body: str, terms: tuple[str, ...]) -> 
 
 
 class SmartContractTests(unittest.TestCase):
-    def test_routes_one_primary_specialty_and_silent_modifier(self):
+    def test_bare_smart_stays_in_smart_without_loading_specialties(self):
+        body = skill_body("nerd-smart")
+        metadata = (SKILLS / "nerd-smart" / "agents" / "openai.yaml").read_text()
+        assert_terms(
+            self,
+            body,
+            (
+                "A bare `nerd smart` invocation stays in Nerd Smart",
+                "Do not load, invoke, or route to a primary specialty",
+                "`route nerd`",
+                "`use nerd`",
+                "`auto nerd`",
+                "If none of those phrases is present, remain in Nerd Smart",
+                "A direct specialty invocation is handled by that named specialty",
+            ),
+        )
+        frontmatter = body.split("---", 2)[1]
+        self.assertIn("working role before substantive work", frontmatter)
+        self.assertNotIn("appropriate Nerd specialty", frontmatter)
+        self.assertIn("opt-in specialty routing", metadata)
+        self.assertNotIn(
+            "Route exactly one primary specialty after focus is established",
+            body,
+        )
+
+    def test_explicit_nerd_routing_selects_one_specialty_and_silent_modifier(self):
         body = skill_body("nerd-smart")
         assert_terms(
             self,
