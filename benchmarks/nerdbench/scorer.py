@@ -154,6 +154,37 @@ def build_judge_command(
     return command
 
 
+def judge_output_schema(case: BenchmarkCase) -> dict:
+    decision = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "A": {"type": "boolean"},
+            "B": {"type": "boolean"},
+            "evidence": {"type": "string"},
+        },
+        "required": ["A", "B", "evidence"],
+    }
+    criterion_ids = [
+        item.id for item in case.criteria if item.evaluator == "judge"
+    ]
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "criteria": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    criterion_id: decision for criterion_id in criterion_ids
+                },
+                "required": criterion_ids,
+            }
+        },
+        "required": ["criteria"],
+    }
+
+
 def validate_judge_result(result: object, criterion_ids: tuple[str, ...]) -> dict:
     if not isinstance(result, dict) or set(result) != {"criteria"}:
         raise ValueError("judge result must contain only criteria")
@@ -254,9 +285,19 @@ def judge_tasks(
     return tasks
 
 
-def _invoke_judge(prompt: str, config: dict, workspace: Path) -> tuple[dict, float]:
+def _invoke_judge(
+    prompt: str,
+    config: dict,
+    workspace: Path,
+    case: BenchmarkCase,
+) -> tuple[dict, float]:
     judge = config["judge"]
-    command = build_judge_command(JUDGE_SCHEMA, prompt, model=judge.get("model"))
+    schema_path = workspace / "judge-output-schema.json"
+    schema_path.write_text(
+        json.dumps(judge_output_schema(case), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    command = build_judge_command(schema_path, prompt, model=judge.get("model"))
     started = time.monotonic()
     process = subprocess.run(
         command,
@@ -296,7 +337,7 @@ def judge_result_directory(result_dir: Path, config: dict) -> list[dict]:
                 continue
             case = cases[task["case_id"]]
             prompt = build_judge_prompt(case, task["outputs"])
-            result, elapsed = _invoke_judge(prompt, config, workspace)
+            result, elapsed = _invoke_judge(prompt, config, workspace, case)
             criterion_ids = tuple(
                 item.id for item in case.criteria if item.evaluator == "judge"
             )

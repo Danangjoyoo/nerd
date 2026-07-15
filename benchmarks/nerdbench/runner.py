@@ -31,6 +31,13 @@ CONDITION_SKILLS = {
     "nerd-silent": "nerd-silent",
     "nerd-patrol": "nerd-patrol",
 }
+SMOKE_CASES = {
+    "smart": "smart-ambiguous-focus",
+    "surgery": "surgery-trace-source",
+    "execute": "execute-blocker",
+    "silent": "silent-final-only",
+    "patrol": "patrol-auth-pr",
+}
 
 
 def load_config(path: Path) -> dict:
@@ -293,23 +300,13 @@ def _case_index(config: dict) -> dict[str, BenchmarkCase]:
 
 def _smoke_specs(specs: tuple[RunSpec, ...]) -> tuple[RunSpec, ...]:
     chosen = []
-    seen_comparisons = set()
     for spec in specs:
         comparison = spec.run_id.split("--", 1)[0]
         if spec.agent != "codex" or spec.repetition != 1:
             continue
-        if comparison == "patrol":
-            if comparison not in seen_comparisons:
-                chosen.append(spec)
-                seen_comparisons.add(comparison)
+        if spec.case_id != SMOKE_CASES[comparison]:
             continue
-        first_case = next(
-            item.case_id
-            for item in specs
-            if item.run_id.startswith(comparison + "--")
-        )
-        if spec.case_id == first_case:
-            chosen.append(spec)
+        chosen.append(spec)
     return tuple(chosen)
 
 

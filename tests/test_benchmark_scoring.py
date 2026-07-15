@@ -12,6 +12,7 @@ from benchmarks.nerdbench.scorer import (
     blind_pair,
     build_judge_command,
     build_judge_prompt,
+    judge_output_schema,
     score_run,
     validate_judge_result,
 )
@@ -162,6 +163,18 @@ class ScoringTests(unittest.TestCase):
         ):
             self.assertIn(value, command)
         self.assertNotIn("dangerously-bypass", " ".join(command))
+
+    def test_judge_output_schema_declares_every_criterion(self):
+        case = make_case(
+            (Criterion("quality", 100, True, "judge", "States the endpoint."),)
+        )
+        schema = judge_output_schema(case)
+        criteria = schema["properties"]["criteria"]
+        self.assertEqual(set(criteria["properties"]), {"quality"})
+        self.assertEqual(criteria["required"], ["quality"])
+        decision = criteria["properties"]["quality"]
+        self.assertEqual(decision["required"], ["A", "B", "evidence"])
+        self.assertFalse(decision["additionalProperties"])
 
 
 if __name__ == "__main__":

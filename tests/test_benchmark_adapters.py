@@ -10,6 +10,7 @@ import unittest
 from benchmarks.nerdbench.adapters import get_adapter
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import (
+    _smoke_specs,
     _changed_files,
     _timeout_text,
     create_run_directory,
@@ -123,6 +124,14 @@ class RunnerTests(unittest.TestCase):
             [item.run_id for item in first],
             [item.run_id for item in second],
         )
+
+    def test_smoke_uses_noninteractive_execute_blocker_case(self):
+        config = load_config(CONFIG)
+        runs = schedule_runs(config, Path("/tmp/smoke"))
+        smoke = _smoke_specs(runs)
+        execute = [item for item in smoke if item.run_id.startswith("execute--")]
+        self.assertEqual(len(execute), 2)
+        self.assertEqual({item.case_id for item in execute}, {"execute-blocker"})
 
     def test_existing_run_directory_is_never_overwritten(self):
         with tempfile.TemporaryDirectory() as directory:
