@@ -26,7 +26,11 @@ EVENTS = ROOT / "tests" / "fixtures" / "benchmark-events"
 CONFIG = ROOT / "benchmarks" / "config.json"
 
 
-def spec(agent: str, model: str | None = None) -> RunSpec:
+def spec(
+    agent: str,
+    model: str | None = None,
+    reasoning_effort: str | None = None,
+) -> RunSpec:
     return RunSpec(
         run_id="case-agent-1-condition",
         case_id="case",
@@ -35,6 +39,8 @@ def spec(agent: str, model: str | None = None) -> RunSpec:
         model=model,
         repetition=1,
         workspace=Path("/tmp/benchmark workspace"),
+        target_id="test-target",
+        reasoning_effort=reasoning_effort,
     )
 
 
@@ -48,6 +54,15 @@ class AdapterCommandTests(unittest.TestCase):
         self.assertIn("/tmp/benchmark workspace", command)
         self.assertEqual(command[-1], "prompt; echo bad")
 
+    def test_codex_command_pins_reasoning_effort(self):
+        command = get_adapter("codex").build_command(
+            spec("codex", "gpt-5.6-sol", "xhigh"),
+            "prompt",
+        )
+        self.assertIn("gpt-5.6-sol", command)
+        self.assertIn("-c", command)
+        self.assertIn('model_reasoning_effort="xhigh"', command)
+
     def test_claude_command_is_noninteractive_and_persistent_state_is_disabled(self):
         command = get_adapter("claude").build_command(
             spec("claude", "claude-test"), "prompt"
@@ -56,6 +71,14 @@ class AdapterCommandTests(unittest.TestCase):
         self.assertIn("--no-session-persistence", command)
         self.assertIn("acceptEdits", command)
         self.assertIn("claude-test", command)
+
+    def test_claude_command_pins_reasoning_effort(self):
+        command = get_adapter("claude").build_command(
+            spec("claude", "claude-fable-5", "xhigh"),
+            "prompt",
+        )
+        effort = command.index("--effort")
+        self.assertEqual(command[effort + 1], "xhigh")
 
     def test_cursor_command_uses_workspace_and_sandbox(self):
         command = get_adapter("cursor").build_command(spec("cursor"), "prompt")
@@ -125,6 +148,13 @@ class RunnerTests(unittest.TestCase):
             [item.run_id for item in second],
         )
 
+    def test_pair_identity_includes_target_and_effort(self):
+        base = spec("codex", "gpt-5.6-sol", "xhigh")
+        other = replace(base, target_id="other-target")
+        self.assertNotEqual(pair_key(base), pair_key(other))
+        self.assertIn("test-target", pair_key(base))
+        self.assertIn("xhigh", pair_key(base))
+
     def test_smoke_uses_noninteractive_execute_blocker_case(self):
         config = load_config(CONFIG)
         runs = schedule_runs(config, Path("/tmp/smoke"))
@@ -169,7 +199,10 @@ class RunnerTests(unittest.TestCase):
         )
         self.assertEqual(config["parallelism"], 1)
         self.assertEqual(config["judge"]["agent"], "codex")
+        self.assertEqual(config["judge"]["model"], "gpt-5.6-terra")
+        self.assertEqual(config["judge"]["reasoning_effort"], "xhigh")
         self.assertGreater(config["judge"]["timeout_seconds"], 0)
+        self.assertEqual(config["target"]["id"], "cross-agent-default")
 
     def test_condition_prompt_explicitly_invokes_skill_without_escape(self):
         self.assertEqual(

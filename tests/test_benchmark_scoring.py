@@ -149,6 +149,7 @@ class ScoringTests(unittest.TestCase):
             Path("/tmp/schema.json"),
             "judge this",
             model="test-model",
+            reasoning_effort="xhigh",
         )
         self.assertEqual(command[0:2], ["codex", "exec"])
         for value in (
@@ -160,6 +161,7 @@ class ScoringTests(unittest.TestCase):
             "/tmp/schema.json",
             "--model",
             "test-model",
+            'model_reasoning_effort="xhigh"',
         ):
             self.assertIn(value, command)
         self.assertNotIn("dangerously-bypass", " ".join(command))
