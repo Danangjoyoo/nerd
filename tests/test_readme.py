@@ -55,15 +55,41 @@ def _graph_rows(body: str, heading: str, next_heading: str):
 
 
 class ReadmeContractTests(unittest.TestCase):
+    def test_header_has_nerd_banner_and_skills_badge(self):
+        body = README.read_text(encoding="utf-8")
+        expected_header = (
+            "# Nerd\n\n"
+            "![Nerd mascot banner](assets/nerd-banner.png)\n\n"
+            "[![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/"
+            "badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml) "
+            "[![skills.sh](https://skills.sh/b/danangjoyoo/nerd)]"
+            "(https://skills.sh/danangjoyoo/nerd)\n"
+        )
+        self.assertTrue(body.startswith(expected_header))
+
+        banner = ROOT / "assets" / "nerd-banner.png"
+        self.assertTrue(banner.is_file())
+        self.assertEqual(banner.read_bytes()[:8], b"\x89PNG\r\n\x1a\n")
+
     def test_install_command_is_current(self):
         body = README.read_text(encoding="utf-8")
-        for agent in ("claude-code", "codex", "cursor"):
+        commands = {
+            "Codex": "codex",
+            "Claude Code": "claude-code",
+            "Cursor": "cursor",
+        }
+        for label, agent in commands.items():
             command = (
-                "npx skills add danangjoyoo/nerd --global "
-                f"--agent {agent} --skill '*' --yes"
+                f"# {label}\n"
+                "npx skills add danangjoyoo/nerd \\\n"
+                "  --global \\\n"
+                f"  --agent {agent} \\\n"
+                "  --skill '*' \\\n"
+                "  --yes"
             )
             self.assertIn(command, body)
         self.assertIn("./scripts/install.sh {claude|codex|cursor|all}", body)
+        self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
 
     def test_every_public_skill_is_listed_once(self):
@@ -162,7 +188,7 @@ class ReadmeContractTests(unittest.TestCase):
     def test_readme_remains_sharp(self):
         self.assertLessEqual(
             len(README.read_text(encoding="utf-8").splitlines()),
-            160,
+            170,
         )
 
     def test_ci_badge_is_current(self):

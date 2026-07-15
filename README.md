@@ -1,15 +1,34 @@
 # Nerd
 
-[![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml)
+![Nerd mascot banner](assets/nerd-banner.png)
+
+[![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml) [![skills.sh](https://skills.sh/b/danangjoyoo/nerd)](https://skills.sh/danangjoyoo/nerd)
 
 Focused operating skills for coding agents: think clearly, diagnose before fixing, audit with evidence, build against repository reality, and stay silent when narration adds no value.
 
 ## Install
 
 ```bash
-npx skills add danangjoyoo/nerd --global --agent claude-code --skill '*' --yes  # Claude Code
-npx skills add danangjoyoo/nerd --global --agent codex --skill '*' --yes        # Codex
-npx skills add danangjoyoo/nerd --global --agent cursor --skill '*' --yes       # Cursor
+# Codex
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent codex \
+  --skill '*' \
+  --yes
+
+# Claude Code
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent claude-code \
+  --skill '*' \
+  --yes
+
+# Cursor
+npx skills add danangjoyoo/nerd \
+  --global \
+  --agent cursor \
+  --skill '*' \
+  --yes
 ```
 
 Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}`.
