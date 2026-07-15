@@ -214,7 +214,6 @@ class ExecuteContractTests(unittest.TestCase):
                 "<INHERITANCE>",
                 "<FAST-TRACK>",
                 "nerd-smart",
-                "Repository patterns? This optional scan improves convention matching but adds latency. Run it? (yes/no)",
                 "Non-code",
                 "Code",
                 "Wait for the answer unless the user already opted in or out",
