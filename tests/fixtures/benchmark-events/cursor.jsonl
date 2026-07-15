@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"content":[{"type":"text","text":"Cursor final answer"}]},"usage":{"output_tokens":27},"model":"cursor-test"}
+{"type":"result","status":"completed"}

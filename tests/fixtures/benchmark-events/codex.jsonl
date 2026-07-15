@@ -1,0 +1,3 @@
+{"type":"thread.started","thread_id":"safe-thread"}
+{"type":"item.completed","item":{"type":"agent_message","text":"Codex final answer"}}
+{"type":"turn.completed","usage":{"input_tokens":100,"output_tokens":42},"model":"gpt-test","API_KEY":"must-redact"}
