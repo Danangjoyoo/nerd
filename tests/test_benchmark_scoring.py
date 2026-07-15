@@ -10,6 +10,8 @@ from benchmarks.nerdbench.models import (
 )
 from benchmarks.nerdbench.scorer import (
     blind_pair,
+    build_judge_command,
+    build_judge_prompt,
     score_run,
     validate_judge_result,
 )
@@ -122,6 +124,44 @@ class ScoringTests(unittest.TestCase):
                 {"criteria": {"quality": {"A": "yes", "B": True}}},
                 ("quality",),
             )
+
+    def test_judge_prompt_is_blinded_and_complete(self):
+        case = make_case(
+            (Criterion("quality", 100, True, "judge", "States the endpoint."),)
+        )
+        body = build_judge_prompt(case, {"A": "first", "B": "second"})
+        for expected in (
+            "prompt",
+            "document",
+            "quality",
+            "States the endpoint.",
+            '"A": "first"',
+            '"B": "second"',
+        ):
+            self.assertIn(expected, body)
+        self.assertNotIn("nerd-smart", body)
+        self.assertNotIn("superpowers", body.casefold())
+        self.assertNotIn("latency", body.casefold())
+
+    def test_judge_command_is_noninteractive_and_schema_bound(self):
+        command = build_judge_command(
+            Path("/tmp/schema.json"),
+            "judge this",
+            model="test-model",
+        )
+        self.assertEqual(command[0:2], ["codex", "exec"])
+        for value in (
+            "--ephemeral",
+            "--json",
+            "--sandbox",
+            "read-only",
+            "--output-schema",
+            "/tmp/schema.json",
+            "--model",
+            "test-model",
+        ):
+            self.assertIn(value, command)
+        self.assertNotIn("dangerously-bypass", " ".join(command))
 
 
 if __name__ == "__main__":
