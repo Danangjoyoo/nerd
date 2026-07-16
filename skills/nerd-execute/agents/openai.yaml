@@ -1,4 +1,4 @@
 interface:
   display_name: "Nerd Execute"
-  short_description: "Lean implementation with optional pattern scan"
-  default_prompt: "Use $nerd-execute to implement this confirmed outcome with a lean, test-first workflow and fresh verification."
+  short_description: "Fast execution from a resolved focus record"
+  default_prompt: "Use $nerd-execute to implement this confirmed outcome from its resolved Focus Record with proportionate scope, TODOs, and verification."

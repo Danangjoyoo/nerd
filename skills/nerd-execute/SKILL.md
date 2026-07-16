@@ -6,11 +6,13 @@ description: Use when implementing an approved written plan or a small confirmed
 # Nerd Execute
 
 <INHERITANCE>
-**REQUIRED BASE SKILL:** Use `nerd-smart` first and reuse its approved Focus Record.
+**REQUIRED BASE SKILL:** Use `nerd-smart` first and consume its resolved Focus Record.
+
+A Focus Record is resolved only when all four fields are explicit, the endpoint is **Execute**, and no material ambiguity remains. If it is missing or unresolved, return to Nerd Smart and resolve one material question before continuing. Never mutate before the record is resolved.
 </INHERITANCE>
 
 <FAST-TRACK>
-This lean workflow includes the essential plan-execution, test-first, recovery, and completion-evidence rules. Use it without loading separate implementation workflows unless the user explicitly invokes one or an unusual edge case requires a fuller workflow. Execute inline without subagents.
+The resolved Focus Record is the only universal gate. A current plan, narrower execution scope, TODOs, and verification are conditional. Use this workflow without loading separate implementation workflows unless the user explicitly invokes one or an unusual edge case requires a fuller workflow. Execute inline without subagents.
 </FAST-TRACK>
 
 ## Rules
@@ -19,7 +21,7 @@ Use a mapping only when the task's boundary or proof is unclear. Pick the single
 
 ## Generic Mappings
 
-| # | Signal | Contract focus | Targeted proof |
+| # | Signal | Outcome focus | Targeted proof |
 | --- | --- | --- | --- |
 | **1** | New behavior | Smallest observable behavior and surface | Focused test fails for the missing behavior, then passes. |
 | **2** | Bug fix | Reproduced symptom and smallest correction | Regression test demonstrates red then green. |
@@ -32,24 +34,23 @@ Use a mapping only when the task's boundary or proof is unclear. Pick the single
 | **9** | Performance or concurrency | Measurable threshold or invariant | Repeatable benchmark or race test comparing baseline and changed behavior. |
 | **10** | Documentation or static artifact | Exact content or rendered artifact | Focused lint, render, content, or link check. |
 
-## Gate Repository Pattern Context
+## Execution Discipline
 
-Classify the work before repository exploration:
+Use this template internally. Do not display or narrate a conditional item unless it needs user confirmation.
 
-- **Non-code:** Skip repository-pattern context entirely and do not ask about it.
-- **Code:** Before searching repository conventions, configuration, analogues, architecture, or test patterns. Search for current pattern first, then confirm to follow the existing pattern or not.
-
-If approved, inspect only relevant authority/configuration, the nearest implementation, and the nearest test. If declined, inspect only named target files, mandatory repository instructions, and directly required tests or dependencies. Never create a repository-pattern artifact unless requested.
+| Item | Requirement | Rule |
+| --- | --- | --- |
+| **Focus Record** | Mandatory | Read and obey the resolved intention, endpoint, scope, and role. Never infer around an unresolved field. |
+| **Current plan** | Conditional | If the user created or approved a plan in the current context, read it once and execute its remaining work. Raise only contradictions with the Focus Record, missing prerequisites, or blockers. Otherwise, do not search for, request, or create a plan. |
+| **Execution scope** | Conditional | Inherit the Focus Record scope. Define a narrower file or system boundary only when the goal or risk requires it. |
+| **TODOs** | Conditional | Write two to five TODOs for multi-step, dependent, or risky work. For a small direct change, execute without a checklist. |
+| **Verification** | Conditional | Run the smallest relevant check when behavior, risk, or a completion claim needs proof. When no proportionate check is available, skip it and report **Not verified**. |
 
 ## Execute Directly
 
-Make the first user-facing message only the coding gate or, for fully specified non-code work, the contract. Combine any required skill-use announcement into that message instead of sending setup narration. If essential input is missing, ask one focused question before forming the contract.
+Begin immediately once the Focus Record is resolved. When a conditional item needs confirmation, ask one question using Nerd Smart's Confirmation Style; otherwise add no gate or setup ceremony.
 
-After the gate and any essential clarification, emit one line:
-
-`Contract: [outcome] | Files: [boundary] | Verify: [targeted check]`
-
-Track a short checklist internally. Use two to five internal items only for multi-step work; do not create milestones, checkpoints, gravity records, or routine status templates. Ask one focused question only when ambiguity materially changes the result.
+Inspect repository context only when it can change the implementation or proof. Prefer mandatory repository instructions, relevant authority or configuration, the nearest implementation, and the nearest test. Ask only when inspected evidence exposes a material conflict.
 
 For behavior changes, write or update one focused test, run it to confirm the expected failure, implement the minimum change, then rerun it. For non-behavior changes, edit directly and run the smallest relevant validation. Run a pre-edit baseline only when a quick existing check would distinguish pre-existing failure from the requested change.
 
@@ -57,11 +58,11 @@ Preserve user-authored and unrelated changes. Keep tests beside the behavior the
 
 ## Finish Briefly
 
-Run fresh verification scaled to the changed surface. Do not claim success without its output. Report only:
+If Verification applies, run the selected check fresh. Do not claim a check passed without fresh output. Report only:
 
 - **Done:** [completed outcome]
 - **Verified by:** [command and result]
 
-Add **Not verified** only when an evidence gap remains. Do not echo diffs or narrate routine tool use unless requested.
+Use **Not verified** instead of **Verified by** when verification was skipped or remains unavailable. Do not echo diffs or narrate routine tool use unless requested.
 
 After changing Nerd Execute, run `python3 scripts/validate_skills.py`.

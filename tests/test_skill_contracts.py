@@ -73,6 +73,63 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
+    def test_centralizes_behavior_in_exactly_ten_endpoint_mappings(self):
+        body = skill_body("nerd-smart")
+        mapping = body.split("## Endpoint Mapping", 1)[1].split(
+            "## Focus First", 1
+        )[0]
+        rows = re.findall(r"^\| \*\*[A-Za-z]+\*\* \|", mapping, re.MULTILINE)
+
+        self.assertEqual(len(rows), 10)
+        assert_terms(
+            self,
+            mapping,
+            (
+                "Discuss",
+                "Ideate",
+                "Explore",
+                "Diagnose",
+                "Review",
+                "Specify",
+                "Document",
+                "Plan",
+                "Execute",
+                "Monitor",
+                "The endpoint controls the next action and stopping boundary",
+                "does not authorize specialty routing",
+                "one brief self-review",
+            ),
+        )
+        self.assertIn(
+            "**Expectation:** [One endpoint from Endpoint Mapping]",
+            body,
+        )
+        stop_rule = body.split("## Stop at the Endpoint", 1)[1]
+        self.assertIn("Follow the confirmed row in Endpoint Mapping", stop_rule)
+        self.assertNotIn("- Discuss or ideate", stop_rule)
+
+    def test_confirmation_style_balances_question_cost_and_risk(self):
+        body = skill_body("nerd-smart")
+        confirmation = body.split("## Confirmation Style", 1)[1].split(
+            "## Route Only When Explicitly Authorized", 1
+        )[0]
+
+        assert_terms(
+            self,
+            confirmation,
+            (
+                "Ask one question at a time",
+                "two or three mutually exclusive options",
+                "recommended option first",
+                "Do not ask about low-impact details",
+                "Do ask when the answer materially changes",
+            ),
+        )
+        focus = body.split("## Focus First", 1)[1].split(
+            "## Confirmation Style", 1
+        )[0]
+        self.assertIn("Follow Confirmation Style", focus)
+
     def test_uses_internal_brainstorming_reference(self):
         body = skill_body("nerd-smart")
         self.assertIn("references/brainstorming.md", body)
@@ -91,9 +148,70 @@ class SurgeryContractTests(unittest.TestCase):
                 "**Uncertainty Check**",
                 "**Source Request**",
                 "**Verification Experiment**",
+                "**Architecture Check**",
                 "Confirmed",
                 "Probable",
                 "Unknown",
+            ),
+        )
+
+    def test_requires_resolved_focus_and_runs_one_experiment_loop(self):
+        body = skill_body("nerd-surgery")
+        discipline = body.split("## Surgery Discipline", 1)[1].split(
+            "## Diagnostic Contract", 1
+        )[0]
+        rows = re.findall(
+            r"^\| \*\*(Focus|Observe|Map|Experiment|Analyze|Iterate)\*\* \|",
+            discipline,
+            re.MULTILINE,
+        )
+
+        self.assertEqual(len(rows), 6)
+        assert_terms(
+            self,
+            body,
+            (
+                "resolved Focus Record",
+                "all four fields are explicit",
+                "endpoint is **Diagnose** or **Execute**",
+                "Do not investigate or repair before the record is resolved",
+            ),
+        )
+        assert_terms(
+            self,
+            discipline,
+            (
+                "base diagnostic frame",
+                "hypothesis, not evidence",
+                "user inputs and symptom",
+                "Check Generic Diagnostic Mappings first",
+                "smallest discriminating experiment",
+                "Compare predicted and observed signals",
+                "Supported**, **Rejected**, or **Inconclusive",
+                "repeat from Observe",
+                "one short, sharp question",
+                "two or three mutually exclusive options",
+                "recommended option first",
+            ),
+        )
+
+    def test_limits_failed_corrections_and_escalates_architecture(self):
+        body = skill_body("nerd-surgery")
+        correction = body.split("## Correction Discipline", 1)[1].split(
+            "## Records", 1
+        )[0]
+
+        assert_terms(
+            self,
+            correction,
+            (
+                "Treat every correction as one hypothesis test",
+                "one causal variable",
+                "same reproducer",
+                "never stack speculative fixes",
+                "After the first failed correction",
+                "After the second failed correction",
+                "Do not attempt a third correction",
             ),
         )
 
@@ -115,7 +233,7 @@ class SurgeryContractTests(unittest.TestCase):
     def test_uses_exactly_ten_optional_generic_diagnostic_mappings(self):
         body = skill_body("nerd-surgery")
         mapping = body.split("## Generic Diagnostic Mappings", 1)[1].split(
-            "## Diagnostic Contract", 1
+            "## Surgery Discipline", 1
         )[0]
         rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
 
@@ -136,7 +254,7 @@ class SurgeryContractTests(unittest.TestCase):
                 "Visual or UI mismatch",
             ),
         )
-        self.assertIn("Use a mapping only when", body)
+        self.assertIn("Check Generic Diagnostic Mappings first", body)
         self.assertIn("Mappings select evidence; they never establish cause", body)
         self.assertNotIn("lookup at `## Generic Diagnostic Mapping` first", body)
 
@@ -205,40 +323,64 @@ class PatrolContractTests(unittest.TestCase):
 
 
 class ExecuteContractTests(unittest.TestCase):
-    # def test_uses_fast_track_and_optional_repository_pattern_gate(self):
-    #     body = skill_body("nerd-execute")
-    #     assert_terms(
-    #         self,
-    #         body,
-    #         (
-    #             "<INHERITANCE>",
-    #             "<FAST-TRACK>",
-    #             "nerd-smart",
-    #             "Non-code",
-    #             "Code",
-    #             "Wait for the answer unless the user already opted in or out",
-    #             "If approved",
-    #             "If declined",
-    #             "Never create a repository-pattern artifact",
-    #             "Execute inline without subagents",
-    #         ),
-    #     )
+    def test_requires_resolved_focus_and_uses_conditional_discipline(self):
+        body = skill_body("nerd-execute")
+        discipline = body.split("## Execution Discipline", 1)[1].split(
+            "## Execute Directly", 1
+        )[0]
+        rows = re.findall(
+            r"^\| \*\*(Focus Record|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            discipline,
+            re.MULTILINE,
+        )
 
-    def test_executes_with_minimal_test_recovery_and_completion_contract(self):
+        self.assertEqual(len(rows), 5)
+        assert_terms(
+            self,
+            body,
+            (
+                "<INHERITANCE>",
+                "<FAST-TRACK>",
+                "resolved Focus Record",
+                "all four fields are explicit",
+                "endpoint is **Execute**",
+                "no material ambiguity remains",
+                "resolve one material question before continuing",
+                "Use this template internally",
+                "Execute inline without subagents",
+            ),
+        )
+        assert_terms(
+            self,
+            discipline,
+            (
+                "| **Focus Record** | Mandatory |",
+                "| **Current plan** | Conditional |",
+                "user created or approved a plan in the current context",
+                "do not search for, request, or create a plan",
+                "| **Execution scope** | Conditional |",
+                "| **TODOs** | Conditional |",
+                "two to five TODOs",
+                "| **Verification** | Conditional |",
+                "smallest relevant check",
+                "**Not verified**",
+            ),
+        )
+        self.assertNotIn("Contract: [outcome]", body)
+        self.assertNotIn("## Gate Repository Pattern Context", body)
+
+    def test_executes_with_minimal_test_recovery_and_completion_evidence(self):
         body = skill_body("nerd-execute")
         assert_terms(
             self,
             body,
             (
-                "Contract: [outcome] | Files: [boundary] | Verify: [targeted check]",
-                "two to five internal items",
-                "do not create milestones, checkpoints, gravity records",
                 "write or update one focused test",
                 "confirm the expected failure",
                 "implement the minimum change",
                 "pre-edit baseline only when",
                 "two evidence-driven correction attempts",
-                "Do not claim success without its output",
+                "Do not claim a check passed without fresh output",
                 "**Done:**",
                 "**Verified by:**",
                 "**Not verified**",
@@ -248,7 +390,7 @@ class ExecuteContractTests(unittest.TestCase):
     def test_uses_exactly_ten_optional_generic_proof_mappings(self):
         body = skill_body("nerd-execute")
         mapping = body.split("## Generic Mappings", 1)[1].split(
-            "## Gate Repository Pattern Context", 1
+            "## Execution Discipline", 1
         )[0]
         rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
 
@@ -290,9 +432,13 @@ class ExecuteContractTests(unittest.TestCase):
 
     def test_metadata_describes_the_fast_track_without_mandating_patterns(self):
         metadata = (SKILLS / "nerd-execute" / "agents" / "openai.yaml").read_text()
-        self.assertIn('short_description: "Lean implementation with optional pattern scan"', metadata)
+        self.assertIn(
+            'short_description: "Fast execution from a resolved focus record"',
+            metadata,
+        )
         self.assertIn("$nerd-execute", metadata)
-        self.assertIn("test-first workflow and fresh verification", metadata)
+        self.assertIn("resolved Focus Record", metadata)
+        self.assertIn("proportionate scope, TODOs, and verification", metadata)
         self.assertNotIn("against repository patterns", metadata)
 
 
