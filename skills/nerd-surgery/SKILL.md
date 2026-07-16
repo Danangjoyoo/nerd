@@ -7,11 +7,13 @@ description: Use when code, integrations, automation, infrastructure, or runtime
 
 ## Inheritance
 
-Use `nerd-smart` first and reuse its approved Focus Record. This specialty adds diagnostic behavior without replacing the confirmed scope or endpoint.
+Use `nerd-smart` first and consume its resolved Focus Record. A Focus Record is resolved only when all four fields are explicit, the endpoint is **Diagnose** or **Execute**, and no material ambiguity remains. Do not investigate or repair before the record is resolved.
+
+Use the Focus Record as the base diagnostic frame. Treat any user-suggested cause as a hypothesis, not evidence. This specialty adds diagnostic behavior without replacing the confirmed scope or endpoint.
 
 Read [references/systematic-debugging.md](references/systematic-debugging.md) before diagnosis. At an execute endpoint, also read [references/test-first-repair.md](references/test-first-repair.md) before mutation and [references/verification.md](references/verification.md) before any success claim.
 
-Use a mapping only when existing evidence does not already identify the next discriminating check. Pick the single closest row and do not combine rows. Mappings select evidence; they never establish cause.
+Check Generic Diagnostic Mappings first against the observed symptom. Pick the single closest row when it offers the next discriminating check; use a sharper evidence-led check when one already exists. Do not combine rows. Mappings select evidence; they never establish cause.
 
 ## Generic Diagnostic Mappings
 
@@ -27,6 +29,21 @@ Use a mapping only when existing evidence does not already identify the next dis
 | **8** | Build, compile, or type failure | Start from the first causal diagnostic with the exact toolchain and configuration. | The minimal target passes with the same toolchain. |
 | **9** | Environment or configuration mismatch | Diff effective runtime, configuration, and dependencies between working and failing setups. | Aligning one differing factor toggles the failure. |
 | **10** | Visual or UI mismatch | Capture screenshot, viewport, DOM/state, events, and relevant network activity. | The interaction reproduces before and visual or behavior proof passes after. |
+
+## Surgery Discipline
+
+Use this loop internally. Update the Case Record only when evidence or the active hypothesis changes.
+
+| Step | Rule |
+| --- | --- |
+| **Focus** | Consume the resolved Focus Record as the base diagnostic frame. Treat a user-suggested cause as a hypothesis, not evidence. |
+| **Observe** | Capture the user inputs and symptom, including expected versus observed behavior. Reproduce it when possible; otherwise preserve the evidence gap. |
+| **Map** | Check Generic Diagnostic Mappings first and select at most one row to sharpen the next check. |
+| **Experiment** | State one active hypothesis and design the smallest discriminating experiment that changes one variable. |
+| **Analyze** | Compare predicted and observed signals. Classify the result as **Supported**, **Rejected**, or **Inconclusive**. |
+| **Iterate** | When rejected or inconclusive, update the evidence and repeat from Observe. When supported, seek direct causal confirmation before prescribing change. |
+
+When user confirmation is required, follow Nerd Smart's Confirmation Style: ask one short, sharp question; offer two or three mutually exclusive options; put the recommended option first with one brief reason. Ask only when the answer changes the experiment, authorization, or confirmed scope.
 
 ## Diagnostic Contract
 
@@ -64,6 +81,14 @@ Before repair, show the Verification Experiment and run it when the environment 
 
 Prefer local execution. Remote writes, deployment, production access, SSH/tunneling, or database assertions require concise approval. If proof is unavailable, state the evidence gap and do not claim resolution.
 
+## Correction Discipline
+
+At an execute endpoint, corrections remain experiments. Treat every correction as one hypothesis test. Change one causal variable and repeat the same reproducer; never stack speculative fixes.
+
+- After the first failed correction, record what it disproved and return to Surgery Discipline.
+- After the second failed correction, stop changing code and complete an Architecture Check.
+- Do not attempt a third correction until the user approves the revised direction.
+
 ## Records
 
 **Case Record**
@@ -97,5 +122,11 @@ Prefer local execution. Remote writes, deployment, production access, SSH/tunnel
 - **Signals:** [Inputs, outputs, logs, and assertions]
 - **Expected:** [Failure before correction and success after]
 - **Access:** [Ready, approval required, or unavailable]
+
+**Architecture Check**
+- **Failed corrections:** [Two attempted causes]
+- **New evidence:** [What the failures revealed]
+- **Suspected boundary:** [Component, dependency, or architectural assumption]
+- **Recommendation:** [Continue diagnosis or revise architecture]
 
 Never describe an attempt as resolved without fresh proof.
