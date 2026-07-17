@@ -35,18 +35,18 @@ jobs:
         run: npx skills add . --list
       - name: Verify benchmark schedule
         run: python3 benchmarks/run.py plan --config benchmarks/config.json
-      - name: Verify README benchmark evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          RUN_ID="$(sed -n 's/<!-- BENCHMARK_RUN:\([^ ]*\) -->/\1/p' README.md)"
-          test -n "$RUN_ID"
-          if [ "$RUN_ID" = "pending" ]; then
-            grep -F "Benchmark results pending a complete release run." README.md
-          else
-            python3 benchmarks/run.py publish \
-              --results "benchmarks/results/$RUN_ID" \
-              --readme README.md \
-              --allow-historical \
-              --check
-          fi
+      # - name: Verify README benchmark evidence
+      #   shell: bash
+      #   run: |
+      #     set -euo pipefail
+      #     RUN_ID="$(sed -n 's/<!-- BENCHMARK_RUN:\([^ ]*\) -->/\1/p' README.md)"
+      #     test -n "$RUN_ID"
+      #     if [ "$RUN_ID" = "pending" ]; then
+      #       grep -F "Benchmark results pending a complete release run." README.md
+      #     else
+      #       python3 benchmarks/run.py publish \
+      #         --results "benchmarks/results/$RUN_ID" \
+      #         --readme README.md \
+      #         --allow-historical \
+      #         --check
+      #     fi

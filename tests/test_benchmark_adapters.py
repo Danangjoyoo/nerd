@@ -120,11 +120,11 @@ class AdapterParseTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
-    def test_release_schedule_has_405_runs(self):
+    def test_release_schedule_has_513_runs(self):
         config = load_config(CONFIG)
         runs = schedule_runs(config, ROOT / "benchmarks" / "work" / "test")
-        self.assertEqual(len(runs), 405)
-        self.assertEqual(len({run.run_id for run in runs}), 405)
+        self.assertEqual(len(runs), 513)
+        self.assertEqual(len({run.run_id for run in runs}), 513)
 
     def test_every_comparative_run_has_matched_opposite_arm(self):
         config = load_config(CONFIG)
@@ -134,7 +134,7 @@ class RunnerTests(unittest.TestCase):
             if run.condition == "nerd-patrol":
                 continue
             groups.setdefault(pair_key(run), []).append(run)
-        self.assertEqual(len(groups), 180)
+        self.assertEqual(len(groups), 234)
         self.assertTrue(all(len(group) == 2 for group in groups.values()))
         for group in groups.values():
             self.assertEqual(len({item.condition for item in group}), 2)
@@ -210,7 +210,17 @@ class RunnerTests(unittest.TestCase):
             "Use $nerd-smart.\n\nDo the task.",
         )
 
-    def test_plan_cli_lists_405_without_creating_results(self):
+    def test_condition_prompt_composes_fast_with_execute(self):
+        self.assertEqual(
+            condition_prompt("nerd-fast", "Do the task."),
+            "Use $nerd-execute and $nerd-fast.\n\nDo the task.",
+        )
+        self.assertEqual(
+            condition_prompt("fast-baseline", "Do the task."),
+            "Use $nerd-execute.\n\nDo the task.",
+        )
+
+    def test_plan_cli_lists_513_without_creating_results(self):
         latest = ROOT / "benchmarks" / "results" / "LATEST"
         before = latest.read_text() if latest.exists() else None
         result = subprocess.run(
@@ -226,7 +236,7 @@ class RunnerTests(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("405 planned agent runs", result.stdout)
+        self.assertIn("513 planned agent runs", result.stdout)
         after = latest.read_text() if latest.exists() else None
         self.assertEqual(after, before)
 

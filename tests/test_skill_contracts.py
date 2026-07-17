@@ -42,7 +42,7 @@ class SmartContractTests(unittest.TestCase):
             body,
         )
 
-    def test_explicit_nerd_routing_selects_one_specialty_and_silent_modifier(self):
+    def test_explicit_nerd_routing_selects_one_specialty_and_global_modifiers(self):
         body = skill_body("nerd-smart")
         assert_terms(
             self,
@@ -52,6 +52,7 @@ class SmartContractTests(unittest.TestCase):
                 "nerd-patrol",
                 "nerd-execute",
                 "nerd-silent",
+                "nerd-fast",
                 "exactly one primary specialty",
                 "modifier",
             ),
@@ -474,6 +475,240 @@ class SilentContractTests(unittest.TestCase):
                 "normal complete final result",
                 "correctness",
                 "verification",
+            ),
+        )
+
+
+class FastContractTests(unittest.TestCase):
+    def test_is_an_explicitly_composable_latency_modifier_with_accuracy_floor(self):
+        body = skill_body("nerd-fast")
+        metadata = (SKILLS / "nerd-fast" / "agents" / "openai.yaml").read_text()
+        assert_terms(
+            self,
+            body,
+            (
+                "global modifier",
+                "never a primary specialty",
+                "never replaces or restarts the active workflow",
+                "nerd-silent",
+                "only when the user explicitly invokes both modifiers",
+                "Never activate, infer, or auto-compose",
+                "correctness",
+                "authorization",
+                "safety",
+                "proof",
+                "no hard total tool limit",
+            ),
+        )
+        self.assertNotIn(
+            "when both operational latency and presentation cost matter",
+            body,
+        )
+        self.assertIn('$nerd-fast', metadata)
+        self.assertIn('latency', metadata.casefold())
+        self.assertNotIn("superpowers:", body.casefold())
+
+    def test_uses_exactly_ten_ordered_gates(self):
+        body = skill_body("nerd-fast")
+        gates = body.split("## Gates", 1)[1].split("## Verification-Cost Gate", 1)[0]
+        rows = re.findall(
+            r"^\| \*\*(Inheritance|Reuse|Freshness|Need|Batch|Dependency|Escalation|Recovery|Verification cost|Stop)\*\* \|",
+            gates,
+            re.MULTILINE,
+        )
+        self.assertEqual(
+            rows,
+            [
+                "Inheritance",
+                "Reuse",
+                "Freshness",
+                "Need",
+                "Batch",
+                "Dependency",
+                "Escalation",
+                "Recovery",
+                "Verification cost",
+                "Stop",
+            ],
+        )
+
+    def test_gives_concrete_batch_commands_without_platform_coupling(self):
+        body = skill_body("nerd-fast")
+        self.assertIn("## Concrete Command Batching", body)
+        batching = body.split("## Concrete Command Batching", 1)[1].split(
+            "## Verification-Cost Gate", 1
+        )[0]
+        assert_terms(
+            self,
+            batching,
+            (
+                "sed -n '1,160p' src/a.py; sed -n '40,120p' tests/test_a.py",
+                "rg -n 'timeout|retry' src tests docs",
+                "git status --short; git diff --stat; git diff --check",
+                "python3 -m compileall src && pytest tests/unit -q && python3 scripts/validate.py",
+                "primary-command || compatible-fallback-command",
+                "Use equivalent tools",
+                "Use `;` only when later operations remain useful",
+                "Use `&&` when success is a prerequisite",
+                "Use `||` only for intentional recovery or fallback",
+                "Only chain commands when the execution tool invokes a shell interpreter",
+            ),
+        )
+
+    def test_requires_recoverable_mutation_batches(self):
+        body = skill_body("nerd-fast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Before dispatching a mutation batch",
+                "idempotent, transactional, or safely recoverable",
+                "keep mutations sequential and inspect state between them",
+            ),
+        )
+
+    def test_prefers_targeted_edits_for_localized_mutations(self):
+        body = skill_body("nerd-fast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Prefer a structured patch or targeted-edit primitive",
+                "Do not reproduce unchanged file content",
+                "Rewrite a whole file only when",
+            ),
+        )
+
+    def test_dispatches_routine_authorized_tools_without_optional_preamble(self):
+        body = skill_body("nerd-fast")
+        assert_terms(
+            self,
+            body,
+            (
+                "For routine authorized operations, invoke the tool immediately",
+                "approval, safety, a material decision, or a required progress update",
+                "Silent controls overall narration and final presentation",
+            ),
+        )
+
+    def test_runs_optional_persistent_index_for_complex_cross_file_discovery(self):
+        body = skill_body("nerd-fast")
+        assert_terms(
+            self,
+            body,
+            (
+                "existing fresh file or symbol index",
+                "complex repository analysis, architecture summaries, or cross-file work",
+                "three or more exact-symbol lookups",
+                "run `ensure` once at the start of discovery",
+                "Do not rebuild or refresh an index for a single known target",
+                "confirm source before mutation",
+                "exact-file read or narrow text search",
+                "scripts/symbol_index.py",
+                "Universal Ctags is optional",
+            ),
+        )
+
+    def test_verification_cost_gate_has_five_tiers_and_bounded_escalation(self):
+        body = skill_body("nerd-fast")
+        verification = body.split("## Verification-Cost Gate", 1)[1].split(
+            "## Generic Operational Mappings", 1
+        )[0]
+        tiers = re.findall(r"^\| \*\*(V[0-4])\*\* \|", verification, re.MULTILINE)
+        self.assertEqual(tiers, ["V0", "V1", "V2", "V3", "V4"])
+        assert_terms(
+            self,
+            verification,
+            (
+                "lowest tier that directly supports the exact claim",
+                "Any file mutation, structural refactor, or code addition requires at least V1",
+                "Any behavioral completion claim after mutation requires fresh proof",
+                "Do not run a full suite merely because one exists",
+                "Do not rerun an unchanged passing check",
+                "After two evidence-driven correction attempts",
+                "narrow the claim",
+                "Not verified",
+            ),
+        )
+        triggers = verification.split("### Verification Escalation Triggers", 1)[1]
+        self.assertEqual(len(re.findall(r"^- ", triggers, re.MULTILINE)), 5)
+
+    def test_reuses_incremental_state_across_language_runtimes(self):
+        body = skill_body("nerd-fast")
+        verification = body.split("## Verification-Cost Gate", 1)[1].split(
+            "## Generic Operational Mappings", 1
+        )[0]
+        self.assertIn("### Incremental and Runtime-Aware Verification", verification)
+        assert_terms(
+            self,
+            verification,
+            (
+                "dependency, compiler, transpiler, test, runtime, and build caches",
+                "active daemons and watch processes",
+                "syntax, type, lint, compile, or AST check",
+                "one test method, case, file, package, or affected component",
+                "clearing caches, reinstalling dependencies, rebuilding unaffected targets",
+                "recreating environments, or restarting healthy services",
+                "clean builds, broad suites, or environment resets",
+                "pytest tests/test_api.py::test_login",
+                "vitest run path/to/api.test.ts",
+                "bundle exec rspec spec/api_spec.rb:42",
+                "./gradlew test --tests 'pkg.ApiTest.login'",
+                "go test ./pkg/api -run '^TestLogin$'",
+                "Treat commands, languages, and build systems as illustrations",
+                "narrowest equivalent check supported by the active project",
+            ),
+        )
+
+    def test_uses_exactly_ten_operational_mappings_and_four_waves(self):
+        body = skill_body("nerd-fast")
+        mapping = body.split("## Generic Operational Mappings", 1)[1].split(
+            "## Execution Discipline", 1
+        )[0]
+        rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
+        self.assertEqual(len(rows), 10)
+        assert_terms(
+            self,
+            mapping,
+            (
+                "Current context is sufficient",
+                "Exact file, symbol, command, or target is named",
+                "Local target is unknown",
+                "Multiple targets are independent",
+                "genuine dependencies",
+                "approved plan",
+                "Current or external information",
+                "failure or contradiction",
+                "Verification is expensive",
+                "earlier turn or retry",
+            ),
+        )
+        discipline = body.split("## Execution Discipline", 1)[1]
+        record_fields = re.findall(
+            r"^\| \*\*(Recipe|Known|Unknown|Next batch|Proof|Stop)\*\* \|",
+            discipline,
+            re.MULTILINE,
+        )
+        self.assertEqual(
+            record_fields,
+            ["Recipe", "Known", "Unknown", "Next batch", "Proof", "Stop"],
+        )
+        waves = re.findall(
+            r"^\| \*\*(Reuse|Discover|Execute|Prove)\*\* \|",
+            discipline,
+            re.MULTILINE,
+        )
+        self.assertEqual(waves, ["Reuse", "Discover", "Execute", "Prove"])
+        assert_terms(
+            self,
+            discipline,
+            (
+                "Selected mapping",
+                "Reusable current evidence",
+                "One critical missing fact",
+                "Independent operations to execute together",
+                "Lowest sufficient fresh verification tier",
+                "Exact completion condition",
             ),
         )
 

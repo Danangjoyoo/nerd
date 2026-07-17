@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "id": "fast-raw-repository-summary",
+      "comparison": "fast-raw",
+      "prompt": "Inspect this repository and write an accurate, concise technical summary for a new maintainer. Cover its purpose, every public Nerd skill and how the skills route or compose, the benchmark architecture, installation and validation paths, and the major directories. Support factual claims with repository paths. Do not change files. Return only the summary.",
+      "fixture": "__repository__",
+      "endpoint": "document",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "skills", "weight": 35, "hard_gate": true, "evaluator": "regex", "expected": "(?is)(?=.*nerd-smart)(?=.*nerd-surgery)(?=.*nerd-patrol)(?=.*nerd-execute)(?=.*nerd-silent)(?=.*nerd-fast)"},
+        {"id": "architecture", "weight": 25, "hard_gate": true, "evaluator": "regex", "expected": "(?is)(?=.*skills/)(?=.*benchmarks/)(?=.*tests/)(?=.*scripts/)"},
+        {"id": "agents", "weight": 15, "hard_gate": true, "evaluator": "regex", "expected": "(?is)(?=.*codex)(?=.*claude)(?=.*cursor)"},
+        {"id": "operations", "weight": 15, "hard_gate": true, "evaluator": "regex", "expected": "(?is)(?=.*install)(?=.*(?:validat|verif|test))"},
+        {"id": "clean", "weight": 10, "hard_gate": true, "evaluator": "clean", "expected": "no changed files"}
+      ]
+    }
+  ]
+}

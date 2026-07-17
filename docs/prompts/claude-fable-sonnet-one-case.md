@@ -8,7 +8,7 @@ You are the benchmark operator for `/Users/danangjoyo.agus/work/playground/mensa
 
 Complete only the missing Claude Fable 5 xhigh and Claude Sonnet 5 xhigh pilots. Each target must run exactly one case from each of the four comparisons, one repetition, and two paired arms: 8 candidate runs followed by 4 blinded judge tasks and 8 scores.
 
-This is a direct release run. Do not use the smoke mode or the existing 120-run configs directly.
+This is a direct release run. Do not use the smoke mode or the existing 156-run configs directly.
 
 ## Hard scope
 

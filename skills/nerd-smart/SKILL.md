@@ -71,6 +71,8 @@ Do not combine primary specialties. Handle compound goals sequentially. When exp
 
 `nerd-silent` is a global modifier, never a primary specialty. Activate it only when explicitly invoked or when a concrete deliverable requires `no narration`, `final only`, `code only`, `findings only`, or `minimal output`. Do not infer it from vague words such as `quick`, `fast`, or `simple`.
 
+`nerd-fast` is a global modifier, never a primary specialty. Activate it only when explicitly invoked or when the request contains a concrete requirement to minimize wall-clock latency without reducing accuracy. Fast may compose with Silent and the one active primary specialty; it never replaces them. Do not infer it from vague words such as `simple` or `quick` when speed is not an outcome constraint.
+
 ## Decide and Work
 
 Use the confirmed Endpoint Mapping row as the action contract. Inspect only context likely to change the answer. Recommend one direction and at most two credible alternatives. Use one reasoning pass; use a second only for a material contradiction. Never dispatch subagents or reviewers.

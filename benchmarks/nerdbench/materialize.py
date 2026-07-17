@@ -28,6 +28,10 @@ LOCAL_CONDITIONS = {
     "regular": ("nerd-smart",),
     "nerd-silent": ("nerd-smart", "nerd-silent"),
     "nerd-patrol": ("nerd-smart", "nerd-patrol"),
+    "fast-baseline": ("nerd-smart", "nerd-execute"),
+    "nerd-fast": ("nerd-smart", "nerd-execute", "nerd-fast"),
+    "raw-agent": (),
+    "nerd-fast-only": ("nerd-fast",),
 }
 
 UPSTREAM_CONDITIONS = {
@@ -103,6 +107,24 @@ def fetch_superpowers(cache_dir: Path) -> Path:
 def _copy_fixture(case: BenchmarkCase, destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=False)
     if case.fixture is None:
+        return
+    if case.fixture == "__repository__":
+        tracked = subprocess.run(
+            ["git", "ls-files", "-co", "--exclude-standard", "-z"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        ).stdout
+        for value in tracked.split(b"\0"):
+            if not value:
+                continue
+            relative = Path(value.decode(errors="surrogateescape"))
+            source = ROOT / relative
+            if not source.is_file():
+                continue
+            target = destination / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
         return
     source = ROOT / "benchmarks" / "fixtures" / case.fixture
     if not source.is_dir():

@@ -28,6 +28,7 @@
     "benchmarks/cases/surgery.json",
     "benchmarks/cases/execute.json",
     "benchmarks/cases/silent.json",
+    "benchmarks/cases/fast.json",
     "benchmarks/cases/patrol.json"
   ],
   "conditions": {
@@ -35,6 +36,7 @@
     "surgery": ["nerd-surgery", "superpowers-systematic-debugging"],
     "execute": ["nerd-execute", "superpowers-executing-plans"],
     "silent": ["regular", "nerd-silent"],
+    "fast": ["fast-baseline", "nerd-fast"],
     "patrol": ["nerd-patrol"]
   },
   "repetitions": 3,

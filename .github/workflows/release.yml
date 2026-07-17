@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      EXPECTED_SKILL_COUNT: 5
+      EXPECTED_SKILL_COUNT: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -40,12 +40,12 @@ jobs:
           cat > "$RUNNER_TEMP/nerd-release/assert-skills" <<'SCRIPT'
           #!/usr/bin/env bash
           set -euo pipefail
-          EXPECTED_SKILL_COUNT=5
+          EXPECTED_SKILL_COUNT=6
           INPUT="$(cat)"
           FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-[a-z0-9-]+' | sort -u)"
           COUNT="$(printf '%s\n' "$FOUND" | grep -Ec '^nerd-' || true)"
           test "$COUNT" -eq "$EXPECTED_SKILL_COUNT"
-          test "$FOUND" = $'nerd-execute\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery'
+          test "$FOUND" = $'nerd-execute\nnerd-fast\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery'
           test "$(printf '%s\n' "$FOUND" | wc -l | tr -d ' ')" -eq "$EXPECTED_SKILL_COUNT"
           SCRIPT
           chmod +x "$RUNNER_TEMP/nerd-release/assert-skills"
@@ -58,7 +58,7 @@ jobs:
           TAG_LIST="$(npx skills add "https://github.com/Danangjoyoo/nerd/tree/$GITHUB_REF_NAME" --list)"
           printf '%s\n' "$TAG_LIST"
           printf '%s\n' "$TAG_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent; do
+          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast; do
             printf '%s\n' "$TAG_LIST" | grep -F "$skill"
           done
       - name: Verify public shorthand discovery
@@ -68,7 +68,7 @@ jobs:
           PUBLIC_LIST="$(npx skills add danangjoyoo/nerd --list)"
           printf '%s\n' "$PUBLIC_LIST"
           printf '%s\n' "$PUBLIC_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent; do
+          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast; do
             printf '%s\n' "$PUBLIC_LIST" | grep -F "$skill"
           done
       - name: Verify isolated multi-agent install

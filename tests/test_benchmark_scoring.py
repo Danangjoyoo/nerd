@@ -100,6 +100,15 @@ class ScoringTests(unittest.TestCase):
         )
         self.assertTrue(score_run(case, make_run(), None).passed)
 
+    def test_clean_evaluator_requires_no_changed_files(self):
+        case = make_case(
+            (Criterion("clean", 100, True, "clean", "no changed files"),)
+        )
+        self.assertTrue(
+            score_run(case, make_run(changed_files=()), None).passed
+        )
+        self.assertFalse(score_run(case, make_run(), None).passed)
+
     def test_judge_is_required_for_judge_criterion(self):
         case = make_case((Criterion("quality", 100, True, "judge", "clear"),))
         self.assertFalse(score_run(case, make_run(), None).passed)

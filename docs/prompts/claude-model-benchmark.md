@@ -27,8 +27,9 @@ Measure exactly these paired comparisons:
 2. `nerd-surgery` vs `superpowers-systematic-debugging`: the same accuracy and latency metrics.
 3. `nerd-execute` vs `superpowers-executing-plans`: the same accuracy and latency metrics.
 4. `nerd-silent` vs `regular`: accuracy score/pass rate, p50/p95 latency, paired latency delta, eligible median output tokens, tokens saved, valid-pair counts, and every exclusion reason.
+5. `nerd-fast` with `nerd-execute` vs regular `nerd-execute`: the same accuracy and latency metrics, plus the Fast accuracy-floor and latency-improvement publication gate.
 
-Each target config contains five cases, three repetitions, and 120 candidate agent runs. A complete target has 60 blinded judge tasks and 120 scored runs.
+Each target config contains 26 cases across five comparisons, three repetitions, and 156 candidate agent runs. A complete target has 78 blinded judge tasks and 156 scored runs.
 
 ## Hard rules
 
@@ -75,7 +76,7 @@ For each config, require:
 python3 benchmarks/run.py plan --config <CONFIG>
 ```
 
-The last line must be `120 planned agent runs`.
+The last line must be `156 planned agent runs`.
 
 ## Per-target worker procedure
 
@@ -91,7 +92,7 @@ python3 benchmarks/run.py report --results "$SMOKE_RESULT"
 python3 benchmarks/run.py report --results "$SMOKE_RESULT" --check
 ```
 
-Require 8/8 raw runs, four blinded judge tasks, eight scores, exit code `0` for every candidate run, no harness errors, and provider-reported output tokens for both Silent arms. Smoke summaries must remain non-publishable.
+Require 10/10 raw runs, five blinded judge tasks, ten scores, exit code `0` for every candidate run, no harness errors, and provider-reported output tokens for both Silent arms. Smoke summaries must remain non-publishable.
 
 Only after that target's smoke passes, run its release shard:
 
@@ -116,14 +117,15 @@ Continue judging/scoring/reporting with the explicit `RESULT_DIR`; never use `LA
 For each target, verify:
 
 - `manifest.json`, `raw.jsonl`, `judges.jsonl`, `scores.jsonl`, `summary.json`, and `summary.md` exist.
-- `raw.jsonl` contains exactly 120 unique run IDs and `scores.jsonl` contains the same 120 IDs.
-- `judges.jsonl` contains exactly 60 unique judge task IDs.
+- `raw.jsonl` contains exactly 156 unique run IDs and `scores.jsonl` contains the same 156 IDs.
+- `judges.jsonl` contains exactly 78 unique judge task IDs.
 - Every record has the config's exact `target_id`, requested model, and reasoning effort.
 - Claude `system/init` events report only the requested model; any resolved-model mismatch blocks the shard.
 - Every case/target/repetition identity has both expected arms.
 - The manifest records the exact Nerd commit, Superpowers commit/tag object, config, seed, agent version, model, and effort.
 - `report --check` succeeds without changing the derived files.
 - Silent token claims use provider-reported output tokens and the repository eligibility rule.
+- Fast is publishable only with no new hard-gate failures, no accuracy regression, and lower paired median latency.
 - Any insufficient comparison remains `insufficient-data`.
 
 Audit shareable JSON/JSONL for credentials, authorization headers, secret-like values, and unrelated absolute paths. Never print a suspected secret. Quarantine the affected shard and report only its file and JSON field path; do not hand-edit raw evidence.

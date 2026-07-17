@@ -3,8 +3,10 @@ import tempfile
 import unittest
 
 from scripts.validate_skills import (
+    DERIVED_SKILLS,
     PUBLIC_SKILLS,
     REQUIRED_REFERENCES,
+    REQUIRED_SCRIPTS,
     validate_repository,
 )
 
@@ -22,6 +24,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-patrol",
                 "nerd-execute",
                 "nerd-silent",
+                "nerd-fast",
             ),
         )
 
@@ -41,9 +44,23 @@ class SkillStructureTests(unittest.TestCase):
                 ),
                 "nerd-execute": (),
                 "nerd-silent": (),
+                "nerd-fast": (),
             },
         )
         self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())
+        self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
+
+    def test_derived_skill_licenses_are_explicit(self):
+        self.assertEqual(
+            DERIVED_SKILLS,
+            (
+                "nerd-smart",
+                "nerd-surgery",
+                "nerd-patrol",
+                "nerd-execute",
+            ),
+        )
 
     def test_repository_contract(self):
         self.assertEqual(validate_repository(ROOT), [])
@@ -62,7 +79,7 @@ class AttributionTests(unittest.TestCase):
             self.assertIn(expected, body)
 
     def test_derived_skills_carry_identical_license(self):
-        derived = PUBLIC_SKILLS[:-1]
+        derived = DERIVED_SKILLS
         licenses = [
             (ROOT / "skills" / skill / "LICENSE.superpowers").read_text()
             for skill in derived

@@ -22,6 +22,7 @@ PAIR_CONDITIONS = {
     "surgery": ("nerd-surgery", "superpowers-systematic-debugging"),
     "execute": ("nerd-execute", "superpowers-executing-plans"),
     "silent": ("nerd-silent", "regular"),
+    "fast": ("nerd-fast", "fast-baseline"),
 }
 JUDGE_SCHEMA = Path(__file__).resolve().parents[1] / "judge" / "schema.json"
 JUDGE_INSTRUCTIONS = """Evaluate outputs A and B independently against each supplied criterion.
@@ -69,6 +70,8 @@ def _evaluate(
         return run.command_results.get(command) == expected_exit
     if evaluator == "judge":
         return bool(judge and judge.get(criterion_id) is True)
+    if evaluator == "clean":
+        return not run.changed_files
     raise ValueError(f"unknown evaluator: {evaluator}")
 
 

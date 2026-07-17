@@ -1,0 +1,6 @@
+interface:
+  display_name: "Nerd Fast"
+  short_description: "Critical-path latency without accuracy loss"
+  default_prompt: "Use $nerd-fast with this task to minimize wall-clock latency while preserving correctness and proportionate proof."
+policy:
+  allow_implicit_invocation: true
