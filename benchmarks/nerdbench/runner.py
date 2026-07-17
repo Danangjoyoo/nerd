@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -12,6 +13,7 @@ import random
 import re
 import shlex
 import subprocess
+import tempfile
 import time
 
 from .adapters import get_adapter
@@ -33,7 +35,10 @@ CONDITION_SKILLS = {
     "nerd-patrol": ("nerd-patrol",),
     "fast-baseline": ("nerd-execute",),
     "nerd-fast": ("nerd-execute", "nerd-fast"),
+    "raw-agent": (),
+    "nerd-fast-only": ("nerd-fast",),
 }
+ISOLATED_CODEX_CONDITIONS = {"raw-agent", "nerd-fast-only"}
 SMOKE_CASES = {
     "smart": "smart-ambiguous-focus",
     "surgery": "surgery-trace-source",
@@ -172,8 +177,35 @@ def condition_prompt(condition: str, prompt: str) -> str:
         skills = CONDITION_SKILLS[condition]
     except KeyError as error:
         raise ValueError(f"unknown benchmark condition: {condition}") from error
+    if not skills:
+        return prompt
     invocation = " and ".join(f"${skill}" for skill in skills)
     return f"Use {invocation}.\n\n{prompt}"
+
+
+@contextmanager
+def isolated_codex_environment(
+    spec: RunSpec,
+    environ: dict[str, str] | None = None,
+):
+    environment = dict(os.environ if environ is None else environ)
+    if spec.agent != "codex" or spec.condition not in ISOLATED_CODEX_CONDITIONS:
+        yield environment
+        return
+
+    source_home = Path(
+        environment.get("CODEX_HOME", str(Path.home() / ".codex"))
+    ).resolve()
+    with tempfile.TemporaryDirectory(
+        prefix="nerd-fast-benchmark-codex-"
+    ) as temporary:
+        isolated_home = Path(temporary)
+        auth = source_home / "auth.json"
+        if auth.is_file():
+            (isolated_home / "auth.json").symlink_to(auth)
+        environment["CODEX_HOME"] = str(isolated_home)
+        environment["HOME"] = str(isolated_home)
+        yield environment
 
 
 def _git_output(args: list[str], cwd: Path = ROOT) -> str:
@@ -238,14 +270,15 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
 
     started = time.monotonic()
     try:
-        process = subprocess.run(
-            command,
-            cwd=spec.workspace,
-            capture_output=True,
-            text=True,
-            timeout=case.timeout_seconds,
-            env=os.environ.copy(),
-        )
+        with isolated_codex_environment(spec) as environment:
+            process = subprocess.run(
+                command,
+                cwd=spec.workspace,
+                capture_output=True,
+                text=True,
+                timeout=case.timeout_seconds,
+                env=environment,
+            )
         exit_code = process.returncode
         stdout = process.stdout
         stderr = process.stderr

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -13,6 +14,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from benchmarks.nerdbench.report import publish_readme, write_report
+from benchmarks.nerdbench.pair_report import (
+    publish_fast_raw_readme,
+    write_pair_summary,
+)
 from benchmarks.nerdbench.runner import load_config, run_matrix, schedule_runs
 from benchmarks.nerdbench.scorer import score_result_directory
 from benchmarks.nerdbench.scorer import judge_result_directory
@@ -76,6 +81,21 @@ def build_parser() -> argparse.ArgumentParser:
     publish.add_argument("--readme", default=str(ROOT / "README.md"))
     publish.add_argument("--check", action="store_true")
     publish.add_argument("--allow-historical", action="store_true")
+
+    pair_report = subparsers.add_parser(
+        "pair-report",
+        help="summarize one exact paired smoke result",
+    )
+    pair_report.add_argument("--results", required=True)
+    pair_report.add_argument("--output", required=True)
+    pair_report.add_argument("--overwrite", action="store_true")
+
+    pair_publish = subparsers.add_parser(
+        "pair-publish",
+        help="sync a paired smoke summary to README",
+    )
+    pair_publish.add_argument("--summary", required=True)
+    pair_publish.add_argument("--readme", default=str(ROOT / "README.md"))
     return parser
 
 
@@ -134,6 +154,27 @@ def main(argv: list[str] | None = None) -> int:
             allow_historical=args.allow_historical,
         )
         print(f"synchronized {summary['run_id']}")
+        return 0
+
+    if args.command == "pair-report":
+        result = _result_dir(args)
+        output = Path(args.output)
+        if not output.is_absolute():
+            output = (ROOT / output).resolve()
+        summary = write_pair_summary(result, output, overwrite=args.overwrite)
+        print(f"wrote paired smoke summary {summary['run_id']} to {output}")
+        return 0
+
+    if args.command == "pair-publish":
+        summary_path = Path(args.summary)
+        if not summary_path.is_absolute():
+            summary_path = (ROOT / summary_path).resolve()
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        readme = Path(args.readme)
+        if not readme.is_absolute():
+            readme = (ROOT / readme).resolve()
+        publish_fast_raw_readme(summary, readme)
+        print("synchronized Fast raw smoke benchmark")
         return 0
 
     raise AssertionError(args.command)

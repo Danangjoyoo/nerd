@@ -1,0 +1,45 @@
+{
+  "agent_version": "codex-cli 0.144.1",
+  "baseline": {
+    "condition": "raw-agent",
+    "hard_gate_failures": [],
+    "latency_seconds": 306.8682,
+    "output_tokens": 11339,
+    "passed": true,
+    "score": 100.0
+  },
+  "case_id": "fast-raw-repository-summary",
+  "comparison": "fast-raw",
+  "controls": {
+    "raw_nerd_skill_access": false,
+    "treatment_indexer_invoked": true
+  },
+  "created_at": "2026-07-17T01:03:22.816412+00:00",
+  "delta": {
+    "accuracy_points": 0.0,
+    "latency_percent": -23.4256,
+    "output_tokens_percent": -22.0125
+  },
+  "limitations": [
+    "one case",
+    "one repetition",
+    "directional evidence only"
+  ],
+  "model": "gpt-5.6-sol",
+  "repetitions": 1,
+  "run_id": "20260717T010322Z-1db16ae-gpt-5.6-sol-xhigh-fast-raw",
+  "schema_version": 1,
+  "target": {
+    "display_name": "GPT 5.6 Sol \u00b7 xhigh \u00b7 Fast raw smoke",
+    "id": "gpt-5.6-sol-xhigh-fast-raw",
+    "reasoning_effort": "xhigh"
+  },
+  "treatment": {
+    "condition": "nerd-fast-only",
+    "hard_gate_failures": [],
+    "latency_seconds": 234.9824,
+    "output_tokens": 8843,
+    "passed": true,
+    "score": 100.0
+  }
+}

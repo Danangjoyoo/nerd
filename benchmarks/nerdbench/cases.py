@@ -8,7 +8,7 @@ from pathlib import Path
 from .models import BenchmarkCase, Criterion
 
 
-EVALUATORS = {"regex", "absent_regex", "file", "command", "judge"}
+EVALUATORS = {"regex", "absent_regex", "file", "command", "judge", "clean"}
 CASE_FIELDS = {
     "id",
     "comparison",

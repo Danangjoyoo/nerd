@@ -3,10 +3,16 @@ import re
 import unittest
 
 from benchmarks.nerdbench.report import pending_readme_results, render_readme_results
+from benchmarks.nerdbench.pair_report import (
+    FAST_RAW_END,
+    FAST_RAW_START,
+    render_fast_raw_readme,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
+FAST_RAW_RESULT = ROOT / "benchmarks" / "pilots" / "fast-raw-one-case" / "result.json"
 SKILLS = (
     "nerd-smart",
     "nerd-surgery",
@@ -186,10 +192,26 @@ class ReadmeContractTests(unittest.TestCase):
         summary = __import__("json").loads(summary_path.read_text(encoding="utf-8"))
         self.assertEqual(region, render_readme_results(summary))
 
+    def test_fast_raw_smoke_section_matches_checked_in_summary(self):
+        body = README.read_text(encoding="utf-8")
+        self.assertEqual(body.count(FAST_RAW_START), 1)
+        self.assertEqual(body.count(FAST_RAW_END), 1)
+        region = body.split(FAST_RAW_START, 1)[1].split(FAST_RAW_END, 1)[0].strip()
+        summary = __import__("json").loads(
+            FAST_RAW_RESULT.read_text(encoding="utf-8")
+        )
+        self.assertEqual(region, render_fast_raw_readme(summary))
+        self.assertEqual(summary["repetitions"], 1)
+        self.assertEqual(summary["limitations"], [
+            "one case",
+            "one repetition",
+            "directional evidence only",
+        ])
+
     def test_readme_remains_sharp(self):
         self.assertLessEqual(
             len(README.read_text(encoding="utf-8").splitlines()),
-            170,
+            190,
         )
 
     def test_ci_badge_is_current(self):

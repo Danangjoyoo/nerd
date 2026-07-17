@@ -15,7 +15,7 @@ Optimize the number of sequential operations on the critical path. Do not optimi
 - `nerd-fast` changes operation selection, ordering, batching, reuse, escalation, stopping behavior, and whether routine work needs a pre-tool model round.
 - `nerd-silent` changes overall narration and final presentation cost.
 
-Fast and Silent may compose. Fast never replaces or restarts the active workflow. When invoked without a resolved workflow, it uses Nerd Smart only when a material endpoint, scope, or authorization ambiguity remains.
+Fast and Silent may compose only when both modifiers are explicitly invoked. Fast never activates, infers, or auto-composes Silent from latency, presentation cost, brevity, token cost, or output preferences. Fast never replaces or restarts the active workflow. When invoked without a resolved workflow, it uses Nerd Smart only when a material endpoint, scope, or authorization ambiguity remains.
 
 Activate Fast on explicit invocation or a concrete request to minimize wall-clock latency without reducing accuracy. Do not infer activation from vague terms such as `simple` or `quick` when speed is not an actual outcome constraint.
 
@@ -189,7 +189,7 @@ Additional discipline:
 | --- | --- |
 | **TODOs** | Make every TODO produce an outcome, remove a blocker, or provide proof. Do not create TODOs named only `analyze`, `think`, or `inspect more`. |
 | **Evidence reuse** | Do not reread unchanged files, repeat successful commands, or restart planning after every tool result. Reuse a successful result until a mutation, contradiction, freshness requirement, or failed dependent operation invalidates it. |
-| **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search and expected reuse amortizes refresh cost. Do not rebuild or refresh an index for a single lookup. Resolve the bundled `scripts/symbol_index.py` relative to `SKILL.md`, run `ensure` once before repeated exact-symbol lookups, and use `find` without implicit refresh. Universal Ctags is optional; fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
+| **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search. For complex repository analysis, architecture summaries, or cross-file work expected to require three or more exact-symbol lookups, resolve `scripts/symbol_index.py` relative to `SKILL.md` and run `ensure` once at the start of discovery. Use `find` without implicit refresh as symbol names emerge. Do not rebuild or refresh an index for a single known target. Universal Ctags is optional: make one capability or refresh attempt, then fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
 | **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and their expected wall-clock savings exceed startup and handoff cost. |
 | **Authority** | Preserve required user interaction, safety checks, authorization, and proof. |
 | **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite whole files only when they are generated, mostly replaced, or transformed by an appropriate trusted tool. Before dispatching a mutation batch, confirm that each intermediate step is idempotent, transactional, or safely recoverable if a later command fails; otherwise keep mutations sequential and inspect state between them. |
@@ -238,7 +238,7 @@ Structural and contract tests must establish that Fast:
 - Prefers targeted edits and immediate tool dispatch for routine authorized operations.
 - Reuses trustworthy incremental runtime state and gives non-binding narrow-check examples across language ecosystems.
 - Selects an existing fresh index only when reuse amortizes its cost, invokes the bundled script relative to `SKILL.md`, confirms source before mutation, and preserves direct-search fallback.
-- Composes with Nerd Silent without duplicating narration rules.
+- Composes with Nerd Silent only when both modifiers are explicitly invoked, without duplicating narration rules.
 - Does not contain a runtime `superpowers:` dependency.
 
 Benchmark Fast against the same active workflow without Fast on paired tasks that exercise known-target work, unknown-target discovery, independent operations, continuation, failure recovery, and expensive verification. Extend benchmark condition prompts to compose Fast with the selected active workflow instead of replacing that workflow.

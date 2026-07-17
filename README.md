@@ -50,107 +50,42 @@ Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers
 
 ## Benchmarks
 
-<!-- BENCHMARK_RUN:pending -->
-<!-- BENCHMARK_RESULTS:START -->
-Benchmark results pending a complete release run.
-<!-- BENCHMARK_RESULTS:END -->
-
-Model preview from the current valid paired evidence:
-
-### Accuracy
-
 Representative rubric score per model. Higher is better; each block is 5 percentage points.
 
 ```text
 ================= Sol     =================
-Nerd        [████████████████████] 100.0%
-Superpowers [████████████████████] 100.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [█████████░░░░░░░░░░░]  82.9s | Tokens Saved [███████████████████░] 55.9%
+Superpowers | Acc [████████████████████] 100.0% | Lty [██████████░░░░░░░░░░]  89.9s | N/A
 
 ================= Terra   =================
-Nerd        [████████████████████] 100.0%
-Superpowers [██████░░░░░░░░░░░░░░]  30.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [█████████░░░░░░░░░░░]  78.8s | Tokens Saved [██░░░░░░░░░░░░░░░░░░]  6.9%
+Superpowers | Acc [██████░░░░░░░░░░░░░░]  30.0% | Lty [██████████░░░░░░░░░░]  88.7s | N/A
 
 ================= Luna    =================
-Nerd        [████████████████████] 100.0%
-Superpowers [█████████████░░░░░░░]  65.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [███████░░░░░░░░░░░░░]  65.3s | Tokens Saved [███████████░░░░░░░░░] 33.3%
+Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [█████████░░░░░░░░░░░]  84.4s | N/A
 
 ================= GPT 5.5 =================
-Nerd        [████████████████████] 100.0%
-Superpowers [████████████████████] 100.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [█████░░░░░░░░░░░░░░░]  46.9s | GPT 5.Tokens Saved [████████████████████] 59.9%
+Superpowers | Acc [████████████████████] 100.0% | Lty [████████░░░░░░░░░░░░]  72.1s | N/A
 
 ================= Opus    =================
-Nerd        [████████████████████] 100.0%
-Superpowers [█████████████░░░░░░░]  65.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [████░░░░░░░░░░░░░░░░]  35.6s | Tokens Saved [██████████████░░░░░░] 43.4%
+Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [█████████████░░░░░░░] 114.4s | N/A
 
 ================= Fable   =================
-Nerd        [████████████████████] 100.0%
-Superpowers [█████████████░░░░░░░]  65.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [████████████░░░░░░░░] 109.9s | Tokens Saved [███████████████░░░░░] 44.5%
+Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [███████████░░░░░░░░░] 103.1s | N/A
 
 ================= Sonnet  =================
-Nerd        [████████████████████] 100.0%
-Superpowers [█████████████░░░░░░░]  65.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [████░░░░░░░░░░░░░░░░]  32.5s | Tokens Saved [███████████████████░] 58.4%
+Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [███████████████████░] 169.6s | N/A
 
 ================= Haiku   =================
-Nerd        [████████████████████] 100.0%
-Superpowers [██████░░░░░░░░░░░░░░]  30.0%
+Nerd        | Acc [████████████████████] 100.0% | Lty [███░░░░░░░░░░░░░░░░░]  30.6s | Tokens Saved [██░░░░░░░░░░░░░░░░░░]  6.5%
+Superpowers | Acc [██████░░░░░░░░░░░░░░]  30.0% | Lty [███░░░░░░░░░░░░░░░░░]  28.4s | N/A
 ```
 
-### Latency
-
-Nerd Smart versus Superpowers Brainstorming per model, with no aggregation. GPT values use one new complex-case repetition; lower is better and all bars share a 0–180s scale.
-
-```text
-================= Sol     =================
-Nerd        [█████████░░░░░░░░░░░]  82.9s
-Superpowers [██████████░░░░░░░░░░]  89.9s
-
-================= Terra   =================
-Nerd        [█████████░░░░░░░░░░░]  78.8s
-Superpowers [██████████░░░░░░░░░░]  88.7s
-
-================= Luna    =================
-Nerd        [███████░░░░░░░░░░░░░]  65.3s
-Superpowers [█████████░░░░░░░░░░░]  84.4s
-
-================= GPT 5.5 =================
-Nerd        [█████░░░░░░░░░░░░░░░]  46.9s
-Superpowers [████████░░░░░░░░░░░░]  72.1s
-
-================= Opus    =================
-Nerd        [████░░░░░░░░░░░░░░░░]  35.6s
-Superpowers [█████████████░░░░░░░] 114.4s
-
-================= Fable   =================
-Nerd        [████████████░░░░░░░░] 109.9s
-Superpowers [███████████░░░░░░░░░] 103.1s
-
-================= Sonnet  =================
-Nerd        [████░░░░░░░░░░░░░░░░]  32.5s
-Superpowers [███████████████████░] 169.6s
-
-================= Haiku   =================
-Nerd        [███░░░░░░░░░░░░░░░░░]  30.6s
-Superpowers [███░░░░░░░░░░░░░░░░░]  28.4s
-
-```
-
-### Token savings
-All bars share a 0–60% scale.
-
-```text
-Sol      Nerd [███████████████████░] 55.9%
-Terra    Nerd [██░░░░░░░░░░░░░░░░░░]  6.9%
-Luna     Nerd [███████████░░░░░░░░░] 33.3%
-GPT 5.5  Nerd [████████████████████] 59.9%
-Opus     Nerd [██████████████░░░░░░] 43.4%
-Fable    Nerd [███████████████░░░░░] 44.5%
-Sonnet   Nerd [███████████████████░] 58.4%
-Haiku    Nerd [██░░░░░░░░░░░░░░░░░░]  6.5%
-```
-
-### Method
-
-Accuracy and latency use Nerd Smart versus Superpowers Brainstorming as the representative comparison for every model. Token savings is the median per-case percentage for the no-narration comparison, labeled Nerd. New release matrices also pair Fast with regular Execute and publish it only when Fast preserves the accuracy floor and improves median latency. See the [full cost and accuracy view](docs/benchmark/nerd-cost-accuracy.html) and [benchmark plan](docs/plans/2026-07-15-nerd-benchmarks.md).
 
 ## Verify locally
 

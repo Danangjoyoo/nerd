@@ -480,7 +480,7 @@ class SilentContractTests(unittest.TestCase):
 
 
 class FastContractTests(unittest.TestCase):
-    def test_is_a_composable_latency_modifier_with_accuracy_floor(self):
+    def test_is_an_explicitly_composable_latency_modifier_with_accuracy_floor(self):
         body = skill_body("nerd-fast")
         metadata = (SKILLS / "nerd-fast" / "agents" / "openai.yaml").read_text()
         assert_terms(
@@ -491,12 +491,18 @@ class FastContractTests(unittest.TestCase):
                 "never a primary specialty",
                 "never replaces or restarts the active workflow",
                 "nerd-silent",
+                "only when the user explicitly invokes both modifiers",
+                "Never activate, infer, or auto-compose",
                 "correctness",
                 "authorization",
                 "safety",
                 "proof",
                 "no hard total tool limit",
             ),
+        )
+        self.assertNotIn(
+            "when both operational latency and presentation cost matter",
+            body,
         )
         self.assertIn('$nerd-fast', metadata)
         self.assertIn('latency', metadata.casefold())
@@ -585,15 +591,17 @@ class FastContractTests(unittest.TestCase):
             ),
         )
 
-    def test_uses_optional_persistent_index_only_when_amortized(self):
+    def test_runs_optional_persistent_index_for_complex_cross_file_discovery(self):
         body = skill_body("nerd-fast")
         assert_terms(
             self,
             body,
             (
                 "existing fresh file or symbol index",
-                "expected reuse amortizes refresh cost",
-                "Do not rebuild or refresh an index for a single lookup",
+                "complex repository analysis, architecture summaries, or cross-file work",
+                "three or more exact-symbol lookups",
+                "run `ensure` once at the start of discovery",
+                "Do not rebuild or refresh an index for a single known target",
                 "confirm source before mutation",
                 "exact-file read or narrow text search",
                 "scripts/symbol_index.py",
