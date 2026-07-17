@@ -19,6 +19,15 @@ Prefer: **reuse -> batch -> parallelize -> target narrowly -> escalate on eviden
 
 Use no hard total tool limit. Fixed limits can trade accuracy for speed when valid evidence or proof needs more operations.
 
+## Read-Volume Gate
+
+At task start, before the first source read, estimate `x`: the total estimated lines direct navigation would require. Estimate from the named scope, known ranges or file sizes, and likely supporting files; do not read targets merely to calculate an exact count.
+
+- `x <= 200`: skip `symbol_index.py`; read or search the targets directly.
+- `x > 200`: resolve `scripts/symbol_index.py` relative to this `SKILL.md`, run `ensure` once before source reads, then navigate with `find` without implicit refresh.
+
+Do not wait until 200 lines have already been read. Apply this gate before every mapping and discovery rule; it replaces lookup-count heuristics. Universal Ctags is optional: if it or a usable index is unavailable, stale, or incomplete, fall back to an exact-file read or narrow text search. Treat index matches as navigation candidates and confirm source before mutation.
+
 ## Gates
 
 Apply these gates in order. Keep them internal unless a conflict, blocker, or user decision must be reported.
@@ -36,7 +45,7 @@ Apply these gates in order. Keep them internal unless a conflict, blocker, or us
 | **Verification cost** | What is the lowest-cost fresh proof supporting the completion claim? | Select the lowest sufficient tier and escalate only on a verification trigger. |
 | **Stop** | Are the requested outcome and required proof satisfied? | Stop without optional exploration or review. |
 
-Use one discovery batch before narrowing when the target is unknown. Read exact named targets before repository-wide discovery. Batch known independent reads, searches, lookups, and safe checks. Use one final proof wave unless it exposes a material unresolved failure. User instructions, repository authority, and the active specialty override these soft limits.
+Use one discovery batch before narrowing when the target is unknown. When the Read-Volume Gate selects direct navigation, read exact named targets before repository-wide discovery. Batch known independent reads, searches, lookups, and safe checks. Use one final proof wave unless it exposes a material unresolved failure. User instructions, repository authority, and the active specialty override these soft limits.
 
 ## Concrete Command Batching
 
@@ -120,7 +129,7 @@ Classify operational shape only after intent, endpoint, scope, and authorization
 | # | Signal | Default recipe |
 | --- | --- | --- |
 | **1** | Current context is sufficient | Reuse evidence -> perform the active endpoint -> apply the verification-cost gate -> stop. |
-| **2** | Exact file, symbol, command, or target is named | Read the target and nearest authority or test together -> work -> run targeted proof. |
+| **2** | Exact file, symbol, command, or target is named | Apply the Read-Volume Gate -> navigate the target and nearest authority or test -> work -> run targeted proof. |
 | **3** | Local target is unknown | Read mandatory instructions -> run one batched search -> inspect the best hits -> narrow scope. |
 | **4** | Multiple targets are independent | Batch or parallelize reads and safe checks -> synthesize once -> continue. |
 | **5** | Work has genuine dependencies | Create two to five critical-path TODOs -> execute in dependency order -> prove the result. |
@@ -161,10 +170,6 @@ Each TODO must deliver an outcome, remove a blocker, or provide proof.
 ### Reuse Evidence Until Invalidated
 
 Do not reread unchanged files, repeat successful commands, or restart planning after each result. Reuse evidence until mutation, contradiction, staleness, or dependency failure invalidates it.
-
-### Index Only When It Pays
-
-Prefer an existing fresh file or symbol index when cheaper than direct search. For complex repository analysis, architecture summaries, or cross-file work likely to need three or more exact-symbol lookups, resolve `scripts/symbol_index.py` relative to this `SKILL.md` and run `ensure` once at the start of discovery. Use `find` without implicit refresh. Do not rebuild or refresh an index for a single known target. Universal Ctags is optional: try once, then fall back to an exact-file read or narrow text search when unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation.
 
 ### Patch Narrowly and Safely
 

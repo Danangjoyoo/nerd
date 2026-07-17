@@ -591,23 +591,30 @@ class FastContractTests(unittest.TestCase):
             ),
         )
 
-    def test_runs_optional_persistent_index_for_complex_cross_file_discovery(self):
+    def test_uses_early_read_volume_gate_for_symbol_index(self):
         body = skill_body("nerd-fast")
+        self.assertIn("## Read-Volume Gate", body)
+        self.assertLess(body.index("## Read-Volume Gate"), body.index("## Gates"))
+        gate = body.split("## Read-Volume Gate", 1)[1].split("## Gates", 1)[0]
         assert_terms(
             self,
-            body,
+            gate,
             (
-                "existing fresh file or symbol index",
-                "complex repository analysis, architecture summaries, or cross-file work",
-                "three or more exact-symbol lookups",
-                "run `ensure` once at the start of discovery",
-                "Do not rebuild or refresh an index for a single known target",
-                "confirm source before mutation",
+                "At task start, before the first source read",
+                "total estimated lines",
+                "`x <= 200`",
+                "skip `symbol_index.py`",
+                "`x > 200`",
+                "run `ensure` once before source reads",
+                "`find` without implicit refresh",
+                "Do not wait until 200 lines have already been read",
                 "exact-file read or narrow text search",
                 "scripts/symbol_index.py",
                 "Universal Ctags is optional",
+                "confirm source before mutation",
             ),
         )
+        self.assertNotIn("three or more exact-symbol lookups", body)
 
     def test_verification_cost_gate_has_five_tiers_and_bounded_escalation(self):
         body = skill_body("nerd-fast")

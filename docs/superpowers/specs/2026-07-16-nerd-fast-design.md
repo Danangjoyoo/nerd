@@ -35,6 +35,15 @@ Prefer this order:
 
 Fast has no hard total tool limit. A fixed cap would trade accuracy for speed on tasks whose evidence or proof genuinely requires more operations.
 
+## Read-Volume Gate
+
+At task start, before the first source read, estimate `x`: the total estimated lines direct navigation would require. Estimate from the named scope, known ranges or file sizes, and likely supporting files; do not read targets merely to calculate an exact count.
+
+- `x <= 200`: skip the symbol index and read or search the targets directly.
+- `x > 200`: resolve `scripts/symbol_index.py` relative to `SKILL.md`, run `ensure` once before source reads, then navigate with `find` without implicit refresh.
+
+Do not wait until 200 lines have already been read. This read-volume gate replaces lookup-count heuristics. If Universal Ctags or a usable index is unavailable, stale, or incomplete, fall back to an exact-file read or narrow text search. Treat index matches as navigation candidates and confirm source before mutation.
+
 ## Gates
 
 Apply the gates in order. Do not narrate them unless a user decision, conflict, or blocker is required.
@@ -189,7 +198,7 @@ Additional discipline:
 | --- | --- |
 | **TODOs** | Make every TODO produce an outcome, remove a blocker, or provide proof. Do not create TODOs named only `analyze`, `think`, or `inspect more`. |
 | **Evidence reuse** | Do not reread unchanged files, repeat successful commands, or restart planning after every tool result. Reuse a successful result until a mutation, contradiction, freshness requirement, or failed dependent operation invalidates it. |
-| **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search. For complex repository analysis, architecture summaries, or cross-file work expected to require three or more exact-symbol lookups, resolve `scripts/symbol_index.py` relative to `SKILL.md` and run `ensure` once at the start of discovery. Use `find` without implicit refresh as symbol names emerge. Do not rebuild or refresh an index for a single known target. Universal Ctags is optional: make one capability or refresh attempt, then fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
+| **Indexed navigation** | Apply the Read-Volume Gate before discovery. Use `find` without implicit refresh after `ensure`; confirm every match in source before mutation. |
 | **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and their expected wall-clock savings exceed startup and handoff cost. |
 | **Authority** | Preserve required user interaction, safety checks, authorization, and proof. |
 | **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite whole files only when they are generated, mostly replaced, or transformed by an appropriate trusted tool. Before dispatching a mutation batch, confirm that each intermediate step is idempotent, transactional, or safely recoverable if a later command fails; otherwise keep mutations sequential and inspect state between them. |
