@@ -154,14 +154,29 @@ Execute in four waves:
 | **Execute** | Perform the smallest authorized work and parallelize only independent operations. |
 | **Prove** | Apply the verification-cost gate, state only supported claims, and stop. |
 
-| Rule | Discipline |
-| --- | --- |
-| **TODOs** | Make every TODO produce an outcome, remove a blocker, or provide proof. |
-| **Evidence reuse** | Do not reread unchanged files, repeat successful commands, or restart planning after every tool result. Reuse a result until a mutation, contradiction, freshness requirement, or failed dependency invalidates it. |
-| **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search. For complex repository analysis, architecture summaries, or cross-file work expected to require three or more exact-symbol lookups, resolve `scripts/symbol_index.py` relative to this `SKILL.md` and run `ensure` once at the start of discovery. Use `find` without implicit refresh as symbol names emerge. Do not rebuild or refresh an index for a single known target. Universal Ctags is optional: make one capability or refresh attempt, then fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
-| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite a whole file only when it is generated, most of its content must change, or a trusted formatter or codemod is the appropriate transform. Before dispatching a mutation batch, confirm that each intermediate step is idempotent, transactional, or safely recoverable if a later command fails; otherwise keep mutations sequential and inspect state between them. Treat concrete tools such as patch utilities, IDE edit APIs, and `sed` as examples rather than dependencies. |
-| **Tool dispatch** | For routine authorized operations, invoke the tool immediately. Do not spend a model round explaining intent unless required for approval, safety, a material decision, or a required progress update. Fast removes optional pre-tool latency; Silent controls overall narration and final presentation. |
-| **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and expected wall-clock savings exceed startup and handoff cost. Leave optional commentary volume and final-output reduction to Nerd Silent. |
+### Keep TODOs Outcome-Bound
+
+Each TODO must deliver an outcome, remove a blocker, or provide proof.
+
+### Reuse Evidence Until Invalidated
+
+Do not reread unchanged files, repeat successful commands, or restart planning after each result. Reuse evidence until mutation, contradiction, staleness, or dependency failure invalidates it.
+
+### Index Only When It Pays
+
+Prefer an existing fresh file or symbol index when cheaper than direct search. For complex repository analysis, architecture summaries, or cross-file work likely to need three or more exact-symbol lookups, resolve `scripts/symbol_index.py` relative to this `SKILL.md` and run `ensure` once at the start of discovery. Use `find` without implicit refresh. Do not rebuild or refresh an index for a single known target. Universal Ctags is optional: try once, then fall back to an exact-file read or narrow text search when unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation.
+
+### Patch Narrowly and Safely
+
+Prefer a structured patch or targeted-edit primitive. Do not reproduce unchanged file content in output or edit payloads. Rewrite a whole file only when generated, mostly changed, or handled by a trusted formatter or codemod. Before dispatching a mutation batch, require each step to be idempotent, transactional, or safely recoverable; otherwise keep mutations sequential and inspect state between them. Concrete tools are examples, not dependencies.
+
+### Dispatch Routine Tools Immediately
+
+For routine authorized operations, invoke the tool immediately. Explain first only for approval, safety, a material decision, or a required progress update. Fast removes optional pre-tool latency; Silent controls overall narration and final presentation.
+
+### Delegate Only for Net Speed
+
+Dispatch reviewers or subagents only when the active workflow allows it and expected wall-clock savings exceed setup and handoff cost.
 
 ## Conflict Discipline
 
