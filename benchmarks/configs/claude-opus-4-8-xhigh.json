@@ -23,13 +23,15 @@
     "benchmarks/cases/smart.json",
     "benchmarks/cases/surgery.json",
     "benchmarks/cases/execute.json",
-    "benchmarks/cases/silent.json"
+    "benchmarks/cases/silent.json",
+    "benchmarks/cases/fast.json"
   ],
   "conditions": {
     "smart": ["nerd-smart", "superpowers-brainstorming"],
     "surgery": ["nerd-surgery", "superpowers-systematic-debugging"],
     "execute": ["nerd-execute", "superpowers-executing-plans"],
-    "silent": ["regular", "nerd-silent"]
+    "silent": ["regular", "nerd-silent"],
+    "fast": ["fast-baseline", "nerd-fast"]
   },
   "repetitions": 3,
   "parallelism": 1,

@@ -15,6 +15,7 @@ ARMS = {
     "surgery": ("nerd-surgery", "superpowers-systematic-debugging"),
     "execute": ("nerd-execute", "superpowers-executing-plans"),
     "silent": ("nerd-silent", "regular"),
+    "fast": ("nerd-fast", "fast-baseline"),
 }
 
 
@@ -23,7 +24,7 @@ def manifest():
         "run_id": "20260715T000000Z-deadbee",
         "created_at": "2026-07-15T00:00:00+00:00",
         "smoke": False,
-        "planned_runs": 405,
+        "planned_runs": 513,
         "nerd_commit": "deadbeef",
         "upstream_commit": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a",
         "config": {"repetitions": 3, "seed": 7},
@@ -39,7 +40,7 @@ def build_fixture():
     records = []
     scores = []
     for comparison, (treatment, baseline) in ARMS.items():
-        count = 6 if comparison == "silent" else 5
+        count = 6 if comparison in {"silent", "fast"} else 5
         for index in range(count):
             case_id = f"{comparison}-case-{index}"
             for condition in (treatment, baseline):
@@ -93,6 +94,11 @@ class AggregateReportTests(unittest.TestCase):
         self.assertEqual(smart["paired"]["score_delta"], 10.0)
         self.assertEqual(smart["paired"]["latency_delta_percent"], -20.0)
 
+        fast = summary["comparisons"]["fast"]
+        self.assertEqual(fast["treatment"]["mean_score"], 90.0)
+        self.assertEqual(fast["baseline"]["mean_score"], 80.0)
+        self.assertEqual(fast["paired"]["latency_delta_percent"], -20.0)
+
         silent = summary["comparisons"]["silent"]
         self.assertEqual(silent["valid_pairs"]["accuracy"], 6)
         self.assertEqual(silent["valid_pairs"]["latency"], 6)
@@ -130,6 +136,28 @@ class AggregateReportTests(unittest.TestCase):
         )
         self.assertEqual(summary["publication_state"], "insufficient-data")
 
+    def test_fast_requires_accuracy_floor_and_lower_median_latency(self):
+        records, scores = build_fixture()
+        for record in records:
+            if record["condition"] == "nerd-fast":
+                record["elapsed_seconds"] = 12.0
+        summary = aggregate_results(records, scores, manifest())
+        fast = summary["comparisons"]["fast"]
+        self.assertEqual(fast["publication_state"], "insufficient-data")
+        self.assertFalse(fast["success_gate"]["latency_improved"])
+
+        records, scores = build_fixture()
+        for score in scores:
+            if score["run_id"].endswith("--nerd-fast"):
+                score["score"] = 70.0
+                score["passed"] = False
+                score["hard_gate_failures"] = ["proof"]
+        summary = aggregate_results(records, scores, manifest())
+        fast = summary["comparisons"]["fast"]
+        self.assertEqual(fast["publication_state"], "insufficient-data")
+        self.assertFalse(fast["success_gate"]["accuracy_preserved"])
+        self.assertFalse(fast["success_gate"]["no_new_hard_gate_failures"])
+
     def test_summary_markdown_contains_requested_metrics(self):
         records, scores = build_fixture()
         body = render_summary_markdown(
@@ -141,6 +169,7 @@ class AggregateReportTests(unittest.TestCase):
             "p50 latency",
             "p95 latency",
             "Tokens saved",
+            "Fast",
             "Patrol",
         ):
             self.assertIn(term, body)
@@ -151,6 +180,7 @@ class AggregateReportTests(unittest.TestCase):
         body = render_readme_results(summary)
         self.assertIn("| Comparison | Nerd score | Baseline score", body)
         self.assertIn("Smart vs Superpowers Brainstorming", body)
+        self.assertIn("Fast vs regular execution", body)
         self.assertIn("90.0%", body)
         self.assertIn("80.0%", body)
         self.assertIn("-20.00%", body)
@@ -160,7 +190,7 @@ class AggregateReportTests(unittest.TestCase):
         self.assertIn("-40.0%", body)
         self.assertIn("| p50 latency | 5.0s | 4.0s | -20.00% |", body)
         self.assertIn("5 valid pairs", body)
-        self.assertIn("21 cases", body)
+        self.assertIn("27 cases", body)
         self.assertIn("Nerd `deadbeef`", body)
         self.assertIn(
             "Superpowers `c984ea2e7aeffdcc865784fd6c5e3ab75da0209a`",

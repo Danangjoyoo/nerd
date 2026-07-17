@@ -18,8 +18,9 @@ class ClaudeHandoffTests(unittest.TestCase):
             "claude-opus-4-8",
             "claude-sonnet-5",
             "claude-haiku-4-5",
-            "120",
-            "60",
+            "nerd-fast",
+            "156",
+            "78",
         ):
             self.assertIn(value, body)
 

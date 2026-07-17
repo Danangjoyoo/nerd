@@ -8,5 +8,7 @@
   {"fixture": "execute-written-plan", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
   {"fixture": "execute-repository-convention", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
   {"fixture": "execute-preexisting-failure", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
-  {"fixture": "execute-blocker", "command": ["python3", "-m", "unittest", "discover", "-v"], "expected_exit": 0}
+  {"fixture": "execute-blocker", "command": ["python3", "-m", "unittest", "discover", "-v"], "expected_exit": 0},
+  {"fixture": "fast-independent-work", "command": ["python3", "-m", "unittest", "-v"], "expected_exit": 1},
+  {"fixture": "fast-verification-cost", "command": ["python3", "-m", "unittest", "test_feature", "-v"], "expected_exit": 1}
 ]

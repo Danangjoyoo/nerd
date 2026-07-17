@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "id": "fast-known-target",
+      "comparison": "fast",
+      "prompt": "Implement greet(name) in feature.py so it returns 'Hello, <name>!'. The target and expected behavior are explicit; use the shortest correct path and proportionate proof.",
+      "fixture": "execute-small-feature",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "fast-path", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Uses the named target directly without unnecessary repository-wide exploration or planning."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "feature.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_feature -v::0"}
+      ]
+    },
+    {
+      "id": "fast-unknown-target",
+      "comparison": "fast",
+      "prompt": "Add slugify(text) using the naming, typing, and test conventions already present. Locate the nearest relevant implementation and test with one focused discovery pass.",
+      "fixture": "execute-repository-convention",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "discovery", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Finds the nearest relevant implementation and test without broad unrelated exploration."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "text_tools.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_text_tools -v::0"}
+      ]
+    },
+    {
+      "id": "fast-independent-work",
+      "comparison": "fast",
+      "prompt": "Implement increment(value) in alpha.py and decrement(value) in beta.py. The two targets are independent; inspect and handle them together, then run one proof command.",
+      "fixture": "fast-independent-work",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "batching", "weight": 20, "hard_gate": false, "evaluator": "judge", "expected": "Treats the two independent targets as one batched work wave rather than serial rediscovery."},
+        {"id": "alpha", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "alpha.py"},
+        {"id": "beta", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "beta.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_alpha test_beta -v::0"}
+      ]
+    },
+    {
+      "id": "fast-approved-plan",
+      "comparison": "fast",
+      "prompt": "PLAN.md is approved. Execute its remaining work without re-planning or rediscovering scope, and run the specified focused proof.",
+      "fixture": "execute-written-plan",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "reuse-plan", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Consumes the approved plan once and executes it without reopening settled decisions."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "stats.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_stats -v::0"}
+      ]
+    },
+    {
+      "id": "fast-failure-recovery",
+      "comparison": "fast",
+      "prompt": "Implement double(value). The full suite has one unrelated legacy failure; reuse that evidence, prove only the targeted behavior, and report the verification boundary honestly.",
+      "fixture": "execute-preexisting-failure",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "bounded-recovery", "weight": 30, "hard_gate": false, "evaluator": "judge", "expected": "Separates the unrelated failure from the requested behavior without repeated broad correction attempts."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "numbers.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_feature -v::0"}
+      ]
+    },
+    {
+      "id": "fast-verification-cost",
+      "comparison": "fast",
+      "prompt": "Implement normalize(text) in feature.py. The exact required proof is `python3 -m unittest test_feature -v`; the unrelated full-suite test is intentionally slow and no broader verification trigger applies.",
+      "fixture": "fast-verification-cost",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "verification-gate", "weight": 30, "hard_gate": true, "evaluator": "judge", "expected": "Uses the specified focused proof and does not broaden verification without a trigger."},
+        {"id": "file", "weight": 30, "hard_gate": true, "evaluator": "file", "expected": "feature.py"},
+        {"id": "proof", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest test_feature -v::0"}
+      ]
+    }
+  ]
+}

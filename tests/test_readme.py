@@ -13,6 +13,7 @@ SKILLS = (
     "nerd-patrol",
     "nerd-execute",
     "nerd-silent",
+    "nerd-fast",
 )
 START = "<!-- BENCHMARK_RESULTS:START -->"
 END = "<!-- BENCHMARK_RESULTS:END -->"

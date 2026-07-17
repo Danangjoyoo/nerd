@@ -20,7 +20,7 @@ TARGETS = {
 
 
 class BenchmarkMatrixTests(unittest.TestCase):
-    def test_exact_target_configs_plan_120_unique_runs_each(self):
+    def test_exact_target_configs_plan_156_unique_runs_each(self):
         all_run_ids = set()
         for target_id, (agent, model, effort) in TARGETS.items():
             config_path = CONFIG_DIR / f"{target_id}.json"
@@ -31,14 +31,14 @@ class BenchmarkMatrixTests(unittest.TestCase):
             self.assertEqual(config["agents"], [agent])
             self.assertEqual(config["models"], {agent: model})
             runs = schedule_runs(config, ROOT / "benchmarks/work/matrix-test")
-            self.assertEqual(len(runs), 120)
-            self.assertEqual(len({item.run_id for item in runs}), 120)
+            self.assertEqual(len(runs), 156)
+            self.assertEqual(len({item.run_id for item in runs}), 156)
             self.assertTrue(all(item.target_id == target_id for item in runs))
             self.assertTrue(all(item.reasoning_effort == effort for item in runs))
             self.assertTrue(all(item.run_id not in all_run_ids for item in runs))
             all_run_ids.update(item.run_id for item in runs)
-            self.assertEqual(len(_smoke_specs(runs)), 8)
-        self.assertEqual(len(all_run_ids), 960)
+            self.assertEqual(len(_smoke_specs(runs)), 10)
+        self.assertEqual(len(all_run_ids), 1248)
 
     def test_all_targets_share_one_pinned_judge(self):
         judges = {
@@ -56,6 +56,7 @@ class BenchmarkMatrixTests(unittest.TestCase):
             "smart": 300,
             "surgery": 300,
             "silent": 300,
+            "fast": 300,
         }
         for comparison, minimum in minimums.items():
             payload = json.loads(

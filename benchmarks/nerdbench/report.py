@@ -17,6 +17,7 @@ COMPARISONS = {
     "surgery": ("nerd-surgery", "superpowers-systematic-debugging"),
     "execute": ("nerd-execute", "superpowers-executing-plans"),
     "silent": ("nerd-silent", "regular"),
+    "fast": ("nerd-fast", "fast-baseline"),
 }
 
 README_RUN = "<!-- BENCHMARK_RUN:{run_id} -->"
@@ -212,6 +213,31 @@ def _standard_comparison(
     }
 
 
+def _fast_comparison(
+    pairs: list[tuple[dict, dict]],
+    seed: int,
+) -> dict:
+    result = _standard_comparison("fast", pairs, seed)
+    no_new_hard_gate_failures = all(
+        not set(fast.get("hard_gate_failures", ())).difference(
+            baseline.get("hard_gate_failures", ())
+        )
+        for fast, baseline in pairs
+    )
+    score_delta = result["paired"]["score_delta"]
+    latency_delta = result["paired"]["latency_delta_percent"]
+    accuracy_preserved = score_delta is not None and score_delta >= 0
+    latency_improved = latency_delta is not None and latency_delta < 0
+    result["success_gate"] = {
+        "no_new_hard_gate_failures": no_new_hard_gate_failures,
+        "accuracy_preserved": accuracy_preserved,
+        "latency_improved": latency_improved,
+    }
+    if not all(result["success_gate"].values()):
+        result["publication_state"] = "insufficient-data"
+    return result
+
+
 def _silent_comparison(
     pairs: list[tuple[dict, dict]],
     seed: int,
@@ -297,6 +323,8 @@ def aggregate_results(
         matched = _pairs(valid, treatment, baseline)
         if name == "silent":
             comparisons[name] = _silent_comparison(matched, seed)
+        elif name == "fast":
+            comparisons[name] = _fast_comparison(matched, seed)
         else:
             comparisons[name] = _standard_comparison(name, matched, seed)
 
@@ -352,7 +380,7 @@ def render_readme_results(summary: dict) -> str:
     if summary.get("publication_state") != "publishable":
         raise ValueError("benchmark summary is not publishable")
     comparisons = summary.get("comparisons", {})
-    required = {"smart", "surgery", "execute", "silent"}
+    required = {"smart", "surgery", "execute", "silent", "fast"}
     missing = required.difference(comparisons)
     if missing:
         raise ValueError(f"benchmark summary is missing comparisons: {sorted(missing)}")
@@ -361,13 +389,14 @@ def render_readme_results(summary: dict) -> str:
         "smart": "Smart vs Superpowers Brainstorming",
         "surgery": "Surgery vs Superpowers Systematic Debugging",
         "execute": "Execute vs Superpowers Executing Plans",
+        "fast": "Fast vs regular execution",
     }
     lines = [
         "| Comparison | Nerd score | Baseline score | Score delta | Nerd pass | Baseline pass | p50 latency delta |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     valid_pairs = []
-    for name in ("smart", "surgery", "execute"):
+    for name in ("smart", "surgery", "execute", "fast"):
         item = comparisons[name]
         treatment = item.get("treatment")
         baseline = item.get("baseline")
@@ -502,7 +531,7 @@ def render_summary_markdown(summary: dict) -> str:
         "| Comparison | Accuracy score | Pass rate | p50 latency | p95 latency | Paired score delta | Paired latency delta |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for name in ("smart", "surgery", "execute"):
+    for name in ("smart", "surgery", "execute", "fast"):
         item = summary["comparisons"][name]
         treatment = item["treatment"]
         if not treatment:

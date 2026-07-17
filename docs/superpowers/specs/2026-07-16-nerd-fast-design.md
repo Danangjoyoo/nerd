@@ -12,8 +12,8 @@ Optimize the number of sequential operations on the critical path. Do not optimi
 
 - `nerd-smart` owns intention, endpoint, scope, and role.
 - `nerd-execute`, `nerd-surgery`, and `nerd-patrol` own their domain workflows.
-- `nerd-fast` changes operation selection, ordering, batching, reuse, escalation, and stopping behavior.
-- `nerd-silent` changes presentation and optional narration cost.
+- `nerd-fast` changes operation selection, ordering, batching, reuse, escalation, stopping behavior, and whether routine work needs a pre-tool model round.
+- `nerd-silent` changes overall narration and final presentation cost.
 
 Fast and Silent may compose. Fast never replaces or restarts the active workflow. When invoked without a resolved workflow, it uses Nerd Smart only when a material endpoint, scope, or authorization ambiguity remains.
 
@@ -45,8 +45,8 @@ Apply the gates in order. Do not narrate them unless a user decision, conflict, 
 | Reuse | Is sufficient current evidence already present? | Reuse it without another tool call. |
 | Freshness | Could the evidence have changed or become invalid? | Refresh time-sensitive external state, changed files, failed commands, and ambiguous or truncated output. |
 | Need | Which decision, change, or proof will the operation affect? | Skip operations without a material consumer. |
-| Batch | Can known independent operations be combined? | Execute them in one batch and synthesize once. |
-| Dependency | Does an operation require another result? | Keep only genuine dependencies sequential. Do not parallelize dependent mutations. |
+| Batch | Can known operations be dispatched together? | Batch independent operations; combine predetermined read-only commands in one invocation. |
+| Dependency | Can an intermediate result change the next operation? | Keep adaptive dependencies sequential. Do not parallelize dependent mutations. |
 | Escalation | What is the cheapest operation that can distinguish the possibilities? | Start narrowly and broaden only after an escalation trigger. |
 | Recovery | Did the failed attempt produce new evidence? | Make at most two evidence-driven corrections by default, then report the blocker. |
 | Verification cost | What is the lowest-cost fresh proof that directly supports the completion claim? | Select the lowest sufficient proof tier and escalate only on a verification trigger. |
@@ -63,6 +63,31 @@ Apply the gates in order. Do not narrate them unless a user decision, conflict, 
 
 User instructions, repository authority, and the active specialty override these defaults.
 
+### Concrete Command Batching
+
+Batch operations when the commands and their reactions are known before execution. Prefer one command that spans known targets; otherwise group read-only commands in one tool invocation. Parallelize independent operations when the platform supports it, and keep adaptive operations in separate rounds when an output can change the next command.
+
+Use concrete examples without making their tools part of the contract:
+
+```sh
+# Read several known regions in one round.
+sed -n '1,160p' src/a.py; sed -n '40,120p' tests/test_a.py
+
+# Search several known targets with one command.
+rg -n 'timeout|retry' src tests docs
+
+# Collect independent, read-only repository evidence.
+git status --short; git diff --stat; git diff --check
+
+# Run dependent checks as a fail-fast sequence.
+python3 -m compileall src && pytest tests/unit -q && python3 scripts/validate.py
+
+# Select an intentional fallback after failure.
+primary-command || compatible-fallback-command
+```
+
+Require equivalent tools when these examples are unavailable. Use `;` only when later operations remain useful after an earlier failure, `&&` when success is a prerequisite, and `||` only for intentional recovery or fallback.
+
 ## Verification-Cost Gate
 
 Verification is required to support claims, not to perform ceremony. Select the cheapest fresh check that observes the behavior or property being claimed.
@@ -78,6 +103,28 @@ Verification is required to support claims, not to perform ceremony. Select the 
 | V4 | Full-system or live validation | Full repository suite, end-to-end run, deployment smoke test, or authorized live integration. |
 
 Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation has invalidated it. Any behavioral completion claim after mutation requires fresh proof.
+
+### Incremental and Runtime-Aware Verification
+
+| Situation | Default |
+| --- | --- |
+| **Reusable state** | Reuse fresh, trustworthy dependency, compiler, transpiler, test, runtime, and build caches. Preserve active daemons and watch processes when available. |
+| **Static claim** | Use the narrowest syntax, type, lint, compile, or AST check that directly observes the claim. |
+| **Behavioral claim** | Run one test method, case, file, package, or affected component before broader suites. |
+| **Cold work** | Avoid clearing caches, reinstalling dependencies, rebuilding unaffected targets, recreating environments, or restarting healthy services without evidence that it is necessary. |
+| **Escalation** | Run clean builds, broad suites, or environment resets only when repository authority, stale state, contradictory evidence, release parity, or another verification trigger requires them. |
+
+Use concrete narrow-check examples without making their ecosystems part of the contract:
+
+| Ecosystem | Example |
+| --- | --- |
+| **Python** | `pytest tests/test_api.py::test_login` |
+| **JavaScript / TypeScript** | `vitest run path/to/api.test.ts` |
+| **Ruby** | `bundle exec rspec spec/api_spec.rb:42` |
+| **Java / Kotlin** | `./gradlew test --tests 'pkg.ApiTest.login'` |
+| **Go** | `go test ./pkg/api -run '^TestLogin$'` |
+
+Treat commands, languages, and build systems as illustrations. Require the narrowest equivalent check supported by the active project.
 
 ### Verification Escalation Triggers
 
@@ -116,34 +163,38 @@ Select the single closest mapping. If two mappings conflict materially, use one 
 
 For non-atomic work, maintain this internal Fast Path record:
 
-```text
-Recipe: selected mapping
-Known: reusable current evidence
-Unknown: one critical missing fact
-Next batch: independent operations to execute together
-Proof: lowest sufficient fresh verification tier
-Stop: exact completion condition
-```
+| Field | Value |
+| --- | --- |
+| **Recipe** | Selected mapping. |
+| **Known** | Reusable current evidence. |
+| **Unknown** | One critical missing fact. |
+| **Next batch** | Independent operations to execute together. |
+| **Proof** | Lowest sufficient fresh verification tier. |
+| **Stop** | Exact completion condition. |
 
 Do not display the record unless it exposes a conflict that requires user input.
 
 Execute in four waves:
 
-1. **Reuse:** Consume current records, plans, outputs, and unchanged evidence.
-2. **Discover:** Run one narrow batch that resolves the critical unknown.
-3. **Execute:** Perform the smallest authorized work and parallelize only independent operations.
-4. **Prove:** Apply the verification-cost gate, state only supported claims, and stop.
+| Wave | Discipline |
+| --- | --- |
+| **Reuse** | Consume current records, plans, outputs, and unchanged evidence. |
+| **Discover** | Run one narrow batch that resolves the critical unknown. |
+| **Execute** | Perform the smallest authorized work and parallelize only independent operations. |
+| **Prove** | Apply the verification-cost gate, state only supported claims, and stop. |
 
 Additional discipline:
 
-- Make every TODO produce an outcome, remove a blocker, or provide proof.
-- Do not create TODOs named only `analyze`, `think`, or `inspect more`.
-- Do not reread unchanged files or repeat successful commands.
-- Do not restart planning after every tool result.
-- Reuse a successful result until a mutation, contradiction, freshness requirement, or failed dependent operation invalidates it.
-- Do not dispatch reviewers or subagents unless the active workflow permits them and their expected wall-clock savings exceed startup and handoff cost.
-- Preserve required user interaction, safety checks, authorization, and proof.
-- Leave narration and final-output reduction to Nerd Silent.
+| Rule | Discipline |
+| --- | --- |
+| **TODOs** | Make every TODO produce an outcome, remove a blocker, or provide proof. Do not create TODOs named only `analyze`, `think`, or `inspect more`. |
+| **Evidence reuse** | Do not reread unchanged files, repeat successful commands, or restart planning after every tool result. Reuse a successful result until a mutation, contradiction, freshness requirement, or failed dependent operation invalidates it. |
+| **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search and expected reuse amortizes refresh cost. Do not rebuild or refresh an index for a single lookup. Resolve the bundled `scripts/symbol_index.py` relative to `SKILL.md`, run `ensure` once before repeated exact-symbol lookups, and use `find` without implicit refresh. Universal Ctags is optional; fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
+| **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and their expected wall-clock savings exceed startup and handoff cost. |
+| **Authority** | Preserve required user interaction, safety checks, authorization, and proof. |
+| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite whole files only when they are generated, mostly replaced, or transformed by an appropriate trusted tool. |
+| **Tool dispatch** | Invoke tools immediately for routine authorized operations. Add a pre-tool model round only for approval, safety, a material decision, or a required progress update. |
+| **Presentation** | Leave overall narration and final-output reduction to Nerd Silent. |
 
 ## Conflicts and Failure Handling
 
@@ -160,11 +211,15 @@ Create only the files needed for publication and validation:
 ```text
 skills/nerd-fast/
 ├── SKILL.md
-└── agents/
-    └── openai.yaml
+├── agents/
+│   └── openai.yaml
+└── scripts/
+    └── symbol_index.py
 ```
 
-Keep the complete runtime method in `SKILL.md`; no scripts, assets, or reference files are currently justified. Add `nerd-fast` to the public skill contract, README skill table, modifier composition language, installation validation, and contract tests.
+The optional indexer script uses only Python standard-library modules and keeps its workspace-keyed SQLite cache outside the workspace. Universal Ctags with JSON support is optional and is used only during explicit incremental refreshes. When the dependency or a usable index is unavailable, an exact-file read or narrow text search remains the required fallback. The implementation and measurement boundary is specified in [the symbol indexer implementation plan](../plans/2026-07-17-nerd-fast-symbol-indexer.md).
+
+No assets or reference files are justified. Keep `nerd-fast` in the public skill contract, README skill table, modifier composition language, installation validation, and contract tests.
 
 The metadata description must identify Fast as a latency modifier and include its explicit and concrete latency triggers. The default prompt must name `$nerd-fast`.
 
@@ -179,6 +234,10 @@ Structural and contract tests must establish that Fast:
 - Preserves active workflow correctness, authorization, safety, and proof.
 - Has no hard total tool cap.
 - Contains the ten ordered gates, proof ladder, five verification escalation triggers, ten generic mappings, four execution waves, and bounded recovery rule.
+- Includes concrete, non-binding command-batching examples and equivalent-tool guidance.
+- Prefers targeted edits and immediate tool dispatch for routine authorized operations.
+- Reuses trustworthy incremental runtime state and gives non-binding narrow-check examples across language ecosystems.
+- Selects an existing fresh index only when reuse amortizes its cost, invokes the bundled script relative to `SKILL.md`, confirms source before mutation, and preserves direct-search fallback.
 - Composes with Nerd Silent without duplicating narration rules.
 - Does not contain a runtime `superpowers:` dependency.
 

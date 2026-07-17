@@ -28,6 +28,8 @@ LOCAL_CONDITIONS = {
     "regular": ("nerd-smart",),
     "nerd-silent": ("nerd-smart", "nerd-silent"),
     "nerd-patrol": ("nerd-smart", "nerd-patrol"),
+    "fast-baseline": ("nerd-smart", "nerd-execute"),
+    "nerd-fast": ("nerd-smart", "nerd-execute", "nerd-fast"),
 }
 
 UPSTREAM_CONDITIONS = {

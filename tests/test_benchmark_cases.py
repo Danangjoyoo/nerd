@@ -47,6 +47,14 @@ EXPECTED_CASES = {
         "patrol-secret-logging",
         "patrol-no-findings",
     },
+    "fast": {
+        "fast-known-target",
+        "fast-unknown-target",
+        "fast-independent-work",
+        "fast-approved-plan",
+        "fast-failure-recovery",
+        "fast-verification-cost",
+    },
 }
 
 
@@ -126,10 +134,10 @@ class BenchmarkCorpusTests(unittest.TestCase):
             actual = {item.id for item in load_cases(CASES / f"{comparison}.json")}
             self.assertEqual(actual, expected)
 
-    def test_every_comparison_has_five_valid_cases(self):
-        for comparison in EXPECTED_CASES:
+    def test_every_comparison_has_the_expected_valid_cases(self):
+        for comparison, expected in EXPECTED_CASES.items():
             loaded = load_cases(CASES / f"{comparison}.json")
-            self.assertEqual(len(loaded), 5)
+            self.assertEqual(len(loaded), len(expected))
             for item in loaded:
                 self.assertEqual(sum(c.weight for c in item.criteria), 100)
                 self.assertTrue(any(c.hard_gate for c in item.criteria))
@@ -168,6 +176,21 @@ class MaterializationTests(unittest.TestCase):
             self.assertTrue((first / ".git").exists())
             self.assertFalse((first / "benchmarks" / "cases").exists())
             self.assertTrue((first / ".agents" / "skills" / "nerd-execute").exists())
+
+    def test_fast_condition_installs_execute_and_modifier(self):
+        from benchmarks.nerdbench.materialize import materialize_run
+
+        case_item = load_cases(CASES / "fast.json")[0]
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = materialize_run(
+                case_item,
+                "nerd-fast",
+                "codex",
+                Path(directory) / "fast",
+            )
+            installed = workspace / ".agents" / "skills"
+            for skill in ("nerd-smart", "nerd-execute", "nerd-fast"):
+                self.assertTrue((installed / skill / "SKILL.md").is_file())
 
     def test_upstream_commit_mismatch_is_rejected(self):
         from benchmarks.nerdbench.materialize import verify_superpowers_checkout

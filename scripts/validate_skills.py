@@ -14,6 +14,7 @@ PUBLIC_SKILLS = (
     "nerd-patrol",
     "nerd-execute",
     "nerd-silent",
+    "nerd-fast",
 )
 
 REQUIRED_REFERENCES = {
@@ -26,9 +27,24 @@ REQUIRED_REFERENCES = {
     "nerd-patrol": ("test-first-remediation.md", "verification.md"),
     "nerd-execute": (),
     "nerd-silent": (),
+    "nerd-fast": (),
 }
 
-DERIVED_SKILLS = PUBLIC_SKILLS[:-1]
+REQUIRED_SCRIPTS = {
+    "nerd-smart": (),
+    "nerd-surgery": (),
+    "nerd-patrol": (),
+    "nerd-execute": (),
+    "nerd-silent": (),
+    "nerd-fast": ("symbol_index.py",),
+}
+
+DERIVED_SKILLS = (
+    "nerd-smart",
+    "nerd-surgery",
+    "nerd-patrol",
+    "nerd-execute",
+)
 BANNED_RUNTIME_REFERENCES = ("brainstorming-smart", "mensa", "superpowers:")
 
 
@@ -140,6 +156,11 @@ def validate_repository(root: Path) -> list[str]:
             for nested_skill in references_root.rglob("SKILL.md"):
                 relative = nested_skill.relative_to(root)
                 violations.append(f"nested skill is forbidden: {relative}")
+
+        for script in REQUIRED_SCRIPTS[name]:
+            path = skill_dir / "scripts" / script
+            if not path.is_file():
+                violations.append(f"missing file: skills/{name}/scripts/{script}")
 
         if name in DERIVED_SKILLS and not (skill_dir / "LICENSE.superpowers").is_file():
             violations.append(f"missing file: skills/{name}/LICENSE.superpowers")

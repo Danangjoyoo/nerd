@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml) [![skills.sh](https://skills.sh/b/danangjoyoo/nerd)](https://skills.sh/danangjoyoo/nerd)
 
-Focused operating skills for coding agents: think clearly, diagnose before fixing, audit with evidence, build against repository reality, and stay silent when narration adds no value.
+Focused operating skills for coding agents: think clearly, diagnose before fixing, audit with evidence, build against repository reality, minimize critical-path latency, and stay silent when narration adds no value.
 
 ## Install
 
@@ -42,8 +42,9 @@ Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}
 | `nerd-patrol` | Examines a confirmed security scope and reports only reachable, evidence-backed findings. |
 | `nerd-execute` | Implements approved plans or confirmed small changes using repository patterns and fresh proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
+| `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
 
-Smart routes one primary specialty; Silent composes with any active workflow. The Agent Skills layout supports Codex, Claude Code, and Cursor.
+Smart routes one primary specialty; Fast and Silent compose as global modifiers with any active workflow. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 
 Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
 
@@ -149,7 +150,7 @@ Haiku    Nerd [██░░░░░░░░░░░░░░░░░░]  6.
 
 ### Method
 
-Accuracy and latency use Nerd Smart versus Superpowers Brainstorming as the representative comparison for every model. Token savings is the median per-case percentage for the no-narration comparison, labeled Nerd. See the [full cost and accuracy view](docs/benchmark/nerd-cost-accuracy.html) and [benchmark plan](docs/plans/2026-07-15-nerd-benchmarks.md).
+Accuracy and latency use Nerd Smart versus Superpowers Brainstorming as the representative comparison for every model. Token savings is the median per-case percentage for the no-narration comparison, labeled Nerd. New release matrices also pair Fast with regular Execute and publish it only when Fast preserves the accuracy floor and improves median latency. See the [full cost and accuracy view](docs/benchmark/nerd-cost-accuracy.html) and [benchmark plan](docs/plans/2026-07-15-nerd-benchmarks.md).
 
 ## Verify locally
 

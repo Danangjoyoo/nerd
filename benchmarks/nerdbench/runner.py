@@ -22,15 +22,17 @@ from .models import BenchmarkCase, RunResult, RunSpec
 
 ROOT = Path(__file__).resolve().parents[2]
 CONDITION_SKILLS = {
-    "nerd-smart": "nerd-smart",
-    "superpowers-brainstorming": "brainstorming",
-    "nerd-surgery": "nerd-surgery",
-    "superpowers-systematic-debugging": "systematic-debugging",
-    "nerd-execute": "nerd-execute",
-    "superpowers-executing-plans": "executing-plans",
-    "regular": "nerd-smart",
-    "nerd-silent": "nerd-silent",
-    "nerd-patrol": "nerd-patrol",
+    "nerd-smart": ("nerd-smart",),
+    "superpowers-brainstorming": ("brainstorming",),
+    "nerd-surgery": ("nerd-surgery",),
+    "superpowers-systematic-debugging": ("systematic-debugging",),
+    "nerd-execute": ("nerd-execute",),
+    "superpowers-executing-plans": ("executing-plans",),
+    "regular": ("nerd-smart",),
+    "nerd-silent": ("nerd-silent",),
+    "nerd-patrol": ("nerd-patrol",),
+    "fast-baseline": ("nerd-execute",),
+    "nerd-fast": ("nerd-execute", "nerd-fast"),
 }
 SMOKE_CASES = {
     "smart": "smart-ambiguous-focus",
@@ -38,6 +40,7 @@ SMOKE_CASES = {
     "execute": "execute-blocker",
     "silent": "silent-final-only",
     "patrol": "patrol-auth-pr",
+    "fast": "fast-verification-cost",
 }
 
 
@@ -166,10 +169,11 @@ def create_run_directory(results_root: Path, run_id: str) -> Path:
 
 def condition_prompt(condition: str, prompt: str) -> str:
     try:
-        skill = CONDITION_SKILLS[condition]
+        skills = CONDITION_SKILLS[condition]
     except KeyError as error:
         raise ValueError(f"unknown benchmark condition: {condition}") from error
-    return f"Use ${skill}.\n\n{prompt}"
+    invocation = " and ".join(f"${skill}" for skill in skills)
+    return f"Use {invocation}.\n\n{prompt}"
 
 
 def _git_output(args: list[str], cwd: Path = ROOT) -> str:
