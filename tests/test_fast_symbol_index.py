@@ -66,6 +66,7 @@ class CacheContractTests(unittest.TestCase):
             )
             self.assertEqual(indexer.find_symbol(connection, "Widget"), symbols)
             self.assertEqual(indexer.find_symbol(connection, "Wid"), [])
+            connection.close()
 
 
 class CtagsContractTests(unittest.TestCase):
@@ -155,6 +156,86 @@ class CtagsContractTests(unittest.TestCase):
         self.assertIn("--fields=+nsS-P", commands[0])
         self.assertNotIn("--excmd=number", commands[0])
 
+    def test_large_generation_uses_one_line_list_process(self):
+        indexer = load_indexer()
+        commands: list[list[str]] = []
+        inputs: list[str | None] = []
+
+        class Output:
+            def __iter__(self):
+                return iter(())
+
+            def close(self):
+                return None
+
+        class Process:
+            stdout = Output()
+
+            def wait(self):
+                return 0
+
+        def popen(command, **kwargs):
+            commands.append(command)
+            stream = kwargs.get("stdin")
+            inputs.append(stream.read() if stream is not None else None)
+            return Process()
+
+        paths = [f"src/module_{index}.py" for index in range(201)]
+        original = indexer.subprocess.Popen
+        indexer.subprocess.Popen = popen
+        try:
+            indexer.generate_tags("ctags", Path("/workspace"), paths[:200])
+            self.assertEqual(len(commands), 1)
+            self.assertNotIn("-L", commands[0])
+            self.assertIsNone(inputs[0])
+            commands.clear()
+            inputs.clear()
+            indexer.generate_tags("ctags", Path("/workspace"), paths)
+        finally:
+            indexer.subprocess.Popen = original
+
+        self.assertEqual(len(commands), 1)
+        self.assertEqual(commands[0][-2:], ["-L", "-"])
+        self.assertEqual(inputs[0].splitlines()[0], "./src/module_0.py")
+        self.assertEqual(len(inputs[0].splitlines()), 201)
+
+    def test_line_unsafe_paths_fall_back_to_argument_batches(self):
+        indexer = load_indexer()
+
+        class Output:
+            def __iter__(self):
+                return iter(())
+
+            def close(self):
+                return None
+
+        class Process:
+            stdout = Output()
+
+            def wait(self):
+                return 0
+
+        for unsafe in ("odd\nname.py", "trailing.py "):
+            with self.subTest(path=unsafe):
+                commands: list[list[str]] = []
+
+                def popen(command, **kwargs):
+                    commands.append(command)
+                    return Process()
+
+                paths = [f"src/module_{index}.py" for index in range(200)]
+                paths.append(unsafe)
+                original = indexer.subprocess.Popen
+                indexer.subprocess.Popen = popen
+                try:
+                    indexer.generate_tags("ctags", Path("/workspace"), paths)
+                finally:
+                    indexer.subprocess.Popen = original
+
+                self.assertEqual(len(commands), 2)
+                self.assertTrue(all("-L" not in command for command in commands))
+                self.assertIn(f"./{unsafe}", commands[-1])
+
 
 class RefreshContractTests(unittest.TestCase):
     def test_refresh_indexes_only_changes_and_removes_deleted_files(self):
@@ -203,6 +284,7 @@ class RefreshContractTests(unittest.TestCase):
             self.assertEqual(second, {"changed": 0, "removed": 0})
             self.assertEqual(third, {"changed": 0, "removed": 1})
             self.assertEqual(indexer.find_symbol(connection, "Widget"), [])
+            connection.close()
 
 
 class CliContractTests(unittest.TestCase):

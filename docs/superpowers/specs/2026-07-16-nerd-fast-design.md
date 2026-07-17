@@ -86,7 +86,7 @@ python3 -m compileall src && pytest tests/unit -q && python3 scripts/validate.py
 primary-command || compatible-fallback-command
 ```
 
-Require equivalent tools when these examples are unavailable. Use `;` only when later operations remain useful after an earlier failure, `&&` when success is a prerequisite, and `||` only for intentional recovery or fallback.
+Require equivalent tools when these examples are unavailable. Only chain commands when the execution tool invokes a shell interpreter; otherwise use separate structured invocations or the tool's native batching interface. Use `;` only when later operations remain useful after an earlier failure, `&&` when success is a prerequisite, and `||` only for intentional recovery or fallback.
 
 ## Verification-Cost Gate
 
@@ -102,7 +102,7 @@ Verification is required to support claims, not to perform ceremony. Select the 
 | V3 | Boundary or package validation | Relevant package suite, type check, build, integration test, migration check, or multi-component validation. |
 | V4 | Full-system or live validation | Full repository suite, end-to-end run, deployment smoke test, or authorized live integration. |
 
-Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation has invalidated it. Any behavioral completion claim after mutation requires fresh proof.
+Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation has invalidated it. Any file mutation, structural refactor, or code addition requires at least V1 proof before completion. Any behavioral completion claim after mutation requires fresh proof.
 
 ### Incremental and Runtime-Aware Verification
 
@@ -192,7 +192,7 @@ Additional discipline:
 | **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search and expected reuse amortizes refresh cost. Do not rebuild or refresh an index for a single lookup. Resolve the bundled `scripts/symbol_index.py` relative to `SKILL.md`, run `ensure` once before repeated exact-symbol lookups, and use `find` without implicit refresh. Universal Ctags is optional; fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
 | **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and their expected wall-clock savings exceed startup and handoff cost. |
 | **Authority** | Preserve required user interaction, safety checks, authorization, and proof. |
-| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite whole files only when they are generated, mostly replaced, or transformed by an appropriate trusted tool. |
+| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite whole files only when they are generated, mostly replaced, or transformed by an appropriate trusted tool. Before dispatching a mutation batch, confirm that each intermediate step is idempotent, transactional, or safely recoverable if a later command fails; otherwise keep mutations sequential and inspect state between them. |
 | **Tool dispatch** | Invoke tools immediately for routine authorized operations. Add a pre-tool model round only for approval, safety, a material decision, or a required progress update. |
 | **Presentation** | Leave overall narration and final-output reduction to Nerd Silent. |
 

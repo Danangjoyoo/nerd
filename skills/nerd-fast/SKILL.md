@@ -61,7 +61,7 @@ python3 -m compileall src && pytest tests/unit -q && python3 scripts/validate.py
 primary-command || compatible-fallback-command
 ```
 
-Treat these commands as illustrations, not requirements. Use equivalent tools when `sed`, `rg`, shell operators, or the shown runtimes are unavailable. Use `;` only when later operations remain useful after an earlier failure. Use `&&` when success is a prerequisite. Use `||` only for intentional recovery or fallback.
+Treat these commands as illustrations, not requirements. Use equivalent tools when `sed`, `rg`, shell operators, or the shown runtimes are unavailable. Only chain commands when the execution tool invokes a shell interpreter; otherwise use separate structured invocations or the tool's native batching interface. Use `;` only when later operations remain useful after an earlier failure. Use `&&` when success is a prerequisite. Use `||` only for intentional recovery or fallback.
 
 ## Verification-Cost Gate
 
@@ -77,7 +77,7 @@ Select the cheapest fresh check that observes the behavior or property being cla
 | **V3** | Boundary or package validation | A relevant package suite, type check, build, integration test, migration check, or multi-component validation. |
 | **V4** | Full-system or live validation | A full repository suite, end-to-end run, deployment smoke test, or authorized live integration. |
 
-Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation invalidated it. Any behavioral completion claim after mutation requires fresh proof.
+Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation invalidated it. Any file mutation, structural refactor, or code addition requires at least V1 proof before completion. Any behavioral completion claim after mutation requires fresh proof.
 
 ### Incremental and Runtime-Aware Verification
 
@@ -159,7 +159,7 @@ Execute in four waves:
 | **TODOs** | Make every TODO produce an outcome, remove a blocker, or provide proof. |
 | **Evidence reuse** | Do not reread unchanged files, repeat successful commands, or restart planning after every tool result. Reuse a result until a mutation, contradiction, freshness requirement, or failed dependency invalidates it. |
 | **Indexed navigation** | Prefer an existing fresh file or symbol index when its query cost is lower than direct search and expected reuse amortizes refresh cost. Do not rebuild or refresh an index for a single lookup. When the bundled script is available, resolve `scripts/symbol_index.py` relative to this `SKILL.md`, run `ensure` once before repeated exact-symbol lookups, and use `find` without implicit refresh. Universal Ctags is optional; fall back to an exact-file read or narrow text search when the index is unavailable, stale, or incomplete. Treat matches as navigation candidates and confirm source before mutation. |
-| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite a whole file only when it is generated, most of its content must change, or a trusted formatter or codemod is the appropriate transform. Treat concrete tools such as patch utilities, IDE edit APIs, and `sed` as examples rather than dependencies. |
+| **Mutation** | Prefer a structured patch or targeted-edit primitive for localized mutations. Do not reproduce unchanged file content in the model output or edit payload. Rewrite a whole file only when it is generated, most of its content must change, or a trusted formatter or codemod is the appropriate transform. Before dispatching a mutation batch, confirm that each intermediate step is idempotent, transactional, or safely recoverable if a later command fails; otherwise keep mutations sequential and inspect state between them. Treat concrete tools such as patch utilities, IDE edit APIs, and `sed` as examples rather than dependencies. |
 | **Tool dispatch** | For routine authorized operations, invoke the tool immediately. Do not spend a model round explaining intent unless required for approval, safety, a material decision, or a required progress update. Fast removes optional pre-tool latency; Silent controls overall narration and final presentation. |
 | **Delegation** | Do not dispatch reviewers or subagents unless the active workflow permits them and expected wall-clock savings exceed startup and handoff cost. Leave optional commentary volume and final-output reduction to Nerd Silent. |
 

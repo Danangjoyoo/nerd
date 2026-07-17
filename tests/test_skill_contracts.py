@@ -545,6 +545,19 @@ class FastContractTests(unittest.TestCase):
                 "Use `;` only when later operations remain useful",
                 "Use `&&` when success is a prerequisite",
                 "Use `||` only for intentional recovery or fallback",
+                "Only chain commands when the execution tool invokes a shell interpreter",
+            ),
+        )
+
+    def test_requires_recoverable_mutation_batches(self):
+        body = skill_body("nerd-fast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Before dispatching a mutation batch",
+                "idempotent, transactional, or safely recoverable",
+                "keep mutations sequential and inspect state between them",
             ),
         )
 
@@ -600,6 +613,7 @@ class FastContractTests(unittest.TestCase):
             verification,
             (
                 "lowest tier that directly supports the exact claim",
+                "Any file mutation, structural refactor, or code addition requires at least V1",
                 "Any behavioral completion claim after mutation requires fresh proof",
                 "Do not run a full suite merely because one exists",
                 "Do not rerun an unchanged passing check",

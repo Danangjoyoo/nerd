@@ -429,6 +429,14 @@ def parse_ctags_json(lines: Iterable[str], root: Path) -> list[dict[str, object]
     return parsed
 
 
+def _ctags_operand(path: str) -> str:
+    return path if os.path.isabs(path) else f"./{path}"
+
+
+def _line_list_safe(path: str) -> bool:
+    return "\n" not in path and "\r" not in path and not path[-1:].isspace()
+
+
 def _generate_tag_batch(
     binary: str,
     root: Path,
@@ -439,7 +447,7 @@ def _generate_tag_batch(
         "--output-format=json",
         "--fields=+nsS-P",
         "--sort=no",
-        *paths,
+        *(_ctags_operand(path) for path in paths),
     ]
     with tempfile.TemporaryFile(mode="w+t", encoding="utf-8") as errors:
         process = subprocess.Popen(
@@ -464,7 +472,51 @@ def _generate_tag_batch(
     return parsed
 
 
+def _generate_tag_list(
+    binary: str,
+    root: Path,
+    paths: list[str],
+) -> list[dict[str, object]]:
+    command = [
+        binary,
+        "--output-format=json",
+        "--fields=+nsS-P",
+        "--sort=no",
+        "-L",
+        "-",
+    ]
+    with (
+        tempfile.TemporaryFile(mode="w+t", encoding="utf-8") as inputs,
+        tempfile.TemporaryFile(mode="w+t", encoding="utf-8") as errors,
+    ):
+        inputs.writelines(f"{_ctags_operand(path)}\n" for path in paths)
+        inputs.seek(0)
+        process = subprocess.Popen(
+            command,
+            cwd=root,
+            stdin=inputs,
+            stdout=subprocess.PIPE,
+            stderr=errors,
+            text=True,
+            bufsize=1,
+        )
+        if process.stdout is None:
+            raise RuntimeError("Universal Ctags stdout pipe was not created")
+        try:
+            parsed = parse_ctags_json(process.stdout, root)
+        finally:
+            process.stdout.close()
+        returncode = process.wait()
+        if returncode != 0:
+            errors.seek(0)
+            detail = errors.read().strip()
+            raise RuntimeError(f"Universal Ctags failed ({returncode}): {detail}")
+    return parsed
+
+
 def generate_tags(binary: str, root: Path, paths: list[str]) -> list[dict[str, object]]:
+    if len(paths) > 200 and all(_line_list_safe(path) for path in paths):
+        return _generate_tag_list(binary, root, paths)
     parsed: list[dict[str, object]] = []
     for start in range(0, len(paths), 200):
         parsed.extend(_generate_tag_batch(binary, root, paths[start : start + 200]))
@@ -480,7 +532,7 @@ python3 -m unittest tests.test_fast_symbol_index.CtagsContractTests -v
 python3 -m unittest tests.test_fast_symbol_index -v
 ```
 
-Expected: all four tests pass without invoking the host machine's `ctags` binary.
+Expected: all five tests pass without invoking the host machine's `ctags` binary.
 
 - [ ] **Step 5: Commit capability detection and parsing**
 
