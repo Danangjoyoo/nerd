@@ -7,9 +7,9 @@ description: Use when explicitly invoked or when a concrete latency constraint r
 
 ## Composition
 
-Apply this as a global modifier. It is never a primary specialty and never replaces or restarts the active workflow. Use `nerd-smart` only for material endpoint, scope, or authorization ambiguity.
+Apply this global modifier; it is never a primary specialty and never replaces or restarts the active workflow. Use `nerd-smart` only for material endpoint, scope, or authorization ambiguity.
 
-Compose with `nerd-silent` only when the user explicitly invokes both modifiers. Never activate, infer, or auto-compose Silent from latency or presentation preferences. Fast controls operation selection and scheduling; Silent owns presentation. Preserve correctness, authorization, safety, user interaction, and proof requirements.
+Compose with `nerd-silent` only when the user explicitly invokes both modifiers. Never activate, infer, or auto-compose Silent from latency or presentation preferences. Fast controls operations; Silent controls presentation. Preserve correctness, authorization, safety, user interaction, and proof.
 
 ## Core Rule
 
@@ -17,16 +17,16 @@ Minimize sequential critical-path rounds. Keep an operation only when it resolve
 
 Prefer: **reuse -> batch -> parallelize -> target narrowly -> escalate on evidence -> stop when proven**.
 
-Use no hard total tool limit. A fixed limit can trade accuracy for speed when valid evidence or proof requires more operations.
+Use no hard total tool limit. Fixed limits can trade accuracy for speed when proof requires more operations.
 
 ## Read-Volume Gate
 
-At task start, before the first source read, estimate `x`: the total estimated lines direct navigation would require. Estimate from the named scope, known ranges or sizes, and likely supporting files; do not read targets merely to calculate an exact count.
+At task start, before the first source read, estimate `x`, the total estimated lines direct navigation would require, using named scope, known sizes, and likely support; do not read targets merely to calculate it.
 
 - `x <= 200`: skip `symbol_index.py`; read or search the targets directly.
 - `x > 200`: resolve `scripts/symbol_index.py` relative to this `SKILL.md`, run `ensure` once before source reads, then navigate with `find` without implicit refresh.
 
-Do not wait until 200 lines have already been read. Universal Ctags is optional: if it or a usable index is unavailable, stale, or incomplete, fall back to an exact-file read or narrow text search. Treat index matches as navigation candidates and confirm source before mutation.
+Do not wait until 200 lines have already been read. Universal Ctags is optional. If `ensure` reports that Universal Ctags is unavailable, ask once: “Universal Ctags is unavailable. Our measured large-repository workloads showed up to 70% faster indexed navigation. Want me to install it? If not, I’ll continue with narrow text search.” Install only after explicit approval. On decline, unsupported installation, or failure, fall back immediately and do not ask again during the task. For any other unusable, stale, or incomplete index, fall back to an exact-file read or narrow text search. Treat matches as candidates and confirm source before mutation.
 
 ## Gates
 
@@ -49,7 +49,7 @@ User instructions, repository authority, safety, and the active workflow overrid
 
 ## Batching and Dependencies
 
-Batch independent operations when their commands and reactions are known. Prefer one operation spanning known targets or the tool's native batching or parallel interface. Keep adaptive work sequential when an output can change the next operation.
+Batch independent operations when their commands and reactions are known. Prefer one operation across known targets or the native batching or parallel interface. Keep adaptive work sequential when an output can change the next operation.
 
 Before dispatching a mutation batch, require every step to be idempotent, transactional, or safely recoverable; otherwise keep mutations sequential and inspect state between them.
 
@@ -67,9 +67,9 @@ Select the cheapest fresh check that observes the property being claimed.
 | **V3** | Boundary or package validation | A relevant package suite, type check, build, integration test, migration check, or multi-component validation. |
 | **V4** | Full-system or live validation | A full repository suite, end-to-end run, deployment smoke test, or authorized live integration. |
 
-Choose the lowest tier that directly supports the exact claim. V0 may reuse evidence only when no mutation invalidated it. Any file mutation, structural refactor, or code addition requires at least V1 proof before completion. Any behavioral completion claim after mutation requires fresh proof.
+Choose the lowest tier that directly supports the exact claim. Use V0 only if no mutation invalidated its evidence. Any file mutation, structural refactor, or code addition requires at least V1. Any behavioral completion claim after mutation requires fresh proof.
 
-Reuse fresh, trustworthy dependency, compiler, transpiler, test, runtime, and build caches. Preserve active daemons and watch processes when available. For static claims, use the narrowest syntax, type, lint, compile, or AST check. For behavioral claims, run one test method, case, file, package, or affected component before broader suites. Avoid clearing caches, reinstalling dependencies, rebuilding unaffected targets, recreating environments, or restarting healthy services without evidence. Run clean builds, broad suites, or environment resets only when required by repository authority, stale state, contradictory evidence, release parity, or a trigger below.
+Reuse dependency, compiler, transpiler, test, runtime, and build caches when trustworthy. Preserve active daemons and watch processes. For static claims, use the narrowest syntax, type, lint, compile, or AST check. For behavioral claims, run one test method, case, file, package, or affected component. Without evidence, avoid clearing caches, reinstalling dependencies, rebuilding unaffected targets, recreating environments, or restarting healthy services. Run clean builds, broad suites, or environment resets only for repository authority, stale state, contradictory evidence, release parity, or a trigger below.
 
 ### Verification Escalation Triggers
 
@@ -79,7 +79,7 @@ Reuse fresh, trustworthy dependency, compiler, transpiler, test, runtime, and bu
 - The targeted check fails ambiguously or reveals a wider affected surface.
 - The lower tier cannot observe a material part of the completion claim.
 
-Do not run a full suite merely because one exists. Do not rerun an unchanged passing check. Classify a failure as related, unrelated, or unknown; correct only a related failure within scope. After two evidence-driven correction attempts, stop with the failing command, observed evidence, and smallest decision needed. When proof remains narrower than the claim, narrow the claim and state the verified boundary or `Not verified`.
+Do not run a full suite merely because one exists. Do not rerun an unchanged passing check. Classify failures as related, unrelated, or unknown; correct only related failures in scope. After two evidence-driven correction attempts, report the command, evidence, and smallest needed decision. If proof is narrower, narrow the claim to the verified boundary or `Not verified`.
 
 ## Adaptive Path
 
@@ -93,13 +93,13 @@ Do not run a full suite merely because one exists. Do not rerun an unchanged pas
 - If a failure or contradiction appears, reuse it as evidence, reproduce once when needed, and test one bounded hypothesis.
 - If work continues from an earlier turn, reuse the current record, plan, outputs, and diff; refresh only changed or stale evidence.
 
-Use the smallest applicable path. These conditions do not grant permission or replace the active workflow.
+Use the smallest applicable path; conditions do not grant permission or replace the active workflow.
 
 ## Execution Discipline
 
-For non-atomic work, keep only the current evidence, one critical unknown, the next independent batch, the lowest sufficient proof, and the stop condition. Skip any field without a material consumer.
+For non-atomic work, keep current evidence, one critical unknown, next independent batch, lowest sufficient proof, and stop condition. Skip fields without a material consumer.
 
-Each TODO must deliver an outcome, remove a blocker, or provide proof. Do not reread unchanged files, repeat successful commands, or restart planning after each result. Reuse evidence until mutation, contradiction, staleness, or dependency failure invalidates it.
+Each TODO must deliver an outcome, remove a blocker, or provide proof. Do not reread unchanged files, repeat passing commands, or replan after each result. Reuse evidence until mutation, contradiction, staleness, or dependency failure invalidates it.
 
 Prefer a structured patch or targeted-edit primitive. Do not reproduce unchanged file content. Rewrite a whole file only when generated, mostly changed, or handled by a trusted formatter or codemod.
 
@@ -109,7 +109,7 @@ Dispatch reviewers or subagents only when the active workflow permits them and e
 
 ## Conflict Discipline
 
-Yield to correctness and authority. When Fast conflicts with repository instructions, safety, the active workflow, or a supported completion claim, preserve the higher-authority requirement and take the lowest-cost valid path.
+When Fast conflicts with repository instructions, safety, the active workflow, or a supported completion claim, yield to the higher authority and take the lowest-cost valid path.
 
 Treat tool errors as evidence. Correct the invocation or assumption once, then broaden only when the error shows that the current scope or source is insufficient.
 
