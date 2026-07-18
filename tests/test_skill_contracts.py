@@ -532,28 +532,25 @@ class FastContractTests(unittest.TestCase):
             ],
         )
 
-    def test_gives_concrete_batch_commands_without_platform_coupling(self):
+    def test_keeps_batching_platform_neutral_and_compact(self):
         body = skill_body("nerd-fast")
-        self.assertIn("## Concrete Command Batching", body)
-        batching = body.split("## Concrete Command Batching", 1)[1].split(
+        self.assertIn("## Batching and Dependencies", body)
+        batching = body.split("## Batching and Dependencies", 1)[1].split(
             "## Verification-Cost Gate", 1
         )[0]
         assert_terms(
             self,
             batching,
             (
-                "sed -n '1,160p' src/a.py; sed -n '40,120p' tests/test_a.py",
-                "rg -n 'timeout|retry' src tests docs",
-                "git status --short; git diff --stat; git diff --check",
-                "python3 -m compileall src && pytest tests/unit -q && python3 scripts/validate.py",
-                "primary-command || compatible-fallback-command",
-                "Use equivalent tools",
-                "Use `;` only when later operations remain useful",
-                "Use `&&` when success is a prerequisite",
-                "Use `||` only for intentional recovery or fallback",
-                "Only chain commands when the execution tool invokes a shell interpreter",
+                "Batch independent operations when their commands and reactions are known",
+                "native batching or parallel interface",
+                "Keep adaptive work sequential when an output can change the next operation",
+                "idempotent, transactional, or safely recoverable",
             ),
         )
+        self.assertNotIn("```sh", batching)
+        self.assertNotIn("sed -n", batching)
+        self.assertNotIn("pytest", batching)
 
     def test_requires_recoverable_mutation_batches(self):
         body = skill_body("nerd-fast")
@@ -619,7 +616,7 @@ class FastContractTests(unittest.TestCase):
     def test_verification_cost_gate_has_five_tiers_and_bounded_escalation(self):
         body = skill_body("nerd-fast")
         verification = body.split("## Verification-Cost Gate", 1)[1].split(
-            "## Generic Operational Mappings", 1
+            "## Adaptive Path", 1
         )[0]
         tiers = re.findall(r"^\| \*\*(V[0-4])\*\* \|", verification, re.MULTILINE)
         self.assertEqual(tiers, ["V0", "V1", "V2", "V3", "V4"])
@@ -643,9 +640,8 @@ class FastContractTests(unittest.TestCase):
     def test_reuses_incremental_state_across_language_runtimes(self):
         body = skill_body("nerd-fast")
         verification = body.split("## Verification-Cost Gate", 1)[1].split(
-            "## Generic Operational Mappings", 1
+            "## Adaptive Path", 1
         )[0]
-        self.assertIn("### Incremental and Runtime-Aware Verification", verification)
         assert_terms(
             self,
             verification,
@@ -657,67 +653,49 @@ class FastContractTests(unittest.TestCase):
                 "clearing caches, reinstalling dependencies, rebuilding unaffected targets",
                 "recreating environments, or restarting healthy services",
                 "clean builds, broad suites, or environment resets",
-                "pytest tests/test_api.py::test_login",
-                "vitest run path/to/api.test.ts",
-                "bundle exec rspec spec/api_spec.rb:42",
-                "./gradlew test --tests 'pkg.ApiTest.login'",
-                "go test ./pkg/api -run '^TestLogin$'",
-                "Treat commands, languages, and build systems as illustrations",
-                "narrowest equivalent check supported by the active project",
             ),
         )
+        self.assertNotIn("| Ecosystem | Example |", verification)
 
-    def test_uses_exactly_ten_operational_mappings_and_four_waves(self):
+    def test_uses_one_conditional_path_without_mandatory_waves(self):
         body = skill_body("nerd-fast")
-        mapping = body.split("## Generic Operational Mappings", 1)[1].split(
+        self.assertNotIn("## Generic Operational Mappings", body)
+        self.assertNotIn("Execute in four waves", body)
+        path = body.split("## Adaptive Path", 1)[1].split(
             "## Execution Discipline", 1
         )[0]
-        rows = re.findall(r"^\| \*\*[0-9]+\*\* \|", mapping, re.MULTILINE)
-        self.assertEqual(len(rows), 10)
         assert_terms(
             self,
-            mapping,
+            path,
             (
-                "Current context is sufficient",
-                "Exact file, symbol, command, or target is named",
-                "Local target is unknown",
-                "Multiple targets are independent",
-                "genuine dependencies",
-                "approved plan",
-                "Current or external information",
-                "failure or contradiction",
-                "Verification is expensive",
-                "earlier turn or retry",
+                "If current evidence is sufficient",
+                "If an exact target is named",
+                "If the target is unknown",
+                "If operations are independent",
+                "If an output can change the next operation",
+                "If current or external information is required",
+                "If a failure or contradiction appears",
+                "If work continues from an earlier turn",
             ),
         )
         discipline = body.split("## Execution Discipline", 1)[1]
-        record_fields = re.findall(
-            r"^\| \*\*(Recipe|Known|Unknown|Next batch|Proof|Stop)\*\* \|",
-            discipline,
-            re.MULTILINE,
-        )
-        self.assertEqual(
-            record_fields,
-            ["Recipe", "Known", "Unknown", "Next batch", "Proof", "Stop"],
-        )
-        waves = re.findall(
-            r"^\| \*\*(Reuse|Discover|Execute|Prove)\*\* \|",
-            discipline,
-            re.MULTILINE,
-        )
-        self.assertEqual(waves, ["Reuse", "Discover", "Execute", "Prove"])
         assert_terms(
             self,
             discipline,
             (
-                "Selected mapping",
-                "Reusable current evidence",
-                "One critical missing fact",
-                "Independent operations to execute together",
-                "Lowest sufficient fresh verification tier",
-                "Exact completion condition",
+                "Do not reread unchanged files",
+                "Each TODO must deliver an outcome, remove a blocker, or provide proof",
+                "Prefer a structured patch or targeted-edit primitive",
+                "For routine authorized operations, invoke the tool immediately",
+                "Dispatch reviewers or subagents only when",
             ),
         )
+
+    def test_stays_compact_without_reintroducing_rejected_models(self):
+        body = skill_body("nerd-fast")
+        self.assertLessEqual(len(body.split()), 1400)
+        self.assertNotIn("confidence >", body.casefold())
+        self.assertNotIn("confidence <", body.casefold())
 
 
 class FamilyContractTests(unittest.TestCase):
