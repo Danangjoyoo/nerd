@@ -613,6 +613,24 @@ class FastContractTests(unittest.TestCase):
         )
         self.assertNotIn("three or more exact-symbol lookups", body)
 
+    def test_offers_missing_universal_ctags_install_once_with_consent(self):
+        body = skill_body("nerd-fast")
+        gate = body.split("## Read-Volume Gate", 1)[1].split("## Gates", 1)[0]
+        assert_terms(
+            self,
+            gate,
+            (
+                "If `ensure` reports that Universal Ctags is unavailable",
+                "ask once",
+                "measured large-repository workloads",
+                "up to 70% faster",
+                "Want me to install it?",
+                "Install only after explicit approval",
+                "fall back immediately",
+                "do not ask again during the task",
+            ),
+        )
+
     def test_verification_cost_gate_has_five_tiers_and_bounded_escalation(self):
         body = skill_body("nerd-fast")
         verification = body.split("## Verification-Cost Gate", 1)[1].split(

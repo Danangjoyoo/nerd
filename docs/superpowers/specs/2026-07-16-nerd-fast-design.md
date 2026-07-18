@@ -33,7 +33,7 @@ Before the first source read, estimate `x`, the total lines direct navigation is
 - `x <= 200`: skip the symbol index and navigate directly.
 - `x > 200`: resolve `scripts/symbol_index.py` relative to `SKILL.md`, run `ensure` once, then use `find` without implicit refresh.
 
-Apply this decision before discovery. Universal Ctags remains optional. If it or a usable index is unavailable, stale, or incomplete, fall back to an exact-file read or narrow text search. Index matches are navigation candidates and must be confirmed in source before mutation.
+Apply this decision before discovery. Universal Ctags remains optional. If `ensure` reports it unavailable, ask once whether to install it, explaining that measured large-repository workloads showed up to 70% faster indexed navigation. Installation requires explicit approval. On decline, unsupported installation, or failure, fall back immediately without asking again during the task. For any other unusable, stale, or incomplete index, use an exact-file read or narrow text search. Index matches remain navigation candidates and must be confirmed in source before mutation.
 
 ## Ordered Decisions
 
@@ -117,6 +117,8 @@ skills/nerd-fast/
 
 The indexer remains a standard-library, workspace-keyed, incremental SQLite exact-symbol index with optional Universal Ctags refresh. This consolidation does not change its schema, fingerprinting, exact lookup, result ordering, CLI, or fallback behavior. Fuzzy lookup, language filters, ranking, reference graphs, and content hashes remain out of scope.
 
+Universal Ctags capability detection must accept both single-column `--list-features` output and the tabular `#NAME DESCRIPTION` format emitted by Homebrew Universal Ctags 6.2.x. For every nonempty row, the first whitespace-delimited field is the feature name; `json` remains mandatory. The installed Ctags binary must work directly through `--ctags` without a user-created wrapper.
+
 The metadata description must identify the concrete latency trigger, and the default prompt must name `$nerd-fast`. Fast remains original Nerd guidance and does not receive `LICENSE.superpowers`.
 
 ## Contract and Benchmark Proof
@@ -130,6 +132,8 @@ Deterministic contracts must establish that Fast:
 - Keeps batching platform-neutral and mutations recoverable.
 - Reuses incremental runtime state without ecosystem-specific command tables.
 - Preserves targeted editing, immediate routine tool dispatch, direct-search fallback, and source confirmation before mutation.
+- Offers a missing Universal Ctags install once, states the scoped benchmark, requires explicit approval, and preserves immediate fallback.
+- Accepts single-column and tabular Universal Ctags feature output without a wrapper while retaining the JSON requirement.
 - Composes with Silent only when both are explicitly invoked.
 - Does not contain a runtime `superpowers:` dependency.
 - Remains at or below 1,400 words.
@@ -147,4 +151,4 @@ Success requires no new hard-gate failure, no lower paired accuracy, lower media
 - Changing final response verbosity; Nerd Silent owns presentation.
 - Adding a hard time, token, or tool-call budget without an explicit user constraint.
 - Adding numeric confidence thresholds or a fixed global operation-cost ranking.
-- Changing `symbol_index.py` behavior or adding index features.
+- Changing index schema, CLI, lookup semantics, or adding index features beyond Universal Ctags capability-output compatibility.

@@ -102,6 +102,33 @@ class CtagsContractTests(unittest.TestCase):
                 "ctags", runner=lambda *args, **kwargs: next(calls)
             )
 
+    def test_accepts_tabular_universal_ctags_features(self):
+        indexer = load_indexer()
+        calls = iter(
+            (
+                indexer.subprocess.CompletedProcess(
+                    ["ctags", "--version"],
+                    0,
+                    stdout="Universal Ctags 6.2.1\n",
+                    stderr="",
+                ),
+                indexer.subprocess.CompletedProcess(
+                    ["ctags", "--list-features"],
+                    0,
+                    stdout=(
+                        "#NAME                       DESCRIPTION\n"
+                        "wildcards                   can use glob matching\n"
+                        "json                        supports json format output\n"
+                    ),
+                    stderr="",
+                ),
+            )
+        )
+
+        indexer.require_universal_ctags(
+            "ctags", runner=lambda *args, **kwargs: next(calls)
+        )
+
     def test_parses_only_tag_records_and_normalizes_paths(self):
         indexer = load_indexer()
         lines = [

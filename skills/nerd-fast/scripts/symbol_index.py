@@ -160,7 +160,11 @@ def require_universal_ctags(binary: str, runner=subprocess.run) -> None:
         text=True,
         check=False,
     )
-    available = {line.strip().casefold() for line in features.stdout.splitlines()}
+    available = {
+        line.split(maxsplit=1)[0].casefold()
+        for line in features.stdout.splitlines()
+        if line.strip()
+    }
     if features.returncode != 0 or "json" not in available:
         raise RuntimeError("Universal Ctags JSON support is required for indexed refresh")
 
