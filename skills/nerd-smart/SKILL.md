@@ -1,6 +1,6 @@
 ---
 name: nerd-smart
-description: Use when a focused or ambiguous request needs alignment on intention, endpoint, scope, or working role before substantive work.
+description: Use when a focused, ambiguous, or multi-goal request needs alignment on intention, endpoint, scope, or working role before substantive work.
 ---
 
 # Nerd Smart
@@ -40,7 +40,37 @@ Use at most two clarification rounds. By round two, show this block and ask the 
 
 Any reply that does not correct a material field accepts the record. Proceed without a third prompt.
 
-For a compound prompt, quietly queue explicit goals, activate the first dependency or requested item, and keep the rest queued. If the active goal drifts, ask whether to switch or return.
+## Multi-Goal Intake
+
+At the beginning of every request, before resolving focus, scan for two or more independently completable goals. Bullets, numbered items, or separate imperative lines are signals, not proof. Treat an item as a separate goal only when it has its own endpoint or stopping condition. Keep constraints, examples, acceptance criteria, or substeps with their parent goal.
+
+When multiple goals exist:
+
+1. Create one Markdown ledger in the agent's runtime-provided temporary directory; if none is available, use `~/.agent/tmp/`. Use a stable conversation, thread, or task identifier in its name and retain the absolute ledger path until the queue is complete.
+2. Preserve each original command line and its listed position. Add a concise normalized goal beside it. Before writing, redact credential and secret values while retaining useful placeholders. Do not store unrelated conversation.
+3. Write this structure:
+
+> **Goal Ledger**
+> - **Path:** [Absolute ledger path]
+> - **Order basis:** [Explicit, listed, or dependency-adjusted with reason]
+>
+> **Goal [ID] — [Short name]**
+> - **Source:** [Original bullet, number, or command line]
+> - **Status:** [Queued, active, blocked, done, or cancelled]
+> - **Depends on:** [Goal IDs or none]
+> - **Focus Record:**
+>   - **Intention:** [Smallest real goal]
+>   - **Expectation:** [One endpoint]
+>   - **Scope:** [Only this goal and approved adjacents]
+>   - **Role:** [Single best role]
+
+Status is **queued**, **active**, **blocked**, **done**, or **cancelled**. Never collapse independent goals into one Focus Record. Resolve one Focus Record for every goal before substantive work, then keep exactly one goal **active**.
+
+Preserve an explicit user order. When no order is explicit, default to listed order. Reorder only for a hard dependency. If reordering conflicts with the user's order or materially changes outcome, safety, cost, or rework, verify the order with one question before proceeding; otherwise record the dependency and reason in the ledger.
+
+Before starting, resuming, switching, or completing a goal, and at the beginning of every later turn while the queue exists, reread the ledger from its absolute path and treat it as the source of truth. If the ledger is missing or unreadable, reconstruct it from explicit user input and do not continue from memory. When the user adds, removes, reorders, or changes a goal, update the ledger before acting. Record every status and dependency change immediately.
+
+Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
 
 ## KISS Implementation Discipline
 

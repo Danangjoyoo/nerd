@@ -34,8 +34,10 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
         frontmatter = body.split("---", 2)[1]
+        self.assertIn("multi-goal request", frontmatter)
         self.assertIn("working role before substantive work", frontmatter)
         self.assertNotIn("appropriate Nerd specialty", frontmatter)
+        self.assertIn("Multi-goal focus", metadata)
         self.assertIn("opt-in specialty routing", metadata)
         self.assertNotIn(
             "Route exactly one primary specialty after focus is established",
@@ -130,6 +132,49 @@ class SmartContractTests(unittest.TestCase):
             "## Confirmation Style", 1
         )[0]
         self.assertIn("Follow Confirmation Style", focus)
+
+    def test_multi_goal_intake_persists_and_rereads_ordered_focus_records(self):
+        body = skill_body("nerd-smart")
+        intake = body.split("## Multi-Goal Intake", 1)[1].split(
+            "## KISS Implementation Discipline", 1
+        )[0]
+
+        assert_terms(
+            self,
+            intake,
+            (
+                "At the beginning of every request",
+                "two or more independently completable goals",
+                "Bullets, numbered items, or separate imperative lines",
+                "constraints, examples, acceptance criteria, or substeps",
+                "runtime-provided temporary directory",
+                "`~/.agent/tmp/`",
+                "stable conversation, thread, or task identifier",
+                "absolute ledger path",
+                "Preserve each original command line",
+                "redact credential and secret values",
+                "**Goal Ledger**",
+                "**Order basis:**",
+                "**Source:**",
+                "**Status:**",
+                "**Depends on:**",
+                "queued**, **active**, **blocked**, **done**, or **cancelled",
+                "Never collapse independent goals into one Focus Record",
+                "one Focus Record for every goal",
+                "exactly one goal **active**",
+                "Preserve an explicit user order",
+                "default to listed order",
+                "hard dependency",
+                "verify the order",
+                "Before starting, resuming, switching, or completing a goal",
+                "reread the ledger",
+                "source of truth",
+                "If the ledger is missing or unreadable",
+                "do not continue from memory",
+                "update the ledger before acting",
+                "Do not borrow scope",
+            ),
+        )
 
     def test_kiss_discipline_covers_design_planning_and_execution(self):
         body = skill_body("nerd-smart")
