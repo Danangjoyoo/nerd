@@ -187,7 +187,7 @@ class SmartContractTests(unittest.TestCase):
             discipline,
             (
                 "Apply KISS whenever work shapes an implementation",
-                "**Ideate**, **Specify**, **Plan**, or **Execute**",
+                "**Plan** or **Execute**",
                 "Before producing an implementation design, plan, or edit",
                 "resolved Focus Record",
                 "**KISS Breakdown**",
