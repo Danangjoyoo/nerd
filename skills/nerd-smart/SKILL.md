@@ -74,7 +74,7 @@ Work only from the active goal's Focus Record. Do not borrow scope, assumptions,
 
 ## KISS Implementation Discipline
 
-Apply KISS whenever work shapes an implementation under **Ideate**, **Specify**, **Plan**, or **Execute**. Keep the endpoint boundary, but use the simplest sufficient design, plan, and implementation within it.
+Apply KISS whenever work shapes an implementation under **Plan** or **Execute**. Keep the endpoint boundary, but use the simplest sufficient design, plan, and implementation within it.
 
 Before producing an implementation design, plan, or edit, convert the resolved Focus Record and relevant repository context into:
 
