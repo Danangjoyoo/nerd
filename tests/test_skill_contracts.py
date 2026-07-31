@@ -34,8 +34,10 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
         frontmatter = body.split("---", 2)[1]
+        self.assertIn("multi-goal request", frontmatter)
         self.assertIn("working role before substantive work", frontmatter)
         self.assertNotIn("appropriate Nerd specialty", frontmatter)
+        self.assertIn("Multi-goal focus", metadata)
         self.assertIn("opt-in specialty routing", metadata)
         self.assertNotIn(
             "Route exactly one primary specialty after focus is established",
@@ -130,6 +132,89 @@ class SmartContractTests(unittest.TestCase):
             "## Confirmation Style", 1
         )[0]
         self.assertIn("Follow Confirmation Style", focus)
+
+    def test_multi_goal_intake_persists_and_rereads_ordered_focus_records(self):
+        body = skill_body("nerd-smart")
+        intake = body.split("## Multi-Goal Intake", 1)[1].split(
+            "## KISS Implementation Discipline", 1
+        )[0]
+
+        assert_terms(
+            self,
+            intake,
+            (
+                "At the beginning of every request",
+                "two or more independently completable goals",
+                "Bullets, numbered items, or separate imperative lines",
+                "constraints, examples, acceptance criteria, or substeps",
+                "runtime-provided temporary directory",
+                "`~/.agent/tmp/`",
+                "stable conversation, thread, or task identifier",
+                "absolute ledger path",
+                "Preserve each original command line",
+                "redact credential and secret values",
+                "**Goal Ledger**",
+                "**Order basis:**",
+                "**Source:**",
+                "**Status:**",
+                "**Depends on:**",
+                "queued**, **active**, **blocked**, **done**, or **cancelled",
+                "Never collapse independent goals into one Focus Record",
+                "one Focus Record for every goal",
+                "exactly one goal **active**",
+                "Preserve an explicit user order",
+                "default to listed order",
+                "hard dependency",
+                "verify the order",
+                "Before starting, resuming, switching, or completing a goal",
+                "reread the ledger",
+                "source of truth",
+                "If the ledger is missing or unreadable",
+                "do not continue from memory",
+                "update the ledger before acting",
+                "Do not borrow scope",
+            ),
+        )
+
+    def test_kiss_discipline_covers_design_planning_and_execution(self):
+        body = skill_body("nerd-smart")
+        discipline = body.split("## KISS Implementation Discipline", 1)[1].split(
+            "## Confirmation Style", 1
+        )[0]
+
+        assert_terms(
+            self,
+            discipline,
+            (
+                "Apply KISS whenever work shapes an implementation",
+                "**Ideate**, **Specify**, **Plan**, or **Execute**",
+                "Before producing an implementation design, plan, or edit",
+                "resolved Focus Record",
+                "**KISS Breakdown**",
+                "**Required outcome:**",
+                "**Smallest change:**",
+                "**Proof:**",
+                "**Not needed:**",
+                "Start with KISS",
+                "Prefer changing an existing path",
+                "Add complexity only when required by",
+                "an explicit requirement",
+                "an established repository convention",
+                "observed evidence",
+                "a concrete correctness, security, or measured performance constraint",
+                "Hypothetical reuse or future flexibility is not evidence",
+                "fewer concepts, files, dependencies, and changed boundaries",
+                "For design",
+                "fewest components and boundaries",
+                "For planning",
+                "only steps required",
+                "For execution",
+                "Do not preserve complexity merely because it appears",
+                "same Focus Record, approved outcome, constraints, design decisions, and proof",
+                "Ask one question before changing an approved constraint or design decision",
+                "Stop when the required outcome is proven",
+            ),
+        )
 
     def test_uses_internal_brainstorming_reference(self):
         body = skill_body("nerd-smart")
@@ -330,12 +415,12 @@ class ExecuteContractTests(unittest.TestCase):
             "## Execute Directly", 1
         )[0]
         rows = re.findall(
-            r"^\| \*\*(Focus Record|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            r"^\| \*\*(Focus Record|KISS|Current plan|Execution scope|TODOs|Verification)\*\* \|",
             discipline,
             re.MULTILINE,
         )
 
-        self.assertEqual(len(rows), 5)
+        self.assertEqual(len(rows), 6)
         assert_terms(
             self,
             body,
@@ -356,6 +441,10 @@ class ExecuteContractTests(unittest.TestCase):
             discipline,
             (
                 "| **Focus Record** | Mandatory |",
+                "| **KISS** | Mandatory |",
+                "KISS Breakdown",
+                "derive it internally",
+                "without adding a user-facing gate",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",
                 "do not search for, request, or create a plan",
@@ -369,6 +458,29 @@ class ExecuteContractTests(unittest.TestCase):
         )
         self.assertNotIn("Contract: [outcome]", body)
         self.assertNotIn("## Gate Repository Pattern Context", body)
+
+    def test_enforces_kiss_and_simplifies_overbuilt_plans(self):
+        body = skill_body("nerd-execute")
+        execution = body.split("## Execute Directly", 1)[1].split(
+            "## Finish Briefly", 1
+        )[0]
+
+        assert_terms(
+            self,
+            execution,
+            (
+                "Apply KISS throughout execution",
+                "most direct existing path",
+                "fewer concepts, files, dependencies, and changed boundaries",
+                "Do not add an abstraction, layer, service, dependency",
+                "an explicit requirement",
+                "an established repository convention",
+                "observed evidence",
+                "a concrete correctness, security, or measured performance constraint",
+                "Do not preserve complexity merely because it appears",
+                "simplify the plan",
+            ),
+        )
 
     def test_executes_with_minimal_test_recovery_and_completion_evidence(self):
         body = skill_body("nerd-execute")

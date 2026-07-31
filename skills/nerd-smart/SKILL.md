@@ -1,6 +1,6 @@
 ---
 name: nerd-smart
-description: Use when a focused or ambiguous request needs alignment on intention, endpoint, scope, or working role before substantive work.
+description: Use when a focused, ambiguous, or multi-goal request needs alignment on intention, endpoint, scope, or working role before substantive work.
 ---
 
 # Nerd Smart
@@ -23,7 +23,7 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. |
 | **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. |
 | **Plan** | Turn a confirmed outcome into ordered implementation steps. | Produce only the actionable plan, perform one brief self-review, and stop before execution. |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | Use the smallest implementation workflow, verify the result, and report completion evidence. |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Create a KISS breakdown, make the simplest sufficient change, verify it, and stop. |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. |
 
 ## Focus First
@@ -40,7 +40,62 @@ Use at most two clarification rounds. By round two, show this block and ask the 
 
 Any reply that does not correct a material field accepts the record. Proceed without a third prompt.
 
-For a compound prompt, quietly queue explicit goals, activate the first dependency or requested item, and keep the rest queued. If the active goal drifts, ask whether to switch or return.
+## Multi-Goal Intake
+
+At the beginning of every request, before resolving focus, scan for two or more independently completable goals. Bullets, numbered items, or separate imperative lines are signals, not proof. Treat an item as a separate goal only when it has its own endpoint or stopping condition. Keep constraints, examples, acceptance criteria, or substeps with their parent goal.
+
+When multiple goals exist:
+
+1. Create one Markdown ledger in the agent's runtime-provided temporary directory; if none is available, use `~/.agent/tmp/`. Use a stable conversation, thread, or task identifier in its name and retain the absolute ledger path until the queue is complete.
+2. Preserve each original command line and its listed position. Add a concise normalized goal beside it. Before writing, redact credential and secret values while retaining useful placeholders. Do not store unrelated conversation.
+3. Write this structure:
+
+> **Goal Ledger**
+> - **Path:** [Absolute ledger path]
+> - **Order basis:** [Explicit, listed, or dependency-adjusted with reason]
+>
+> **Goal [ID] — [Short name]**
+> - **Source:** [Original bullet, number, or command line]
+> - **Status:** [Queued, active, blocked, done, or cancelled]
+> - **Depends on:** [Goal IDs or none]
+> - **Focus Record:**
+>   - **Intention:** [Smallest real goal]
+>   - **Expectation:** [One endpoint]
+>   - **Scope:** [Only this goal and approved adjacents]
+>   - **Role:** [Single best role]
+
+Status is **queued**, **active**, **blocked**, **done**, or **cancelled**. Never collapse independent goals into one Focus Record. Resolve one Focus Record for every goal before substantive work, then keep exactly one goal **active**.
+
+Preserve an explicit user order. When no order is explicit, default to listed order. Reorder only for a hard dependency. If reordering conflicts with the user's order or materially changes outcome, safety, cost, or rework, verify the order with one question before proceeding; otherwise record the dependency and reason in the ledger.
+
+Before starting, resuming, switching, or completing a goal, and at the beginning of every later turn while the queue exists, reread the ledger from its absolute path and treat it as the source of truth. If the ledger is missing or unreadable, reconstruct it from explicit user input and do not continue from memory. When the user adds, removes, reorders, or changes a goal, update the ledger before acting. Record every status and dependency change immediately.
+
+Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
+
+## KISS Implementation Discipline
+
+Apply KISS whenever work shapes an implementation under **Plan** or **Execute**. Keep the endpoint boundary, but use the simplest sufficient design, plan, and implementation within it.
+
+Before producing an implementation design, plan, or edit, convert the resolved Focus Record and relevant repository context into:
+
+> **KISS Breakdown**
+> - **Required outcome:** [Smallest observable behavior that must change]
+> - **Smallest change:** [Most direct existing path and minimal change surface]
+> - **Proof:** [Focused check that demonstrates the outcome]
+> - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
+
+If every item is already clear, state the breakdown briefly and begin without asking for confirmation.
+
+Start with KISS: implement the simplest direct solution that satisfies the required outcome and current constraints.
+
+- Prefer changing an existing path over adding a new abstraction, layer, service, dependency, configuration system, or generalized interface.
+- Add complexity only when required by an explicit requirement, an established repository convention, observed evidence such as a failing test or reproduced behavior, or a concrete correctness, security, or measured performance constraint. Name that evidence. Hypothetical reuse or future flexibility is not evidence.
+- When multiple solutions work, choose the one with fewer concepts, files, dependencies, and changed boundaries.
+- For design, choose the fewest components and boundaries that satisfy current requirements; do not invent extension points for possible future needs.
+- For planning, include only steps required to produce and prove the outcome; omit speculative phases, optional refactors, and infrastructure.
+- For execution, make the smallest change on the most direct existing path and verify the focused behavior first.
+- Do not preserve complexity merely because it appears in an existing design or plan. Simplify it only when the same Focus Record, approved outcome, constraints, design decisions, and proof remain intact. Ask one question before changing an approved constraint or design decision.
+- Stop when the required outcome is proven and relevant checks pass; do not improve adjacent code unless the approved scope requires it.
 
 ## Confirmation Style
 
