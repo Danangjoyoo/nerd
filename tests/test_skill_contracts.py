@@ -131,6 +131,44 @@ class SmartContractTests(unittest.TestCase):
         )[0]
         self.assertIn("Follow Confirmation Style", focus)
 
+    def test_kiss_discipline_covers_design_planning_and_execution(self):
+        body = skill_body("nerd-smart")
+        discipline = body.split("## KISS Implementation Discipline", 1)[1].split(
+            "## Confirmation Style", 1
+        )[0]
+
+        assert_terms(
+            self,
+            discipline,
+            (
+                "Apply KISS whenever work shapes an implementation",
+                "**Ideate**, **Specify**, **Plan**, or **Execute**",
+                "Before producing an implementation design, plan, or edit",
+                "resolved Focus Record",
+                "**KISS Breakdown**",
+                "**Required outcome:**",
+                "**Smallest change:**",
+                "**Proof:**",
+                "**Not needed:**",
+                "Start with KISS",
+                "Prefer changing an existing path",
+                "Add complexity only when required by",
+                "an explicit requirement",
+                "an established repository convention",
+                "observed evidence",
+                "a concrete correctness, security, or measured performance constraint",
+                "Hypothetical reuse or future flexibility is not evidence",
+                "fewer concepts, files, dependencies, and changed boundaries",
+                "For design",
+                "fewest components and boundaries",
+                "For planning",
+                "only steps required",
+                "For execution",
+                "Do not preserve complexity merely because it appears",
+                "Stop when the required outcome is proven",
+            ),
+        )
+
     def test_uses_internal_brainstorming_reference(self):
         body = skill_body("nerd-smart")
         self.assertIn("references/brainstorming.md", body)
@@ -330,12 +368,12 @@ class ExecuteContractTests(unittest.TestCase):
             "## Execute Directly", 1
         )[0]
         rows = re.findall(
-            r"^\| \*\*(Focus Record|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            r"^\| \*\*(Focus Record|KISS|Current plan|Execution scope|TODOs|Verification)\*\* \|",
             discipline,
             re.MULTILINE,
         )
 
-        self.assertEqual(len(rows), 5)
+        self.assertEqual(len(rows), 6)
         assert_terms(
             self,
             body,
@@ -356,6 +394,10 @@ class ExecuteContractTests(unittest.TestCase):
             discipline,
             (
                 "| **Focus Record** | Mandatory |",
+                "| **KISS** | Mandatory |",
+                "KISS Breakdown",
+                "derive it internally",
+                "without adding a user-facing gate",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",
                 "do not search for, request, or create a plan",
@@ -369,6 +411,29 @@ class ExecuteContractTests(unittest.TestCase):
         )
         self.assertNotIn("Contract: [outcome]", body)
         self.assertNotIn("## Gate Repository Pattern Context", body)
+
+    def test_enforces_kiss_and_simplifies_overbuilt_plans(self):
+        body = skill_body("nerd-execute")
+        execution = body.split("## Execute Directly", 1)[1].split(
+            "## Finish Briefly", 1
+        )[0]
+
+        assert_terms(
+            self,
+            execution,
+            (
+                "Apply KISS throughout execution",
+                "most direct existing path",
+                "fewer concepts, files, dependencies, and changed boundaries",
+                "Do not add an abstraction, layer, service, dependency",
+                "an explicit requirement",
+                "an established repository convention",
+                "observed evidence",
+                "a concrete correctness, security, or measured performance constraint",
+                "Do not preserve complexity merely because it appears",
+                "simplify the plan",
+            ),
+        )
 
     def test_executes_with_minimal_test_recovery_and_completion_evidence(self):
         body = skill_body("nerd-execute")

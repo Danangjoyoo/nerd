@@ -23,7 +23,7 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. |
 | **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. |
 | **Plan** | Turn a confirmed outcome into ordered implementation steps. | Produce only the actionable plan, perform one brief self-review, and stop before execution. |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | Use the smallest implementation workflow, verify the result, and report completion evidence. |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Create a KISS breakdown, make the simplest sufficient change, verify it, and stop. |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. |
 
 ## Focus First
@@ -41,6 +41,31 @@ Use at most two clarification rounds. By round two, show this block and ask the 
 Any reply that does not correct a material field accepts the record. Proceed without a third prompt.
 
 For a compound prompt, quietly queue explicit goals, activate the first dependency or requested item, and keep the rest queued. If the active goal drifts, ask whether to switch or return.
+
+## KISS Implementation Discipline
+
+Apply KISS whenever work shapes an implementation under **Ideate**, **Specify**, **Plan**, or **Execute**. Keep the endpoint boundary, but use the simplest sufficient design, plan, and implementation within it.
+
+Before producing an implementation design, plan, or edit, convert the resolved Focus Record and relevant repository context into:
+
+> **KISS Breakdown**
+> - **Required outcome:** [Smallest observable behavior that must change]
+> - **Smallest change:** [Most direct existing path and minimal change surface]
+> - **Proof:** [Focused check that demonstrates the outcome]
+> - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
+
+If every item is already clear, state the breakdown briefly and begin without asking for confirmation.
+
+Start with KISS: implement the simplest direct solution that satisfies the required outcome and current constraints.
+
+- Prefer changing an existing path over adding a new abstraction, layer, service, dependency, configuration system, or generalized interface.
+- Add complexity only when required by an explicit requirement, an established repository convention, observed evidence such as a failing test or reproduced behavior, or a concrete correctness, security, or measured performance constraint. Name that evidence. Hypothetical reuse or future flexibility is not evidence.
+- When multiple solutions work, choose the one with fewer concepts, files, dependencies, and changed boundaries.
+- For design, choose the fewest components and boundaries that satisfy current requirements; do not invent extension points for possible future needs.
+- For planning, include only steps required to produce and prove the outcome; omit speculative phases, optional refactors, and infrastructure.
+- For execution, make the smallest change on the most direct existing path and verify the focused behavior first.
+- Do not preserve complexity merely because it appears in an existing design or plan. Simplify it when the same required outcome and proof remain intact.
+- Stop when the required outcome is proven and relevant checks pass; do not improve adjacent code unless the approved scope requires it.
 
 ## Confirmation Style
 
