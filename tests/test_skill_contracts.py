@@ -165,6 +165,8 @@ class SmartContractTests(unittest.TestCase):
                 "only steps required",
                 "For execution",
                 "Do not preserve complexity merely because it appears",
+                "same Focus Record, approved outcome, constraints, design decisions, and proof",
+                "Ask one question before changing an approved constraint or design decision",
                 "Stop when the required outcome is proven",
             ),
         )

@@ -64,7 +64,7 @@ Start with KISS: implement the simplest direct solution that satisfies the requi
 - For design, choose the fewest components and boundaries that satisfy current requirements; do not invent extension points for possible future needs.
 - For planning, include only steps required to produce and prove the outcome; omit speculative phases, optional refactors, and infrastructure.
 - For execution, make the smallest change on the most direct existing path and verify the focused behavior first.
-- Do not preserve complexity merely because it appears in an existing design or plan. Simplify it when the same required outcome and proof remain intact.
+- Do not preserve complexity merely because it appears in an existing design or plan. Simplify it only when the same Focus Record, approved outcome, constraints, design decisions, and proof remain intact. Ask one question before changing an approved constraint or design decision.
 - Stop when the required outcome is proven and relevant checks pass; do not improve adjacent code unless the approved scope requires it.
 
 ## Confirmation Style
