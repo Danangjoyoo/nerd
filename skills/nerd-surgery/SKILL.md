@@ -5,6 +5,10 @@ description: Use when code, integrations, automation, infrastructure, or runtime
 
 # Nerd Surgery
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 ## Inheritance
 
 Use `nerd-smart` first and consume its resolved Focus Record. A Focus Record is resolved only when all four fields are explicit, the endpoint is **Diagnose** or **Execute**, and no material ambiguity remains. Do not investigate or repair before the record is resolved.

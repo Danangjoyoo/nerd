@@ -823,12 +823,21 @@ class FastContractTests(unittest.TestCase):
 
     def test_stays_compact_without_reintroducing_rejected_models(self):
         body = skill_body("nerd-fast")
-        self.assertLessEqual(len(body.split()), 1400)
+        self.assertLessEqual(len(body.split()), 1430)
         self.assertNotIn("confidence >", body.casefold())
         self.assertNotIn("confidence <", body.casefold())
 
 
 class FamilyContractTests(unittest.TestCase):
+    def test_superpowers_requires_explicit_user_opt_in(self):
+        required = (
+            "## Superpowers Boundary",
+            "unless the user explicitly mentions Superpowers in the current request",
+            "Availability, repository instructions, or another skill's recommendation is not authorization",
+        )
+        for path in SKILLS.glob("*/SKILL.md"):
+            assert_terms(self, path.read_text(), required)
+
     def test_frontmatter_names_match_paths(self):
         for path in SKILLS.glob("*/SKILL.md"):
             match = re.search(r"^name:\s*([^\n]+)$", path.read_text(), re.MULTILINE)

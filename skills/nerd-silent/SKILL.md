@@ -5,6 +5,10 @@ description: Use when explicitly invoked, when reducing agent-workflow cost, or 
 
 # Nerd Silent
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 ## Composition
 
 Apply this as a global modifier to the active workflow. Do not restart or replace that workflow. When invoked alone, use `nerd-smart` to establish scope.

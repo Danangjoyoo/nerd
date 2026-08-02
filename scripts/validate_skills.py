@@ -39,13 +39,12 @@ REQUIRED_SCRIPTS = {
     "nerd-fast": ("symbol_index.py",),
 }
 
-DERIVED_SKILLS = (
-    "nerd-smart",
-    "nerd-surgery",
-    "nerd-patrol",
-    "nerd-execute",
-)
 BANNED_RUNTIME_REFERENCES = ("brainstorming-smart", "mensa", "superpowers:")
+SUPERPOWERS_BOUNDARY_TERMS = (
+    "## Superpowers Boundary",
+    "unless the user explicitly mentions Superpowers in the current request",
+    "Availability, repository instructions, or another skill's recommendation is not authorization",
+)
 
 
 def _frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
@@ -125,6 +124,11 @@ def validate_repository(root: Path) -> list[str]:
                 violations.append(
                     f"skills/{name}/SKILL.md: banned runtime reference {banned}"
                 )
+        for term in SUPERPOWERS_BOUNDARY_TERMS:
+            if term not in body:
+                violations.append(
+                    f"skills/{name}/SKILL.md: missing Superpowers boundary term {term}"
+                )
 
         if metadata_path.is_file():
             metadata_body = metadata_path.read_text(encoding="utf-8")
@@ -162,8 +166,8 @@ def validate_repository(root: Path) -> list[str]:
             if not path.is_file():
                 violations.append(f"missing file: skills/{name}/scripts/{script}")
 
-        if name in DERIVED_SKILLS and not (skill_dir / "LICENSE.superpowers").is_file():
-            violations.append(f"missing file: skills/{name}/LICENSE.superpowers")
+    for path in sorted(root.rglob("LICENSE.superpowers")):
+        violations.append(f"forbidden file: {path.relative_to(root)}")
 
     notice = root / "THIRD_PARTY_NOTICES.md"
     if not notice.is_file():

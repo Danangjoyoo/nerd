@@ -5,6 +5,10 @@ description: Use when implementing an approved written plan or a small confirmed
 
 # Nerd Execute
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 <INHERITANCE>
 **REQUIRED BASE SKILL:** Use `nerd-smart` first and consume its resolved Focus Record.
 

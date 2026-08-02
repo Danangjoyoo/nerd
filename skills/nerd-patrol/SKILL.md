@@ -5,6 +5,10 @@ description: Use when examining a confirmed code, pull request, module, applicat
 
 # Nerd Patrol
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 ## Inheritance
 
 Use `nerd-smart` first and reuse its approved Focus Record. This specialty adds security examination without broadening the confirmed scope.

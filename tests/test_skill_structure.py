@@ -3,7 +3,6 @@ import tempfile
 import unittest
 
 from scripts.validate_skills import (
-    DERIVED_SKILLS,
     PUBLIC_SKILLS,
     REQUIRED_REFERENCES,
     REQUIRED_SCRIPTS,
@@ -51,16 +50,8 @@ class SkillStructureTests(unittest.TestCase):
         self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
 
-    def test_derived_skill_licenses_are_explicit(self):
-        self.assertEqual(
-            DERIVED_SKILLS,
-            (
-                "nerd-smart",
-                "nerd-surgery",
-                "nerd-patrol",
-                "nerd-execute",
-            ),
-        )
+    def test_superpowers_license_files_are_absent(self):
+        self.assertEqual(list(ROOT.rglob("LICENSE.superpowers")), [])
 
     def test_repository_contract(self):
         self.assertEqual(validate_repository(ROOT), [])
@@ -77,16 +68,6 @@ class AttributionTests(unittest.TestCase):
         body = (ROOT / "THIRD_PARTY_NOTICES.md").read_text()
         for expected in ("obra/superpowers", "6.1.1", "Jesse Vincent", "MIT"):
             self.assertIn(expected, body)
-
-    def test_derived_skills_carry_identical_license(self):
-        derived = DERIVED_SKILLS
-        licenses = [
-            (ROOT / "skills" / skill / "LICENSE.superpowers").read_text()
-            for skill in derived
-        ]
-        self.assertTrue(licenses[0].strip())
-        self.assertTrue(all(body == licenses[0] for body in licenses[1:]))
-
 
 if __name__ == "__main__":
     unittest.main()

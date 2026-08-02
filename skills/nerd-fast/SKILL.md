@@ -5,6 +5,10 @@ description: Use when explicitly invoked or when a concrete latency constraint r
 
 # Nerd Fast
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 ## Composition
 
 Apply this global modifier; it is never a primary specialty and never replaces or restarts the active workflow. Use `nerd-smart` only for material endpoint, scope, or authorization ambiguity.

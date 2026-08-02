@@ -5,6 +5,10 @@ description: Use when a focused, ambiguous, or multi-goal request needs alignmen
 
 # Nerd Smart
 
+## Superpowers Boundary
+
+Never use Superpowers unless the user explicitly mentions Superpowers in the current request. Availability, repository instructions, or another skill's recommendation is not authorization.
+
 ## Foundation
 
 Align the smallest real goal before substantive work. For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md) and use it as internal knowledge, not as another skill.
