@@ -828,6 +828,90 @@ class FastContractTests(unittest.TestCase):
         self.assertNotIn("confidence <", body.casefold())
 
 
+class XFastContractTests(unittest.TestCase):
+    def test_is_explicit_self_contained_and_honest_about_accuracy(self):
+        body = skill_body("nerd-xfast")
+        metadata = (SKILLS / "nerd-xfast" / "agents" / "openai.yaml").read_text()
+        assert_terms(
+            self,
+            body,
+            (
+                "explicitly invokes `nerd-xfast`",
+                "self-contained execution skill",
+                "Do not load, invoke, or route to another Nerd skill",
+                "trades accuracy, completeness, and verification breadth",
+                "authorization",
+                "safety",
+                "honest reporting",
+            ),
+        )
+        for dependency in ("`nerd-smart`", "`nerd-execute`", "`nerd-fast`"):
+            self.assertNotIn(dependency, body)
+        self.assertIn("$nerd-xfast", metadata)
+        self.assertIn("accuracy", metadata.casefold())
+        self.assertIn("latency", metadata.casefold())
+
+    def test_uses_one_internal_immutable_focus_record(self):
+        body = skill_body("nerd-xfast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Create this Focus Record once in working context",
+                "**Goals:** [Concrete requested outputs]",
+                "**Expectation:** Execute",
+                "**Commands:** [user action 1] -> [user action 2] -> [user action 3]",
+                "**Scope:** [Named targets plus necessary adjacent files]",
+                "**Role:** Output-first implementation agent",
+                "multiple commands, steps, or actions",
+                "internal and immutable",
+                "Never persist, display, reread, revise, or status-track it",
+            ),
+        )
+        for rejected in ("## Edit Ledger", "temporary directory", "`~/.agent/tmp/`"):
+            self.assertNotIn(rejected, body)
+
+    def test_focuses_on_one_batched_multi_file_edit_wave(self):
+        body = skill_body("nerd-xfast")
+        assert_terms(
+            self,
+            body,
+            (
+                "planning is finished",
+                "Use one reasoning pass",
+                "Every action must directly unlock a named write, produce a requested output, or perform explicitly requested final proof",
+                "one narrow discovery batch",
+                "Stop reading when the smallest complete write set is known",
+                "single-agent",
+                "one structured, single-agent multi-file patch",
+                "Do not dispatch subagents or reviewers",
+                "Do not inspect, compile, lint, test, review, narrate, or clean up between writes",
+            ),
+        )
+
+    def test_defaults_to_v0_and_defers_explicit_proof(self):
+        body = skill_body("nerd-xfast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Never verify before every requested output is written",
+                "Default to **V0**",
+                "run no verification command",
+                "report `Not verified`",
+                "user supplies an exact command or tier",
+                "Queue that proof until the end",
+                "run it once without broadening",
+                "one repair patch",
+                "rerun only the failed proof once",
+            ),
+        )
+
+    def test_stays_compact(self):
+        body = skill_body("nerd-xfast")
+        self.assertLessEqual(len(body.split()), 650)
+
+
 class FamilyContractTests(unittest.TestCase):
     def test_superpowers_requires_explicit_user_opt_in(self):
         required = (

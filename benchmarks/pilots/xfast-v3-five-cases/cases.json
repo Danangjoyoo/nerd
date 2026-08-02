@@ -1,0 +1,88 @@
+{
+  "cases": [
+    {
+      "id": "xfast-v3-batched-edit",
+      "comparison": "xfast",
+      "prompt": "Implement clamp(value, minimum, maximum) in alpha.py and parity_label(value) in beta.py, and add focused coverage for both behaviors in test_math_ops.py.",
+      "fixture": "xfast-batched-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "alpha", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "alpha.py"},
+        {"id": "beta", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "beta.py"},
+        {"id": "tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_math_ops.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile alpha.py beta.py test_math_ops.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py alpha.py beta.py test_math_ops.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "xfast-v3-discovery-edit",
+      "comparison": "xfast",
+      "prompt": "Add normalize_handle(text): trim whitespace, lowercase letters, replace every non-alphanumeric run with one underscore, and strip boundary underscores. Register it as 'handle' and add focused unit coverage.",
+      "fixture": "xfast-discovery-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "implementation", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "normalizers.py"},
+        {"id": "registry", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "registry.py"},
+        {"id": "tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_normalizers.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "xfast-v3-independent-work",
+      "comparison": "xfast",
+      "prompt": "Implement increment(value) in alpha.py and decrement(value) in beta.py, and add focused positive, negative, and zero coverage to their test files.",
+      "fixture": "xfast-v3-independent-work",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "alpha", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "alpha.py"},
+        {"id": "beta", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "beta.py"},
+        {"id": "alpha-tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_alpha.py"},
+        {"id": "beta-tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_beta.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile alpha.py beta.py test_alpha.py test_beta.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py alpha.py beta.py test_alpha.py test_beta.py::0"},
+        {"id": "behavior", "weight": 30, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "xfast-v3-greeting",
+      "comparison": "xfast",
+      "prompt": "Implement greet(name) in feature.py so it returns 'Hello, <name>!', preserving the supplied name, and add focused unit coverage.",
+      "fixture": "xfast-v3-greeting",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "implementation", "weight": 15, "hard_gate": true, "evaluator": "file", "expected": "feature.py"},
+        {"id": "tests", "weight": 15, "hard_gate": true, "evaluator": "file", "expected": "test_feature.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile feature.py test_feature.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py feature.py test_feature.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "xfast-v3-slugify",
+      "comparison": "xfast",
+      "prompt": "Implement slugify(value) in text_tools.py: trim and lowercase text, replace every non-alphanumeric run with one hyphen, strip boundary hyphens, and add focused unit coverage.",
+      "fixture": "xfast-v3-slugify",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "implementation", "weight": 15, "hard_gate": true, "evaluator": "file", "expected": "text_tools.py"},
+        {"id": "tests", "weight": 15, "hard_gate": true, "evaluator": "file", "expected": "test_text_tools.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile text_tools.py test_text_tools.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py text_tools.py test_text_tools.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    }
+  ]
+}

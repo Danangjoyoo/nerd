@@ -24,6 +24,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute",
                 "nerd-silent",
                 "nerd-fast",
+                "nerd-xfast",
             ),
         )
 
@@ -44,6 +45,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute": (),
                 "nerd-silent": (),
                 "nerd-fast": (),
+                "nerd-xfast": (),
             },
         )
         self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())

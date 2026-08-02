@@ -1,0 +1,147 @@
+{
+  "aggregate": {
+    "delta": {
+      "accuracy_points": 0.0,
+      "speed_percent": 51.3152,
+      "token_pairs": 3,
+      "token_saved_percent": 50.5858
+    },
+    "fast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 62.1926,
+      "median_output_tokens": 2212,
+      "pass_rate_percent": 100,
+      "runs": 3
+    },
+    "pairs": 3,
+    "xfast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 31.2317,
+      "median_output_tokens": 1167,
+      "pass_rate_percent": 100,
+      "runs": 3
+    }
+  },
+  "artifacts": {
+    "cases": "benchmarks/pilots/xfast-v2-one-case/cases.json",
+    "config_dir": "benchmarks/pilots/xfast-v2-one-case/",
+    "result_summary": "benchmarks/pilots/xfast-v2-one-case/result.json"
+  },
+  "comparison": "xfast-v2-vs-fast",
+  "controls": {
+    "case_file": "benchmarks/pilots/xfast-v2-one-case/cases.json",
+    "cases": 1,
+    "fresh_isolated_agents": true,
+    "reasoning_effort": "high",
+    "repetitions_per_model": 1,
+    "same_model_and_effort_within_pairs": true
+  },
+  "created_at": "2026-08-02T16:53:22.324191+00:00",
+  "limitations": [
+    "1 coding case",
+    "1 repetition per model",
+    "per-model results are directional evidence"
+  ],
+  "models": {
+    "Luna": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": 69.0979,
+        "token_pairs": 1,
+        "token_saved_percent": 72.9334
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 102.8632,
+        "median_output_tokens": 4984,
+        "pass_rate_percent": 100,
+        "runs": 1
+      },
+      "pairs": 1,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 31.7869,
+        "median_output_tokens": 1349,
+        "pass_rate_percent": 100,
+        "runs": 1
+      }
+    },
+    "Sol": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": 49.7824,
+        "token_pairs": 1,
+        "token_saved_percent": 47.2423
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 62.1926,
+        "median_output_tokens": 2212,
+        "pass_rate_percent": 100,
+        "runs": 1
+      },
+      "pairs": 1,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 31.2317,
+        "median_output_tokens": 1167,
+        "pass_rate_percent": 100,
+        "runs": 1
+      }
+    },
+    "Terra": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": 51.3152,
+        "token_pairs": 1,
+        "token_saved_percent": 50.5858
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 50.9792,
+        "median_output_tokens": 1963,
+        "pass_rate_percent": 100,
+        "runs": 1
+      },
+      "pairs": 1,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 24.8191,
+        "median_output_tokens": 970,
+        "pass_rate_percent": 100,
+        "runs": 1
+      }
+    }
+  },
+  "provenance": {
+    "codex_versions": {
+      "Luna": "codex-cli 0.144.5",
+      "Sol": "codex-cli 0.144.5",
+      "Terra": "codex-cli 0.144.5"
+    },
+    "models": {
+      "Luna": "gpt-5.6-luna",
+      "Sol": "gpt-5.6-sol",
+      "Terra": "gpt-5.6-terra"
+    },
+    "nerd_commits": {
+      "Luna": "ac6ffef4bd82e09014e653ddf99d0e1541dde544",
+      "Sol": "ac6ffef4bd82e09014e653ddf99d0e1541dde544",
+      "Terra": "ac6ffef4bd82e09014e653ddf99d0e1541dde544"
+    }
+  },
+  "run_ids": {
+    "Luna": "20260802T164903Z-ac6ffef-gpt-5.6-luna-high",
+    "Sol": "20260802T165322Z-ac6ffef-gpt-5.6-sol-high",
+    "Terra": "20260802T165145Z-ac6ffef-gpt-5.6-terra-high"
+  },
+  "schema_version": 1
+}

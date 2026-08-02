@@ -43,8 +43,9 @@ Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}
 | `nerd-execute` | Implements approved plans or confirmed small changes using repository patterns and fresh proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
+| `nerd-xfast` | Produces authorized multi-file edits through one immutable action chain, one batched patch, and end-only proof. |
 
-Smart routes one primary specialty; Fast and Silent compose as global modifiers with any active workflow. The Agent Skills layout supports Codex, Claude Code, and Cursor.
+Smart routes one primary specialty; Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 
 Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
 
@@ -102,3 +103,22 @@ python3 benchmarks/run.py run --config benchmarks/config.json --release
 ```
 
 MIT licensed. See [LICENSE](LICENSE).
+
+<!-- XFAST_BENCHMARK:START -->
+## Now available xfast!
+
+Nerd XFast is the self-contained, throughput-first coding path. It intentionally trades accuracy, completeness, and verification breadth in pursuit of lower latency through one immutable action chain, immediate writes, and no self-selected proof.
+
+In this pilot, XFast was 55.39% faster and used 58.50% fewer output tokens.
+
+| Model | Fast accuracy | XFast accuracy | Accuracy delta | Fast latency | XFast latency | Speed | Output tokens |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Luna | 98.00% | 100.00% | +2.00 points | 95.60s | 28.93s | +69.12% | 69.07% saved |
+| Terra | 100.00% | 100.00% | +0.00 points | 41.71s | 30.28s | +36.40% | 39.14% saved |
+| Sol | 96.00% | 100.00% | +4.00 points | 81.45s | 39.35s | +52.15% | 55.83% saved |
+| Combined | 98.00% | 100.00% | +2.00 points | 75.13s | 30.28s | +55.39% | 58.50% saved |
+
+Notes: this is a directional pilot with 5 cases and one repetition per model. Each arm ran in a fresh isolated Codex process with the same model at `high` reasoning effort. Accuracy reduction is accepted by design; token savings are shown only when every paired run reported token usage.
+
+[Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/xfast-v3-five-cases/) · [Result summary](benchmarks/pilots/xfast-v3-five-cases/result.json)
+<!-- XFAST_BENCHMARK:END -->

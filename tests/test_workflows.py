@@ -12,6 +12,7 @@ SKILLS = (
     "nerd-execute",
     "nerd-silent",
     "nerd-fast",
+    "nerd-xfast",
 )
 
 
@@ -65,9 +66,9 @@ class WorkflowContractTests(unittest.TestCase):
         for skill in SKILLS:
             self.assertIn(skill, body)
 
-    def test_release_counts_exactly_six_public_skills(self):
+    def test_release_counts_exactly_seven_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_SKILL_COUNT=6", body)
+        self.assertIn("EXPECTED_SKILL_COUNT=7", body)
         self.assertIn("grep -E", body)
         self.assertIn("wc -l", body)
 

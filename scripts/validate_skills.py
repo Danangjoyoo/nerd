@@ -15,6 +15,7 @@ PUBLIC_SKILLS = (
     "nerd-execute",
     "nerd-silent",
     "nerd-fast",
+    "nerd-xfast",
 )
 
 REQUIRED_REFERENCES = {
@@ -28,6 +29,7 @@ REQUIRED_REFERENCES = {
     "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": (),
+    "nerd-xfast": (),
 }
 
 REQUIRED_SCRIPTS = {
@@ -37,6 +39,7 @@ REQUIRED_SCRIPTS = {
     "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": ("symbol_index.py",),
+    "nerd-xfast": (),
 }
 
 BANNED_RUNTIME_REFERENCES = ("brainstorming-smart", "mensa", "superpowers:")

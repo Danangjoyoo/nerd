@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "id": "xfast-batched-edit",
+      "comparison": "xfast",
+      "prompt": "Implement clamp(value, minimum, maximum) in alpha.py and parity_label(value) in beta.py, then update test_math_ops.py with focused tests for both. Treat the three known targets as one edit set. Finish all edits before running the listed compile, lint, and behavior proofs.",
+      "fixture": "xfast-batched-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "throughput-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Completes the requested code and tests, then reports the final validation boundary concisely without claiming unrun proof."},
+        {"id": "alpha", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "alpha.py"},
+        {"id": "beta", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "beta.py"},
+        {"id": "tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_math_ops.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile alpha.py beta.py test_math_ops.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py alpha.py beta.py test_math_ops.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "xfast-discovery-edit",
+      "comparison": "xfast",
+      "prompt": "Add normalize_handle(text) using the nearby conventions: trim surrounding whitespace, lowercase letters, replace every run of non-alphanumeric characters with one underscore, and strip leading or trailing underscores. Register it under the key 'handle' and update the nearest unit tests. Locate the three relevant files in one focused read pass, complete the edit set, then run the listed compile, lint, and behavior proofs.",
+      "fixture": "xfast-discovery-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "throughput-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Finds and completes the requested implementation, registration, and tests, then reports the final validation boundary concisely without claiming unrun proof."},
+        {"id": "implementation", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "normalizers.py"},
+        {"id": "registry", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "registry.py"},
+        {"id": "tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_normalizers.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    }
+  ]
+}

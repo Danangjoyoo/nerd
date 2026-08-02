@@ -94,7 +94,12 @@ class CodexAdapter(AgentAdapter):
             "-C",
             str(spec.workspace),
         ]
-        if spec.condition in {"raw-agent", "nerd-fast-only"}:
+        if spec.condition in {
+            "raw-agent",
+            "nerd-fast-only",
+            "xfast-baseline",
+            "nerd-xfast",
+        }:
             command.extend(["--ignore-user-config", "--ignore-rules"])
         if spec.model:
             command.extend(["--model", spec.model])
