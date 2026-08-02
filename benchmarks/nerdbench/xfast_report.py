@@ -364,7 +364,7 @@ def render_xfast_readme(summary: dict) -> str:
         [
             "## Now available xfast!",
             "",
-            "Nerd XFast is the self-contained, throughput-first coding path. It intentionally trades accuracy, completeness, and verification breadth in pursuit of lower latency through one immutable action chain, immediate writes, and no self-selected proof.",
+            "Nerd XFast is the self-contained, KISS-first throughput path. It intentionally trades exploration, accuracy, completeness, and verification breadth in pursuit of lower latency through one immutable action chain, immediate output, and at most one model-selected end-proof wave.",
             "",
             f"In this pilot, XFast was {speed_result} and used {token_result} "
             "output tokens.",

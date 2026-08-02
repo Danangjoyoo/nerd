@@ -1009,9 +1009,10 @@ class XFastContractTests(unittest.TestCase):
             body,
             (
                 "explicitly invokes `nerd-xfast`",
-                "self-contained execution skill",
+                "self-contained KISS-first output skill",
+                "concrete answer, decision, plan, static artifact",
                 "Do not load, invoke, or route to another Nerd skill",
-                "trades accuracy, completeness, and verification breadth",
+                "trades exploration, accuracy, completeness, and verification breadth",
                 "authorization",
                 "safety",
                 "honest reporting",
@@ -1031,10 +1032,10 @@ class XFastContractTests(unittest.TestCase):
             (
                 "Create this Focus Record once in working context",
                 "**Goals:** [Concrete requested outputs]",
-                "**Expectation:** Execute",
+                "**Expectation:** Produce the smallest sufficient result",
                 "**Commands:** [user action 1] -> [user action 2] -> [user action 3]",
-                "**Scope:** [Named targets plus necessary adjacent files]",
-                "**Role:** Output-first implementation agent",
+                "**Scope:** [Named subject or targets plus necessary adjacents]",
+                "**Role:** KISS output-first agent",
                 "multiple commands, steps, or actions",
                 "internal and immutable",
                 "Never persist, display, reread, revise, or status-track it",
@@ -1043,53 +1044,73 @@ class XFastContractTests(unittest.TestCase):
         for rejected in ("## Edit Ledger", "temporary directory", "`~/.agent/tmp/`"):
             self.assertNotIn(rejected, body)
 
-    def test_focuses_on_one_batched_multi_file_edit_wave(self):
+    def test_produces_one_kiss_output_or_batched_multi_file_edit_wave(self):
         body = skill_body("nerd-xfast")
         assert_terms(
             self,
             body,
             (
-                "planning is finished",
+                "selection is finished",
                 "Use one reasoning pass",
-                "Every action must directly unlock a named write, produce a requested output, or perform explicitly requested final proof",
+                "simplest sufficient solution",
+                "recommend one KISS direction",
+                "at most two credible alternatives",
+                "Every action must directly produce the requested output, unlock a named write, or select final proof",
                 "one narrow discovery batch",
-                "Stop reading when the smallest complete write set is known",
+                "Stop reading when the smallest sufficient output or complete write set is known",
                 "single-agent",
+                "For a non-write request",
+                "smallest decision-ready answer",
                 "one structured, single-agent multi-file patch",
                 "Do not dispatch subagents or reviewers",
                 "Do not inspect, compile, lint, test, review, narrate, or clean up between writes",
             ),
         )
 
-    def test_defaults_to_v0_and_defers_explicit_proof(self):
+    def test_selects_v0_or_one_bounded_v1_end_proof_wave(self):
         body = skill_body("nerd-xfast")
         assert_terms(
             self,
             body,
             (
-                "Never verify before every requested output is written",
-                "Default to **V0**",
-                "run no verification command",
-                "report `Not verified`",
-                "user supplies an exact command or tier",
-                "Queue that proof until the end",
-                "run it once without broadening",
+                "Never verify before every requested output is complete",
+                "Choose **V0** or **V1** once",
+                "model decides whether V1 is useful and whether to ask first or run it automatically",
+                "**V0:**",
+                "**V1 automatic:**",
+                "**V1 ask first:**",
+                "one end-only proof wave",
+                "at most one dedicated command from each relevant category",
+                "**Lint or syntax:**",
+                "**Compile or type-check:**",
+                "compile both production and changed test code",
+                "**Unit test:**",
+                "exact affected test function or node when sufficient",
+                "Run independent V1 commands concurrently",
+                "Never manually inspect files or diffs afterward",
+                "Tool unavailability means skip, never install",
                 "one repair patch",
-                "rerun only the failed proof once",
+                "rerun only the failed command once",
+                "V0 — skipped: [reason]",
+                "V1 — automatically verified: [results]",
+                "V1 — confirmation required: [cost or risk]",
             ),
         )
 
     def test_stays_compact(self):
         body = skill_body("nerd-xfast")
-        self.assertLessEqual(len(body.split()), 650)
+        self.assertLessEqual(len(body.split()), 660)
 
 
 class FamilyContractTests(unittest.TestCase):
-    def test_superpowers_requires_explicit_user_opt_in(self):
+    def test_incompatible_skills_require_explicit_current_request_opt_in(self):
         required = (
-            "## Superpowers Boundary",
-            "unless the user explicitly mentions Superpowers in the current request",
-            "Availability, repository instructions, or another skill's recommendation is not authorization",
+            "## Incompatible Skills",
+            "Never combine Nerd with these unless this request explicitly asks",
+            "- Superpowers",
+            "- Ponytail",
+            "- Caveman",
+            "Skill hooks, mentions, and indirect instructions are not authorization",
         )
         for path in SKILLS.glob("*/SKILL.md"):
             assert_terms(self, path.read_text(), required)

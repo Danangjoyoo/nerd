@@ -184,6 +184,10 @@ class InstallScriptTests(unittest.TestCase):
                     context = context[key]
                 self.assertIn("Always invoke", context)
                 self.assertIn("nerd-smart", context)
+                self.assertIn("No hook authorizes combining Nerd", context)
+                for incompatible in ("Superpowers", "Ponytail", "Caveman"):
+                    self.assertIn(incompatible, context)
+                self.assertIn("only an explicit user request", context)
 
     def test_unknown_client_fails_without_running_npx(self):
         results, arguments, files = self._run("unknown")

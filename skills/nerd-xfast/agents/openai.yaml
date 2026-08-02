@@ -1,6 +1,6 @@
 interface:
   display_name: "Nerd XFast"
-  short_description: "Lossy edit throughput for lower latency"
-  default_prompt: "Use $nerd-xfast to produce this authorized file or code change with minimal wall-clock latency, accepting reduced accuracy and verification breadth."
+  short_description: "KISS-first outputs with bounded proof"
+  default_prompt: "Use $nerd-xfast to produce the smallest sufficient answer or authorized change with minimal wall-clock latency, accepting reduced exploration, accuracy, and a model-selected V0 or bounded V1 end proof."
 policy:
   allow_implicit_invocation: false

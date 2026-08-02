@@ -11,7 +11,9 @@ import sys
 INSTRUCTION = (
     "Always invoke the installed `nerd-smart` skill before substantive work on "
     "every user request. Follow its Focus Record and endpoint contract. This "
-    "standing authorization applies only to `nerd-smart`."
+    "standing authorization applies only to `nerd-smart`. No hook authorizes "
+    "combining Nerd with Superpowers, Ponytail, or Caveman; only an explicit "
+    "user request in the current prompt authorizes that pairing."
 )
 
 

@@ -424,7 +424,7 @@ class XFastReportTests(unittest.TestCase):
             self.assertEqual(body.count(XFAST_START), 1)
             self.assertEqual(body.count(XFAST_END), 1)
             self.assertEqual(body.count("## Now available xfast!"), 1)
-            self.assertIn("intentionally trades accuracy", body)
+            self.assertIn("intentionally trades exploration, accuracy", body)
             self.assertIn("two cases and two repetitions", body)
             self.assertIn("fresh isolated Codex process", body)
             self.assertIn("`high` reasoning effort", body)
