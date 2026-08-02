@@ -32,7 +32,17 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(
             REQUIRED_REFERENCES,
             {
-                "nerd-smart": ("brainstorming.md",),
+                "nerd-smart": (
+                    "brainstorming.md",
+                    "spec-template.md",
+                    "system-design-template.md",
+                    "plan-template.md",
+                    "document-overview-template.md",
+                    "document-how-to-template.md",
+                    "document-reference-template.md",
+                    "diagnosis-template.md",
+                    "rca-template.md",
+                ),
                 "nerd-surgery": (
                     "systematic-debugging.md",
                     "test-first-repair.md",
@@ -50,7 +60,15 @@ class SkillStructureTests(unittest.TestCase):
         )
         self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
+        self.assertFalse((ROOT / "skills" / "nerd-xfast" / "references").exists())
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-smart"], ("prompt_hook.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
+
+    def test_smart_reference_files_match_registry(self):
+        references = ROOT / "skills" / "nerd-smart" / "references"
+        actual = {path.name for path in references.glob("*.md")}
+        self.assertEqual(actual, set(REQUIRED_REFERENCES["nerd-smart"]))
 
     def test_superpowers_license_files_are_absent(self):
         self.assertEqual(list(ROOT.rglob("LICENSE.superpowers")), [])

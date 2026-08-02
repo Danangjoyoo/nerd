@@ -19,7 +19,17 @@ PUBLIC_SKILLS = (
 )
 
 REQUIRED_REFERENCES = {
-    "nerd-smart": ("brainstorming.md",),
+    "nerd-smart": (
+        "brainstorming.md",
+        "spec-template.md",
+        "system-design-template.md",
+        "plan-template.md",
+        "document-overview-template.md",
+        "document-how-to-template.md",
+        "document-reference-template.md",
+        "diagnosis-template.md",
+        "rca-template.md",
+    ),
     "nerd-surgery": (
         "systematic-debugging.md",
         "test-first-repair.md",
@@ -33,7 +43,7 @@ REQUIRED_REFERENCES = {
 }
 
 REQUIRED_SCRIPTS = {
-    "nerd-smart": (),
+    "nerd-smart": ("prompt_hook.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),
     "nerd-execute": (),

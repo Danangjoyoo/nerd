@@ -11,12 +11,27 @@ def skill_body(name: str) -> str:
     return (SKILLS / name / "SKILL.md").read_text()
 
 
+def smart_reference_body(name: str) -> str:
+    return (SKILLS / "nerd-smart" / "references" / name).read_text()
+
+
 def assert_terms(test: unittest.TestCase, body: str, terms: tuple[str, ...]) -> None:
     for term in terms:
         test.assertIn(term, body)
 
 
 class SmartContractTests(unittest.TestCase):
+    TEMPLATE_REFERENCES = (
+        "spec-template.md",
+        "system-design-template.md",
+        "plan-template.md",
+        "document-overview-template.md",
+        "document-how-to-template.md",
+        "document-reference-template.md",
+        "diagnosis-template.md",
+        "rca-template.md",
+    )
+
     def test_bare_smart_stays_in_smart_without_loading_specialties(self):
         body = skill_body("nerd-smart")
         metadata = (SKILLS / "nerd-smart" / "agents" / "openai.yaml").read_text()
@@ -176,43 +191,37 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_kiss_discipline_covers_design_planning_and_execution(self):
+    def test_kiss_discipline_defines_compact_breakdown(self):
         body = skill_body("nerd-smart")
+        mapping = body.split("## Endpoint Mapping", 1)[1].split(
+            "## Focus First", 1
+        )[0]
         discipline = body.split("## KISS Implementation Discipline", 1)[1].split(
             "## Confirmation Style", 1
         )[0]
+
+        for endpoint in ("Plan", "Execute"):
+            row = next(
+                line
+                for line in mapping.splitlines()
+                if line.startswith(f"| **{endpoint}** |")
+            )
+            self.assertIn("Create a KISS breakdown", row)
 
         assert_terms(
             self,
             discipline,
             (
-                "Apply KISS whenever work shapes an implementation",
-                "**Plan** or **Execute**",
-                "Before producing an implementation design, plan, or edit",
+                "Use this template when Endpoint Mapping calls for a KISS breakdown",
                 "resolved Focus Record",
                 "**KISS Breakdown**",
                 "**Required outcome:**",
                 "**Smallest change:**",
                 "**Proof:**",
                 "**Not needed:**",
-                "Start with KISS",
-                "Prefer changing an existing path",
-                "Add complexity only when required by",
-                "an explicit requirement",
-                "an established repository convention",
-                "observed evidence",
-                "a concrete correctness, security, or measured performance constraint",
-                "Hypothetical reuse or future flexibility is not evidence",
-                "fewer concepts, files, dependencies, and changed boundaries",
-                "For design",
-                "fewest components and boundaries",
-                "For planning",
-                "only steps required",
-                "For execution",
-                "Do not preserve complexity merely because it appears",
-                "same Focus Record, approved outcome, constraints, design decisions, and proof",
-                "Ask one question before changing an approved constraint or design decision",
-                "Stop when the required outcome is proven",
+                "proceed without another confirmation when clear",
+                "Treat **Not needed** as out of scope",
+                "stop when **Proof** passes",
             ),
         )
 
@@ -220,6 +229,169 @@ class SmartContractTests(unittest.TestCase):
         body = skill_body("nerd-smart")
         self.assertIn("references/brainstorming.md", body)
         self.assertNotIn("superpowers:", body.casefold())
+
+    def test_routes_endpoint_templates_lazily_without_changing_endpoint(self):
+        body = skill_body("nerd-smart")
+        mapping = body.split("## Endpoint Mapping", 1)[1].split(
+            "## Focus First", 1
+        )[0]
+        self.assertNotIn("## Use Endpoint Templates", body)
+        self.assertIn(
+            "| Endpoint | User intention | Agent's next step | Template |",
+            mapping,
+        )
+
+        for reference in self.TEMPLATE_REFERENCES:
+            link = f"references/{reference}"
+            self.assertIn(link, mapping)
+            self.assertEqual(body.count(link), 1)
+
+        assert_terms(
+            self,
+            mapping,
+            (
+                "after the Focus Record is resolved",
+                "templates are optional for tiny outputs",
+                "explicit user format takes precedence",
+                "Load only the matched reference, one by default",
+                "combined specification and system design",
+                "Strip bracketed prompts",
+                "omit irrelevant sections",
+                "mark unknowns",
+                "never let a template advance the endpoint",
+            ),
+        )
+
+    def test_template_artifacts_follow_explicit_write_requests_or_offer_persistence(self):
+        body = skill_body("nerd-smart")
+        mapping = body.split("## Endpoint Mapping", 1)[1].split(
+            "## Focus First", 1
+        )[0]
+
+        assert_terms(
+            self,
+            mapping,
+            (
+                "always show the filled artifact in the session",
+                "reference files are scaffolds, not output files",
+                "explicitly asks to write or save to a named directory or Markdown path",
+                "write it in the same action",
+                "descriptive non-overwriting `.md` name",
+                "report the path",
+                "do not ask again",
+                "Otherwise keep it session-only",
+                '"Would you like me to write this to a Markdown file?"',
+                "A later yes authorizes only persistence",
+                "ask for a path if none was given",
+                "Persistence never changes content or advances the endpoint",
+            ),
+        )
+
+    def test_endpoint_templates_share_safe_adaptation_contract(self):
+        references = SKILLS / "nerd-smart" / "references"
+        for reference in self.TEMPLATE_REFERENCES:
+            with self.subTest(reference=reference):
+                path = references / reference
+                self.assertTrue(path.is_file(), f"missing {path}")
+                body = path.read_text() if path.is_file() else ""
+                self.assertFalse(body.startswith("---"))
+                assert_terms(
+                    self,
+                    body,
+                    (
+                        "## Use When",
+                        "## Adaptation Rules",
+                        "## Template",
+                        "## Completion Check",
+                        "[Required:",
+                        "[Optional:",
+                        "Preserve confirmed facts",
+                        "Mark material unknowns",
+                        "Omit irrelevant optional sections",
+                        "Remove bracketed instructions",
+                    ),
+                )
+                folded = body.casefold()
+                for forbidden in (
+                    "$nerd-",
+                    "superpowers:",
+                    "license.superpowers",
+                    "obra/superpowers",
+                ):
+                    self.assertNotIn(forbidden, folded)
+
+    def test_endpoint_templates_keep_artifact_types_distinct(self):
+        expected_terms = {
+            "spec-template.md": (
+                "externally observable",
+                "system-design-template.md",
+                "## Acceptance Criteria",
+                "## Open Questions",
+            ),
+            "system-design-template.md": (
+                "internal architecture",
+                "spec-template.md",
+                "## Components and Responsibilities",
+                "## Failure and Recovery",
+                "## Alternatives and Trade-offs",
+            ),
+            "plan-template.md": (
+                "ordered implementation",
+                "## KISS Breakdown",
+                "### Task",
+                "**Files:**",
+                "**Change:**",
+                "**Proof:**",
+                "Stop before execution",
+            ),
+            "document-overview-template.md": (
+                "what the subject is",
+                "## Audience and Purpose",
+                "## Key Concepts",
+                "## Limitations",
+            ),
+            "document-how-to-template.md": (
+                "concrete outcome",
+                "## Prerequisites",
+                "## Steps",
+                "## Verification",
+                "## Troubleshooting",
+            ),
+            "document-reference-template.md": (
+                "precise lookup",
+                "## Terminology",
+                "## Defaults and Invariants",
+                "## Errors and Limitations",
+            ),
+            "diagnosis-template.md": (
+                "current broken",
+                "## Expected Behavior",
+                "## Actual Behavior",
+                "## Hypotheses and Experiments",
+                "Confirmed",
+                "Probable",
+                "Unknown",
+                "Do not repair",
+            ),
+            "rca-template.md": (
+                "retrospective",
+                "## Timeline",
+                "## Detection and Response",
+                "## Contributing Factors",
+                "## Corrective and Preventive Actions",
+                "owner",
+                "due date",
+                "status",
+                "Do not execute",
+            ),
+        }
+
+        for reference, terms in expected_terms.items():
+            with self.subTest(reference=reference):
+                path = SKILLS / "nerd-smart" / "references" / reference
+                self.assertTrue(path.is_file(), f"missing {path}")
+                if path.is_file():
+                    assert_terms(self, smart_reference_body(reference), terms)
 
 
 class SurgeryContractTests(unittest.TestCase):

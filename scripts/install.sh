@@ -34,5 +34,14 @@ if ! command -v npx >/dev/null 2>&1; then
   exit 127
 fi
 
-exec npx skills add danangjoyoo/nerd \
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "error: python3 is required to configure nerd-smart hooks" >&2
+  exit 127
+fi
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+npx skills add danangjoyoo/nerd \
   --global --agent "$@" --skill '*' --yes
+
+python3 "$script_dir/install_hooks.py" "$@"

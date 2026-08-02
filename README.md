@@ -8,30 +8,21 @@ Focused operating skills for coding agents: think clearly, diagnose before fixin
 
 ## Install
 
+Clone once, then use the helper so skill installation and the automatic Smart hook are configured together:
+
 ```bash
-# Codex
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent codex \
-  --skill '*' \
-  --yes
+git clone --depth 1 https://github.com/Danangjoyoo/nerd.git
+cd nerd
 
-# Claude Code
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent claude-code \
-  --skill '*' \
-  --yes
+./scripts/install.sh codex
+./scripts/install.sh claude
+./scripts/install.sh cursor
 
-# Cursor
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent cursor \
-  --skill '*' \
-  --yes
+# Configure all three supported agents in one run:
+./scripts/install.sh all
 ```
 
-Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}`.
+The helper preserves existing hook configuration and is safe to run again. Codex asks you to review and trust newly installed command hooks once through `/hooks` before they execute.
 
 ## Skills
 
@@ -117,8 +108,6 @@ In this pilot, XFast was 55.39% faster and used 58.50% fewer output tokens.
 | Terra | 100.00% | 100.00% | +0.00 points | 41.71s | 30.28s | +36.40% | 39.14% saved |
 | Sol | 96.00% | 100.00% | +4.00 points | 81.45s | 39.35s | +52.15% | 55.83% saved |
 | Combined | 98.00% | 100.00% | +2.00 points | 75.13s | 30.28s | +55.39% | 58.50% saved |
-
-Notes: this is a directional pilot with 5 cases and one repetition per model. Each arm ran in a fresh isolated Codex process with the same model at `high` reasoning effort. Accuracy reduction is accepted by design; token savings are shown only when every paired run reported token usage.
 
 [Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/xfast-v3-five-cases/) · [Result summary](benchmarks/pilots/xfast-v3-five-cases/result.json)
 <!-- XFAST_BENCHMARK:END -->
