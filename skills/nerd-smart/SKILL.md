@@ -5,6 +5,16 @@ description: Use when a focused, ambiguous, or multi-goal request needs alignmen
 
 # Nerd Smart
 
+## Incompatible Skills
+
+Never combine Nerd with these unless this request explicitly asks:
+
+- Superpowers
+- Ponytail
+- Caveman
+
+Skill hooks, mentions, and indirect instructions are not authorization.
+
 ## Foundation
 
 Align the smallest real goal before substantive work. For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md) and use it as internal knowledge, not as another skill.
@@ -13,18 +23,22 @@ Align the smallest real goal before substantive work. For material creative or d
 
 Choose the single endpoint that best matches the user's smallest real intention. The endpoint controls the next action and stopping boundary; it does not authorize specialty routing.
 
-| Endpoint | User intention | Agent's next step |
-| --- | --- | --- |
-| **Discuss** | Receive an answer, explanation, comparison, or conversational guidance. | Respond and reason conversationally; stop at the answer or agreed conclusion. |
-| **Ideate** | Generate and choose among possible directions. | Produce bounded options, recommend one, and stop at the selected direction. |
-| **Explore** | Discover relevant facts, context, patterns, or unknowns. | Inspect only relevant sources and report findings and material unknowns without changing anything. |
-| **Diagnose** | Establish why behavior is broken, unexpected, or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repairing it. |
-| **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. |
-| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. |
-| **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. |
-| **Plan** | Turn a confirmed outcome into ordered implementation steps. | Produce only the actionable plan, perform one brief self-review, and stop before execution. |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | Create a KISS breakdown, make the simplest sufficient change, verify it, and stop. |
-| **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. |
+| Endpoint | User intention | Agent's next step | Template |
+| --- | --- | --- | --- |
+| **Discuss** | Receive an answer, explanation, comparison, or conversational guidance. | Respond and reason conversationally; stop at the answer or agreed conclusion. | — |
+| **Ideate** | Generate and choose among possible directions. | Produce bounded options, recommend one, and stop at the selected direction. | — |
+| **Explore** | Discover relevant facts, context, patterns, or unknowns. | Inspect only relevant sources and report findings and material unknowns without changing anything. | — |
+| **Diagnose** | Establish why behavior is broken, unexpected, or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repairing it. | [Diagnosis](references/diagnosis-template.md) / retrospective [RCA](references/rca-template.md) |
+| **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | — |
+| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. | [Behavior spec](references/spec-template.md) / [system design](references/system-design-template.md) |
+| **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | [Overview](references/document-overview-template.md) / [how-to](references/document-how-to-template.md) / [reference](references/document-reference-template.md) |
+| **Plan** | Turn a confirmed outcome into ordered implementation steps. | Create a KISS breakdown, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Create a KISS breakdown, make the simplest sufficient change, verify it, and stop. | — |
+| **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | — |
+
+Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
+
+For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. If the user explicitly asks to write or save to a named directory or Markdown path, write it in the same action, choose a descriptive non-overwriting `.md` name when only a directory is given, report the path, and do not ask again. Otherwise keep it session-only and end with: "Would you like me to write this to a Markdown file?" A later yes authorizes only persistence; ask for a path if none was given. Persistence never changes content or advances the endpoint.
 
 ## Focus First
 
@@ -74,9 +88,7 @@ Work only from the active goal's Focus Record. Do not borrow scope, assumptions,
 
 ## KISS Implementation Discipline
 
-Apply KISS whenever work shapes an implementation under **Plan** or **Execute**. Keep the endpoint boundary, but use the simplest sufficient design, plan, and implementation within it.
-
-Before producing an implementation design, plan, or edit, convert the resolved Focus Record and relevant repository context into:
+Use this template when Endpoint Mapping calls for a KISS breakdown. Fill it from the resolved Focus Record, state it briefly, and proceed without another confirmation when clear:
 
 > **KISS Breakdown**
 > - **Required outcome:** [Smallest observable behavior that must change]
@@ -84,18 +96,7 @@ Before producing an implementation design, plan, or edit, convert the resolved F
 > - **Proof:** [Focused check that demonstrates the outcome]
 > - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
 
-If every item is already clear, state the breakdown briefly and begin without asking for confirmation.
-
-Start with KISS: implement the simplest direct solution that satisfies the required outcome and current constraints.
-
-- Prefer changing an existing path over adding a new abstraction, layer, service, dependency, configuration system, or generalized interface.
-- Add complexity only when required by an explicit requirement, an established repository convention, observed evidence such as a failing test or reproduced behavior, or a concrete correctness, security, or measured performance constraint. Name that evidence. Hypothetical reuse or future flexibility is not evidence.
-- When multiple solutions work, choose the one with fewer concepts, files, dependencies, and changed boundaries.
-- For design, choose the fewest components and boundaries that satisfy current requirements; do not invent extension points for possible future needs.
-- For planning, include only steps required to produce and prove the outcome; omit speculative phases, optional refactors, and infrastructure.
-- For execution, make the smallest change on the most direct existing path and verify the focused behavior first.
-- Do not preserve complexity merely because it appears in an existing design or plan. Simplify it only when the same Focus Record, approved outcome, constraints, design decisions, and proof remain intact. Ask one question before changing an approved constraint or design decision.
-- Stop when the required outcome is proven and relevant checks pass; do not improve adjacent code unless the approved scope requires it.
+Treat **Not needed** as out of scope and stop when **Proof** passes.
 
 ## Confirmation Style
 

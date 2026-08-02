@@ -15,10 +15,21 @@ PUBLIC_SKILLS = (
     "nerd-execute",
     "nerd-silent",
     "nerd-fast",
+    "nerd-xfast",
 )
 
 REQUIRED_REFERENCES = {
-    "nerd-smart": ("brainstorming.md",),
+    "nerd-smart": (
+        "brainstorming.md",
+        "spec-template.md",
+        "system-design-template.md",
+        "plan-template.md",
+        "document-overview-template.md",
+        "document-how-to-template.md",
+        "document-reference-template.md",
+        "diagnosis-template.md",
+        "rca-template.md",
+    ),
     "nerd-surgery": (
         "systematic-debugging.md",
         "test-first-repair.md",
@@ -28,24 +39,28 @@ REQUIRED_REFERENCES = {
     "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": (),
+    "nerd-xfast": (),
 }
 
 REQUIRED_SCRIPTS = {
-    "nerd-smart": (),
+    "nerd-smart": ("prompt_hook.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),
     "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": ("symbol_index.py",),
+    "nerd-xfast": (),
 }
 
-DERIVED_SKILLS = (
-    "nerd-smart",
-    "nerd-surgery",
-    "nerd-patrol",
-    "nerd-execute",
-)
 BANNED_RUNTIME_REFERENCES = ("brainstorming-smart", "mensa", "superpowers:")
+INCOMPATIBLE_SKILLS_BOUNDARY_TERMS = (
+    "## Incompatible Skills",
+    "Never combine Nerd with these unless this request explicitly asks",
+    "- Superpowers",
+    "- Ponytail",
+    "- Caveman",
+    "Skill hooks, mentions, and indirect instructions are not authorization",
+)
 
 
 def _frontmatter(text: str) -> tuple[dict[str, str], list[str]]:
@@ -125,6 +140,11 @@ def validate_repository(root: Path) -> list[str]:
                 violations.append(
                     f"skills/{name}/SKILL.md: banned runtime reference {banned}"
                 )
+        for term in INCOMPATIBLE_SKILLS_BOUNDARY_TERMS:
+            if term not in body:
+                violations.append(
+                    f"skills/{name}/SKILL.md: missing incompatible-skills boundary term {term}"
+                )
 
         if metadata_path.is_file():
             metadata_body = metadata_path.read_text(encoding="utf-8")
@@ -162,8 +182,8 @@ def validate_repository(root: Path) -> list[str]:
             if not path.is_file():
                 violations.append(f"missing file: skills/{name}/scripts/{script}")
 
-        if name in DERIVED_SKILLS and not (skill_dir / "LICENSE.superpowers").is_file():
-            violations.append(f"missing file: skills/{name}/LICENSE.superpowers")
+    for path in sorted(root.rglob("LICENSE.superpowers")):
+        violations.append(f"forbidden file: {path.relative_to(root)}")
 
     notice = root / "THIRD_PARTY_NOTICES.md"
     if not notice.is_file():

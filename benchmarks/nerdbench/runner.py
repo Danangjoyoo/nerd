@@ -37,8 +37,15 @@ CONDITION_SKILLS = {
     "nerd-fast": ("nerd-execute", "nerd-fast"),
     "raw-agent": (),
     "nerd-fast-only": ("nerd-fast",),
+    "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
+    "nerd-xfast": ("nerd-xfast",),
 }
-ISOLATED_CODEX_CONDITIONS = {"raw-agent", "nerd-fast-only"}
+ISOLATED_CODEX_CONDITIONS = {
+    "raw-agent",
+    "nerd-fast-only",
+    "xfast-baseline",
+    "nerd-xfast",
+}
 SMOKE_CASES = {
     "smart": "smart-ambiguous-focus",
     "surgery": "surgery-trace-source",

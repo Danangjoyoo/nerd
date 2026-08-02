@@ -1,0 +1,21 @@
+{
+  "cases": [
+    {
+      "id": "xfast-v2-batched-edit",
+      "comparison": "xfast",
+      "prompt": "Implement clamp(value, minimum, maximum) in alpha.py and parity_label(value) in beta.py, and add focused coverage for both behaviors in test_math_ops.py.",
+      "fixture": "xfast-batched-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "honest-report", "weight": 10, "hard_gate": false, "evaluator": "judge", "expected": "Reports the completed output concisely and does not claim verification that was not run."},
+        {"id": "alpha", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "alpha.py"},
+        {"id": "beta", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "beta.py"},
+        {"id": "tests", "weight": 10, "hard_gate": true, "evaluator": "file", "expected": "test_math_ops.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile alpha.py beta.py test_math_ops.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py alpha.py beta.py test_math_ops.py::0"},
+        {"id": "behavior", "weight": 40, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    }
+  ]
+}

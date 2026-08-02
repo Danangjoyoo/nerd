@@ -1,0 +1,141 @@
+{
+  "aggregate": {
+    "delta": {
+      "accuracy_points": -0.8333,
+      "speed_percent": -68.2074,
+      "token_pairs": 12,
+      "token_saved_percent": -77.785
+    },
+    "fast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 74.1012,
+      "median_output_tokens": 3089.5,
+      "pass_rate_percent": 100,
+      "runs": 12
+    },
+    "pairs": 12,
+    "xfast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 99.1667,
+      "median_latency_seconds": 154.7896,
+      "median_output_tokens": 7035.5,
+      "pass_rate_percent": 100,
+      "runs": 12
+    }
+  },
+  "comparison": "xfast-vs-fast",
+  "controls": {
+    "cases": 2,
+    "fresh_isolated_agents": true,
+    "reasoning_effort": "high",
+    "repetitions_per_model": 2,
+    "same_model_and_effort_within_pairs": true
+  },
+  "created_at": "2026-08-02T16:09:28.232999+00:00",
+  "limitations": [
+    "two cases",
+    "two repetitions per model",
+    "per-model results are directional evidence"
+  ],
+  "models": {
+    "Luna": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": -68.2074,
+        "token_pairs": 4,
+        "token_saved_percent": -74.9228
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 93.4452,
+        "median_output_tokens": 4123.0,
+        "pass_rate_percent": 100,
+        "runs": 4
+      },
+      "pairs": 4,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 154.7896,
+        "median_output_tokens": 7211.0,
+        "pass_rate_percent": 100,
+        "runs": 4
+      }
+    },
+    "Sol": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": -201.2844,
+        "token_pairs": 4,
+        "token_saved_percent": -216.132
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 68.1343,
+        "median_output_tokens": 2491.0,
+        "pass_rate_percent": 100,
+        "runs": 4
+      },
+      "pairs": 4,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 218.861,
+        "median_output_tokens": 7899.0,
+        "pass_rate_percent": 100,
+        "runs": 4
+      }
+    },
+    "Terra": {
+      "delta": {
+        "accuracy_points": -2.5,
+        "speed_percent": -56.5209,
+        "token_pairs": 4,
+        "token_saved_percent": -53.8903
+      },
+      "fast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 69.8104,
+        "median_output_tokens": 3089.5,
+        "pass_rate_percent": 100,
+        "runs": 4
+      },
+      "pairs": 4,
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 97.5,
+        "median_latency_seconds": 105.101,
+        "median_output_tokens": 4685.0,
+        "pass_rate_percent": 100,
+        "runs": 4
+      }
+    }
+  },
+  "provenance": {
+    "codex_versions": {
+      "Luna": "codex-cli 0.144.5",
+      "Sol": "codex-cli 0.144.5",
+      "Terra": "codex-cli 0.144.5"
+    },
+    "models": {
+      "Luna": "gpt-5.6-luna",
+      "Sol": "gpt-5.6-sol",
+      "Terra": "gpt-5.6-terra"
+    },
+    "nerd_commits": {
+      "Luna": "ac6ffef4bd82e09014e653ddf99d0e1541dde544",
+      "Sol": "ac6ffef4bd82e09014e653ddf99d0e1541dde544",
+      "Terra": "ac6ffef4bd82e09014e653ddf99d0e1541dde544"
+    }
+  },
+  "run_ids": {
+    "Luna": "20260802T153803Z-ac6ffef-gpt-5.6-luna-high",
+    "Sol": "20260802T160928Z-ac6ffef-gpt-5.6-sol-high",
+    "Terra": "20260802T155616Z-ac6ffef-gpt-5.6-terra-high"
+  },
+  "schema_version": 1
+}

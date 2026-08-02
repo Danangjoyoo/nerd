@@ -20,6 +20,7 @@ SKILLS = (
     "nerd-execute",
     "nerd-silent",
     "nerd-fast",
+    "nerd-xfast",
 )
 START = "<!-- BENCHMARK_RESULTS:START -->"
 END = "<!-- BENCHMARK_RESULTS:END -->"
@@ -80,22 +81,14 @@ class ReadmeContractTests(unittest.TestCase):
 
     def test_install_command_is_current(self):
         body = README.read_text(encoding="utf-8")
-        commands = {
-            "Codex": "codex",
-            "Claude Code": "claude-code",
-            "Cursor": "cursor",
-        }
-        for label, agent in commands.items():
-            command = (
-                f"# {label}\n"
-                "npx skills add danangjoyoo/nerd \\\n"
-                "  --global \\\n"
-                f"  --agent {agent} \\\n"
-                "  --skill '*' \\\n"
-                "  --yes"
-            )
-            self.assertIn(command, body)
-        self.assertIn("./scripts/install.sh {claude|codex|cursor|all}", body)
+        self.assertIn(
+            "git clone --depth 1 https://github.com/Danangjoyoo/nerd.git",
+            body,
+        )
+        for target in ("claude", "codex", "cursor", "all"):
+            self.assertIn(f"./scripts/install.sh {target}", body)
+        self.assertIn("automatic Smart hook", body)
+        self.assertNotIn("npx skills add danangjoyoo/nerd", body)
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
 

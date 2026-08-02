@@ -8,30 +8,21 @@ Focused operating skills for coding agents: think clearly, diagnose before fixin
 
 ## Install
 
+Clone once, then use the helper so skill installation and the automatic Smart hook are configured together:
+
 ```bash
-# Codex
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent codex \
-  --skill '*' \
-  --yes
+git clone --depth 1 https://github.com/Danangjoyoo/nerd.git
+cd nerd
 
-# Claude Code
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent claude-code \
-  --skill '*' \
-  --yes
+./scripts/install.sh codex
+./scripts/install.sh claude
+./scripts/install.sh cursor
 
-# Cursor
-npx skills add danangjoyoo/nerd \
-  --global \
-  --agent cursor \
-  --skill '*' \
-  --yes
+# Configure all three supported agents in one run:
+./scripts/install.sh all
 ```
 
-Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}`.
+The helper preserves existing hook configuration and is safe to run again. Codex asks you to review and trust newly installed command hooks once through `/hooks` before they execute.
 
 ## Skills
 
@@ -43,8 +34,9 @@ Or use the helper after cloning: `./scripts/install.sh {claude|codex|cursor|all}
 | `nerd-execute` | Implements approved plans or confirmed small changes using repository patterns and fresh proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
+| `nerd-xfast` | Produces the smallest sufficient answer or authorized edit through one immutable action chain, immediate output, and bounded end proof. |
 
-Smart routes one primary specialty; Fast and Silent compose as global modifiers with any active workflow. The Agent Skills layout supports Codex, Claude Code, and Cursor.
+Smart routes one primary specialty; Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 
 Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
 
@@ -102,3 +94,20 @@ python3 benchmarks/run.py run --config benchmarks/config.json --release
 ```
 
 MIT licensed. See [LICENSE](LICENSE).
+
+<!-- XFAST_BENCHMARK:START -->
+## Now available xfast!
+
+Nerd XFast is the self-contained, KISS-first throughput path. It intentionally trades exploration, accuracy, completeness, and verification breadth in pursuit of lower latency through one immutable action chain, immediate output, and at most one model-selected end-proof wave.
+
+In this pilot, XFast was 55.39% faster and used 58.50% fewer output tokens.
+
+| Model | Fast accuracy | XFast accuracy | Accuracy delta | Fast latency | XFast latency | Speed | Output tokens |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Luna | 98.00% | 100.00% | +2.00 points | 95.60s | 28.93s | +69.12% | 69.07% saved |
+| Terra | 100.00% | 100.00% | +0.00 points | 41.71s | 30.28s | +36.40% | 39.14% saved |
+| Sol | 96.00% | 100.00% | +4.00 points | 81.45s | 39.35s | +52.15% | 55.83% saved |
+| Combined | 98.00% | 100.00% | +2.00 points | 75.13s | 30.28s | +55.39% | 58.50% saved |
+
+[Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/xfast-v3-five-cases/) · [Result summary](benchmarks/pilots/xfast-v3-five-cases/result.json)
+<!-- XFAST_BENCHMARK:END -->

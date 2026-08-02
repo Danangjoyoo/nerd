@@ -21,6 +21,10 @@ from benchmarks.nerdbench.pair_report import (
 from benchmarks.nerdbench.runner import load_config, run_matrix, schedule_runs
 from benchmarks.nerdbench.scorer import score_result_directory
 from benchmarks.nerdbench.scorer import judge_result_directory
+from benchmarks.nerdbench.xfast_report import (
+    publish_xfast_readme,
+    write_xfast_summary,
+)
 
 
 DEFAULT_CONFIG = ROOT / "benchmarks" / "config.json"
@@ -96,6 +100,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pair_publish.add_argument("--summary", required=True)
     pair_publish.add_argument("--readme", default=str(ROOT / "README.md"))
+
+    xfast_report = subparsers.add_parser(
+        "xfast-report",
+        help="summarize the three XFast versus Fast pilot results",
+    )
+    xfast_report.add_argument("--results", nargs=3, required=True)
+    xfast_report.add_argument("--output", required=True)
+    xfast_report.add_argument("--overwrite", action="store_true")
+
+    xfast_publish = subparsers.add_parser(
+        "xfast-publish",
+        help="sync the XFast pilot summary to README",
+    )
+    xfast_publish.add_argument("--summary", required=True)
+    xfast_publish.add_argument("--readme", default=str(ROOT / "README.md"))
+    xfast_publish.add_argument("--check", action="store_true")
     return parser
 
 
@@ -175,6 +195,31 @@ def main(argv: list[str] | None = None) -> int:
             readme = (ROOT / readme).resolve()
         publish_fast_raw_readme(summary, readme)
         print("synchronized Fast raw smoke benchmark")
+        return 0
+
+    if args.command == "xfast-report":
+        results = [
+            path.resolve() if path.is_absolute() else (ROOT / path).resolve()
+            for value in args.results
+            for path in [Path(value)]
+        ]
+        output = Path(args.output)
+        if not output.is_absolute():
+            output = (ROOT / output).resolve()
+        summary = write_xfast_summary(results, output, overwrite=args.overwrite)
+        print(f"wrote {summary['aggregate']['pairs']} XFast pairs to {output}")
+        return 0
+
+    if args.command == "xfast-publish":
+        summary_path = Path(args.summary)
+        if not summary_path.is_absolute():
+            summary_path = (ROOT / summary_path).resolve()
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        readme = Path(args.readme)
+        if not readme.is_absolute():
+            readme = (ROOT / readme).resolve()
+        publish_xfast_readme(summary, readme, check=args.check)
+        print("checked XFast README" if args.check else "synchronized XFast README")
         return 0
 
     raise AssertionError(args.command)

@@ -55,6 +55,10 @@ EXPECTED_CASES = {
         "fast-failure-recovery",
         "fast-verification-cost",
     },
+    "xfast": {
+        "xfast-batched-edit",
+        "xfast-discovery-edit",
+    },
 }
 
 
