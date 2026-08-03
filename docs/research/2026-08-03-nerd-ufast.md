@@ -259,5 +259,18 @@ at:
 | Benchmark scorer | `5afaa3d5bd90ddfe48811a37f17c993d553d57f54d3b82c1a6bd5170bbed4ba7` |
 | UFast reporter | `a781de87b510a4db7f6f5a5047244ed6507e4378408767ecec84377494114208` |
 
-The accepted Luna and Terra result directories and their measured values are
-appended after judging and scoring succeeds.
+The accepted matrix ran from commit
+`d7fb63a02a93a55334d3c9c45b55a0c51ea780c4`:
+
+| Model | Accepted result directory | XFast score | UFast score | XFast latency | UFast latency | XFast tokens | UFast tokens |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Luna | `20260803T055610Z-d7fb63a-gpt-5.6-luna-high` | 90 | 90 | 45.4528 s | 73.7721 s | 1,722 | 2,826 |
+| Terra | `20260803T055945Z-d7fb63a-gpt-5.6-terra-high` | 100 | 90 | 46.8391 s | 61.9925 s | 1,736 | 2,176 |
+
+All four workloads passed, both blinded judge tasks were valid, and no hard
+gate failed. Both UFast runs used project index, indexed search, and one atomic
+safe-edit transaction; neither fell back. The two-pair aggregate is directional:
+UFast was 47.3284% slower, used 44.7286% more output tokens, and scored five
+points lower. This confirms that the Phase 1 tools are integrated and isolated,
+not that UFast is faster on this one small Python case. Generic-language and
+larger semantic-tool benchmarks remain future work.

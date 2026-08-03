@@ -37,8 +37,8 @@ The helper preserves existing hook and Codex configuration and is safe to run ag
 | `nerd-execute` | Implements approved plans or confirmed small changes using repository patterns and fresh proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | High speed work that cuts critical-path latency through reuse, batching, narrow exploration, and proportionate proof without reducing accuracy. |
-| `nerd-xfast` | Super high speed for rapid output through one immutable action chain, immediate results, and bounded end proof. |
-| `nerd-ufast` | Generic tool-backed ultra-fast work for supported operations, with bounded inputs, structured results, safety guards, and immediate fallback. |
+| `nerd-xfast` | Super high speed through batched native text/patch calls, one immutable action chain, and V0 or one bounded V1 end-proof wave; deliberately lossy. |
+| `nerd-ufast` | Generic tool-backed ultra-fast work through batched registry operations, deterministic safety guards, and a V0/V1 auto-or-ask proof ladder. |
 
 Smart routes one primary specialty; Fast, UFast, and Silent are explicit global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor; UFast's bundled MCP runtime is currently verified only with Codex.
 
@@ -51,10 +51,12 @@ Smart aligns intention, endpoint, scope, and working role. The speed modes then 
 | Need | Choose | Contract |
 | --- | --- | --- |
 | High speed work without deliberate accuracy loss | Fast | Reuse, batch, parallelize, navigate narrowly, and run proportionate proof. |
-| Super high speed for rapid output | XFast | Accept reduced exploration, completeness, accuracy, and verification breadth. |
-| Tool-backed ultra-fast work on a supported deterministic operation | UFast | Route work into a matching namespaced tool; fall back when no installed tool supports it. |
+| Super high speed for rapid output | XFast | Batch native text/patch calls and accept reduced exploration, completeness, accuracy, and verification breadth. |
+| Tool-backed ultra-fast work on a supported deterministic operation | UFast | Batch project index/search/edit/test operations and preserve the active workflow's accuracy contract. |
 
-UFast is generic: the modifier can route any operation for which a matching UFast tool is installed. Its first bundled route handles bounded UTF-8 workspace changes with hash guards, atomic replacement, verification adapters, and rollback; Python is only the adapter exercised by this benchmark. UFast and XFast do not compose. Installing UFast does not promise that every task is faster, and the benchmark reports the measured result even when it is slower.
+XFast remains at the agent's native text/patch layer: it batches independent calls, stops exploration early, and chooses V0 or one end-only V1 proof wave. UFast moves the mechanical “how” into deterministic tools: search accepts batched queries, safe edit batches files atomically, and the test runner executes independent checks concurrently. Its V0 reuses fresh structured evidence; V1 runs safe local proof automatically or asks first when proof is broad, stateful, external, destructive, or needs more authority.
+
+UFast is generic: its operation registry can route any intent for which a deterministic backend is installed. Phase 1 bundles a reusable project index, bounded fast search, hash-guarded safe edit, and repository-aware test runner. The safe-edit backend handles UTF-8 workspace changes with atomic replacement and rollback; Python is only the adapter exercised by the verification benchmark. Language Server and AST/codemod backends remain later phases. UFast and XFast do not compose. Installing UFast does not promise that every task is faster, and benchmark wording follows the measured result.
 
 ## Benchmarks
 
@@ -95,24 +97,23 @@ Superpowers | Acc [██████░░░░░░░░░░░░░░]
 ```
 
 <!-- UFAST_BENCHMARK:START -->
-## UFast: deterministic tools for supported changes
+## UFast: routed deterministic project tools
 
-Nerd UFast is a generic tool-backed modifier that keeps the active workflow's scope and correctness contract. Its first bundled route moves a supported UTF-8 workspace change into one hash-guarded, atomic transaction with verification adapters and rollback; unsupported operations fall back to the active workflow.
+Nerd UFast is a generic tool-backed modifier with an operation registry. Phase 1 batches indexed queries, atomic multi-file edits, and concurrent allowlisted checks. V0 reuses fresh structured evidence; V1 runs safe local proof automatically or asks before broader proof. Language-specific LSP and AST backends can register later without changing the public routing contract.
 
-Across this directional pilot, UFast was 15.27% slower than XFast and used 2.75% more output tokens.
+Across this directional pilot, UFast was 47.33% slower than XFast. UFast used 44.73% more output tokens.
 
 | Model | XFast accuracy | UFast accuracy | Accuracy delta | XFast latency | UFast latency | Speed | XFast tokens | UFast tokens | Token change | Tool hit | Fallbacks |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | ---: | ---: |
-| Luna | 94.00% | 96.00% | +2.00 points | 44.54s | 78.72s | 88.18% slower | 1927 | 3559 | 92.48% more | 100.00% | 1 |
-| Terra | 100.00% | 94.00% | -6.00 points | 40.73s | 37.79s | 9.52% faster | 1423 | 1346 | 5.41% fewer | 100.00% | 0 |
-| Sol | 96.00% | 96.00% | +0.00 points | 45.54s | 47.59s | 15.27% slower | 1712 | 1712 | 2.75% more | 100.00% | 0 |
-| Combined | 96.67% | 95.33% | -1.33 points | 41.83s | 46.40s | 15.27% slower | 1712 | 1712 | 2.75% more | 100.00% | 1 |
+| Luna | 90.00% | 90.00% | +0.00 points | 45.45s | 73.77s | 62.30% slower | 1722 | 2826 | 64.11% more | 100.00% | 0 |
+| Terra | 100.00% | 90.00% | -10.00 points | 46.84s | 61.99s | 32.35% slower | 1736 | 2176 | 25.35% more | 100.00% | 0 |
+| Combined | 95.00% | 90.00% | -5.00 points | 46.15s | 67.88s | 47.33% slower | 1729 | 2501 | 44.73% more | 100.00% | 0 |
 
-The UFast tool path had a 100.00% hit rate, 1 fallback runs, 25.00 ms median cold start, and 637.00 ms median tool-operation time per run.
+The UFast route had a 100.00% tool hit rate, 0 fallback runs, 2 project-index runs, 2 fast-search runs, 0 standalone test-runner runs, 38.50 ms median cold start, and 69.00 ms median total tool-operation time per run.
 
-Method: five Python coding cases, one repetition, and three models at `high` reasoning effort produced 30 fresh Codex processes and 15 matched pairs. The cases exercise one adapter, not UFast's generic scope. The exact prompts and proof commands are shared by both arms. One repetition is directional evidence; it does not establish a universal speedup. Codex is the only verified UFast tool host in this release; other hosts install the skill but fall back until their tool integration is verified.
+Method: one Python discovery/edit verification case, one repetition, and Luna plus Terra at `high` reasoning effort produced 4 fresh Codex processes and 2 matched pairs. The case exercises one adapter, not UFast's generic scope. The exact prompt and proof commands are shared by both arms. This tiny verification does not establish a universal speedup. Codex is the only verified UFast tool host in this release; other hosts install the skill but fall back until their tool integration is verified.
 
-[Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/ufast-vs-xfast/) · [Result summary](benchmarks/pilots/ufast-vs-xfast/result.json)
+[Cases](benchmarks/cases/ufast-phase1-verification.json) · [Pilot configs](benchmarks/pilots/ufast-vs-xfast/) · [Result summary](benchmarks/pilots/ufast-vs-xfast/result.json)
 <!-- UFAST_BENCHMARK:END -->
 
 ## Verify locally
