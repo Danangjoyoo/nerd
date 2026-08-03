@@ -101,8 +101,7 @@ class CodexAdapter(AgentAdapter):
             "nerd-xfast",
             "nerd-ufast",
         }:
-            if spec.condition != "nerd-ufast":
-                command.append("--ignore-user-config")
+            command.append("--ignore-user-config")
             command.append("--ignore-rules")
         if spec.model:
             command.extend(["--model", spec.model])

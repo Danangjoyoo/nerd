@@ -92,8 +92,8 @@ class ReadmeContractTests(unittest.TestCase):
         self.assertNotIn("npx skills add danangjoyoo/nerd", body)
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
-        self.assertIn("./scripts/install.sh codex --ufast", body)
-        self.assertIn("only verified UFast tool host", body)
+        self.assertNotIn("--ufast", body)
+        self.assertNotIn("UFast tool host", body)
 
     def test_every_public_skill_is_listed_once(self):
         body = README.read_text(encoding="utf-8")
@@ -106,10 +106,11 @@ class ReadmeContractTests(unittest.TestCase):
             "Cleverly quick thinking",
             "High speed work",
             "Super high speed for rapid output",
-            "Tool-backed ultra-fast work",
+            "Prompt-only ultra-fast work",
         ):
             self.assertIn(phrase, body)
         self.assertIn("UFast and XFast do not compose", body)
+        self.assertIn("It has no bundled scripts, MCP server, registry", body)
 
     # def test_benchmark_markers_are_unique(self):
     #     body = README.read_text(encoding="utf-8")

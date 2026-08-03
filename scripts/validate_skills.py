@@ -52,13 +52,7 @@ REQUIRED_SCRIPTS = {
     "nerd-silent": (),
     "nerd-fast": ("symbol_index.py",),
     "nerd-xfast": (),
-    "nerd-ufast": (
-        "ufast_core.py",
-        "ufast_index.py",
-        "ufast_registry.py",
-        "ufast_verify.py",
-        "ufast_mcp.py",
-    ),
+    "nerd-ufast": (),
 }
 
 BANNED_RUNTIME_REFERENCES = ("brainstorming-smart", "mensa", "superpowers:")

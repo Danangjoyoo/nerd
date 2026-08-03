@@ -1,5 +1,4 @@
 from pathlib import Path
-import json
 import tempfile
 import unittest
 
@@ -8,7 +7,6 @@ from benchmarks.nerdbench.cases import load_cases
 from benchmarks.nerdbench.materialize import materialize_run
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import (
-    _read_ufast_telemetry,
     _ufast_source_hashes,
     condition_prompt,
     isolated_codex_environment,
@@ -35,44 +33,26 @@ def spec(workspace: Path, condition: str) -> RunSpec:
 
 
 class UFastConditionTests(unittest.TestCase):
-    def test_runner_and_reporter_share_one_frozen_source_set(self):
+    def test_runner_and_reporter_share_one_frozen_prompt_source_set(self):
         config = {"conditions": {"xfast": ["nerd-xfast", "nerd-ufast"]}}
-        self.assertEqual(_ufast_source_hashes(config), current_source_hashes())
+        hashes = current_source_hashes()
+        self.assertEqual(_ufast_source_hashes(config), hashes)
+        self.assertEqual(
+            set(hashes),
+            {
+                "case_corpus",
+                "xfast_skill",
+                "ufast_skill",
+                "benchmark_runner",
+                "benchmark_materialize",
+                "benchmark_adapters",
+                "benchmark_scorer",
+                "ufast_report",
+            },
+        )
         self.assertIsNone(
             _ufast_source_hashes({"conditions": {"xfast": ["nerd-xfast"]}})
         )
-
-    def test_telemetry_reader_normalizes_only_bounded_tool_evidence(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary) / "telemetry.jsonl"
-            path.write_text(
-                json.dumps(
-                    {
-                        "tool": "ufast_safe_edit",
-                        "status": "applied",
-                        "runtime_version": "0.3.0",
-                        "operation_ms": 14,
-                        "cold_start_ms": 22,
-                        "changed_files": ["feature.py"],
-                        "checks": [
-                            {"name": "syntax", "exit_code": 0},
-                        ],
-                        "rolled_back": False,
-                        "route": "safe_edit",
-                        "backend": "workspace_transaction",
-                        "cache_status": None,
-                    }
-                )
-                + "\n",
-                encoding="utf-8",
-            )
-            events = _read_ufast_telemetry(path)
-
-        self.assertEqual(len(events), 1)
-        self.assertEqual(events[0]["type"], "ufast_tool_call")
-        self.assertEqual(events[0]["tool"], "ufast_safe_edit")
-        self.assertEqual(events[0]["changed_files"], ["feature.py"])
-        self.assertEqual(events[0]["checks"], [{"name": "syntax", "exit_code": 0}])
 
     def test_prompt_and_materialized_skill_sets_are_exact(self):
         self.assertEqual(
@@ -95,19 +75,11 @@ class UFastConditionTests(unittest.TestCase):
                 {path.name for path in (xfast / ".agents" / "skills").iterdir()},
                 {"nerd-xfast"},
             )
-            self.assertTrue(
-                (
-                    ufast
-                    / ".agents"
-                    / "skills"
-                    / "nerd-ufast"
-                    / "scripts"
-                    / "ufast_mcp.py"
-                ).is_file()
+            self.assertFalse(
+                (ufast / ".agents" / "skills" / "nerd-ufast" / "scripts").exists()
             )
-            self.assertFalse(any(xfast.rglob("ufast_mcp.py")))
 
-    def test_codex_uses_only_the_ufast_isolated_configuration(self):
+    def test_both_prompt_conditions_ignore_user_config_and_add_no_runtime(self):
         adapter = get_adapter("codex")
         with tempfile.TemporaryDirectory() as temporary:
             base = Path(temporary)
@@ -117,33 +89,13 @@ class UFastConditionTests(unittest.TestCase):
                 run_spec = spec(workspace, condition)
                 command = adapter.build_command(run_spec, "Do the task.")
                 self.assertIn("--ignore-rules", command)
-                if condition == "nerd-ufast":
-                    self.assertNotIn("--ignore-user-config", command)
-                else:
-                    self.assertIn("--ignore-user-config", command)
+                self.assertIn("--ignore-user-config", command)
 
                 with isolated_codex_environment(run_spec, environ={}) as environment:
                     isolated_home = Path(environment["CODEX_HOME"])
-                    config = isolated_home / "config.toml"
-                    if condition == "nerd-ufast":
-                        self.assertTrue(config.is_file())
-                        body = config.read_text(encoding="utf-8")
-                        self.assertIn("[mcp_servers.nerd_ufast]", body)
-                        self.assertIn("ufast_mcp.py", body)
-                        self.assertIn(str(workspace), body)
-                        self.assertIn("NERD_UFAST_LOG", body)
-                        self.assertEqual(
-                            environment["NERD_UFAST_WORKSPACE"],
-                            str(workspace),
-                        )
-                        self.assertEqual(
-                            Path(environment["NERD_UFAST_LOG"]).parent,
-                            isolated_home,
-                        )
-                    else:
-                        self.assertFalse(config.exists())
-                        self.assertNotIn("NERD_UFAST_WORKSPACE", environment)
-                        self.assertNotIn("NERD_UFAST_LOG", environment)
+                    self.assertFalse((isolated_home / "config.toml").exists())
+                    self.assertNotIn("NERD_UFAST_WORKSPACE", environment)
+                    self.assertNotIn("NERD_UFAST_LOG", environment)
 
 
 if __name__ == "__main__":

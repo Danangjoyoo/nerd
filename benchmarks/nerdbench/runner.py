@@ -212,33 +212,6 @@ def isolated_codex_environment(
             (isolated_home / "auth.json").symlink_to(auth)
         environment["CODEX_HOME"] = str(isolated_home)
         environment["HOME"] = str(isolated_home)
-        if spec.condition == "nerd-ufast":
-            server = (
-                spec.workspace
-                / ".agents"
-                / "skills"
-                / "nerd-ufast"
-                / "scripts"
-                / "ufast_mcp.py"
-            )
-            telemetry = isolated_home / "ufast-telemetry.jsonl"
-            environment["NERD_UFAST_WORKSPACE"] = str(spec.workspace)
-            environment["NERD_UFAST_LOG"] = str(telemetry)
-            config = "\n".join(
-                (
-                    "[mcp_servers.nerd_ufast]",
-                    'command = "python3"',
-                    f"args = [{json.dumps(str(server))}]",
-                    "env = { "
-                    f"NERD_UFAST_WORKSPACE = {json.dumps(str(spec.workspace))}, "
-                    f"NERD_UFAST_LOG = {json.dumps(str(telemetry))} "
-                    "}",
-                    "startup_timeout_sec = 5",
-                    "tool_timeout_sec = 30",
-                    "",
-                )
-            )
-            (isolated_home / "config.toml").write_text(config, encoding="utf-8")
         yield environment
 
 
@@ -296,104 +269,6 @@ def _timeout_text(value: str | bytes | None) -> str:
     return value
 
 
-def _read_ufast_telemetry(path: Path) -> tuple[dict, ...]:
-    if not path.is_file():
-        return ()
-    if path.stat().st_size > 64 * 1024:
-        raise ValueError("UFast telemetry exceeds the 64 KiB evidence limit")
-    records = []
-    allowed = {
-        "tool",
-        "status",
-        "runtime_version",
-        "operation_ms",
-        "cold_start_ms",
-        "changed_files",
-        "checks",
-        "rolled_back",
-        "reason",
-        "route",
-        "backend",
-        "cache_status",
-    }
-    tool_names = {
-        "ufast_project_index",
-        "ufast_fast_search",
-        "ufast_safe_edit",
-        "ufast_test_runner",
-    }
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
-            continue
-        value = json.loads(line)
-        if not isinstance(value, dict) or not set(value) <= allowed:
-            raise ValueError("UFast telemetry contains an invalid event envelope")
-        if value.get("tool") not in tool_names:
-            raise ValueError("UFast telemetry contains an unknown tool")
-        for timing in ("operation_ms", "cold_start_ms"):
-            measured = value.get(timing)
-            if not isinstance(measured, (int, float)) or isinstance(measured, bool) or measured < 0:
-                raise ValueError(f"UFast telemetry contains invalid {timing}")
-        changed_files = value.get("changed_files", [])
-        if not isinstance(changed_files, list) or not all(
-            isinstance(item, str) for item in changed_files
-        ):
-            raise ValueError("UFast telemetry contains invalid changed_files")
-        checks = value.get("checks", [])
-        if not isinstance(checks, list) or not all(
-            isinstance(check, dict)
-            and set(check) == {"name", "exit_code"}
-            and isinstance(check.get("name"), str)
-            and isinstance(check.get("exit_code"), int)
-            and not isinstance(check.get("exit_code"), bool)
-            for check in checks
-        ):
-            raise ValueError("UFast telemetry contains invalid checks")
-        reason = value.get("reason")
-        if reason is not None and (not isinstance(reason, str) or len(reason) > 500):
-            raise ValueError("UFast telemetry contains an invalid reason")
-        for field in ("route", "backend", "cache_status"):
-            metadata = value.get(field)
-            if metadata is not None and not isinstance(metadata, str):
-                raise ValueError(f"UFast telemetry contains invalid {field}")
-        records.append({"type": "ufast_tool_call", **value})
-    if len(records) > 6:
-        raise ValueError("UFast telemetry exceeds the six-call policy")
-    return tuple(records)
-
-
-def _ufast_evidence(
-    spec: RunSpec,
-    command: list[str],
-    environment: dict[str, str],
-) -> dict | None:
-    if spec.condition not in {"nerd-ufast", "nerd-xfast"}:
-        return None
-    runtime = (
-        spec.workspace
-        / ".agents"
-        / "skills"
-        / "nerd-ufast"
-        / "scripts"
-        / "ufast_mcp.py"
-    )
-    isolated_home = Path(environment["CODEX_HOME"])
-    config = isolated_home / "config.toml"
-    config_present = config.is_file() and "[mcp_servers.nerd_ufast]" in config.read_text(
-        encoding="utf-8"
-    )
-    telemetry_value = environment.get("NERD_UFAST_LOG")
-    tool_calls = (
-        _read_ufast_telemetry(Path(telemetry_value)) if telemetry_value else ()
-    )
-    return {
-        "runtime_present": runtime.is_file(),
-        "config_present": config_present,
-        "user_config_ignored": "--ignore-user-config" in command,
-        "tool_calls": list(tool_calls),
-    }
-
-
 def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
     materialize_run(case, spec.condition, spec.agent, spec.workspace)
     prompt = condition_prompt(spec.condition, case.prompt)
@@ -401,20 +276,16 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
     command = adapter.build_command(spec, prompt)
 
     started = time.monotonic()
-    ufast_evidence = None
     try:
         with isolated_codex_environment(spec) as environment:
-            try:
-                process = subprocess.run(
-                    command,
-                    cwd=spec.workspace,
-                    capture_output=True,
-                    text=True,
-                    timeout=case.timeout_seconds,
-                    env=environment,
-                )
-            finally:
-                ufast_evidence = _ufast_evidence(spec, command, environment)
+            process = subprocess.run(
+                command,
+                cwd=spec.workspace,
+                capture_output=True,
+                text=True,
+                timeout=case.timeout_seconds,
+                env=environment,
+            )
         exit_code = process.returncode
         stdout = process.stdout
         stderr = process.stderr
@@ -424,8 +295,6 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
         stderr = _timeout_text(error.stderr) + "\nbenchmark timeout"
     elapsed = time.monotonic() - started
     final, tokens, events = adapter.parse(stdout, stderr)
-    if ufast_evidence is not None:
-        events = (*events, *ufast_evidence["tool_calls"])
 
     command_results = {}
     for proof in _proof_commands(case):
@@ -446,7 +315,6 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
         events=events,
         changed_files=_changed_files(spec.workspace),
         command_results=command_results,
-        ufast_evidence=ufast_evidence,
     )
     return result, _diff_hash(spec.workspace)
 
@@ -470,7 +338,6 @@ def result_record(result: RunResult, diff_hash: str) -> dict:
         "changed_files": list(result.changed_files),
         "command_results": result.command_results,
         "diff_sha256": diff_hash,
-        "ufast_evidence": result.ufast_evidence,
     }
 
 

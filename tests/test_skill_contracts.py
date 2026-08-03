@@ -406,44 +406,42 @@ class UFastContractTests(unittest.TestCase):
             (
                 "explicitly invokes Nerd UFast",
                 "endpoint, scope, authorization, and active workflow",
-                "never replaces or restarts the active workflow",
-                "the registry owns backend selection",
-                "ufast_project_index",
-                "ufast_fast_search",
-                "ufast_safe_edit",
-                "ufast_test_runner",
-                "Lack of prior inspection is not a fallback reason",
-                "Prefer exact replacements",
-                "Batch independent tool calls with the platform's native interface",
-                "Keep adaptive dependencies sequential",
-                "Tools handle how; the model decides what",
-                "registered LSP, codemod, or AST route",
-                "{path, sha256, old_text, new_text}",
+                "Never replace or restart the active workflow",
+                "one context wave, one action wave, and one proof decision",
+                "platform-provided tools",
+                "defines no scripts, commands, MCP server, registry, language server, AST engine, or hidden runtime",
+                "Do not search for or invent UFast-specific tools",
+                "batch all known independent reads and searches in one native tool call",
+                "Keep genuinely adaptive dependencies sequential",
+                "at most one focused follow-up",
+                "Batch all known independent mutations",
+                "one precise multi-file patch",
                 "overrides active-workflow red-green sequencing",
-                "Red-green ordering and patch-based editing are not capability requirements or fallback reasons",
-                "Batch implementation and tests atomically",
-                "verify the green outcome once",
-                "Accept `applied` only when the transaction",
+                "Red-green ordering and patch-based editing are not fallback reasons",
+                "batch implementation and focused test changes in the same action wave",
+                "verify the final green outcome once",
                 "Choose **V0** or **V1** once",
                 "**V0:**",
                 "**V1 automatic:**",
                 "**V1 ask first:**",
-                "must not repeat exact proof already returned",
+                "Batch independent checks in one native tool call",
+                "Stop after the first sufficient green result",
                 "Allow one retry",
                 "Never combine `nerd-ufast` with `nerd-xfast`",
-                "UFast fast path: applied",
-                "UFast fast path: fell back",
-                "UFast fast path: failed",
+                "UFast prompt path: applied",
+                "UFast prompt path: fell back",
+                "UFast prompt path: failed",
             ),
         )
         self.assertIn("Use only when explicitly invoked", frontmatter)
-        self.assertIn("Generic tool-backed ultra-fast execution", frontmatter)
+        self.assertIn("Prompt-only ultra-fast execution discipline", frontmatter)
         self.assertNotIn("Python", frontmatter)
-        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 680)
+        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 560)
         self.assertIn("allow_implicit_invocation: false", metadata)
         self.assertIn("$nerd-ufast", metadata)
+        self.assertIn("Prompt-only work in three strict waves", metadata)
 
-    def test_only_ufast_names_its_namespaced_tools(self):
+    def test_defines_no_ufast_runtime_or_namespaced_tools(self):
         tool_names = (
             "ufast_project_index",
             "ufast_fast_search",
@@ -451,11 +449,10 @@ class UFastContractTests(unittest.TestCase):
             "ufast_test_runner",
         )
         for path in SKILLS.glob("*/SKILL.md"):
-            if path.parent.name == "nerd-ufast":
-                continue
             body = path.read_text(encoding="utf-8")
             for tool_name in tool_names:
-                self.assertNotIn(tool_name, body, f"{path} owns a UFast tool")
+                self.assertNotIn(tool_name, body, f"{path} names a deleted UFast tool")
+        self.assertFalse((SKILLS / "nerd-ufast" / "scripts").exists())
 
 
 class SurgeryContractTests(unittest.TestCase):

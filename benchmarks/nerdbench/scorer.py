@@ -470,7 +470,6 @@ def _run_result(record: dict) -> RunResult:
             str(key): int(value)
             for key, value in record.get("command_results", {}).items()
         },
-        ufast_evidence=record.get("ufast_evidence"),
     )
 
 

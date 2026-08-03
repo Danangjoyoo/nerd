@@ -1,6 +1,6 @@
 ---
 name: nerd-ufast
-description: Generic tool-backed ultra-fast execution for supported operations. Use only when explicitly invoked and a configured tool supports deterministic bounded work with safe fallback.
+description: Prompt-only ultra-fast execution discipline. Use only when explicitly invoked to compress supported work into one batched context wave, one batched action wave, and one V0/V1 proof decision without lowering the active workflow's accuracy contract.
 ---
 
 # Nerd UFast
@@ -19,85 +19,42 @@ Never combine `nerd-ufast` with `nerd-xfast`. If both are requested, ask which s
 
 ## Composition
 
-Activate only when the user explicitly invokes Nerd UFast, after resolving endpoint, scope, authorization, and active workflow. It never replaces or restarts the active workflow or its completion standard.
+Activate only when the user explicitly invokes Nerd UFast, after resolving endpoint, scope, authorization, and active workflow. Never replace or restart the active workflow, and never lower its correctness or completion standard.
 
-XFast batches native text or patch operations and deliberately narrows reasoning and proof. UFast moves mechanical intelligence into deterministic registry tools while preserving the active workflow's accuracy and proof contract. Tools handle how; the model decides what.
+Fast shortens the critical path adaptively. XFast deliberately accepts reduced exploration, completeness, accuracy, and proof. UFast preserves accuracy but enforces a stricter prompt-only execution shape: one context wave, one action wave, and one proof decision.
 
-For supported safe-edit work, UFast overrides active-workflow red-green sequencing,
-not its final proof outcome. Red-green ordering and patch-based editing are not capability requirements or fallback reasons.
-Batch implementation and tests atomically, then verify the green outcome once.
+Use only platform-provided tools. UFast defines no scripts, commands, MCP server, registry, language server, AST engine, or hidden runtime. Do not search for or invent UFast-specific tools.
 
-## Capability Gate
+## Three Waves
 
-Resolve one intent; the registry owns backend selection:
+### 1. Context
 
-- map or inspect a project: `ufast_project_index`;
-- locate relevant text: `ufast_fast_search`;
-- perform a deterministic existing-file change: `ufast_safe_edit`;
-- run detected repository proof: `ufast_test_runner`.
+Lock the smallest observable outcome, known targets, and required proof before acting. Skip discovery when the request and local evidence already identify the path.
 
-Use a route only when its schema supports the outcome. Semantic rename,
-reference lookup, and AST mutation require their future registered adapters;
-do not approximate them with unsafe text replacement.
+When context is needed, batch all known independent reads and searches in one native tool call. Keep genuinely adaptive dependencies sequential and allow at most one focused follow-up when the first result exposes one material unknown. Do not map the whole project, reread unchanged files, or investigate optional improvements.
 
-The bundled safe-edit backend applies only when the request:
+### 2. Action
 
-- edits existing UTF-8 text files only;
-- fits its 12-file and 128 KiB mutation limits;
-- needs no symlink, hidden, cache, generated, or support-file mutation; and
-- can be expressed as exact replacements or complete contents.
+Batch all known independent mutations with the platform's native patch or edit interface. Prefer one precise multi-file patch. For supported behavior work, UFast overrides active-workflow red-green sequencing: batch implementation and focused test changes in the same action wave, then verify the final green outcome once. Red-green ordering and patch-based editing are not fallback reasons.
 
-Lack of prior inspection is not a fallback reason: index or search first.
-Fall back when no route is installed or a result is unsupported, ambiguous,
-stale, unsafe, or unavailable.
+Do not add abstractions, compatibility layers, cleanup, or documentation unless the requested outcome requires them. Do not narrate between actions. If the work becomes ambiguous, unsafe, or iterative, leave the three-wave path and continue under the active workflow.
 
-## Fast Path
+### 3. Proof
 
-Use the smallest registered route. Search directly when a known query can build
-or reuse the index; call project index only when project shape is unknown. A
-registered LSP, codemod, or AST route outranks text editing for its semantic
-intent. If none is installed, fall back rather than emulate it.
+Choose **V0** or **V1** once from the active workflow's proof contract, obvious risk, cost, and authorization. Do not investigate merely to choose.
 
-Batch independent tool calls with the platform's native interface. Put up to
-ten independent searches in one `queries: ["term", "term"]` call, all known
-file mutations in one safe-edit batch, and all selected checks in one
-test-runner call. The runner
-executes independent checks concurrently. Keep adaptive dependencies sequential
-when context or hashes determine the edit.
+- **V0:** Reuse fresh, directly relevant evidence. For eligible non-mutating work without proof, make no verification claim and report `Not verified` when completion would otherwise imply one.
+- **V1 automatic:** Run one safe, local, focused proof wave when already authorized and proportionate. Batch independent checks in one native tool call when the platform supports it.
+- **V1 ask first:** Ask before broad, slow, stateful, external, destructive, configuration-dependent, or newly authorized proof.
 
-Prefer exact replacements in one atomic safe-edit batch; use complete contents
-only when boundaries are not deterministic. Submit flat edit operations as
-`{path, sha256, old_text, new_text}`; repeat a path for multiple replacements
-and let the tool group them. Keep `verify` enabled. Omit `checks` unless reusing
-an exact `available_checks` name. Never submit commands or return unchanged file
-bodies.
-Accept `applied` only when the transaction and every returned check succeeded.
-
-## Proof Ladder
-
-Choose **V0** or **V1** once from obvious outcome, risk, cost, tool availability,
-and the active workflow's proof contract. Do not investigate merely to choose.
-
-- **V0:** Reuse fresh structured tool proof, or make no verification claim for
-  non-mutating work without a proportionate check. Report `Not verified` when
-  completion would otherwise imply proof.
-- **V1 automatic:** Run safe, local, focused detected checks when already
-  authorized and proportionate; use safe edit or one test-runner call.
-- **V1 ask first:** Ask before broad, slow, stateful, external, destructive, or
-  configuration-dependent proof, or proof needing more authority.
-
-A mutation never lowers the active workflow's required proof. When no adapter
-covers the outcome, perform its residual proof or fall back. The workflow must not repeat exact proof already returned.
-
-Allow one retry only when evidence identifies one exact recoverable invocation
-error. Otherwise fall back with the result. Never claim mutation after rollback.
+A mutation never lowers required proof. Do not repeat equivalent checks. Stop after the first sufficient green result. Allow one retry only when evidence identifies one exact recoverable invocation error; otherwise continue under the active workflow.
 
 ## Finish
 
-Report exactly one path status in the final response:
+Report exactly one path status:
 
-- `UFast fast path: applied` when the verified transaction succeeded.
-- `UFast fast path: fell back — [reason]` when the active workflow completed without it.
-- `UFast fast path: failed — [reason]` when neither path completed.
+- `UFast prompt path: applied` when all three waves completed.
+- `UFast prompt path: fell back — [reason]` when the active workflow completed outside the three-wave path.
+- `UFast prompt path: failed — [reason]` when neither path completed.
 
 Keep the rest of the final response under the active workflow's contract.

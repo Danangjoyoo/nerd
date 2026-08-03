@@ -29,7 +29,7 @@ jobs:
           node-version: "22"
       - name: Validate tagged tree
         run: |
-          python3 -m compileall -q scripts benchmarks tests skills/nerd-ufast/scripts
+          python3 -m compileall -q scripts benchmarks tests
           python3 -m unittest discover -s tests -v
           python3 scripts/validate_skills.py
           python3 benchmarks/run.py plan --config benchmarks/config.json
