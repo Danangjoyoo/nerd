@@ -94,7 +94,21 @@ Superpowers | Acc [██████░░░░░░░░░░░░░░]
 ```
 
 <!-- UFAST_BENCHMARK:START -->
-Prompt-only UFast benchmark pending a fresh Luna and Terra rerun.
+## UFast: prompt-only three-wave execution
+
+Nerd UFast currently contains prompt instructions and metadata only. It batches known context, known mutations, and proportionate proof into three waves while preserving the active workflow's accuracy contract. It has no bundled scripts, MCP server, registry, language server, or AST engine.
+
+Across this directional pilot, UFast was 47.00% slower than XFast. UFast used 52.54% more output tokens.
+
+| Model | XFast accuracy | UFast accuracy | Accuracy delta | XFast latency | UFast latency | Speed | XFast tokens | UFast tokens | Token change |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- |
+| Luna | 100.00% | 100.00% | +0.00 points | 53.85s | 63.20s | 17.37% slower | 2264 | 2721 | 20.19% more |
+| Terra | 100.00% | 100.00% | +0.00 points | 48.31s | 85.33s | 76.64% slower | 1960 | 3624 | 84.90% more |
+| Combined | 100.00% | 100.00% | +0.00 points | 51.08s | 74.27s | 47.00% slower | 2112.0 | 3172.5 | 52.54% more |
+
+Method: one unchanged Python discovery/edit verification case, one repetition, and Luna plus Terra at `high` reasoning effort produced 4 fresh isolated Codex processes and 2 matched pairs. Both conditions ignored user configuration and used only their materialized skills plus platform-native tools. This tiny pilot measures prompt discipline, not future specialized-tool performance, and does not establish a universal speedup.
+
+[Cases](benchmarks/cases/ufast-phase1-verification.json) · [Pilot configs](benchmarks/pilots/ufast-vs-xfast/) · [Result summary](benchmarks/pilots/ufast-vs-xfast/result.json)
 <!-- UFAST_BENCHMARK:END -->
 
 ## Verify locally

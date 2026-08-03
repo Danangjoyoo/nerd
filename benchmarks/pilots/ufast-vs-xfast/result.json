@@ -1,36 +1,25 @@
 {
   "aggregate": {
     "delta": {
-      "accuracy_points": -5.0,
-      "speed_percent": -47.3284,
-      "token_change_percent": 44.7286,
+      "accuracy_points": 0.0,
+      "speed_percent": -47.0048,
+      "token_change_percent": 52.5418,
       "token_pairs": 2
     },
     "pairs": 2,
     "ufast": {
       "hard_gate_failure_runs": 0,
-      "mean_score": 90.0,
-      "median_latency_seconds": 67.8823,
-      "median_output_tokens": 2501.0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 74.2682,
+      "median_output_tokens": 3172.5,
       "pass_rate_percent": 100,
       "runs": 2
     },
-    "ufast_tools": {
-      "applied_runs": 2,
-      "fallback_runs": 0,
-      "fast_search_runs": 2,
-      "hit_rate_percent": 100,
-      "median_cold_start_ms": 38.5,
-      "median_operation_ms": 69.0,
-      "project_index_runs": 2,
-      "test_runner_runs": 0,
-      "tool_call_runs": 2
-    },
     "xfast": {
       "hard_gate_failure_runs": 0,
-      "mean_score": 95.0,
-      "median_latency_seconds": 46.146,
-      "median_output_tokens": 1729.0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 51.0795,
+      "median_output_tokens": 2112.0,
       "pass_rate_percent": 100,
       "runs": 2
     }
@@ -40,96 +29,77 @@
     "config_dir": "benchmarks/pilots/ufast-vs-xfast/",
     "result_summary": "benchmarks/pilots/ufast-vs-xfast/result.json"
   },
-  "comparison": "nerd-ufast-vs-nerd-xfast",
+  "comparison": "nerd-ufast-vs-nerd-xfast-prompt-only",
   "controls": {
     "case_file": "benchmarks/cases/ufast-phase1-verification.json",
+    "case_ids": [
+      "xfast-v3-discovery-edit"
+    ],
     "case_sha256": "6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791",
-    "cases": 1,
-    "fresh_isolated_agents": true,
+    "conditions": [
+      "nerd-xfast",
+      "nerd-ufast"
+    ],
     "models": 2,
     "pairs": 2,
-    "reasoning_effort": "high",
-    "repetitions_per_model": 1,
-    "same_model_and_effort_within_pairs": true,
-    "verified_host": "Codex",
+    "prompt_only": true,
+    "repetitions": 1,
     "workload_runs": 4
   },
-  "created_at": "2026-08-03T05:59:45.306198+00:00",
+  "created_at": "2026-08-03T06:29:17.480162+00:00",
   "limitations": [
     "one Python discovery/edit verification case",
     "one repetition per model",
-    "directional evidence, not a universal latency claim",
-    "the local MCP fast path is verified only on Codex"
+    "prompt discipline only; no UFast runtime or specialized tools",
+    "directional evidence, not a universal latency claim"
   ],
   "models": {
     "Luna": {
       "delta": {
         "accuracy_points": 0.0,
-        "speed_percent": -62.3048,
-        "token_change_percent": 64.1115,
+        "speed_percent": -17.3664,
+        "token_change_percent": 20.1855,
         "token_pairs": 1
       },
       "pairs": 1,
       "ufast": {
         "hard_gate_failure_runs": 0,
-        "mean_score": 90.0,
-        "median_latency_seconds": 73.7721,
-        "median_output_tokens": 2826,
+        "mean_score": 100.0,
+        "median_latency_seconds": 63.2017,
+        "median_output_tokens": 2721,
         "pass_rate_percent": 100,
         "runs": 1
       },
-      "ufast_tools": {
-        "applied_runs": 1,
-        "fallback_runs": 0,
-        "fast_search_runs": 1,
-        "hit_rate_percent": 100,
-        "median_cold_start_ms": 42.0,
-        "median_operation_ms": 66.0,
-        "project_index_runs": 1,
-        "test_runner_runs": 0,
-        "tool_call_runs": 1
-      },
       "xfast": {
         "hard_gate_failure_runs": 0,
-        "mean_score": 90.0,
-        "median_latency_seconds": 45.4528,
-        "median_output_tokens": 1722,
+        "mean_score": 100.0,
+        "median_latency_seconds": 53.8499,
+        "median_output_tokens": 2264,
         "pass_rate_percent": 100,
         "runs": 1
       }
     },
     "Terra": {
       "delta": {
-        "accuracy_points": -10.0,
-        "speed_percent": -32.3519,
-        "token_change_percent": 25.3456,
+        "accuracy_points": 0.0,
+        "speed_percent": -76.6433,
+        "token_change_percent": 84.898,
         "token_pairs": 1
       },
       "pairs": 1,
       "ufast": {
         "hard_gate_failure_runs": 0,
-        "mean_score": 90.0,
-        "median_latency_seconds": 61.9925,
-        "median_output_tokens": 2176,
+        "mean_score": 100.0,
+        "median_latency_seconds": 85.3347,
+        "median_output_tokens": 3624,
         "pass_rate_percent": 100,
         "runs": 1
-      },
-      "ufast_tools": {
-        "applied_runs": 1,
-        "fallback_runs": 0,
-        "fast_search_runs": 1,
-        "hit_rate_percent": 100,
-        "median_cold_start_ms": 35.0,
-        "median_operation_ms": 72.0,
-        "project_index_runs": 1,
-        "test_runner_runs": 0,
-        "tool_call_runs": 1
       },
       "xfast": {
         "hard_gate_failure_runs": 0,
         "mean_score": 100.0,
-        "median_latency_seconds": 46.8391,
-        "median_output_tokens": 1736,
+        "median_latency_seconds": 48.309,
+        "median_output_tokens": 1960,
         "pass_rate_percent": 100,
         "runs": 1
       }
@@ -137,36 +107,33 @@
   },
   "provenance": {
     "codex_versions": {
-      "Luna": "codex-cli 0.144.5",
-      "Terra": "codex-cli 0.144.5"
+      "Luna": "codex-cli 0.144.1",
+      "Terra": "codex-cli 0.144.1"
     },
     "models": {
       "Luna": "gpt-5.6-luna",
       "Terra": "gpt-5.6-terra"
     },
     "nerd_commits": {
-      "Luna": "d7fb63a02a93a55334d3c9c45b55a0c51ea780c4",
-      "Terra": "d7fb63a02a93a55334d3c9c45b55a0c51ea780c4"
+      "Luna": "f642c02ba14c8405f18984a160cf485501b3e16e",
+      "Terra": "f642c02ba14c8405f18984a160cf485501b3e16e"
     },
     "source_hashes": {
-      "benchmark_adapters": "e95989490f0b75513e8432f766e7897a6f43061736f8a768fc3422e51cb0685a",
+      "benchmark_adapters": "a1cf222743b03d7ead2f15cb4bbbfa7d445f93528b24261f7cbd34b18c6e3060",
       "benchmark_materialize": "92659940ca024eb33fb8bbd3116c498beb0d0ca33a0cfbcf270d37a83f94660c",
-      "benchmark_runner": "e910818e8cb73ae2bd2a7fce1a3a95993854ba8188318b9a7270859fe4232d0b",
-      "benchmark_scorer": "5afaa3d5bd90ddfe48811a37f17c993d553d57f54d3b82c1a6bd5170bbed4ba7",
+      "benchmark_runner": "fb137511617dd13118b61e51db4bfce4f81a24fb91732a02b4fd879a6a6abc6e",
+      "benchmark_scorer": "d11b0fe0b51f24403695190d0c0b43bcdd55f4d18d06037eb678bf1ec4548018",
       "case_corpus": "6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791",
-      "ufast_core": "5386cf18786a320d8e3c93eb8489358bdcac8941fcc9740ac5e9fa9e4fd545c9",
-      "ufast_index": "310ea272e50086865dbd10911a5e78bdffc0c96de65be7011a6ddda13666dd76",
-      "ufast_registry": "c5c38b87512ef39843ed49b78d19039a746d8d9d4a99f8e5d763772841f7d220",
-      "ufast_report": "a781de87b510a4db7f6f5a5047244ed6507e4378408767ecec84377494114208",
-      "ufast_server": "30f284e665b199ba5c495fd8aa76bc902939f4f27a29de5cb5468d20c7de491e",
-      "ufast_skill": "01372812a1e920e3bb6c0a818eaec6c0d683a1d45f9d441256469eaa581a98ac",
-      "ufast_verify": "afbbf5ecfe11a89169b062cc5789f70517e907227d3f34f988185e3e41166ea3",
+      "execute_skill": "abb9cf466fae242c1c53f6c65455e64ce5e6ef17c7e5ca07c83125c7d2c3e06b",
+      "smart_skill": "0ddb3ce8440e4f6945280fba992566bd58dc074ffcd42ca4e4d683561b5fc591",
+      "ufast_report": "0a4f74f779597e3b5f46ec040cc77e82999d33e3f3dc5d38ea6f1e83b9d27d8e",
+      "ufast_skill": "a5db8498b53ef0dcab2b630ad3c22d5f1de26012fc8d98ce6c6fa72d6c7647bb",
       "xfast_skill": "a3657d201205571d045acb0249be74e11eb66f2d211fe81aa86ff0fb7426c0f3"
     }
   },
   "run_ids": {
-    "Luna": "20260803T055610Z-d7fb63a-gpt-5.6-luna-high",
-    "Terra": "20260803T055945Z-d7fb63a-gpt-5.6-terra-high"
+    "Luna": "20260803T062637Z-f642c02-gpt-5.6-luna-high",
+    "Terra": "20260803T062917Z-f642c02-gpt-5.6-terra-high"
   },
   "schema_version": 1
 }
