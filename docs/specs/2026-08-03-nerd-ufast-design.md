@@ -123,6 +123,9 @@ codemod, and AST operations.
 - Supported implementation and test changes share one safe-edit batch and one
   post-edit proof decision. UFast does not create an intermediate red mutation
   or proof round merely to follow a generic red-green ritual.
+- This modifier-level sequencing rule overrides an active workflow's generic
+  red-green process for supported safe-edit work, while preserving the same
+  final behavioral proof outcome. Patch-based editing is not a fallback reason.
 - A registered LSP, codemod, or AST route outranks text editing for its semantic
   intent. Missing semantic backends cause fallback, never lossy emulation.
 - V0 reuses fresh structured proof or makes no verification claim for eligible

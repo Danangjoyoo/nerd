@@ -23,6 +23,10 @@ Activate only when the user explicitly invokes Nerd UFast, after resolving endpo
 
 XFast batches native text or patch operations and deliberately narrows reasoning and proof. UFast moves mechanical intelligence into deterministic registry tools while preserving the active workflow's accuracy and proof contract. Tools handle how; the model decides what.
 
+For supported safe-edit work, UFast overrides active-workflow red-green sequencing,
+not its final proof outcome. Red-green ordering and patch-based editing are not capability requirements or fallback reasons.
+Batch implementation and tests atomically, then verify the green outcome once.
+
 ## Capability Gate
 
 Resolve one intent; the registry owns backend selection:
@@ -64,10 +68,9 @@ when context or hashes determine the edit.
 Prefer exact replacements in one atomic safe-edit batch; use complete contents
 only when boundaries are not deterministic. Submit flat edit operations as
 `{path, sha256, old_text, new_text}`; repeat a path for multiple replacements
-and let the tool group them. Batch implementation and tests together, keep
-`verify` enabled, and verify once—do not create an intermediate red write or
-pre-edit proof round. Omit `checks` unless reusing an exact `available_checks`
-name. Never submit commands or return unchanged file bodies.
+and let the tool group them. Keep `verify` enabled. Omit `checks` unless reusing
+an exact `available_checks` name. Never submit commands or return unchanged file
+bodies.
 Accept `applied` only when the transaction and every returned check succeeded.
 
 ## Proof Ladder

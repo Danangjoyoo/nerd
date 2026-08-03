@@ -226,6 +226,17 @@ non-destructive annotation, and the prompt requires one implementation/test
 batch followed by one proof decision. The excluded result is never combined
 with the restarted matrix.
 
+The first Terra run on that source,
+`20260803T054955Z-1208725-gpt-5.6-terra-high`, is also excluded before judging
+or scoring. Correctness and isolation passed, but Terra treated Execute's
+generic red-green sequence as a proof requirement and fell back after indexed
+search without calling safe edit. The modifier precedence is now explicit near
+activation: for a supported atomic edit, UFast overrides intermediate red-green
+ordering but preserves the same final behavioral proof. Neither red-green order
+nor patch-based editing is a valid fallback reason. Because this prompt change
+alters frozen source, the otherwise-valid Luna result on the same source is
+excluded with Terra and both models restart together.
+
 ## Corrected Source Freeze
 
 The 212-test staged-tree suite, skill validator, Python compilation, and diff
@@ -236,7 +247,7 @@ at:
 | --- | --- |
 | Case corpus | `6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791` |
 | XFast skill | `a3657d201205571d045acb0249be74e11eb66f2d211fe81aa86ff0fb7426c0f3` |
-| UFast skill | `305fe5115bb2143de084b88ca0d9c9d77806306828aaf6e688ee500bae17ef62` |
+| UFast skill | `01372812a1e920e3bb6c0a818eaec6c0d683a1d45f9d441256469eaa581a98ac` |
 | UFast core | `5386cf18786a320d8e3c93eb8489358bdcac8941fcc9740ac5e9fa9e4fd545c9` |
 | UFast index | `310ea272e50086865dbd10911a5e78bdffc0c96de65be7011a6ddda13666dd76` |
 | UFast registry | `c5c38b87512ef39843ed49b78d19039a746d8d9d4a99f8e5d763772841f7d220` |
