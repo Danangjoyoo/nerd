@@ -27,6 +27,8 @@ EXPECTED_CHANGED_FILES = {
 }
 SOURCE_HASH_KEYS = (
     "case_corpus",
+    "smart_skill",
+    "execute_skill",
     "xfast_skill",
     "ufast_skill",
     "benchmark_runner",
@@ -41,6 +43,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def current_source_hashes() -> dict[str, str]:
     paths = {
         "case_corpus": ROOT / CASE_FILE,
+        "smart_skill": ROOT / "skills" / "nerd-smart" / "SKILL.md",
+        "execute_skill": ROOT / "skills" / "nerd-execute" / "SKILL.md",
         "xfast_skill": ROOT / "skills" / "nerd-xfast" / "SKILL.md",
         "ufast_skill": ROOT / "skills" / "nerd-ufast" / "SKILL.md",
         "benchmark_runner": ROOT / "benchmarks" / "nerdbench" / "runner.py",

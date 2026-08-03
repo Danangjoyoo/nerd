@@ -41,6 +41,8 @@ class UFastConditionTests(unittest.TestCase):
             set(hashes),
             {
                 "case_corpus",
+                "smart_skill",
+                "execute_skill",
                 "xfast_skill",
                 "ufast_skill",
                 "benchmark_runner",
