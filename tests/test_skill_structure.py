@@ -25,7 +25,6 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-silent",
                 "nerd-fast",
                 "nerd-xfast",
-                "nerd-ufast",
             ),
         )
 
@@ -57,19 +56,19 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-silent": (),
                 "nerd-fast": (),
                 "nerd-xfast": (),
-                "nerd-ufast": (),
             },
         )
         self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-xfast" / "references").exists())
-        self.assertFalse((ROOT / "skills" / "nerd-ufast" / "references").exists())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-smart"], ("prompt_hook.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
-        self.assertEqual(
-            REQUIRED_SCRIPTS["nerd-ufast"],
-            ("mcp_server.py", "ufast_tools.py"),
+
+    def test_ufast_is_archived_outside_public_skills(self):
+        self.assertFalse((ROOT / "skills" / "nerd-ufast").exists())
+        self.assertTrue(
+            (ROOT / "docs" / "experiments" / "nerd-ufast" / "skill" / "SKILL.md").is_file()
         )
 
     def test_smart_reference_files_match_registry(self):

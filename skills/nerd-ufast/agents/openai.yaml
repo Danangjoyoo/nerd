@@ -1,6 +1,0 @@
-interface:
-  display_name: "Nerd UFast"
-  short_description: "Zero-plan single-shot execution"
-  default_prompt: "Use $nerd-ufast to reuse cached project knowledge, prefer inspect and apply_verify for eligible work, verify once, and return only the result."
-policy:
-  allow_implicit_invocation: false

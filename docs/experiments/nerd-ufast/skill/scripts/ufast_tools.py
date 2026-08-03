@@ -211,11 +211,25 @@ class InspectIndex:
                     raise ValueError("path must be a string")
                 path = _safe_path(root, path_value)
                 if not path.is_file() or path.is_symlink():
-                    raise ValueError(f"path is not a regular file: {path_value}")
+                    results.append(
+                        {
+                            "query": query,
+                            "matches": [],
+                            "error": f"path is not a regular file: {path_value}",
+                        }
+                    )
+                    continue
                 try:
                     lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
-                except UnicodeDecodeError as error:
-                    raise ValueError(f"path is not UTF-8 text: {path_value}") from error
+                except UnicodeDecodeError:
+                    results.append(
+                        {
+                            "query": query,
+                            "matches": [],
+                            "error": f"path is not UTF-8 text: {path_value}",
+                        }
+                    )
+                    continue
                 start = int(query.get("start_line", 1))
                 end = int(query.get("end_line", len(lines)))
                 match = _slice(root, path_value, lines, start, end, remaining)
@@ -446,4 +460,3 @@ def apply_verify(
         "rolled_back": failed,
         "elapsed_ms": (time.perf_counter_ns() - started) / 1_000_000,
     }
-

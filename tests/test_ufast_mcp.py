@@ -11,7 +11,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ROOT / "skills" / "nerd-ufast" / "scripts"
+SCRIPTS = ROOT / "docs" / "experiments" / "nerd-ufast" / "skill" / "scripts"
 SERVER = SCRIPTS / "mcp_server.py"
 sys.path.insert(0, str(SCRIPTS))
 
@@ -105,6 +105,32 @@ class UFastMcpTests(unittest.TestCase):
                     max_bytes=1024,
                 )
 
+    def test_inspect_isolates_missing_paths_inside_a_batch(self):
+        from ufast_tools import InspectIndex
+
+        with tempfile.TemporaryDirectory() as temporary:
+            workspace = Path(temporary)
+            (workspace / "feature.py").write_text(
+                "def alpha():\n    return 1\n",
+                encoding="utf-8",
+            )
+            result = InspectIndex().inspect(
+                str(workspace),
+                [{"path": "missing.py"}, {"symbol": "alpha"}],
+                context_lines=1,
+                max_results=10,
+                max_bytes=4096,
+            )
+            self.assertEqual(result["results"][0]["matches"], [])
+            self.assertEqual(
+                result["results"][0]["error"],
+                "path is not a regular file: missing.py",
+            )
+            self.assertEqual(
+                result["results"][1]["matches"][0]["path"],
+                "feature.py",
+            )
+
     def test_apply_verify_succeeds_and_rejects_stale_hash(self):
         from ufast_tools import apply_verify
 
@@ -168,4 +194,3 @@ class UFastMcpTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

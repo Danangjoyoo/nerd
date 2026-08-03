@@ -129,6 +129,24 @@ class CodexAdapter(AgentAdapter):
             "nerd-ufast",
         }:
             command.extend(["--ignore-user-config", "--ignore-rules"])
+        if spec.condition == "nerd-ufast":
+            server = (
+                spec.workspace
+                / ".agents"
+                / "skills"
+                / "nerd-ufast"
+                / "scripts"
+                / "mcp_server.py"
+            )
+            command.extend(
+                [
+                    "-c",
+                    'mcp_servers.nerd-ufast-tools.command="python3"',
+                    "-c",
+                    "mcp_servers.nerd-ufast-tools.args="
+                    + json.dumps([str(server)]),
+                ]
+            )
         if spec.model:
             command.extend(["--model", spec.model])
         if spec.reasoning_effort:

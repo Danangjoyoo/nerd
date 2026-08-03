@@ -140,6 +140,11 @@ class InstallScriptTests(unittest.TestCase):
         self.assertIn(".codex/hooks.json", files)
         self.assertIn(".cursor/hooks.json", files)
 
+    def test_install_does_not_register_archived_ufast_tools(self):
+        results, _, files = self._run("all")
+        self.assertEqual(results[0].returncode, 0, results[0].stderr)
+        self.assertFalse(any(path.startswith(".nerd/mcp/") for path in files))
+
     def test_reinstall_is_idempotent_and_preserves_existing_hooks(self):
         existing = json.dumps(
             {

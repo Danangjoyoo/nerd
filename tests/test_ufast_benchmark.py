@@ -24,6 +24,18 @@ from benchmarks.run import build_parser
 ROOT = Path(__file__).resolve().parents[1]
 PILOT = ROOT / "benchmarks" / "pilots" / "ufast-v1-two-cases"
 CONFIG = PILOT / "gpt-5.6-luna-high.json"
+PILOT_V2 = ROOT / "benchmarks" / "pilots" / "ufast-v2-five-cases"
+CONFIGS_V2 = (
+    PILOT_V2 / "gpt-5.6-luna-medium.json",
+    PILOT_V2 / "gpt-5.6-terra-medium.json",
+)
+INSPECT_PREFLIGHT = (
+    ROOT
+    / "benchmarks"
+    / "pilots"
+    / "ufast-v2-inspect-preflight"
+    / "gpt-5.6-luna-medium.json"
+)
 
 
 def make_spec(workspace: Path, condition: str) -> RunSpec:
@@ -168,6 +180,49 @@ def write_result_fixture(root: Path) -> Path:
 
 
 class UFastBenchmarkTests(unittest.TestCase):
+    def test_inspect_preflight_plans_one_complex_pair(self):
+        config = load_config(INSPECT_PREFLIGHT)
+        runs = schedule_runs(
+            config,
+            ROOT / "benchmarks" / "work" / "ufast-inspect-preflight",
+        )
+        self.assertEqual(config["models"], {"codex": "gpt-5.6-luna"})
+        self.assertEqual(config["target"]["reasoning_effort"], "medium")
+        self.assertEqual(config["repetitions"], 1)
+        self.assertEqual(len(runs), 2)
+        self.assertEqual(
+            {run.condition for run in runs},
+            {"nerd-xfast", "nerd-ufast"},
+        )
+        self.assertEqual({run.case_id for run in runs}, {"ufast-v2-inspect-complex"})
+
+    def test_v2_has_five_cases_one_rep_and_two_medium_models(self):
+        expected_models = {"gpt-5.6-luna", "gpt-5.6-terra"}
+        planned_models = set()
+        planned_cases = set()
+        total_runs = 0
+        for path in CONFIGS_V2:
+            config = load_config(path)
+            runs = schedule_runs(
+                config,
+                ROOT / "benchmarks" / "work" / path.stem,
+            )
+            self.assertEqual(config["target"]["reasoning_effort"], "medium")
+            self.assertEqual(config["repetitions"], 1)
+            self.assertEqual(config["parallelism"], 1)
+            self.assertEqual(
+                config["conditions"],
+                {"xfast": ["nerd-xfast", "nerd-ufast"]},
+            )
+            self.assertEqual(len(runs), 10)
+            total_runs += len(runs)
+            planned_models.update(run.model for run in runs)
+            planned_cases.update(run.case_id for run in runs)
+
+        self.assertEqual(total_runs, 20)
+        self.assertEqual(planned_models, expected_models)
+        self.assertEqual(len(planned_cases), 5)
+
     def test_has_one_low_and_one_high_complexity_case(self):
         cases = load_cases(PILOT / "cases.json")
 

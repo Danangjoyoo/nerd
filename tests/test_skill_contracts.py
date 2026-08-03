@@ -5,10 +5,12 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / "skills"
+UFAST_ARCHIVE = ROOT / "docs" / "experiments" / "nerd-ufast" / "skill"
 
 
 def skill_body(name: str) -> str:
-    return (SKILLS / name / "SKILL.md").read_text()
+    root = UFAST_ARCHIVE if name == "nerd-ufast" else SKILLS / name
+    return (root / "SKILL.md").read_text()
 
 
 def smart_reference_body(name: str) -> str:
@@ -1219,16 +1221,22 @@ class UFastContractTests(unittest.TestCase):
             (
                 "nerd-ufast-tools",
                 "After the cache step",
-                "one `inspect` call",
+                "call it once",
                 "all exact symbol and bounded path queries",
+                "when listed in session tools",
+                "Never test availability with `command -v`, `which`, or file search",
+                "If tool-list visibility is unclear, attempt the call",
+                "before any `rg`, `sed`, `find`, or file-read tool",
+                "Do not replace it with shell access",
+                "infer unavailability from a cache-helper failure",
+                "Fall back only when `inspect` is absent or its call returns an error",
                 "one `apply_verify` call",
                 "apply, verify, and roll back on failed proof",
                 "expected hashes for every changed path",
                 "For unclear targets",
                 "external effects",
                 "migrations",
-                "MCP is unavailable",
-                "existing bounded read, patch, and check tools",
+                "existing bounded tools",
             ),
         )
 

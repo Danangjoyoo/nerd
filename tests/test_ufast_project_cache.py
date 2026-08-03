@@ -7,7 +7,15 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "skills" / "nerd-ufast" / "scripts" / "project_cache.py"
+SCRIPT = (
+    ROOT
+    / "docs"
+    / "experiments"
+    / "nerd-ufast"
+    / "skill"
+    / "scripts"
+    / "project_cache.py"
+)
 
 
 class UFastProjectCacheTests(unittest.TestCase):

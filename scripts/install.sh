@@ -45,4 +45,3 @@ npx skills add danangjoyoo/nerd \
   --global --agent "$@" --skill '*' --yes
 
 python3 "$script_dir/install_hooks.py" "$@"
-python3 "$script_dir/install_mcp.py" "$@"

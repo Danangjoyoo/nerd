@@ -9,7 +9,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-INSTALLER_PATH = ROOT / "scripts" / "install_mcp.py"
+INSTALLER_PATH = ROOT / "docs" / "experiments" / "nerd-ufast" / "install_mcp.py"
 
 
 def _load_installer():

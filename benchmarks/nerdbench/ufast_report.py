@@ -340,7 +340,12 @@ def _skill_overlap() -> dict:
         "nerd-ufast": "Self-contained eligibility-gated deterministic changes",
     }
     for name, boundary in boundaries.items():
-        body = (ROOT / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+        skill = (
+            ROOT / "docs" / "experiments" / "nerd-ufast" / "skill"
+            if name == "nerd-ufast"
+            else ROOT / "skills" / name
+        )
+        body = (skill / "SKILL.md").read_text(encoding="utf-8")
         folded = body.casefold()
         entries[name] = {
             "words": len(body.split()),

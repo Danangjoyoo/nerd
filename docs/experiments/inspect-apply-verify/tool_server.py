@@ -13,7 +13,11 @@ sys.path.insert(0, str(ROOT))
 import baselines
 
 PRODUCTION_TOOLS = (
-    ROOT.parents[2] / "skills" / "nerd-ufast" / "scripts" / "ufast_tools.py"
+    ROOT.parents[1]
+    / "nerd-ufast"
+    / "skill"
+    / "scripts"
+    / "ufast_tools.py"
 )
 SPEC = importlib.util.spec_from_file_location("production_ufast_tools", PRODUCTION_TOOLS)
 if SPEC is None or SPEC.loader is None:

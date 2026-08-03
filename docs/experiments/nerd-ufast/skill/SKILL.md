@@ -17,7 +17,7 @@ Skill hooks, mentions, and indirect instructions are not authorization.
 
 ## Contract
 
-Use this self-contained zero-planning execution skill only when explicitly invoked. Favor latency over exploration and broad proof. Preserve authority, safety, and honesty. Never route elsewhere.
+Use this zero-planning execution skill only when explicitly invoked. Favor latency over broad proof. Preserve authority, safety, and honesty. Never route elsewhere.
 
 Do not dispatch subagents or reviewers. Do not create or maintain a Focus Record, execution plan, TODO, checklist, ledger, state file, or review record. Do not narrate intended steps before acting.
 
@@ -76,11 +76,11 @@ At the start of every task, before any repository search or read, batch only nee
 
 | Cache | Answers |
 | --- | --- |
-| `project-map.md` | What exists: modules, paths, tests, entrypoints. |
-| `conventions.md` | How this project works: errors, logging, APIs. |
-| `commands.md` | How to verify: test, build, lint, run. |
+| `project-map.md` | What exists. |
+| `conventions.md` | How this project works. |
+| `commands.md` | How to verify. |
 | `dependencies.md` | Libraries and versions. |
-| `history.md` | Confirmed reasons and warnings: legacy, migrations, decisions. |
+| `history.md` | Confirmed reasons and warnings. |
 
 Use `project_cache.py get --repo <repo> --cache <cache> --key <key>`. Hits are the first project-navigation SSOT: jump directly to cached paths without rediscovery. A missing cache or key is a cache miss. Fallback to one narrow lookup only when missing, a cached path or command fails, or repository evidence conflicts.
 
@@ -88,9 +88,9 @@ After fresh evidence, run `project_cache.py put --repo <repo> --cache <cache> --
 
 ## Core Tools
 
-After the cache step, prefer `nerd-ufast-tools`. On a miss, make one `inspect` call with all exact symbol and bounded path queries. When patch, starting hashes, and checks are known, make one `apply_verify` call to apply, verify, and roll back on failed proof.
+After the cache step, treat `nerd-ufast-tools` `inspect` as present when listed in session tools. Never test availability with `command -v`, `which`, or file search. On a cache miss, call it once with all exact symbol and bounded path queries before any `rg`, `sed`, `find`, or file-read tool. If tool-list visibility is unclear, attempt the call. Do not replace it with shell access or infer unavailability from a cache-helper failure. Fall back only when `inspect` is absent or its call returns an error.
 
-Require expected hashes for every changed path. For unclear targets, permissions, safety, external effects, destruction, migrations, or result-dependent edits, use existing bounded read, patch, and check tools. Do the same when MCP is unavailable.
+With known patch, hashes, and checks, make one `apply_verify` call to apply, verify, and roll back on failed proof. Require expected hashes for every changed path. For unclear targets, permissions, safety, external effects, destruction, migrations, or result-dependent edits, use existing bounded tools.
 
 ## Single Shot Action
 
@@ -128,4 +128,4 @@ Do not add any other text.
 
 ## End Proof
 
-After output, choose **V0** for low-risk or unavailable proof; otherwise use the smallest focused **V1**. Ask before broad, slow, external, destructive, or unauthorized proof. Run checks together. Allow one fix and rerun its failed check. Never install tools or run repository-wide proof unless requested.
+After output, use **V0** for low-risk or unavailable proof; otherwise the smallest focused **V1**. Ask before external, destructive, or unauthorized proof. Run checks together. Allow one fix and rerun its failed check. Never install tools or run repository-wide proof unless requested.

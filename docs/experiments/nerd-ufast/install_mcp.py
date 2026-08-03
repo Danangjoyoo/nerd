@@ -27,7 +27,7 @@ def _install_home() -> Path:
 
 
 def _source_directory() -> Path:
-    return Path(__file__).resolve().parents[1] / "skills" / "nerd-ufast" / "scripts"
+    return Path(__file__).resolve().parent / "skill" / "scripts"
 
 
 def _load_json(path: Path) -> dict[str, Any]:

@@ -158,7 +158,11 @@ def _install_condition(condition: str, agent: str, destination: Path) -> None:
         raise ValueError(f"unknown benchmark condition: {condition}")
 
     for name in skill_names:
-        source = source_root / name
+        source = (
+            ROOT / "docs" / "experiments" / "nerd-ufast" / "skill"
+            if name == "nerd-ufast"
+            else source_root / name
+        )
         if not (source / "SKILL.md").is_file():
             raise ValueError(f"condition skill is missing: {source}")
         shutil.copytree(source, skill_root / name)
