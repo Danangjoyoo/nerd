@@ -49,11 +49,12 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
         frontmatter = body.split("---", 2)[1]
+        self.assertIn("Cleverly quick thinking", frontmatter)
         self.assertIn("multi-goal request", frontmatter)
         self.assertIn("working role before substantive work", frontmatter)
         self.assertNotIn("appropriate Nerd specialty", frontmatter)
-        self.assertIn("Multi-goal focus", metadata)
-        self.assertIn("opt-in specialty routing", metadata)
+        self.assertIn("Cleverly quick thinking", metadata)
+        self.assertIn("focused outcomes", metadata)
         self.assertNotIn(
             "Route exactly one primary specialty after focus is established",
             body,
@@ -230,6 +231,7 @@ class SmartContractTests(unittest.TestCase):
         self.assertIn("references/brainstorming.md", body)
         self.assertNotIn("superpowers:", body.casefold())
 
+
     def test_routes_endpoint_templates_lazily_without_changing_endpoint(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
@@ -280,9 +282,16 @@ class SmartContractTests(unittest.TestCase):
                 "report the path",
                 "do not ask again",
                 "Otherwise keep it session-only",
-                '"Would you like me to write this to a Markdown file?"',
+                '"Would you like me to write this to `[absolute path]`?"',
+                "Substitute the concrete path before responding",
+                "never ask whether to write without a filepath",
+                "`docs/<descriptive-name>.md`",
+                "runtime-provided root repository",
+                "multiple repositories exist under that root",
+                "root repository rather than a selected or nested repository",
                 "A later yes authorizes only persistence",
-                "ask for a path if none was given",
+                "to the proposed path",
+                "do not ask for a path",
                 "Persistence never changes content or advances the endpoint",
             ),
         )
@@ -828,6 +837,7 @@ class FastContractTests(unittest.TestCase):
     def test_is_an_explicitly_composable_latency_modifier_with_accuracy_floor(self):
         body = skill_body("nerd-fast")
         metadata = (SKILLS / "nerd-fast" / "agents" / "openai.yaml").read_text()
+        frontmatter = body.split("---", 2)[1]
         assert_terms(
             self,
             body,
@@ -845,11 +855,13 @@ class FastContractTests(unittest.TestCase):
                 "no hard total tool limit",
             ),
         )
+        self.assertIn("High speed without accuracy loss", frontmatter)
         self.assertNotIn(
             "when both operational latency and presentation cost matter",
             body,
         )
         self.assertIn('$nerd-fast', metadata)
+        self.assertIn('High speed work', metadata)
         self.assertIn('latency', metadata.casefold())
         self.assertNotIn("superpowers:", body.casefold())
 
@@ -1065,6 +1077,7 @@ class XFastContractTests(unittest.TestCase):
     def test_is_explicit_self_contained_and_honest_about_accuracy(self):
         body = skill_body("nerd-xfast")
         metadata = (SKILLS / "nerd-xfast" / "agents" / "openai.yaml").read_text()
+        frontmatter = body.split("---", 2)[1]
         assert_terms(
             self,
             body,
@@ -1081,6 +1094,8 @@ class XFastContractTests(unittest.TestCase):
         )
         for dependency in ("`nerd-smart`", "`nerd-execute`", "`nerd-fast`"):
             self.assertNotIn(dependency, body)
+        self.assertIn("Super high speed for rapid output", frontmatter)
+        self.assertIn("Super high speed for rapid output with bounded proof", metadata)
         self.assertIn("$nerd-xfast", metadata)
         self.assertIn("accuracy", metadata.casefold())
         self.assertIn("latency", metadata.casefold())

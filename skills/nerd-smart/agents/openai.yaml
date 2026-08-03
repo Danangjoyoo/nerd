@@ -1,6 +1,6 @@
 interface:
   display_name: "Nerd Smart"
-  short_description: "Multi-goal focus with opt-in specialty routing"
+  short_description: "Cleverly quick thinking for focused outcomes"
   default_prompt: "Use $nerd-smart to align this request, persist multiple goals when present, and stop at each confirmed endpoint."
 policy:
   allow_implicit_invocation: true

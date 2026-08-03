@@ -1,6 +1,6 @@
 ---
 name: nerd-fast
-description: Use when explicitly invoked or when a concrete latency constraint requires minimizing wall-clock agent time without reducing accuracy.
+description: High speed without accuracy loss. Use when explicitly invoked or concrete latency constraints require minimizing wall-clock agent time.
 ---
 
 # Nerd Fast

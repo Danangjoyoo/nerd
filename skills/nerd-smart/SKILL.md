@@ -1,6 +1,6 @@
 ---
 name: nerd-smart
-description: Use when a focused, ambiguous, or multi-goal request needs alignment on intention, endpoint, scope, or working role before substantive work.
+description: Cleverly quick thinking for focused, ambiguous, or multi-goal requests. Use to align intention, endpoint, scope, and working role before substantive work and stop at the smallest fitting outcome.
 ---
 
 # Nerd Smart
@@ -38,7 +38,7 @@ Choose the single endpoint that best matches the user's smallest real intention.
 
 Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
 
-For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. If the user explicitly asks to write or save to a named directory or Markdown path, write it in the same action, choose a descriptive non-overwriting `.md` name when only a directory is given, report the path, and do not ask again. Otherwise keep it session-only and end with: "Would you like me to write this to a Markdown file?" A later yes authorizes only persistence; ask for a path if none was given. Persistence never changes content or advances the endpoint.
+For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. If the user explicitly asks to write or save to a named directory or Markdown path, write it in the same action, choose a descriptive non-overwriting `.md` name when only a directory is given, report the path, and do not ask again. Otherwise keep it session-only, choose the exact destination first, and end with: "Would you like me to write this to `[absolute path]`?" Substitute the concrete path before responding; never ask whether to write without a filepath. Unless the user names another location, aim for `docs/<descriptive-name>.md` in the runtime-provided root repository. If multiple repositories exist under that root, use the root repository rather than a selected or nested repository. A later yes authorizes only persistence to the proposed path; do not ask for a path. Persistence never changes content or advances the endpoint.
 
 ## Focus First
 
