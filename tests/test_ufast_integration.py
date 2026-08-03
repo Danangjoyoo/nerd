@@ -9,19 +9,21 @@ from benchmarks.nerdbench.materialize import materialize_run
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import (
     _read_ufast_telemetry,
+    _ufast_source_hashes,
     condition_prompt,
     isolated_codex_environment,
 )
+from benchmarks.nerdbench.ufast_report import current_source_hashes
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CASES = ROOT / "benchmarks" / "pilots" / "xfast-v3-five-cases" / "cases.json"
+CASES = ROOT / "benchmarks" / "cases" / "ufast-phase1-verification.json"
 
 
 def spec(workspace: Path, condition: str) -> RunSpec:
     return RunSpec(
         run_id=f"ufast-test-{condition}",
-        case_id="xfast-v3-greeting",
+        case_id="xfast-v3-discovery-edit",
         condition=condition,
         agent="codex",
         model="gpt-5.6-luna",
@@ -33,15 +35,22 @@ def spec(workspace: Path, condition: str) -> RunSpec:
 
 
 class UFastConditionTests(unittest.TestCase):
+    def test_runner_and_reporter_share_one_frozen_source_set(self):
+        config = {"conditions": {"xfast": ["nerd-xfast", "nerd-ufast"]}}
+        self.assertEqual(_ufast_source_hashes(config), current_source_hashes())
+        self.assertIsNone(
+            _ufast_source_hashes({"conditions": {"xfast": ["nerd-xfast"]}})
+        )
+
     def test_telemetry_reader_normalizes_only_bounded_tool_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "telemetry.jsonl"
             path.write_text(
                 json.dumps(
                     {
-                        "tool": "ufast_apply_workspace_change",
+                        "tool": "ufast_safe_edit",
                         "status": "applied",
-                        "runtime_version": "0.1.0",
+                        "runtime_version": "0.3.0",
                         "operation_ms": 14,
                         "cold_start_ms": 22,
                         "changed_files": ["feature.py"],
@@ -49,6 +58,9 @@ class UFastConditionTests(unittest.TestCase):
                             {"name": "syntax", "exit_code": 0},
                         ],
                         "rolled_back": False,
+                        "route": "safe_edit",
+                        "backend": "workspace_transaction",
+                        "cache_status": None,
                     }
                 )
                 + "\n",
@@ -58,7 +70,7 @@ class UFastConditionTests(unittest.TestCase):
 
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0]["type"], "ufast_tool_call")
-        self.assertEqual(events[0]["tool"], "ufast_apply_workspace_change")
+        self.assertEqual(events[0]["tool"], "ufast_safe_edit")
         self.assertEqual(events[0]["changed_files"], ["feature.py"])
         self.assertEqual(events[0]["checks"], [{"name": "syntax", "exit_code": 0}])
 

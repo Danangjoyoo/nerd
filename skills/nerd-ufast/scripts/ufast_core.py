@@ -16,7 +16,7 @@ import tomllib
 from typing import Any
 
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 MAX_FILES = 12
 MAX_TOTAL_BYTES = 128 * 1024
 MAX_OUTPUT_CHARS = 4_000
@@ -26,6 +26,10 @@ EXCLUDED_DIRECTORIES = frozenset(
     {"__pycache__", "node_modules", "vendor", "dist", "build"}
 )
 STRUCTURED_SUFFIXES = frozenset({".py", ".json", ".toml"})
+
+SCRIPT_DIRECTORY = Path(__file__).resolve().parent
+if str(SCRIPT_DIRECTORY) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIRECTORY))
 
 
 def _elapsed_ms(started: float) -> int:
@@ -356,6 +360,8 @@ def apply_workspace_change(
     root: Path | str,
     changes: Any,
     *,
+    verify: bool = True,
+    selected_checks: Sequence[str] | None = None,
     replace: Callable[[os.PathLike[str], os.PathLike[str]], Any] = os.replace,
 ) -> dict[str, Any]:
     """Atomically apply a bounded UTF-8 text batch and roll back failed checks."""
@@ -501,38 +507,41 @@ def apply_workspace_change(
 
     changed_paths = [item["relative"] for item in validated]
     checks: list[dict[str, Any]] = []
-    with tempfile.TemporaryDirectory(prefix="nerd-ufast-pycache-") as cache_directory:
-        environment = os.environ.copy()
-        environment["PYTHONDONTWRITEBYTECODE"] = "1"
-        environment["PYTHONPYCACHEPREFIX"] = cache_directory
-        for name, command in _verification_commands(workspace, changed_paths):
-            if command is None:
-                check = {
-                    "name": name,
-                    "exit_code": 0,
-                    "duration_ms": 0,
-                    "output": "Structured text validated before atomic write",
-                }
-            else:
-                check = _run_check(name, command, workspace, environment)
-            checks.append(check)
-            if check["exit_code"] != 0:
-                rollback_error = None
-                try:
-                    _restore(replaced)
-                except OSError as error:
-                    rollback_error = error
-                reason = f"Verification check failed: {name}"
-                if rollback_error is not None:
-                    reason += f"; {rollback_error}"
-                return _result(
-                    "verification_failed",
-                    started,
-                    reason=reason,
-                    changed_files=[],
-                    checks=checks,
-                    rolled_back=rollback_error is None,
-                )
+    if any(PurePosixPath(path).suffix in STRUCTURED_SUFFIXES for path in changed_paths):
+        checks.append(
+            {
+                "name": "structural_validation",
+                "backend": "stdlib_parser",
+                "exit_code": 0,
+                "duration_ms": 0,
+                "output": "Structured text validated before atomic write",
+            }
+        )
+    verification_status = "not_requested"
+    if verify:
+        from ufast_verify import run_test_plan
+
+        verification = run_test_plan(workspace, changed_paths, selected_checks)
+        verification_status = verification["status"]
+        checks.extend(verification.get("checks", []))
+        if verification_status in {"failed", "rejected"}:
+            rollback_error = None
+            try:
+                _restore(replaced)
+            except OSError as error:
+                rollback_error = error
+            reason = verification.get("reason") or "Repository verification failed"
+            if rollback_error is not None:
+                reason += f"; {rollback_error}"
+            return _result(
+                "verification_failed",
+                started,
+                reason=reason,
+                changed_files=[],
+                checks=checks,
+                rolled_back=rollback_error is None,
+                verification_status=verification_status,
+            )
 
     return _result(
         "applied",
@@ -540,4 +549,133 @@ def apply_workspace_change(
         changed_files=changed_paths,
         checks=checks,
         rolled_back=False,
+        verification_status=verification_status,
     )
+
+
+def safe_edit(
+    root: Path | str,
+    changes: Any,
+    *,
+    verify: bool = True,
+    selected_checks: Sequence[str] | None = None,
+    replace: Callable[[os.PathLike[str], os.PathLike[str]], Any] = os.replace,
+) -> dict[str, Any]:
+    """Materialize exact replacements, then use the atomic transaction backend."""
+
+    started = time.perf_counter()
+    workspace = Path(root).expanduser().resolve()
+    if not isinstance(verify, bool):
+        return _result(
+            "rejected",
+            started,
+            reason="verify must be a boolean",
+            changed_files=[],
+            checks=[],
+            rolled_back=False,
+        )
+    if not isinstance(changes, list) or not 1 <= len(changes) <= MAX_FILES:
+        return _result(
+            "rejected",
+            started,
+            reason=f"changes must contain between 1 and {MAX_FILES} items",
+            changed_files=[],
+            checks=[],
+            rolled_back=False,
+        )
+
+    materialized: list[dict[str, str]] = []
+    modes: set[str] = set()
+    try:
+        for change in changes:
+            if not isinstance(change, dict):
+                raise ValueError("Each change must be an object")
+            target, relative = _resolve_editable_path(workspace, change.get("path"))
+            expected = change.get("expected_sha256")
+            content_present = "content" in change
+            replacements_present = "replacements" in change
+            if content_present == replacements_present:
+                raise ValueError(
+                    f"Exactly one of content or replacements is required for {relative!r}"
+                )
+            if content_present:
+                content = change.get("content")
+                if not isinstance(content, str):
+                    raise ValueError(f"content must be a string for {relative!r}")
+                modes.add("complete_contents")
+            else:
+                replacements = change.get("replacements")
+                if (
+                    not isinstance(replacements, list)
+                    or not 1 <= len(replacements) <= 50
+                ):
+                    raise ValueError(
+                        f"replacements must contain between 1 and 50 items for {relative!r}"
+                    )
+                content = target.read_text(encoding="utf-8")
+                for replacement in replacements:
+                    if not isinstance(replacement, dict):
+                        raise ValueError("Each replacement must be an object")
+                    old = replacement.get("old_text")
+                    new = replacement.get("new_text")
+                    occurrences = replacement.get("expected_occurrences")
+                    if not isinstance(old, str) or not old:
+                        raise ValueError("old_text must be a non-empty string")
+                    if not isinstance(new, str):
+                        raise ValueError("new_text must be a string")
+                    if (
+                        not isinstance(occurrences, int)
+                        or isinstance(occurrences, bool)
+                        or occurrences < 1
+                    ):
+                        raise ValueError("expected_occurrences must be a positive integer")
+                    actual = content.count(old)
+                    if actual != occurrences:
+                        raise ValueError(
+                            f"Expected {occurrences} occurrence(s) of exact text in "
+                            f"{relative!r}, found {actual}"
+                        )
+                    content = content.replace(old, new, occurrences)
+                modes.add("exact_replacements")
+            materialized.append(
+                {
+                    "path": relative,
+                    "expected_sha256": expected,
+                    "content": content,
+                }
+            )
+    except (OSError, UnicodeError, ValueError) as error:
+        return _result(
+            "rejected",
+            started,
+            reason=str(error),
+            changed_files=[],
+            checks=[],
+            rolled_back=False,
+        )
+
+    result = apply_workspace_change(
+        workspace,
+        materialized,
+        verify=verify,
+        selected_checks=selected_checks,
+        replace=replace,
+    )
+    mode = next(iter(modes)) if len(modes) == 1 else "mixed"
+    resulting_files = []
+    if result.get("status") == "applied":
+        for path in result.get("changed_files", []):
+            target = workspace / path
+            body = target.read_bytes()
+            resulting_files.append(
+                {
+                    "path": path,
+                    "sha256": _digest(body),
+                    "bytes": len(body),
+                }
+            )
+    return {
+        **result,
+        "edit_mode": mode,
+        "resulting_files": resulting_files,
+    }

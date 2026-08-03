@@ -123,9 +123,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     ufast_report = subparsers.add_parser(
         "ufast-report",
-        help="summarize the three UFast versus XFast results",
+        help="summarize the Luna and Terra UFast versus XFast verification results",
     )
-    ufast_report.add_argument("--results", nargs=3, required=True)
+    ufast_report.add_argument("--results", nargs=2, required=True)
     ufast_report.add_argument("--output", required=True)
     ufast_report.add_argument("--overwrite", action="store_true")
 

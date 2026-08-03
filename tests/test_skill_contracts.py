@@ -407,16 +407,23 @@ class UFastContractTests(unittest.TestCase):
                 "explicitly invokes Nerd UFast",
                 "endpoint, scope, authorization, and active workflow",
                 "never replaces or restarts the active workflow",
-                "ufast_prepare_workspace_change",
-                "ufast_apply_workspace_change",
-                "Call prepare exactly once",
-                "Call apply exactly once",
-                "prepare is the eligibility inspection",
-                "not an unknown or ambiguous condition",
-                "red-green sequence alone is not a fallback reason",
-                "one evidence-driven retry",
-                "Fall back immediately",
-                "The active workflow still owns any remaining proof",
+                "the registry owns backend selection",
+                "ufast_project_index",
+                "ufast_fast_search",
+                "ufast_safe_edit",
+                "ufast_test_runner",
+                "Lack of prior inspection is not a fallback reason",
+                "Prefer exact replacements",
+                "Batch independent tool calls with the platform's native interface",
+                "Keep adaptive dependencies sequential",
+                "Tools handle how; the model decides what",
+                "registered LSP, codemod, or AST route",
+                "Choose **V0** or **V1** once",
+                "**V0:**",
+                "**V1 automatic:**",
+                "**V1 ask first:**",
+                "must not repeat exact proof already returned",
+                "Allow one retry",
                 "Never combine `nerd-ufast` with `nerd-xfast`",
                 "UFast fast path: applied",
                 "UFast fast path: fell back",
@@ -426,14 +433,16 @@ class UFastContractTests(unittest.TestCase):
         self.assertIn("Use only when explicitly invoked", frontmatter)
         self.assertIn("Generic tool-backed ultra-fast execution", frontmatter)
         self.assertNotIn("Python", frontmatter)
-        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 420)
+        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 650)
         self.assertIn("allow_implicit_invocation: false", metadata)
         self.assertIn("$nerd-ufast", metadata)
 
     def test_only_ufast_names_its_namespaced_tools(self):
         tool_names = (
-            "ufast_prepare_workspace_change",
-            "ufast_apply_workspace_change",
+            "ufast_project_index",
+            "ufast_fast_search",
+            "ufast_safe_edit",
+            "ufast_test_runner",
         )
         for path in SKILLS.glob("*/SKILL.md"):
             if path.parent.name == "nerd-ufast":
@@ -1111,6 +1120,11 @@ class XFastContractTests(unittest.TestCase):
                 "For a non-write request",
                 "smallest decision-ready answer",
                 "one structured, single-agent multi-file patch",
+                "Batch independent tool calls with the platform's native interface",
+                "one call across known targets",
+                "Keep adaptive dependencies sequential",
+                "native text or patch layer",
+                "does not use UFast's semantic routes",
                 "Do not dispatch subagents or reviewers",
                 "Do not inspect, compile, lint, test, review, narrate, or clean up between writes",
             ),

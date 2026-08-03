@@ -69,7 +69,13 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
         self.assertEqual(
             REQUIRED_SCRIPTS["nerd-ufast"],
-            ("ufast_core.py", "ufast_mcp.py"),
+            (
+                "ufast_core.py",
+                "ufast_index.py",
+                "ufast_registry.py",
+                "ufast_verify.py",
+                "ufast_mcp.py",
+            ),
         )
 
     def test_smart_reference_files_match_registry(self):

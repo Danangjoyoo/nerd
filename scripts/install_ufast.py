@@ -38,7 +38,13 @@ def _copy_runtime(home: Path) -> Path:
     source = Path(__file__).resolve().parents[1] / "skills" / "nerd-ufast" / "scripts"
     destination = home / ".nerd" / "ufast"
     destination.mkdir(parents=True, exist_ok=True)
-    for name in ("ufast_core.py", "ufast_mcp.py"):
+    for name in (
+        "ufast_core.py",
+        "ufast_index.py",
+        "ufast_registry.py",
+        "ufast_verify.py",
+        "ufast_mcp.py",
+    ):
         shutil.copyfile(source / name, destination / name)
         (destination / name).chmod(0o755)
     return destination / "ufast_mcp.py"

@@ -23,19 +23,15 @@ from benchmarks.run import build_parser
 
 ROOT = Path(__file__).resolve().parents[1]
 PILOT = ROOT / "benchmarks" / "pilots" / "ufast-vs-xfast"
-CASES = ROOT / "benchmarks" / "pilots" / "xfast-v3-five-cases" / "cases.json"
-CASE_FILE = "benchmarks/pilots/xfast-v3-five-cases/cases.json"
+CASES = ROOT / "benchmarks" / "cases" / "ufast-phase1-verification.json"
+ORIGINAL_CASES = ROOT / "benchmarks" / "pilots" / "xfast-v3-five-cases" / "cases.json"
+CASE_FILE = "benchmarks/cases/ufast-phase1-verification.json"
 CASE_IDS = (
-    "xfast-v3-batched-edit",
     "xfast-v3-discovery-edit",
-    "xfast-v3-independent-work",
-    "xfast-v3-greeting",
-    "xfast-v3-slugify",
 )
 TARGETS = {
     "Luna": ("gpt-5.6-luna-high", "gpt-5.6-luna"),
     "Terra": ("gpt-5.6-terra-high", "gpt-5.6-terra"),
-    "Sol": ("gpt-5.6-sol-high", "gpt-5.6-sol"),
 }
 
 
@@ -49,25 +45,45 @@ def tool_calls(*, applied: bool = True) -> list[dict]:
     return [
         {
             "type": "ufast_tool_call",
-            "tool": "ufast_prepare_workspace_change",
+            "tool": "ufast_project_index",
             "status": "ready",
-            "runtime_version": "0.1.0",
+            "runtime_version": "0.3.0",
             "operation_ms": 2,
             "cold_start_ms": 11,
             "changed_files": [],
             "checks": [],
             "rolled_back": False,
+            "route": "project_index",
+            "backend": "memory_project_map",
+            "cache_status": "rebuilt",
         },
         {
             "type": "ufast_tool_call",
-            "tool": "ufast_apply_workspace_change",
+            "tool": "ufast_fast_search",
+            "status": "matched",
+            "runtime_version": "0.3.0",
+            "operation_ms": 1,
+            "cold_start_ms": 11,
+            "changed_files": [],
+            "checks": [],
+            "rolled_back": False,
+            "route": "search_project",
+            "backend": "memory_project_map",
+            "cache_status": "hit",
+        },
+        {
+            "type": "ufast_tool_call",
+            "tool": "ufast_safe_edit",
             "status": "applied" if applied else "verification_failed",
-            "runtime_version": "0.1.0",
+            "runtime_version": "0.3.0",
             "operation_ms": 8,
             "cold_start_ms": 11,
             "changed_files": ["feature.py"] if applied else [],
             "checks": [{"name": "syntax", "exit_code": 0}],
             "rolled_back": not applied,
+            "route": "safe_edit",
+            "backend": "workspace_transaction",
+            "cache_status": None,
             **({"reason": "verification failed"} if not applied else {}),
         },
     ]
@@ -92,7 +108,7 @@ def write_result_fixture(
         "created_at": "2026-08-03T00:00:00+00:00",
         "smoke": False,
         "publication_state": "pending-score",
-        "planned_runs": 10,
+        "planned_runs": 2,
         "nerd_commit": "deadbeef",
         "agent_versions": {"codex": "codex-cli test"},
         "source_hashes": source_hashes(),
@@ -191,11 +207,15 @@ class UFastScheduleTests(unittest.TestCase):
             8032026,
             pair_conditions={"xfast": ("nerd-xfast", "nerd-ufast")},
         )
-        self.assertEqual(len(tasks), 5)
+        self.assertEqual(len(tasks), 1)
         self.assertEqual({task["case_id"] for task in tasks}, set(CASE_IDS))
 
-    def test_uses_immutable_five_case_corpus_and_plans_thirty_runs(self):
+    def test_uses_one_immutable_case_and_plans_four_runs(self):
         self.assertEqual(hashlib.sha256(CASES.read_bytes()).hexdigest(), CASE_SHA256)
+        copied = json.loads(CASES.read_text(encoding="utf-8"))["cases"]
+        original = json.loads(ORIGINAL_CASES.read_text(encoding="utf-8"))["cases"]
+        expected = [case for case in original if case["id"] == CASE_IDS[0]]
+        self.assertEqual(copied, expected)
         all_ids = set()
         for label, (target_id, model) in TARGETS.items():
             config = load_config(PILOT / f"{target_id}.json")
@@ -209,19 +229,19 @@ class UFastScheduleTests(unittest.TestCase):
                 {"xfast": ["nerd-xfast", "nerd-ufast"]},
             )
             runs = schedule_runs(config, ROOT / "benchmarks" / "work" / label)
-            self.assertEqual(len(runs), 10)
+            self.assertEqual(len(runs), 2)
             self.assertEqual({run.condition for run in runs}, {"nerd-xfast", "nerd-ufast"})
             self.assertTrue(all(run.run_id not in all_ids for run in runs))
             all_ids.update(run.run_id for run in runs)
-        self.assertEqual(len(all_ids), 30)
+        self.assertEqual(len(all_ids), 4)
 
 
 class UFastReportTests(unittest.TestCase):
-    def test_summarizes_fifteen_pairs_with_tool_and_timing_evidence(self):
+    def test_summarizes_two_pairs_with_tool_and_timing_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:
             summary = summarize_ufast(write_matrix(Path(temporary)))
-        self.assertEqual(summary["aggregate"]["pairs"], 15)
-        self.assertEqual(summary["models"]["Luna"]["pairs"], 5)
+        self.assertEqual(summary["aggregate"]["pairs"], 2)
+        self.assertEqual(summary["models"]["Luna"]["pairs"], 1)
         self.assertEqual(summary["models"]["Luna"]["delta"]["accuracy_points"], -10.0)
         self.assertEqual(summary["models"]["Luna"]["delta"]["speed_percent"], 40.0)
         self.assertEqual(summary["models"]["Luna"]["delta"]["token_change_percent"], -50.0)
@@ -229,9 +249,11 @@ class UFastReportTests(unittest.TestCase):
         self.assertEqual(tools["hit_rate_percent"], 100.0)
         self.assertEqual(tools["fallback_runs"], 0)
         self.assertEqual(tools["median_cold_start_ms"], 11.0)
-        self.assertEqual(tools["median_operation_ms"], 10.0)
-        self.assertEqual(summary["controls"]["workload_runs"], 30)
-        self.assertEqual(summary["controls"]["pairs"], 15)
+        self.assertEqual(tools["median_operation_ms"], 11.0)
+        self.assertEqual(tools["project_index_runs"], 1)
+        self.assertEqual(tools["fast_search_runs"], 1)
+        self.assertEqual(summary["controls"]["workload_runs"], 4)
+        self.assertEqual(summary["controls"]["pairs"], 2)
         self.assertEqual(summary["controls"]["verified_host"], "Codex")
 
     def test_missing_tokens_are_unavailable_and_negative_results_are_honest(self):
@@ -258,7 +280,7 @@ class UFastReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             base = Path(temporary)
             summary = summarize_ufast(write_matrix(base, applied=False))
-            self.assertEqual(summary["aggregate"]["ufast_tools"]["fallback_runs"], 15)
+            self.assertEqual(summary["aggregate"]["ufast_tools"]["fallback_runs"], 2)
 
         with tempfile.TemporaryDirectory() as temporary:
             paths = write_matrix(Path(temporary))
@@ -275,7 +297,7 @@ class UFastReportTests(unittest.TestCase):
                 summarize_ufast(paths)
 
     def test_rejects_xfast_leaks_and_incomplete_or_drifted_evidence(self):
-        mutations = ("xfast leak", "missing run", "source drift")
+        mutations = ("xfast leak", "missing run", "source drift", "failed score")
         for mutation in mutations:
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
                 paths = write_matrix(Path(temporary))
@@ -284,6 +306,15 @@ class UFastReportTests(unittest.TestCase):
                     manifest = json.loads(manifest_path.read_text())
                     manifest["source_hashes"]["ufast_skill"] = "b" * 64
                     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+                elif mutation == "failed score":
+                    scores_path = paths[0] / "scores.jsonl"
+                    scores = [json.loads(line) for line in scores_path.read_text().splitlines()]
+                    scores[0]["passed"] = False
+                    scores[0]["hard_gate_failures"] = ["behavior"]
+                    scores_path.write_text(
+                        "".join(json.dumps(item) + "\n" for item in scores),
+                        encoding="utf-8",
+                    )
                 else:
                     raw_path = paths[0] / "raw.jsonl"
                     records = [json.loads(line) for line in raw_path.read_text().splitlines()]
@@ -312,15 +343,15 @@ class UFastReportTests(unittest.TestCase):
             body = readme.read_text(encoding="utf-8")
             self.assertEqual(body.count(UFAST_START), 1)
             self.assertEqual(body.count(UFAST_END), 1)
-            self.assertIn("five Python coding cases", body)
+            self.assertIn("one Python discovery/edit verification case", body)
             self.assertIn("one repetition", body)
-            self.assertIn("30 fresh Codex processes", body)
+            self.assertIn("4 fresh Codex processes", body)
             publish_ufast_readme(summary, readme, check=True)
             readme.write_text(body.replace("40.00% faster", "39.00% faster", 1))
             with self.assertRaisesRegex(ValueError, "out of date"):
                 publish_ufast_readme(summary, readme, check=True)
 
-    def test_cli_requires_three_results_and_explicit_summary(self):
+    def test_cli_requires_two_results_and_explicit_summary(self):
         parser = build_parser()
         report = parser.parse_args(
             [
@@ -328,12 +359,11 @@ class UFastReportTests(unittest.TestCase):
                 "--results",
                 "luna",
                 "terra",
-                "sol",
                 "--output",
                 "result.json",
             ]
         )
-        self.assertEqual(report.results, ["luna", "terra", "sol"])
+        self.assertEqual(report.results, ["luna", "terra"])
         publish = parser.parse_args(
             [
                 "ufast-publish",

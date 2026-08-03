@@ -312,10 +312,15 @@ def _read_ufast_telemetry(path: Path) -> tuple[dict, ...]:
         "checks",
         "rolled_back",
         "reason",
+        "route",
+        "backend",
+        "cache_status",
     }
     tool_names = {
-        "ufast_prepare_workspace_change",
-        "ufast_apply_workspace_change",
+        "ufast_project_index",
+        "ufast_fast_search",
+        "ufast_safe_edit",
+        "ufast_test_runner",
     }
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -347,9 +352,13 @@ def _read_ufast_telemetry(path: Path) -> tuple[dict, ...]:
         reason = value.get("reason")
         if reason is not None and (not isinstance(reason, str) or len(reason) > 500):
             raise ValueError("UFast telemetry contains an invalid reason")
+        for field in ("route", "backend", "cache_status"):
+            metadata = value.get(field)
+            if metadata is not None and not isinstance(metadata, str):
+                raise ValueError(f"UFast telemetry contains invalid {field}")
         records.append({"type": "ufast_tool_call", **value})
-    if len(records) > 3:
-        raise ValueError("UFast telemetry exceeds the three-call policy")
+    if len(records) > 6:
+        raise ValueError("UFast telemetry exceeds the six-call policy")
     return tuple(records)
 
 
@@ -488,10 +497,6 @@ def _version(command: list[str]) -> str:
     return (result.stdout or result.stderr).strip()
 
 
-def _file_sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def _ufast_source_hashes(config: dict) -> dict[str, str] | None:
     conditions = {
         condition
@@ -500,18 +505,9 @@ def _ufast_source_hashes(config: dict) -> dict[str, str] | None:
     }
     if "nerd-ufast" not in conditions:
         return None
-    paths = {
-        "case_corpus": ROOT / "benchmarks" / "pilots" / "xfast-v3-five-cases" / "cases.json",
-        "ufast_skill": ROOT / "skills" / "nerd-ufast" / "SKILL.md",
-        "ufast_core": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_core.py",
-        "ufast_server": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_mcp.py",
-        "benchmark_runner": ROOT / "benchmarks" / "nerdbench" / "runner.py",
-        "benchmark_materialize": ROOT / "benchmarks" / "nerdbench" / "materialize.py",
-        "benchmark_adapters": ROOT / "benchmarks" / "nerdbench" / "adapters.py",
-        "benchmark_scorer": ROOT / "benchmarks" / "nerdbench" / "scorer.py",
-        "ufast_report": ROOT / "benchmarks" / "nerdbench" / "ufast_report.py",
-    }
-    return {name: _file_sha256(path) for name, path in paths.items()}
+    from .ufast_report import current_source_hashes
+
+    return current_source_hashes()
 
 
 def _manifest(config: dict, run_id: str, planned: int, smoke: bool) -> dict:

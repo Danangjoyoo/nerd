@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 
@@ -17,6 +18,15 @@ CORE_PATH = (
 )
 SERVER_PATH = (
     ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_mcp.py"
+)
+INDEX_PATH = (
+    ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_index.py"
+)
+VERIFY_PATH = (
+    ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_verify.py"
+)
+REGISTRY_PATH = (
+    ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_registry.py"
 )
 
 
@@ -148,7 +158,10 @@ class ApplyContractTests(unittest.TestCase):
             )
 
             self.assertEqual(result["status"], "applied", result)
-            self.assertEqual([check["name"] for check in result["checks"]], ["syntax"])
+            self.assertEqual(
+                [check["name"] for check in result["checks"]],
+                ["structural_validation"],
+            )
             self.assertEqual((root / "README.md").read_text(), "# After\n")
             self.assertEqual(json.loads((root / "settings.json").read_text()), {"enabled": True})
 
@@ -215,7 +228,13 @@ class ApplyContractTests(unittest.TestCase):
             self.assertFalse(result["rolled_back"])
             self.assertEqual(
                 [check["name"] for check in result["checks"]],
-                ["syntax", "fixture_lint", "changed_tests", "verify_behavior"],
+                [
+                    "structural_validation",
+                    "python_syntax",
+                    "fixture_lint",
+                    "python_tests",
+                    "verify_behavior",
+                ],
             )
             self.assertTrue(all(check["exit_code"] == 0 for check in result["checks"]))
             self.assertIn("return f'Hello, {name}!'", (root / "feature.py").read_text())
@@ -271,6 +290,276 @@ class ApplyContractTests(unittest.TestCase):
             self.assertEqual(result["changed_files"], [])
             for path, body in originals.items():
                 self.assertEqual((root / path).read_text(), body)
+
+
+class ProjectIndexContractTests(unittest.TestCase):
+    def test_builds_reuses_and_invalidates_a_content_cache(self):
+        index_module = load_module("nerd_ufast_index_cache", INDEX_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture(root)
+            project = index_module.ProjectIndex(root)
+
+            first = project.project_index()
+            second = project.project_index()
+            (root / "feature.py").write_text(
+                "def greet(name: str) -> str:\n    return name\n",
+                encoding="utf-8",
+            )
+            third = project.project_index()
+
+        self.assertEqual(first["status"], "ready")
+        self.assertEqual(first["cache_status"], "rebuilt")
+        self.assertEqual(second["cache_status"], "hit")
+        self.assertEqual(third["cache_status"], "rebuilt")
+        self.assertEqual(first["total_files"], 2)
+        self.assertEqual(
+            [item["path"] for item in first["files"]],
+            ["feature.py", "test_feature.py"],
+        )
+        self.assertNotIn("content", first["files"][0])
+        self.assertNotEqual(first["index_id"], third["index_id"])
+
+    def test_fast_search_returns_bounded_context_and_edit_hashes(self):
+        index_module = load_module("nerd_ufast_index_search", INDEX_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture(root)
+            project = index_module.ProjectIndex(root)
+            matched = project.fast_search(
+                "NotImplementedError",
+                mode="literal",
+                max_results=3,
+                context_lines=1,
+            )
+            invalid = project.fast_search("[", mode="regex")
+            batched = project.fast_search(
+                queries=["NotImplementedError", "FeatureTests"],
+                max_results=4,
+            )
+            ambiguous = project.fast_search(
+                "NotImplementedError",
+                queries=["FeatureTests"],
+            )
+
+        self.assertEqual(matched["status"], "matched")
+        self.assertEqual(matched["match_count"], 1)
+        self.assertEqual(matched["matches"][0]["path"], "feature.py")
+        self.assertEqual(
+            matched["matches"][0]["sha256"],
+            digest("def greet(name: str) -> str:\n    raise NotImplementedError\n"),
+        )
+        self.assertIn("NotImplementedError", matched["matches"][0]["preview"])
+        self.assertEqual(invalid["status"], "rejected")
+        self.assertIn("regular expression", invalid["reason"])
+        self.assertEqual(batched["status"], "matched")
+        self.assertEqual(batched["queries"], ["NotImplementedError", "FeatureTests"])
+        self.assertEqual(batched["query_counts"], {"NotImplementedError": 1, "FeatureTests": 1})
+        self.assertEqual({match["query"] for match in batched["matches"]}, set(batched["queries"]))
+        self.assertEqual(ambiguous["status"], "rejected")
+        self.assertIn("Exactly one", ambiguous["reason"])
+
+
+class PhaseOneSafeEditTests(unittest.TestCase):
+    def test_exact_replacements_are_applied_by_the_tool(self):
+        core = load_module("nerd_ufast_core_replacements", CORE_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture(root)
+            original = (root / "feature.py").read_text(encoding="utf-8")
+            result = core.safe_edit(
+                root,
+                [
+                    {
+                        "path": "feature.py",
+                        "expected_sha256": digest(original),
+                        "replacements": [
+                            {
+                                "old_text": "    raise NotImplementedError\n",
+                                "new_text": "    return f'Hello, {name}!'\n",
+                                "expected_occurrences": 1,
+                            }
+                        ],
+                    }
+                ],
+                verify=False,
+            )
+
+        self.assertEqual(result["status"], "applied", result)
+        self.assertEqual(result["edit_mode"], "exact_replacements")
+        self.assertEqual(result["resulting_files"][0]["path"], "feature.py")
+        self.assertEqual(
+            result["resulting_files"][0]["sha256"],
+            digest("def greet(name: str) -> str:\n    return f'Hello, {name}!'\n"),
+        )
+        self.assertNotIn("content", result["resulting_files"][0])
+
+    def test_ambiguous_replacement_rejects_the_complete_batch(self):
+        core = load_module("nerd_ufast_core_replacement_reject", CORE_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "notes.txt"
+            original = "same\nsame\n"
+            path.write_text(original, encoding="utf-8")
+            result = core.safe_edit(
+                root,
+                [
+                    {
+                        "path": "notes.txt",
+                        "expected_sha256": digest(original),
+                        "replacements": [
+                            {
+                                "old_text": "same",
+                                "new_text": "changed",
+                                "expected_occurrences": 1,
+                            }
+                        ],
+                    }
+                ],
+                verify=False,
+            )
+            preserved = path.read_text(encoding="utf-8")
+
+        self.assertEqual(result["status"], "rejected")
+        self.assertIn("occurrence", result["reason"])
+        self.assertEqual(preserved, original)
+
+
+class TestRunnerContractTests(unittest.TestCase):
+    def test_detects_and_runs_repository_owned_python_checks(self):
+        verify = load_module("nerd_ufast_verify_python", VERIFY_PATH)
+        core = load_module("nerd_ufast_core_verify_python", CORE_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fixture(root)
+            plan = verify.detect_test_plan(root, ["feature.py", "test_feature.py"])
+            original = (root / "feature.py").read_text(encoding="utf-8")
+            edited = core.safe_edit(
+                root,
+                [
+                    {
+                        "path": "feature.py",
+                        "expected_sha256": digest(original),
+                        "replacements": [
+                            {
+                                "old_text": "    raise NotImplementedError\n",
+                                "new_text": "    return f'Hello, {name}!'\n",
+                                "expected_occurrences": 1,
+                            }
+                        ],
+                    }
+                ],
+                verify=False,
+            )
+            self.assertEqual(edited["status"], "applied")
+            result = verify.run_test_plan(root, ["feature.py", "test_feature.py"])
+
+        self.assertEqual(
+            [check.name for check in plan],
+            ["python_syntax", "fixture_lint", "python_tests", "verify_behavior"],
+        )
+        self.assertEqual(result["status"], "passed", result)
+        self.assertTrue(all(check["exit_code"] == 0 for check in result["checks"]))
+
+    def test_detects_common_language_backends_without_installing_them(self):
+        verify = load_module("nerd_ufast_verify_backends", VERIFY_PATH)
+        cases = {
+            "package.json": "node_test",
+            "go.mod": "go_test",
+            "Cargo.toml": "cargo_test",
+            "pom.xml": "maven_test",
+            "gradlew": "gradle_test",
+        }
+        for marker, expected in cases.items():
+            with self.subTest(marker=marker), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                body = '{"scripts":{"test":"node --test"}}\n' if marker == "package.json" else "fixture\n"
+                path = root / marker
+                path.write_text(body, encoding="utf-8")
+                if marker == "gradlew":
+                    path.chmod(0o755)
+                plan = verify.detect_test_plan(root, [])
+                self.assertIn(expected, [check.name for check in plan])
+
+    def test_limits_detection_to_the_changed_language_and_skips_dependencies(self):
+        verify = load_module("nerd_ufast_verify_relevance", VERIFY_PATH)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "notes.md").write_text("before\n", encoding="utf-8")
+            (root / "package.json").write_text(
+                '{"scripts":{"test":"node --test"}}\n',
+                encoding="utf-8",
+            )
+            dependencies = root / "node_modules" / "nested"
+            dependencies.mkdir(parents=True)
+            (dependencies / "test_hidden.py").write_text(
+                "raise RuntimeError('must not run')\n",
+                encoding="utf-8",
+            )
+
+            plan = verify.detect_test_plan(root, ["notes.md"])
+
+        self.assertEqual(plan, [])
+
+    def test_runs_independent_checks_concurrently_in_registry_order(self):
+        verify = load_module("nerd_ufast_verify_concurrent", VERIFY_PATH)
+        plan = [
+            verify.CheckSpec("slow", "fixture", (sys.executable, "-V")),
+            verify.CheckSpec("fast", "fixture", (sys.executable, "-V")),
+        ]
+        verify.detect_test_plan = lambda *_args, **_kwargs: plan
+
+        def fake_run(_workspace, check):
+            time.sleep(0.12)
+            return {
+                "name": check.name,
+                "backend": check.backend,
+                "exit_code": 0,
+                "duration_ms": 1,
+                "output": "",
+            }
+
+        verify._run_check = fake_run
+        with tempfile.TemporaryDirectory() as directory:
+            started = time.perf_counter()
+            result = verify.run_test_plan(directory)
+            elapsed = time.perf_counter() - started
+
+        self.assertEqual(result["status"], "passed")
+        self.assertEqual([check["name"] for check in result["checks"]], ["slow", "fast"])
+        self.assertLess(elapsed, 0.20)
+
+
+class OperationRegistryContractTests(unittest.TestCase):
+    def test_routes_phase_one_intents_and_reserves_semantic_extensions(self):
+        registry_module = load_module("nerd_ufast_registry_contract", REGISTRY_PATH)
+        registry = registry_module.phase_one_registry(
+            project_index=lambda _: {"status": "ready"},
+            fast_search=lambda _: {"status": "matched"},
+            safe_edit=lambda _: {"status": "applied"},
+            test_runner=lambda _: {"status": "passed"},
+        )
+
+        self.assertEqual(
+            [tool["name"] for tool in registry.tool_definitions()],
+            [
+                "ufast_project_index",
+                "ufast_fast_search",
+                "ufast_safe_edit",
+                "ufast_test_runner",
+            ],
+        )
+        definitions = {tool["name"]: tool for tool in registry.tool_definitions()}
+        self.assertIn("queries", definitions["ufast_fast_search"]["inputSchema"]["properties"])
+        self.assertTrue(definitions["ufast_safe_edit"]["annotations"]["destructiveHint"])
+        self.assertEqual(
+            registry.route_for_intent("search_project").name,
+            "ufast_fast_search",
+        )
+        self.assertIsNone(registry.route_for_intent("rename_symbol"))
+        routed = registry.dispatch("ufast_safe_edit", {"changes": []})
+        self.assertEqual(routed["route"], "safe_edit")
+        self.assertEqual(routed["backend"], "workspace_transaction")
 
     def test_rejects_traversal_and_symlink_targets(self):
         core = load_module("nerd_ufast_core_paths", CORE_PATH)
@@ -382,8 +671,54 @@ class McpProtocolTests(unittest.TestCase):
                     "id": 3,
                     "method": "tools/call",
                     "params": {
-                        "name": "ufast_prepare_workspace_change",
+                        "name": "ufast_project_index",
                         "arguments": {},
+                    },
+                },
+                {
+                    "jsonrpc": "2.0",
+                    "id": 4,
+                    "method": "tools/call",
+                    "params": {
+                        "name": "ufast_fast_search",
+                        "arguments": {
+                            "queries": ["NotImplementedError", "FeatureTests"]
+                        },
+                    },
+                },
+                {
+                    "jsonrpc": "2.0",
+                    "id": 5,
+                    "method": "tools/call",
+                    "params": {
+                        "name": "ufast_safe_edit",
+                        "arguments": {
+                            "changes": [
+                                {
+                                    "path": "feature.py",
+                                    "expected_sha256": digest(
+                                        "def greet(name: str) -> str:\n"
+                                        "    raise NotImplementedError\n"
+                                    ),
+                                    "replacements": [
+                                        {
+                                            "old_text": "    raise NotImplementedError\n",
+                                            "new_text": "    return f'Hello, {name}!'\n",
+                                            "expected_occurrences": 1,
+                                        }
+                                    ],
+                                }
+                            ]
+                        },
+                    },
+                },
+                {
+                    "jsonrpc": "2.0",
+                    "id": 6,
+                    "method": "tools/call",
+                    "params": {
+                        "name": "ufast_test_runner",
+                        "arguments": {"changed_paths": ["feature.py"]},
                     },
                 },
             )
@@ -403,8 +738,10 @@ class McpProtocolTests(unittest.TestCase):
         self.assertEqual(
             [tool["name"] for tool in responses[1]["result"]["tools"]],
             [
-                "ufast_prepare_workspace_change",
-                "ufast_apply_workspace_change",
+                "ufast_project_index",
+                "ufast_fast_search",
+                "ufast_safe_edit",
+                "ufast_test_runner",
             ],
         )
         tool_result = responses[2]["result"]
@@ -414,6 +751,22 @@ class McpProtocolTests(unittest.TestCase):
         self.assertEqual(
             json.loads(tool_result["content"][0]["text"])["status"],
             "ready",
+        )
+        self.assertEqual(responses[3]["result"]["structuredContent"]["status"], "matched")
+        self.assertEqual(
+            responses[3]["result"]["structuredContent"]["queries"],
+            ["NotImplementedError", "FeatureTests"],
+        )
+        self.assertEqual(
+            responses[3]["result"]["structuredContent"]["route"],
+            "search_project",
+        )
+        self.assertEqual(responses[4]["result"]["structuredContent"]["status"], "applied")
+        self.assertEqual(responses[4]["result"]["structuredContent"]["route"], "safe_edit")
+        self.assertEqual(responses[5]["result"]["structuredContent"]["status"], "passed")
+        self.assertEqual(
+            responses[5]["result"]["structuredContent"]["route"],
+            "test_runner",
         )
 
 

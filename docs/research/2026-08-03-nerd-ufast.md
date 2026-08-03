@@ -1,266 +1,233 @@
 # Nerd UFast Research Findings
 
-## Scope
-
-Resolve the first UFast prompt, tool surface, and UFast-only integration path
-for the approved five-case UFast-versus-XFast benchmark.
-
-The public modifier is generic. The benchmark corpus is Python because it is
-the unchanged requested comparison set, not because UFast is Python-only.
+## Scope and Correction
 
 Research date: 2026-08-03.
 
-Local baseline:
+UFast is a generic tool-backed modifier, not a Python change tool. Its first
+implementation used only a full-workspace snapshot and batch writer. That
+experiment was useful but did not implement the requested project map, search,
+standalone verification, or extensible router. It also measured 15.27% slower
+paired latency than XFast across the historical five-case run. Those results
+remain historical evidence for the superseded source and are not reused for
+the corrected architecture.
 
-- Codex CLI 0.144.5.
-- Python MCP SDK is not installed.
-- The repository currently has no runtime dependency manager and its benchmark
-  fixtures intentionally use the Python standard library.
-- The final corpus is the unchanged five-case XFast v3 file with SHA-256
-  d533163102f0c94ff294d555d15d2ad511782290ad31f02ba239d0821838d880.
+The corrected Phase 1 decision is an operation registry with four independent
+tools: project index, fast search, safe edit, and test runner. Language Server
+and AST/codemod backends extend that registry in later phases.
 
 ## Primary Sources
 
 - [OpenAI: Model Context Protocol](https://learn.chatgpt.com/docs/extend/mcp)
-  documents local STDIO servers, isolated Codex configuration, tool allowlists,
-  timeouts, and project or Codex-home configuration.
+  documents local STDIO servers and Codex MCP configuration.
 - [OpenAI: Build an MCP server](https://developers.openai.com/plugins/build/mcp-server)
-  recommends focused tools with explicit schemas, structured results, accurate
-  annotations, input validation, and representative invalid-input tests.
+  recommends focused tools, explicit schemas, structured results, accurate
+  annotations, validation, and representative error tests.
 - [OpenAI: Define tools](https://developers.openai.com/plugins/plan/tools)
-  recommends mapping user outcomes to coherent read and write operations and
-  rejecting tools that do not serve a documented use case.
+  recommends mapping tools to coherent user outcomes.
 - [MCP 2025-11-25 STDIO transport](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
   defines newline-delimited UTF-8 JSON-RPC over standard input and output.
 - [MCP tool specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools)
-  defines tools/list, tools/call, JSON schemas, structured content, execution
-  errors, annotations, and server-side validation requirements.
+  defines tool discovery, invocation, JSON schemas, structured content,
+  annotations, and execution errors.
 - [Official MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
-  is the preferred general SDK, but adds a runtime dependency and is in a
-  major-version transition immediately before this research date.
+  remains the preferred general SDK, but the dependency-free server is the
+  smaller reproducible choice for this repository and its isolated benchmarks.
 
-## Case Operation Map
+Local constraints at research time:
 
-| Case | Required context | Required write | Focused proof |
-| --- | --- | --- | --- |
-| Batched edit | alpha.py, beta.py, test_math_ops.py | Replace three existing Python files | Syntax, fixture lint, focused tests, verify_behavior |
-| Discovery edit | normalizers.py, registry.py, test_normalizers.py | Replace three existing Python files | Syntax, fixture lint, focused tests, verify_behavior |
-| Independent work | alpha.py, beta.py, test_alpha.py, test_beta.py | Replace four existing Python files | Syntax, fixture lint, focused tests, verify_behavior |
-| Greeting | feature.py, test_feature.py | Replace two existing Python files | Syntax, fixture lint, focused tests, verify_behavior |
-| Slugify | text_tools.py, test_text_tools.py | Replace two existing Python files | Syntax, fixture lint, focused tests, verify_behavior |
+- Codex CLI 0.144.5.
+- No installed Python MCP SDK.
+- No repository runtime dependency manager.
+- Benchmark fixtures intentionally rely on standard-library Python.
 
-The original reference/rename slice has no useful fast-path role in this
-corpus. Keeping it as the MVP would benchmark fallback behavior rather than
-UFast.
+## Prompt Research
 
-## Prompt Decision
+### Selected: thin intent modifier
 
-### Selected: thin modifier
+The active workflow first resolves endpoint, scope, authorization, and proof.
+UFast then resolves one mechanical intent and asks the registry for a backend:
 
-UFast inherits the active workflow, selects one installed namespaced route,
-and uses this bundled workspace fast path when it matches:
+1. Unknown project shape: project index.
+2. Target discovery: fast indexed search.
+3. Deterministic existing-file mutation: safe edit.
+4. Repository proof: test runner.
+5. Unsupported semantic or structural intent: immediate workflow fallback.
 
-1. Call `ufast_prepare_workspace_change` once.
-2. Produce the complete requested text changes and required proof artifacts.
-3. Call `ufast_apply_workspace_change` once.
-4. If the transaction succeeds, report its proof.
-5. If unsupported, fall back immediately.
-6. Retry only once when the tool returns an exact, local, recoverable error.
+The prompt names stable outcomes, not implementation libraries. It accepts
+exact structured proof without rerunning it, allows one evidence-specific
+invocation correction, and never turns lack of prior inspection into a fallback
+reason because index and search provide that inspection.
 
-The skill does not plan, route, or replace Smart or Execute. It does not compose
-with XFast.
+Its batching discipline matches Fast at the host boundary while moving more
+work inside each deterministic operation. Known independent searches share one
+multi-query call, all file changes share one transaction, and selected checks
+share one test-runner call whose independent commands run concurrently. Search
+can build the cache directly, so project index is not a mandatory extra round.
 
-### Rejected: self-contained UFast workflow
+Proof is selected once. V0 reuses fresh structured evidence or avoids a proof
+claim for eligible non-mutating work. V1 runs safe local focused checks
+automatically when authorized and proportionate, or asks first when proof is
+broad, slow, stateful, external, destructive, configuration-dependent, or
+requires more authority. UFast never downgrades the active workflow's proof.
 
-This duplicates XFast’s ownership of the complete execution workflow and makes
-the comparison about prompt policy rather than deterministic tools.
+### Rejected prompt directions
 
-## Tool Decision
+- A self-contained UFast workflow duplicates Smart and Execute.
+- A two-call “prepare/apply” prompt makes a particular transaction backend the
+  architecture and returns unnecessary full-workspace content.
+- Python-specific wording confuses the exercised benchmark adapter with UFast's
+  public scope.
+- A large catalog of backend-specific tools forces the model to perform routing
+  that belongs in the registry.
 
-### ufast_prepare_workspace_change
+## Tooling Research
 
-Read-only. It returns a bounded snapshot of existing editable UTF-8 workspace
-files, SHA-256 preconditions, detected verification adapters, and runtime
-timing. It skips binary data and excludes hidden agent configuration, VCS data,
-caches, dependencies, generated output, `lint_check.py`, and
-`verify_behavior.py` contents.
+### Level 1: shell commands
 
-Limits:
+Small shell tools remain useful prototypes, but aliases around search, edit, or
+test commands do not create a meaningful UFast capability. An accepted tool
+must reduce model/tool rounds, enforce a safety property, or both. Arbitrary
+shell-command execution is explicitly outside the test-runner contract.
 
-- Workspace root fixed by server configuration.
-- Any workspace whose editable text fits the bounded snapshot.
-- Existing files only.
-- At most 12 files and 128 KiB of model-visible content.
-- No symlinks, path traversal, generated caches, or hidden directories.
+### Level 2: MCP operation server — selected for Phase 1
 
-### ufast_apply_workspace_change
+The dependency-free STDIO server exposes four namespaced operations through a
+shared registry and result envelope.
 
-Write operation. It accepts complete replacement contents and the exact hashes
-returned by prepare. It validates the entire batch, writes atomically, runs
-applicable fixed adapters, and either commits the complete batch or restores
-the original files. Plain UTF-8 text is generic; Python, JSON, and TOML receive
-structural validation.
+#### `ufast_project_index`
 
-The server chooses checks; callers cannot submit arbitrary commands:
+- Builds or reuses a bounded in-process UTF-8 project map.
+- Returns paths, types, sizes, line counts, hashes, cache status, and index ID.
+- Does not return all file bodies to the model.
+- Excludes VCS data, agent configuration, dependencies, caches, build output,
+  symlinks, binaries, and protected fixture support files.
 
-- Python syntax compile for changed Python files.
-- JSON and TOML parsing before mutation.
-- The repository-local `lint_check.py` when the Python fixture adapter applies.
-- Changed Python test modules matching `test_*.py`.
-- The repository-local `verify_behavior` module for Python fixture cases.
+#### `ufast_fast_search`
 
-Results contain stable status, changed paths, check names, exit codes, bounded
-output, cold-start time, operation time, and rollback state.
+- Searches cached text using one or up to ten batched literal or
+  regular-expression queries.
+- Returns only relevant context, exact locations, and source hashes.
+- Reuses the project map and reports cache hit or rebuild behavior.
 
-### Rejected alternatives
+#### `ufast_safe_edit`
 
-- Shell aliases around search, patch, or test add names but no measured
-  capability or safety property.
-- LSP rename and reference tools do not serve the selected feature cases.
-- A generic AST engine and multi-language adapters exceed the MVP.
-- A nested LLM inside the tool duplicates reasoning cost and weakens benchmark
-  attribution.
+- Accepts complete contents or deterministic exact-text replacements.
+- Requires source hashes and rejects stale or ambiguous batches before writing.
+- Applies existing-file UTF-8 changes atomically with workspace containment.
+- Validates Python, JSON, and TOML before mutation.
+- Runs detected allowlisted checks and restores originals after check failure or
+  partial filesystem replacement.
 
-## Transport Decision
+#### `ufast_test_runner`
 
-Use a local dependency-free STDIO MCP server bundled under the UFast skill.
-Implement only initialization, ping, tools/list, and tools/call from the stable
-2025-11-25 protocol needed by Codex 0.144.5. Echo a supported client protocol
-version during initialization and test the real Codex handshake before
-freezing.
+- Detects Python, Node, Go, Rust, Maven, and Gradle repositories.
+- Selects only allowlisted, changed-language-relevant checks and runs
+  independent commands concurrently with deterministic result ordering.
+- Accepts check names but no arbitrary command input.
+- Returns bounded output, exit codes, backends, and durations.
 
-Why not the SDK in this MVP:
+The benchmark case happens to exercise the Python adapter. The public index,
+search, mutation, router, transport, and result envelopes are language neutral.
 
-- The repository currently has no runtime dependency installation path.
-- Fresh benchmark homes must not pay network or package-resolution cost.
-- The server exposes only two tools and no resources, prompts, authentication,
-  HTTP transport, tasks, or sampling.
-- A later move to the official SDK remains compatible with the same tool
-  schemas.
+### Level 3: Language Servers — Phase 2
 
-## UFast-Only Integration Decision
+Semantic reference lookup and rename should use mature language servers such as
+Pyright, JDT LS, gopls, or an available Kotlin server. Adapters will register
+`find_references` and `rename_symbol` intents only when the relevant server is
+already available or installation is separately authorized. Phase 1 must not
+approximate semantic rename with global text replacement.
 
-Benchmark isolation:
+### Level 4: AST and codemods — Phase 3
 
-- XFast keeps its existing isolated home, ignored user configuration, and only
-  the nerd-xfast skill.
-- UFast receives nerd-smart, nerd-execute, and nerd-ufast.
-- The runner writes a temporary Codex-home config only for the UFast condition.
-- That config launches the copied UFast server and fixes its workspace root.
-- The runner captures a private telemetry log before deleting the temporary
-  home.
-- Tests reject UFast runtime files, config, advertised tools, or events in the
-  XFast condition.
+Use existing codemods or language-specific AST libraries only for operations an
+LSP cannot safely perform. A universal tree mutation engine is deferred because
+language semantics, formatting preservation, and dependency cost differ by
+ecosystem. These adapters use the same registry and shared safety envelope.
 
-Production integration:
+## Router Decision
 
-- The server remains bundled with the skill.
-- Codex is the only verified UFast tool host in the first release.
-- Installation uses an explicit Codex MCP configuration step.
-- Other hosts can install the skill, but the fast path reports unavailable and
-  falls back until their integration is verified.
-- Tool names remain globally visible on Codex once configured; UFast-only
-  ownership is enforced by the nerd_ufast namespace, skill instructions, and
-  exact benchmark isolation. README wording must not claim stronger host-level
-  access control.
+The model reasons in four Phase 1 intents while the registry owns backend
+selection. The registry maps a public operation name and intent to a handler,
+backend label, schema, and MCP annotation. Later LSP and AST routes register at
+the same boundary. This keeps the prompt stable as capabilities grow and makes
+unsupported semantic intents explicit rather than silently lossy.
+
+## Transport and UFast-Only Integration
+
+Use a local dependency-free STDIO MCP server bundled inside the UFast skill. It
+implements initialization, ping, `tools/list`, and `tools/call` for the stable
+protocol surface used by Codex. No network resolution or package installation
+is required in a fresh benchmark home.
+
+Benchmark isolation has three layers:
+
+- All public names use the `ufast_` namespace.
+- Only the UFast condition receives the skill, runtime modules, and temporary
+  Codex MCP configuration.
+- Private telemetry proves route/backend use and tests reject any UFast asset,
+  config, advertisement, or event in XFast.
+
+Production installation is explicit and Codex-only for this release. Once an
+MCP server is configured, Codex can see its tools globally; UFast-only ownership
+therefore comes from namespacing and skill policy, not hidden host capabilities.
+Other hosts must fall back until their integration is verified.
+
+## Verification Corpus Decision
+
+The user reduced the corrected verification to one case, one repetition, and
+two models: Luna and Terra. The source is a byte-for-byte copy of the existing
+`xfast-v3-discovery-edit` case, including fixture, prompt, proof commands, and
+criteria.
+
+- Source: `benchmarks/cases/ufast-phase1-verification.json`
+- SHA-256: `6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791`
+- Conditions: XFast and UFast.
+- Total: four workloads and two matched pairs.
+
+This pilot verifies integration and yields a directional comparison only. It
+does not establish stable latency, statistical significance, all-language
+correctness, or a universal speed factor.
 
 ## Freeze Gates
 
-The implementation can freeze when:
+The corrected source can freeze after:
 
-- Both tool schemas have deterministic contract tests.
-- All five case shapes map to the two-tool path.
-- A real isolated Codex smoke run advertises and invokes the tools.
-- XFast materialization contains no UFast assets or configuration.
-- The prompt invokes the fast path without weakening proof or scope.
+- deterministic contracts cover all four tool schemas and routes;
+- a real STDIO session invokes index, search, safe edit, and test runner;
+- path, hash, ambiguity, atomicity, rollback, and command-allowlist failures are
+  covered;
+- installation copies every runtime module and remains idempotent;
+- UFast benchmark materialization contains the runtime and MCP config while
+  XFast contains neither;
+- the complete repository suite passes;
+- the prompt invokes project context plus safe edit on the selected case.
 
-No critical MVP design question remains unresolved.
+The final source hashes, accepted result directories, scores, and directional
+measurements are recorded here only after the corrected four-workload run is
+complete.
 
-## Calibration and Freeze Record
+## Corrected Source Freeze
 
-The public scope was corrected during calibration: UFast is generic, while the
-Python corpus exercises only one verification adapter. The Python-specific
-tool names and prompt wording were discarded before final evaluation.
-
-Calibration history:
-
-1. `20260803T034747Z-4fba672-gpt-5.6-luna-high` proved that Codex could call
-   both MCP operations, but private telemetry was absent because the MCP child
-   did not inherit the intended variables. The runner was changed to pass the
-   workspace and log paths explicitly in the isolated MCP configuration.
-2. `20260803T035029Z-4fba672-gpt-5.6-luna-high` proved the corrected telemetry
-   and XFast isolation, but was superseded when the public contract was
-   corrected from Python-only to generic.
-3. `20260803T035820Z-4fba672-gpt-5.6-luna-high` is the accepted generic-route
-   calibration. XFast and UFast both exited zero and passed the same three
-   proof commands. UFast recorded
-   `ufast_prepare_workspace_change:ready` and
-   `ufast_apply_workspace_change:applied`; XFast recorded no UFast runtime,
-   configuration, or event. Calibration latency was 45.1855 seconds for XFast
-   and 47.4440 seconds for UFast, so no favorable latency assumption was used
-   to justify the final experiment.
-
-The first attempted Luna evaluation,
-`20260803T040050Z-4fba672-gpt-5.6-luna-high`, produced ten valid workloads but
-zero judge tasks. The shared scorer still resolved the `xfast` comparison to
-the historical Fast-versus-XFast conditions instead of the two conditions in
-the active config. That evidence was preserved but excluded. The scorer now
-derives each pair from the frozen config, its regression test creates all five
-UFast-versus-XFast judge tasks, and scorer source is part of provenance.
-
-The next Luna result,
-`20260803T041215Z-4fba672-gpt-5.6-luna-high`, passed all ten workload gates,
-created five valid blinded judgments, and produced ten passing scores. The
-following Terra result,
-`20260803T042242Z-4fba672-gpt-5.6-terra-high`, also passed all functional and
-isolation gates, but only three of five UFast runs selected the installed tool
-route. On the other two supported cases, the model incorrectly treated lack of
-prior repository inspection and a preferred red-green sequence as reasons to
-fall back. Both results were excluded together to prevent mixed-source
-evidence. The generic capability prompt now defines prepare as the eligibility
-inspection and distinguishes those situations from real disqualifiers.
-Targeted Terra routing calibration
-`20260803T043327Z-4fba672-gpt-5.6-terra-routing-high` then reran the two
-affected case shapes. Both runs exited zero, passed every proof command, and
-recorded `prepare:ready` followed by `apply:applied`.
-
-After those corrections, the complete 202-test deterministic suite passed and
-the restarted final evaluation source was frozen at:
+The 212-test staged-tree suite, skill validator, Python compilation, and diff
+checks passed before live evaluation. The corrected benchmark source is frozen
+at:
 
 | Source | SHA-256 |
 | --- | --- |
-| Case corpus | `d533163102f0c94ff294d555d15d2ad511782290ad31f02ba239d0821838d880` |
-| UFast skill | `ea81bd7f63c0e7544b7e53dcde1e052474a9ca56a2416adb7508681e1cdd5737` |
-| UFast core | `a775850a573b2e9b6040392366804020d024804fa3aaec21d005109f9af40e7e` |
-| UFast server | `42a5d615718dcc0f11cc45ad7924851c17ca8b5b5047e8480d67c553da019882` |
-| Benchmark runner | `5f19bfd20fd1d475b5feccfdecc10e82bd8ea6a96d3be84733f31cae38ffe538` |
+| Case corpus | `6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791` |
+| XFast skill | `a3657d201205571d045acb0249be74e11eb66f2d211fe81aa86ff0fb7426c0f3` |
+| UFast skill | `3b607171572ddb425279145a899a61972d8af0f3a54a008a4bfeff3e798cd216` |
+| UFast core | `5386cf18786a320d8e3c93eb8489358bdcac8941fcc9740ac5e9fa9e4fd545c9` |
+| UFast index | `310ea272e50086865dbd10911a5e78bdffc0c96de65be7011a6ddda13666dd76` |
+| UFast registry | `81f7cd62eae20de1fcf901acb94ce7787c05ab08dd063054b8c5e870098e724e` |
+| UFast verifier | `afbbf5ecfe11a89169b062cc5789f70517e907227d3f34f988185e3e41166ea3` |
+| UFast server | `57cf069818250fa5c22fae471cb0134bafd39f55c6a7c55fb737bd58fee8d02f` |
+| Benchmark runner | `e910818e8cb73ae2bd2a7fce1a3a95993854ba8188318b9a7270859fe4232d0b` |
 | Benchmark materializer | `92659940ca024eb33fb8bbd3116c498beb0d0ca33a0cfbcf270d37a83f94660c` |
 | Benchmark adapter | `e95989490f0b75513e8432f766e7897a6f43061736f8a768fc3422e51cb0685a` |
 | Benchmark scorer | `5afaa3d5bd90ddfe48811a37f17c993d553d57f54d3b82c1a6bd5170bbed4ba7` |
-| UFast reporter | `8468734d6047144fe9545ecb7b39a33c8deaff0df80836c8ab299eb53deaa826` |
+| UFast reporter | `a781de87b510a4db7f6f5a5047244ed6507e4378408767ecec84377494114208` |
 
-The final 30-run matrix must reject any result whose manifest differs from
-these hashes or whose case corpus differs from the original baseline.
-
-## Final Evaluation Record
-
-The accepted result directories are:
-
-- Luna: `20260803T043454Z-4fba672-gpt-5.6-luna-high`
-- Terra: `20260803T044648Z-4fba672-gpt-5.6-terra-high`
-- Sol: `20260803T045454Z-4fba672-gpt-5.6-sol-high`
-
-Together they contain 30 fresh workloads, 15 matched pairs, 15 complete
-blinded judgments, and 30 valid scores. Both conditions passed every run with
-zero hard-gate failures. XFast contained no UFast runtime, configuration, or
-tool event. UFast selected its tool route in all 15 runs, applied 14
-transactions, and completed one honest fallback after hash-precondition
-rejection.
-
-The combined directional result was unfavorable to UFast: 95.33% mean score
-versus 96.67% for XFast, 46.40 seconds versus 41.83 seconds median latency,
-and 2.75% more paired-median output tokens. The paired speed calculation
-reports UFast as 15.27% slower. Median UFast cold start was 25 ms and median
-tool-operation time was 637 ms. These five Python cases and one repetition per
-model do not establish universal accuracy or latency behavior for the generic
-modifier.
+The accepted Luna and Terra result directories and their measured values are
+appended after judging and scoring succeeds.

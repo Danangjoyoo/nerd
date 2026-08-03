@@ -77,6 +77,9 @@ class InstallScriptTests(unittest.TestCase):
         )
         self.assertTrue(all(result.returncode == 0 for result in results))
         self.assertIn(".nerd/ufast/ufast_core.py", files)
+        self.assertIn(".nerd/ufast/ufast_index.py", files)
+        self.assertIn(".nerd/ufast/ufast_registry.py", files)
+        self.assertIn(".nerd/ufast/ufast_verify.py", files)
         self.assertIn(".nerd/ufast/ufast_mcp.py", files)
         config = files[".codex/config.toml"]
         self.assertTrue(config.startswith(existing))

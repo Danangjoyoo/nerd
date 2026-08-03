@@ -1,6 +1,6 @@
 ---
 name: nerd-ufast
-description: Generic tool-backed ultra-fast execution for supported operations. Use only when explicitly invoked and a configured Nerd UFast tool can perform the requested work deterministically with bounded input, structured results, and safe fallback.
+description: Generic tool-backed ultra-fast execution for supported operations. Use only when explicitly invoked and a configured tool supports deterministic bounded work with safe fallback.
 ---
 
 # Nerd UFast
@@ -19,31 +19,70 @@ Never combine `nerd-ufast` with `nerd-xfast`. If both are requested, ask which s
 
 ## Composition
 
-Activate only when the user explicitly invokes Nerd UFast. Apply it as a global modifier after endpoint, scope, authorization, and active workflow are resolved. It never replaces or restarts the active workflow. Preserve its safety boundaries and completion standard.
+Activate only when the user explicitly invokes Nerd UFast, after resolving endpoint, scope, authorization, and active workflow. It never replaces or restarts the active workflow or its completion standard.
+
+XFast batches native text or patch operations and deliberately narrows reasoning and proof. UFast moves mechanical intelligence into deterministic registry tools while preserving the active workflow's accuracy and proof contract. Tools handle how; the model decides what.
 
 ## Capability Gate
 
-Make one capability decision. For a workspace edit without a known disqualifier, prepare is the eligibility inspection. No prior inspection is not an unknown or ambiguous condition. A red-green sequence alone is not a fallback reason; include proof artifacts in the batch.
+Resolve one intent; the registry owns backend selection:
 
-Select a configured `nerd_ufast` tool route only when its schema directly supports the requested operation. Otherwise fall back to the active workflow.
+- map or inspect a project: `ufast_project_index`;
+- locate relevant text: `ufast_fast_search`;
+- perform a deterministic existing-file change: `ufast_safe_edit`;
+- run detected repository proof: `ufast_test_runner`.
 
-The bundled workspace-change route applies only when the request:
+Use a route only when its schema supports the outcome. Semantic rename,
+reference lookup, and AST mutation require their future registered adapters;
+do not approximate them with unsafe text replacement.
+
+The bundled safe-edit backend applies only when the request:
 
 - edits existing UTF-8 text files only;
-- fits the returned 12-file and 128 KiB limits;
+- fits its 12-file and 128 KiB mutation limits;
 - needs no symlink, hidden, cache, generated, or support-file mutation; and
-- can be expressed as complete file contents in one atomic batch.
+- can be expressed as exact replacements or complete contents.
 
-Fall back immediately when the route is unavailable, the request has a known disqualifier, or prepare reports an unsupported, ambiguous, or unsafe condition.
+Lack of prior inspection is not a fallback reason: index or search first.
+Fall back when no route is installed or a result is unsupported, ambiguous,
+stale, unsafe, or unavailable.
 
 ## Fast Path
 
-1. Call prepare exactly once through `ufast_prepare_workspace_change`. Do not independently reread files returned by it.
-2. Use that snapshot to produce the complete requested change and any required proof artifacts in one reasoning pass.
-3. Call apply exactly once through `ufast_apply_workspace_change` with every changed path, its returned SHA-256, and complete content.
-4. Accept `applied` only when every available fixed adapter passes. The active workflow still owns any remaining proof its completion claim requires.
+Use the smallest registered route. Search directly when a known query can build
+or reuse the index; call project index only when project shape is unknown. A
+registered LSP, codemod, or AST route outranks text editing for its semantic
+intent. If none is installed, fall back rather than emulate it.
 
-Allow one evidence-driven retry only when the first result identifies one exact recoverable invocation error. For `unsupported`, `stale`, `rejected`, `verification_failed`, or `failed`, do not improvise tool calls; fall back immediately with the returned evidence. Never claim a mutation after rollback.
+Batch independent tool calls with the platform's native interface. Put up to
+ten independent searches in one `queries` call, all known file mutations in one
+safe-edit batch, and all selected checks in one test-runner call. The runner
+executes independent checks concurrently. Keep adaptive dependencies sequential
+when context or hashes determine the edit.
+
+Prefer exact replacements in one atomic safe-edit batch; use complete contents
+only when boundaries are not deterministic. Never submit arbitrary commands or
+return unchanged file bodies. Accept `applied` only when the transaction
+succeeded and every returned check passed.
+
+## Proof Ladder
+
+Choose **V0** or **V1** once from obvious outcome, risk, cost, tool availability,
+and the active workflow's proof contract. Do not investigate merely to choose.
+
+- **V0:** Reuse fresh structured tool proof, or make no verification claim for
+  non-mutating work without a proportionate check. Report `Not verified` when
+  completion would otherwise imply proof.
+- **V1 automatic:** Run safe, local, focused detected checks when already
+  authorized and proportionate; use safe edit or one test-runner call.
+- **V1 ask first:** Ask before broad, slow, stateful, external, destructive, or
+  configuration-dependent proof, or proof needing more authority.
+
+A mutation never lowers the active workflow's required proof. When no adapter
+covers the outcome, perform its residual proof or fall back. The workflow must not repeat exact proof already returned.
+
+Allow one retry only when evidence identifies one exact recoverable invocation
+error. Otherwise fall back with the result. Never claim mutation after rollback.
 
 ## Finish
 

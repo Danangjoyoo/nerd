@@ -19,79 +19,112 @@ if str(SCRIPT_DIRECTORY) not in sys.path:
 
 from ufast_core import (  # noqa: E402
     VERSION,
-    apply_workspace_change,
-    prepare_workspace_change,
+    safe_edit,
 )
+from ufast_index import ProjectIndex  # noqa: E402
+from ufast_registry import phase_one_registry  # noqa: E402
+from ufast_verify import run_test_plan  # noqa: E402
 
 
 COLD_START_MS: int | None = None
 PROTOCOL_VERSION = "2025-11-25"
 
 
-TOOLS: list[dict[str, Any]] = [
-    {
-        "name": "ufast_prepare_workspace_change",
-        "title": "Prepare a bounded workspace change",
-        "description": (
-            "Read bounded editable UTF-8 workspace files once, capture SHA-256 "
-            "preconditions, and report available verification adapters."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {},
-            "additionalProperties": False,
-        },
-        "annotations": {
-            "readOnlyHint": True,
-            "destructiveHint": False,
-            "idempotentHint": True,
-            "openWorldHint": False,
-        },
-    },
-    {
-        "name": "ufast_apply_workspace_change",
-        "title": "Apply and verify a bounded workspace change",
-        "description": (
-            "Atomically replace existing UTF-8 text files when their hashes match, "
-            "run available fixed verification adapters, and restore originals on failure."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "changes": {
-                    "type": "array",
-                    "minItems": 1,
-                    "maxItems": 12,
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "path": {"type": "string"},
-                            "expected_sha256": {
-                                "type": "string",
-                                "pattern": "^[0-9a-f]{64}$",
-                            },
-                            "content": {"type": "string"},
-                        },
-                        "required": ["path", "expected_sha256", "content"],
-                        "additionalProperties": False,
-                    },
-                }
-            },
-            "required": ["changes"],
-            "additionalProperties": False,
-        },
-        "annotations": {
-            "readOnlyHint": False,
-            "destructiveHint": False,
-            "idempotentHint": False,
-            "openWorldHint": False,
-        },
-    },
-]
-
-
 def _workspace() -> Path | str:
     return os.environ.get("NERD_UFAST_WORKSPACE", "")
+
+
+PROJECT_INDEX = ProjectIndex(_workspace())
+
+
+def _project_index(arguments: dict[str, Any]) -> dict[str, Any]:
+    if not set(arguments) <= {"refresh", "max_entries"}:
+        return {
+            "status": "rejected",
+            "runtime_version": VERSION,
+            "operation_ms": 0,
+            "reason": "Unexpected project-index argument",
+        }
+    return PROJECT_INDEX.project_index(
+        refresh=arguments.get("refresh", False),
+        max_entries=arguments.get("max_entries", 200),
+    )
+
+
+def _fast_search(arguments: dict[str, Any]) -> dict[str, Any]:
+    allowed = {
+        "query",
+        "queries",
+        "mode",
+        "case_sensitive",
+        "paths",
+        "max_results",
+        "context_lines",
+    }
+    if not set(arguments) <= allowed:
+        return {
+            "status": "rejected",
+            "runtime_version": VERSION,
+            "operation_ms": 0,
+            "reason": "Unexpected fast-search argument",
+            "matches": [],
+        }
+    return PROJECT_INDEX.fast_search(
+        arguments.get("query"),
+        queries=arguments.get("queries"),
+        mode=arguments.get("mode", "literal"),
+        case_sensitive=arguments.get("case_sensitive", False),
+        paths=arguments.get("paths"),
+        max_results=arguments.get("max_results", 20),
+        context_lines=arguments.get("context_lines", 2),
+    )
+
+
+def _safe_edit(arguments: dict[str, Any]) -> dict[str, Any]:
+    if not set(arguments) <= {"changes", "verify", "checks"}:
+        return {
+            "status": "rejected",
+            "runtime_version": VERSION,
+            "operation_ms": 0,
+            "reason": "Unexpected safe-edit argument",
+            "changed_files": [],
+            "checks": [],
+            "rolled_back": False,
+        }
+    result = safe_edit(
+        _workspace(),
+        arguments.get("changes"),
+        verify=arguments.get("verify", True),
+        selected_checks=arguments.get("checks"),
+    )
+    if result.get("status") == "applied":
+        PROJECT_INDEX.project_index(refresh=True)
+    return result
+
+
+def _test_runner(arguments: dict[str, Any]) -> dict[str, Any]:
+    if not set(arguments) <= {"changed_paths", "checks"}:
+        return {
+            "status": "rejected",
+            "runtime_version": VERSION,
+            "operation_ms": 0,
+            "reason": "Unexpected test-runner argument",
+            "checks": [],
+        }
+    return run_test_plan(
+        _workspace(),
+        arguments.get("changed_paths"),
+        arguments.get("checks"),
+    )
+
+
+REGISTRY = phase_one_registry(
+    project_index=_project_index,
+    fast_search=_fast_search,
+    safe_edit=_safe_edit,
+    test_runner=_test_runner,
+)
+TOOLS = REGISTRY.tool_definitions()
 
 
 def _record_telemetry(tool: str, result: dict[str, Any]) -> None:
@@ -114,6 +147,9 @@ def _record_telemetry(tool: str, result: dict[str, Any]) -> None:
             if isinstance(check, dict)
         ],
         "rolled_back": result.get("rolled_back", False),
+        "route": result.get("route"),
+        "backend": result.get("backend"),
+        "cache_status": result.get("cache_status"),
     }
     if isinstance(result.get("reason"), str):
         event["reason"] = result["reason"][:500]
@@ -127,27 +163,16 @@ def _record_telemetry(tool: str, result: dict[str, Any]) -> None:
 
 
 def _tool_result(name: Any, arguments: Any) -> dict[str, Any]:
-    if not isinstance(arguments, dict):
-        result = {
-            "status": "rejected",
-            "runtime_version": VERSION,
-            "operation_ms": 0,
-            "reason": "Tool arguments must be an object",
-        }
-    elif name == "ufast_prepare_workspace_change":
-        result = prepare_workspace_change(_workspace())
-    elif name == "ufast_apply_workspace_change":
-        result = apply_workspace_change(_workspace(), arguments.get("changes"))
-    else:
-        result = {
-            "status": "rejected",
-            "runtime_version": VERSION,
-            "operation_ms": 0,
-            "reason": f"Unknown tool: {name!r}",
-        }
+    result = REGISTRY.dispatch(name, arguments)
     result["cold_start_ms"] = COLD_START_MS if COLD_START_MS is not None else 0
     _record_telemetry(str(name), result)
-    is_error = result.get("status") not in {"ready", "applied"}
+    is_error = result.get("status") not in {
+        "ready",
+        "matched",
+        "no_match",
+        "applied",
+        "passed",
+    }
     return {
         "content": [
             {
@@ -183,8 +208,9 @@ def _response(request: dict[str, Any]) -> dict[str, Any] | None:
             "capabilities": {"tools": {"listChanged": False}},
             "serverInfo": {"name": "nerd-ufast", "version": VERSION},
             "instructions": (
-                "Prepare once, submit one complete hash-guarded Python batch, "
-                "and use the normal agent workflow when the operation is unsupported."
+                "Route project mapping, indexed search, safe UTF-8 edits, and "
+                "allowlisted repository checks through the registered tools; "
+                "use the active workflow when an intent is unsupported."
             ),
         }
     elif method == "ping":

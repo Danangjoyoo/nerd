@@ -11,25 +11,24 @@ from statistics import mean, median
 
 UFAST_START = "<!-- UFAST_BENCHMARK:START -->"
 UFAST_END = "<!-- UFAST_BENCHMARK:END -->"
-CASE_FILE = "benchmarks/pilots/xfast-v3-five-cases/cases.json"
-CASE_SHA256 = "d533163102f0c94ff294d555d15d2ad511782290ad31f02ba239d0821838d880"
+CASE_FILE = "benchmarks/cases/ufast-phase1-verification.json"
+CASE_SHA256 = "6f6ba4ea8c190189428deb9e411b63acd9be3026f53cb954614159002e456791"
 CASE_IDS = (
-    "xfast-v3-batched-edit",
     "xfast-v3-discovery-edit",
-    "xfast-v3-independent-work",
-    "xfast-v3-greeting",
-    "xfast-v3-slugify",
 )
 EXPECTED_CONDITIONS = ("nerd-xfast", "nerd-ufast")
 EXPECTED_TARGETS = {
     "gpt-5.6-luna-high": ("Luna", "gpt-5.6-luna"),
     "gpt-5.6-terra-high": ("Terra", "gpt-5.6-terra"),
-    "gpt-5.6-sol-high": ("Sol", "gpt-5.6-sol"),
 }
 SOURCE_HASH_KEYS = (
     "case_corpus",
+    "xfast_skill",
     "ufast_skill",
     "ufast_core",
+    "ufast_index",
+    "ufast_registry",
+    "ufast_verify",
     "ufast_server",
     "benchmark_runner",
     "benchmark_materialize",
@@ -38,17 +37,23 @@ SOURCE_HASH_KEYS = (
     "ufast_report",
 )
 TOOL_NAMES = {
-    "ufast_prepare_workspace_change",
-    "ufast_apply_workspace_change",
+    "ufast_project_index",
+    "ufast_fast_search",
+    "ufast_safe_edit",
+    "ufast_test_runner",
 }
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def current_source_hashes() -> dict[str, str]:
     paths = {
-        "case_corpus": ROOT / "benchmarks" / "pilots" / "xfast-v3-five-cases" / "cases.json",
+        "case_corpus": ROOT / "benchmarks" / "cases" / "ufast-phase1-verification.json",
+        "xfast_skill": ROOT / "skills" / "nerd-xfast" / "SKILL.md",
         "ufast_skill": ROOT / "skills" / "nerd-ufast" / "SKILL.md",
         "ufast_core": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_core.py",
+        "ufast_index": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_index.py",
+        "ufast_registry": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_registry.py",
+        "ufast_verify": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_verify.py",
         "ufast_server": ROOT / "skills" / "nerd-ufast" / "scripts" / "ufast_mcp.py",
         "benchmark_runner": ROOT / "benchmarks" / "nerdbench" / "runner.py",
         "benchmark_materialize": ROOT / "benchmarks" / "nerdbench" / "materialize.py",
@@ -139,9 +144,16 @@ def _validate_isolation(item: dict) -> None:
             raise ValueError(f"UFast runtime/config isolation failed: {run_id}")
         if not calls:
             raise ValueError(f"UFast run has no selected tool call: {run_id}")
-        if len(calls) > 3:
+        if len(calls) > 6:
             raise ValueError(f"UFast run exceeds the tool call policy: {run_id}")
         calls = [_validate_tool_call(call, run_id) for call in calls]
+        if not any(
+            call.get("tool") in {"ufast_project_index", "ufast_fast_search"}
+            for call in calls
+        ):
+            raise ValueError(f"UFast run has no project context route: {run_id}")
+        if not any(call.get("tool") == "ufast_safe_edit" for call in calls):
+            raise ValueError(f"UFast run has no safe-edit route: {run_id}")
         if normalized_events != calls:
             raise ValueError(f"UFast normalized tool events disagree: {run_id}")
     else:
@@ -178,7 +190,7 @@ def _validate_result(path: Path) -> tuple[str, dict, list[dict], dict[str, dict]
         or config.get("conditions") != {"xfast": list(EXPECTED_CONDITIONS)}
         or config.get("repetitions") != 1
         or config.get("parallelism") != 1
-        or manifest.get("planned_runs") != 10
+        or manifest.get("planned_runs") != 2
         or manifest.get("smoke") is not False
     ):
         raise ValueError(f"UFast manifest does not match the frozen matrix: {label}")
@@ -189,8 +201,8 @@ def _validate_result(path: Path) -> tuple[str, dict, list[dict], dict[str, dict]
     raw = _read_jsonl(path / "raw.jsonl")
     scores = _index(_read_jsonl(path / "scores.jsonl"), "score")
     raw_index = _index(raw, "raw")
-    if len(raw) != 10 or len(scores) != 10 or set(raw_index) != set(scores):
-        raise ValueError(f"UFast evidence must contain ten unique matched runs: {label}")
+    if len(raw) != 2 or len(scores) != 2 or set(raw_index) != set(scores):
+        raise ValueError(f"UFast evidence must contain two unique matched runs: {label}")
     identities = {
         (item.get("case_id"), item.get("repetition"), item.get("condition"))
         for item in raw
@@ -215,6 +227,8 @@ def _validate_result(path: Path) -> tuple[str, dict, list[dict], dict[str, dict]
             or item.get("target_id") != target_id
             or item.get("reasoning_effort") != "high"
             or score.get("judge_valid") is not True
+            or score.get("passed") is not True
+            or score.get("hard_gate_failures") != []
             or not isinstance(score.get("score"), (int, float))
             or isinstance(score.get("score"), bool)
         ):
@@ -262,7 +276,7 @@ def _tool_metrics(records: list[dict]) -> dict:
     ]
     applied = [
         any(
-            call.get("tool") == "ufast_apply_workspace_change"
+            call.get("tool") == "ufast_safe_edit"
             and call.get("status") == "applied"
             for call in calls
         )
@@ -275,6 +289,18 @@ def _tool_metrics(records: list[dict]) -> dict:
         "fallback_runs": sum(not value for value in applied),
         "median_cold_start_ms": round(median(cold_starts), 4),
         "median_operation_ms": round(median(operation_totals), 4),
+        "project_index_runs": sum(
+            any(call.get("tool") == "ufast_project_index" for call in calls)
+            for calls in calls_by_run
+        ),
+        "fast_search_runs": sum(
+            any(call.get("tool") == "ufast_fast_search" for call in calls)
+            for calls in calls_by_run
+        ),
+        "test_runner_runs": sum(
+            any(call.get("tool") == "ufast_test_runner" for call in calls)
+            for calls in calls_by_run
+        ),
     }
 
 
@@ -329,8 +355,8 @@ def _metrics(records: list[dict], scores: dict[str, dict]) -> dict:
 
 
 def summarize_ufast(result_dirs: list[Path]) -> dict:
-    if len(result_dirs) != 3:
-        raise ValueError("UFast summary requires exactly three result directories")
+    if len(result_dirs) != 2:
+        raise ValueError("UFast summary requires exactly two result directories")
     models = {}
     manifests = {}
     hashes = None
@@ -348,10 +374,10 @@ def summarize_ufast(result_dirs: list[Path]) -> dict:
         manifests[label] = manifest
         all_raw.extend(raw)
         all_scores.update(scores)
-    if set(models) != {"Luna", "Terra", "Sol"}:
-        raise ValueError("UFast summary requires Luna, Terra, and Sol")
+    if set(models) != {"Luna", "Terra"}:
+        raise ValueError("UFast summary requires Luna and Terra")
     assert hashes is not None
-    ordered = ("Luna", "Terra", "Sol")
+    ordered = ("Luna", "Terra")
     return {
         "schema_version": 1,
         "comparison": "nerd-ufast-vs-nerd-xfast",
@@ -378,16 +404,16 @@ def summarize_ufast(result_dirs: list[Path]) -> dict:
             "same_model_and_effort_within_pairs": True,
             "reasoning_effort": "high",
             "verified_host": "Codex",
-            "models": 3,
-            "cases": 5,
+            "models": 2,
+            "cases": 1,
             "repetitions_per_model": 1,
-            "workload_runs": 30,
-            "pairs": 15,
+            "workload_runs": 4,
+            "pairs": 2,
             "case_file": CASE_FILE,
             "case_sha256": CASE_SHA256,
         },
         "limitations": [
-            "five Python coding cases",
+            "one Python discovery/edit verification case",
             "one repetition per model",
             "directional evidence, not a universal latency claim",
             "the local MCP fast path is verified only on Codex",
@@ -443,7 +469,7 @@ def _tokens(value: float | None) -> str:
 def render_ufast_readme(summary: dict) -> str:
     rows = []
     for label, metrics in [
-        *((name, summary["models"][name]) for name in ("Luna", "Terra", "Sol")),
+        *((name, summary["models"][name]) for name in ("Luna", "Terra")),
         ("Combined", summary["aggregate"]),
     ]:
         rows.append(
@@ -462,21 +488,30 @@ def render_ufast_readme(summary: dict) -> str:
     aggregate = summary["aggregate"]
     tools = aggregate["ufast_tools"]
     artifacts = summary["artifacts"]
+    fallback_label = (
+        "fallback run" if tools["fallback_runs"] == 1 else "fallback runs"
+    )
+    speed_value = aggregate["delta"]["speed_percent"]
+    speed_sentence = (
+        "UFast and XFast were equal within displayed latency precision."
+        if round(speed_value, 2) == 0
+        else f"UFast was {_speed(speed_value)} than XFast."
+    )
     return "\n".join(
         [
-            "## UFast: deterministic tools for supported changes",
+            "## UFast: routed deterministic project tools",
             "",
-            "Nerd UFast is a generic tool-backed modifier that keeps the active workflow's scope and correctness contract. Its first bundled route moves a supported UTF-8 workspace change into one hash-guarded, atomic transaction with verification adapters and rollback; unsupported operations fall back to the active workflow.",
+            "Nerd UFast is a generic tool-backed modifier with an operation registry. Phase 1 batches indexed queries, atomic multi-file edits, and concurrent allowlisted checks. V0 reuses fresh structured evidence; V1 runs safe local proof automatically or asks before broader proof. Language-specific LSP and AST backends can register later without changing the public routing contract.",
             "",
-            f"Across this directional pilot, UFast was {_speed(aggregate['delta']['speed_percent'])} than XFast and used {_token_change(aggregate['delta']['token_change_percent'])} output tokens.",
+            f"Across this directional pilot, {speed_sentence} UFast used {_token_change(aggregate['delta']['token_change_percent'])} output tokens.",
             "",
             "| Model | XFast accuracy | UFast accuracy | Accuracy delta | XFast latency | UFast latency | Speed | XFast tokens | UFast tokens | Token change | Tool hit | Fallbacks |",
             "| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | ---: | ---: |",
             *rows,
             "",
-            f"The UFast tool path had a {tools['hit_rate_percent']:.2f}% hit rate, {tools['fallback_runs']} fallback runs, {tools['median_cold_start_ms']:.2f} ms median cold start, and {tools['median_operation_ms']:.2f} ms median tool-operation time per run.",
+            f"The UFast route had a {tools['hit_rate_percent']:.2f}% tool hit rate, {tools['fallback_runs']} {fallback_label}, {tools['project_index_runs']} project-index runs, {tools['fast_search_runs']} fast-search runs, {tools['test_runner_runs']} standalone test-runner runs, {tools['median_cold_start_ms']:.2f} ms median cold start, and {tools['median_operation_ms']:.2f} ms median total tool-operation time per run.",
             "",
-            "Method: five Python coding cases, one repetition, and three models at `high` reasoning effort produced 30 fresh Codex processes and 15 matched pairs. The cases exercise one adapter, not UFast's generic scope. The exact prompts and proof commands are shared by both arms. One repetition is directional evidence; it does not establish a universal speedup. Codex is the only verified UFast tool host in this release; other hosts install the skill but fall back until their tool integration is verified.",
+            "Method: one Python discovery/edit verification case, one repetition, and Luna plus Terra at `high` reasoning effort produced 4 fresh Codex processes and 2 matched pairs. The case exercises one adapter, not UFast's generic scope. The exact prompt and proof commands are shared by both arms. This tiny verification does not establish a universal speedup. Codex is the only verified UFast tool host in this release; other hosts install the skill but fall back until their tool integration is verified.",
             "",
             f"[Cases]({artifacts['cases']}) · [Pilot configs]({artifacts['config_dir']}) · [Result summary]({artifacts['result_summary']})",
         ]
