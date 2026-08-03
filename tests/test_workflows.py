@@ -13,6 +13,7 @@ SKILLS = (
     "nerd-silent",
     "nerd-fast",
     "nerd-xfast",
+    "nerd-ufast",
 )
 
 
@@ -25,6 +26,7 @@ class WorkflowContractTests(unittest.TestCase):
         body = CI.read_text(encoding="utf-8")
         for command in (
             "python3 -m compileall -q scripts benchmarks tests",
+            "skills/nerd-ufast/scripts",
             "python3 -m unittest discover -s tests -v",
             "python3 scripts/validate_skills.py",
             "npx skills add . --list",
@@ -65,10 +67,12 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertIn(fragment, body)
         for skill in SKILLS:
             self.assertIn(skill, body)
+        for runtime in ("mcp_server.py", "ufast_tools.py"):
+            self.assertIn(f"skills/nerd-ufast/scripts/{runtime}", body)
 
-    def test_release_counts_exactly_seven_public_skills(self):
+    def test_release_counts_exactly_eight_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_SKILL_COUNT=7", body)
+        self.assertIn("EXPECTED_SKILL_COUNT=8", body)
         self.assertIn("grep -E", body)
         self.assertIn("wc -l", body)
 

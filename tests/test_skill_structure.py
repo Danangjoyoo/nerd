@@ -25,6 +25,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-silent",
                 "nerd-fast",
                 "nerd-xfast",
+                "nerd-ufast",
             ),
         )
 
@@ -56,14 +57,20 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-silent": (),
                 "nerd-fast": (),
                 "nerd-xfast": (),
+                "nerd-ufast": (),
             },
         )
         self.assertFalse((ROOT / "skills" / "nerd-execute" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-xfast" / "references").exists())
+        self.assertFalse((ROOT / "skills" / "nerd-ufast" / "references").exists())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-smart"], ("prompt_hook.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
+        self.assertEqual(
+            REQUIRED_SCRIPTS["nerd-ufast"],
+            ("mcp_server.py", "ufast_tools.py"),
+        )
 
     def test_smart_reference_files_match_registry(self):
         references = ROOT / "skills" / "nerd-smart" / "references"

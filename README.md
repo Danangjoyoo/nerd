@@ -24,6 +24,8 @@ cd nerd
 
 The helper preserves existing hook configuration and is safe to run again. Codex asks you to review and trust newly installed command hooks once through `/hooks` before they execute.
 
+It also installs and registers the dependency-free `nerd-ufast-tools` MCP server for the selected agents. Start a new Codex, Claude, or Cursor session to use `inspect` and `apply_verify`; the client starts the server on demand, so no daemon stays running. A skill-only install still works through UFast's bounded fallback tools.
+
 ## Skills
 
 | Skill | Description |
@@ -35,6 +37,7 @@ The helper preserves existing hook configuration and is safe to run again. Codex
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
 | `nerd-xfast` | Produces the smallest sufficient answer or authorized edit through one immutable action chain, immediate output, and bounded end proof. |
+| `nerd-ufast` | Executes fully resolved, low-risk deterministic changes through one bounded mutation and focused proof. |
 
 Smart routes one primary specialty; Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 

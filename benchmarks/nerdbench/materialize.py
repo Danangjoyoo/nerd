@@ -34,6 +34,7 @@ LOCAL_CONDITIONS = {
     "nerd-fast-only": ("nerd-fast",),
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
+    "nerd-ufast": ("nerd-ufast",),
 }
 
 UPSTREAM_CONDITIONS = {

@@ -21,6 +21,7 @@ SKILLS = (
     "nerd-silent",
     "nerd-fast",
     "nerd-xfast",
+    "nerd-ufast",
 )
 START = "<!-- BENCHMARK_RESULTS:START -->"
 END = "<!-- BENCHMARK_RESULTS:END -->"
@@ -88,6 +89,10 @@ class ReadmeContractTests(unittest.TestCase):
         for target in ("claude", "codex", "cursor", "all"):
             self.assertIn(f"./scripts/install.sh {target}", body)
         self.assertIn("automatic Smart hook", body)
+        self.assertIn("nerd-ufast-tools", body)
+        self.assertIn("inspect", body)
+        self.assertIn("apply_verify", body)
+        self.assertIn("no daemon stays running", body)
         self.assertNotIn("npx skills add danangjoyoo/nerd", body)
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())

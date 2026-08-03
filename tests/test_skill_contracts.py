@@ -262,7 +262,7 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_template_artifacts_follow_explicit_write_requests_or_offer_persistence(self):
+    def test_template_artifacts_persist_plans_by_default_without_asking(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
@@ -274,15 +274,19 @@ class SmartContractTests(unittest.TestCase):
             (
                 "always show the filled artifact in the session",
                 "reference files are scaffolds, not output files",
-                "explicitly asks to write or save to a named directory or Markdown path",
-                "write it in the same action",
-                "descriptive non-overwriting `.md` name",
-                "report the path",
-                "do not ask again",
-                "Otherwise keep it session-only",
-                '"Would you like me to write this to a Markdown file?"',
-                "A later yes authorizes only persistence",
-                "ask for a path if none was given",
+                "For every Plan output",
+                "write the filled plan to Markdown before completing the response",
+                "explicit user-provided Markdown path or directory",
+                "create and use `~/.agent/tmp/` as the default plan directory",
+                "descriptive non-overwriting `.md` filename",
+                "report its absolute path",
+                "never ask whether or where to write the Plan",
+                "session-only or no-file instruction disables this default persistence",
+                "For non-Plan template output",
+                "only when persistence is part of the confirmed intention",
+                "established repository convention",
+                "do not ask a follow-up question",
+                "Otherwise keep the artifact session-only",
                 "Persistence never changes content or advances the endpoint",
             ),
         )
@@ -1100,6 +1104,192 @@ class XFastContractTests(unittest.TestCase):
     def test_stays_compact(self):
         body = skill_body("nerd-xfast")
         self.assertLessEqual(len(body.split()), 660)
+
+
+class UFastContractTests(unittest.TestCase):
+    def test_has_zero_planning_action_chain(self):
+        body = skill_body("nerd-ufast")
+        assert_terms(
+            self,
+            body,
+            (
+                "zero-planning execution skill",
+                "Do not create or maintain a Focus Record",
+                "Do not narrate intended steps before acting",
+                "## Zero-Planning Chain",
+                "Task → Immediate action → Verify",
+                "Do not restate, decompose, reinterpret, or status-track it",
+                "begin the first useful action immediately",
+                "one silent bounded decision pass",
+                "Do not emit a plan, preamble, approach, future-tense action list",
+                "Verification happens only after the requested output is complete",
+            ),
+        )
+        self.assertNotIn("## One Focus", body)
+        self.assertNotIn("**Focus Record**", body)
+
+    def test_has_20_row_aggressive_intent_map(self):
+        body = skill_body("nerd-ufast")
+        section = body.split("## Aggressive Intent Mapping", 1)[1].split(
+            "\n## ", 1
+        )[0]
+        table_lines = [line for line in section.splitlines() if line.startswith("|")]
+
+        self.assertEqual(table_lines[0], "| Intention | Keyword | Action |")
+        self.assertEqual(len(table_lines[2:]), 20)
+        assert_terms(
+            self,
+            section,
+            (
+                "Read the full request",
+                "A keyword is a clue, not permission",
+                "Use a nearby project pattern for missing how details",
+                "Do not guess a different result, target, or permission",
+                "### Generic Fallback",
+                "If no intention matches the table",
+                "Use the plain meaning of the full request",
+                "do the smallest local action",
+                "Never add a new goal",
+                "ask one question",
+            ),
+        )
+
+    def test_has_no_explanation_output_contract(self):
+        body = skill_body("nerd-ufast")
+        assert_terms(
+            self,
+            body,
+            (
+                "## No Explanation Output",
+                "Output only the requested result",
+                "Do not explain the analysis, reason, approach, changes, files",
+                "the explanation itself is the requested result",
+                "Done.\nTests: pass.",
+                "Done.\nTests: not run.",
+                "Blocked: <short reason>.",
+                "Do not add any other text",
+            ),
+        )
+        self.assertNotIn("Report only the produced outcome", body)
+
+    def test_has_safe_single_shot_action_contract(self):
+        body = skill_body("nerd-ufast")
+        section = body.split("## Single Shot Action", 1)[1].split("\n## ", 1)[0]
+        table_lines = [line for line in section.splitlines() if line.startswith("|")]
+
+        self.assertEqual(
+            table_lines[0],
+            "| Work | How to batch | Example commands |",
+        )
+        self.assertEqual(len(table_lines[2:]), 7)
+        assert_terms(
+            self,
+            section,
+            (
+                "one model-to-tool round trip",
+                "Use one call for known work",
+                "Run dependent steps in order",
+                "independent steps together",
+                "Call again only when a result chooses the next action",
+                "Never hide search, edits, and proof in one shell command",
+                "inspect([{symbol:A},{symbol:B}])",
+                "inspect([{path:a},{path:b}])",
+                "apply_verify(patch,hashes,checks)",
+                "sequence(edit,test)",
+                "parallel(lint,typecheck,test)",
+                "discover(...) → next_call",
+                "ask_user()",
+            ),
+        )
+        self.assertNotIn("### Examples", section)
+        for unsafe in (
+            "unified subshell payload",
+            "git checkout -- .",
+            "xargs sed",
+            "cat <<",
+        ):
+            self.assertNotIn(unsafe, section)
+
+    def test_prefers_core_mcp_tools_with_safe_fallback(self):
+        body = skill_body("nerd-ufast")
+        section = body.split("## Core Tools", 1)[1].split("\n## ", 1)[0]
+        assert_terms(
+            self,
+            section,
+            (
+                "nerd-ufast-tools",
+                "After the cache step",
+                "one `inspect` call",
+                "all exact symbol and bounded path queries",
+                "one `apply_verify` call",
+                "apply, verify, and roll back on failed proof",
+                "expected hashes for every changed path",
+                "For unclear targets",
+                "external effects",
+                "migrations",
+                "MCP is unavailable",
+                "existing bounded read, patch, and check tools",
+            ),
+        )
+
+    def test_trusts_existing_patterns(self):
+        body = skill_body("nerd-ufast")
+        assert_terms(
+            self,
+            body,
+            (
+                "## Trust Existing Patterns",
+                "Copy the nearest working implementation",
+                "Keep its structure, naming, dependencies, errors, and tests",
+                "Change only the requested behavior",
+                "do not redesign or add abstractions",
+                "New endpoint: find the nearest endpoint → clone it",
+            ),
+        )
+
+    def test_has_best_effort_project_intelligence_cache(self):
+        body = skill_body("nerd-ufast")
+        assert_terms(
+            self,
+            body,
+            (
+                "## Project Intelligence Cache",
+                "~/.agent/tmp/nerd-ufast/",
+                "project-map.md",
+                "conventions.md",
+                "commands.md",
+                "dependencies.md",
+                "history.md",
+                "What exists",
+                "How this project works",
+                "How to verify",
+                "Libraries and versions",
+                "Confirmed reasons and warnings",
+                "##@ key @##",
+                "At the start of every task",
+                "batch only needed exact keys",
+                "before any repository search or read",
+                "first project-navigation SSOT",
+                "jump directly to cached paths",
+                "without rediscovery",
+                "A missing cache or key is a cache miss",
+                "Fallback to one narrow lookup only when",
+                "a cached path or command fails",
+                "repository evidence conflicts",
+                "project_cache.py get",
+                "project_cache.py put",
+                "in the background with `&`",
+                "never wait",
+                "locks and atomically replaces",
+                "refresh only failed or conflicting keys",
+                "Update only the affected key",
+                "Never infer history",
+                "cache secrets/file contents",
+            ),
+        )
+
+    def test_stays_compact(self):
+        self.assertLessEqual(len(skill_body("nerd-ufast").split()), 1000)
 
 
 class FamilyContractTests(unittest.TestCase):

@@ -96,6 +96,8 @@ class AdapterParseTests(unittest.TestCase):
         self.assertEqual(tokens, 42)
         self.assertNotIn("must-redact", repr(events))
         self.assertIn("[REDACTED]", repr(events))
+        self.assertIn("'input_tokens': 100", repr(events))
+        self.assertIn("'output_tokens': 42", repr(events))
 
     def test_claude_json_extracts_result_and_tokens(self):
         stdout = (EVENTS / "claude.json").read_text()

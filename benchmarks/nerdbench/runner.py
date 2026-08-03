@@ -16,7 +16,7 @@ import subprocess
 import tempfile
 import time
 
-from .adapters import get_adapter
+from .adapters import get_adapter, usage_tokens
 from .cases import load_cases
 from .materialize import materialize_run
 from .models import BenchmarkCase, RunResult, RunSpec
@@ -39,12 +39,14 @@ CONDITION_SKILLS = {
     "nerd-fast-only": ("nerd-fast",),
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
+    "nerd-ufast": ("nerd-ufast",),
 }
 ISOLATED_CODEX_CONDITIONS = {
     "raw-agent",
     "nerd-fast-only",
     "xfast-baseline",
     "nerd-xfast",
+    "nerd-ufast",
 }
 SMOKE_CASES = {
     "smart": "smart-ambiguous-focus",
@@ -297,14 +299,25 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
     final, tokens, events = adapter.parse(stdout, stderr)
 
     command_results = {}
+    recorded_events = list(events)
     for proof in _proof_commands(case):
+        proof_started = time.monotonic()
         result = subprocess.run(
             shlex.split(proof),
             cwd=spec.workspace,
             capture_output=True,
             text=True,
         )
+        proof_elapsed = time.monotonic() - proof_started
         command_results[proof] = result.returncode
+        recorded_events.append(
+            {
+                "type": "benchmark.proof",
+                "command": proof,
+                "elapsed_seconds": proof_elapsed,
+                "exit_code": result.returncode,
+            }
+        )
 
     result = RunResult(
         spec=spec,
@@ -312,7 +325,7 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
         elapsed_seconds=elapsed,
         final_text=final,
         output_tokens=tokens,
-        events=events,
+        events=tuple(recorded_events),
         changed_files=_changed_files(spec.workspace),
         command_results=command_results,
     )
@@ -321,6 +334,7 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
 
 def result_record(result: RunResult, diff_hash: str) -> dict:
     spec = result.spec
+    usage = usage_tokens(result.events)
     return {
         "run_id": spec.run_id,
         "case_id": spec.case_id,
@@ -333,6 +347,8 @@ def result_record(result: RunResult, diff_hash: str) -> dict:
         "exit_code": result.exit_code,
         "elapsed_seconds": result.elapsed_seconds,
         "final_text": result.final_text,
+        "input_tokens": usage["input_tokens"],
+        "cached_input_tokens": usage["cached_input_tokens"],
         "output_tokens": result.output_tokens,
         "events": list(result.events),
         "changed_files": list(result.changed_files),

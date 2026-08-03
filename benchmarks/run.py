@@ -25,6 +25,7 @@ from benchmarks.nerdbench.xfast_report import (
     publish_xfast_readme,
     write_xfast_summary,
 )
+from benchmarks.nerdbench.ufast_report import write_ufast_artifacts
 
 
 DEFAULT_CONFIG = ROOT / "benchmarks" / "config.json"
@@ -116,6 +117,16 @@ def build_parser() -> argparse.ArgumentParser:
     xfast_publish.add_argument("--summary", required=True)
     xfast_publish.add_argument("--readme", default=str(ROOT / "README.md"))
     xfast_publish.add_argument("--check", action="store_true")
+
+    ufast_report = subparsers.add_parser(
+        "ufast-report",
+        help="summarize the directional UFast pilot and write Feedback 1 traces",
+    )
+    _add_result_selector(ufast_report)
+    ufast_report.add_argument("--output", required=True)
+    ufast_report.add_argument("--trace-output", required=True)
+    ufast_report.add_argument("--feedback-output", required=True)
+    ufast_report.add_argument("--check", action="store_true")
     return parser
 
 
@@ -220,6 +231,23 @@ def main(argv: list[str] | None = None) -> int:
             readme = (ROOT / readme).resolve()
         publish_xfast_readme(summary, readme, check=args.check)
         print("checked XFast README" if args.check else "synchronized XFast README")
+        return 0
+
+    if args.command == "ufast-report":
+        result = _result_dir(args)
+        outputs = []
+        for value in (args.output, args.trace_output, args.feedback_output):
+            path = Path(value)
+            outputs.append(path.resolve() if path.is_absolute() else (ROOT / path).resolve())
+        summary = write_ufast_artifacts(
+            result,
+            outputs[0],
+            outputs[1],
+            outputs[2],
+            check=args.check,
+        )
+        action = "checked" if args.check else "wrote"
+        print(f"{action} {summary['aggregate']['pairs']} UFast pairs")
         return 0
 
     raise AssertionError(args.command)

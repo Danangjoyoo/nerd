@@ -38,7 +38,9 @@ Choose the single endpoint that best matches the user's smallest real intention.
 
 Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
 
-For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. If the user explicitly asks to write or save to a named directory or Markdown path, write it in the same action, choose a descriptive non-overwriting `.md` name when only a directory is given, report the path, and do not ask again. Otherwise keep it session-only and end with: "Would you like me to write this to a Markdown file?" A later yes authorizes only persistence; ask for a path if none was given. Persistence never changes content or advances the endpoint.
+For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. For every Plan output, write the filled plan to Markdown before completing the response. Use an explicit user-provided Markdown path or directory when given. Otherwise create and use `~/.agent/tmp/` as the default plan directory. Choose a descriptive non-overwriting `.md` filename, report its absolute path, and never ask whether or where to write the Plan. An explicit session-only or no-file instruction disables this default persistence.
+
+For non-Plan template output, write a file only when persistence is part of the confirmed intention. If the user gives a named directory or Markdown path, use it. If persistence is explicit but no path is given, choose a descriptive non-overwriting `.md` path from an established repository convention when one is evident, otherwise use the current working directory. Report every written path and do not ask a follow-up question. Otherwise keep the artifact session-only. Persistence never changes content or advances the endpoint.
 
 ## Focus First
 

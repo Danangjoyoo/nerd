@@ -31,6 +31,17 @@ class InstallScriptTests(unittest.TestCase):
                 encoding="utf-8",
             )
             fake_npx.chmod(0o755)
+            fake_agent = temp / "agent-cli"
+            fake_agent.write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1 $2\" = \"mcp get\" ]; then exit 1; fi\n"
+                "if [ \"$1 $2 $3\" = \"agent mcp list\" ]; then exit 0; fi\n"
+                "exit 0\n",
+                encoding="utf-8",
+            )
+            fake_agent.chmod(0o755)
+            for name in ("codex", "claude", "cursor"):
+                (temp / name).symlink_to(fake_agent)
             for relative, body in (initial_files or {}).items():
                 path = fake_home / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
