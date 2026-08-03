@@ -25,6 +25,10 @@ from benchmarks.nerdbench.xfast_report import (
     publish_xfast_readme,
     write_xfast_summary,
 )
+from benchmarks.nerdbench.ufast_report import (
+    publish_ufast_readme,
+    write_ufast_summary,
+)
 
 
 DEFAULT_CONFIG = ROOT / "benchmarks" / "config.json"
@@ -116,6 +120,22 @@ def build_parser() -> argparse.ArgumentParser:
     xfast_publish.add_argument("--summary", required=True)
     xfast_publish.add_argument("--readme", default=str(ROOT / "README.md"))
     xfast_publish.add_argument("--check", action="store_true")
+
+    ufast_report = subparsers.add_parser(
+        "ufast-report",
+        help="summarize the Luna and Terra UFast versus XFast verification results",
+    )
+    ufast_report.add_argument("--results", nargs=2, required=True)
+    ufast_report.add_argument("--output", required=True)
+    ufast_report.add_argument("--overwrite", action="store_true")
+
+    ufast_publish = subparsers.add_parser(
+        "ufast-publish",
+        help="sync the UFast versus XFast summary to README",
+    )
+    ufast_publish.add_argument("--summary", required=True)
+    ufast_publish.add_argument("--readme", default=str(ROOT / "README.md"))
+    ufast_publish.add_argument("--check", action="store_true")
     return parser
 
 
@@ -220,6 +240,31 @@ def main(argv: list[str] | None = None) -> int:
             readme = (ROOT / readme).resolve()
         publish_xfast_readme(summary, readme, check=args.check)
         print("checked XFast README" if args.check else "synchronized XFast README")
+        return 0
+
+    if args.command == "ufast-report":
+        results = [
+            path.resolve() if path.is_absolute() else (ROOT / path).resolve()
+            for value in args.results
+            for path in [Path(value)]
+        ]
+        output = Path(args.output)
+        if not output.is_absolute():
+            output = (ROOT / output).resolve()
+        summary = write_ufast_summary(results, output, overwrite=args.overwrite)
+        print(f"wrote {summary['aggregate']['pairs']} UFast pairs to {output}")
+        return 0
+
+    if args.command == "ufast-publish":
+        summary_path = Path(args.summary)
+        if not summary_path.is_absolute():
+            summary_path = (ROOT / summary_path).resolve()
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        readme = Path(args.readme)
+        if not readme.is_absolute():
+            readme = (ROOT / readme).resolve()
+        publish_ufast_readme(summary, readme, check=args.check)
+        print("checked UFast README" if args.check else "synchronized UFast README")
         return 0
 
     raise AssertionError(args.command)

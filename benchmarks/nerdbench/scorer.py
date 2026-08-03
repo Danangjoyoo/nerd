@@ -263,6 +263,8 @@ def judge_tasks(
     records: list[dict],
     cases: dict[str, BenchmarkCase],
     seed: int,
+    *,
+    pair_conditions: dict[str, tuple[str, str]] | None = None,
 ) -> list[dict]:
     grouped: dict[tuple, dict[str, dict]] = {}
     patrol = []
@@ -286,7 +288,10 @@ def judge_tasks(
     tasks = []
     for identity, arms in sorted(grouped.items(), key=lambda item: repr(item[0])):
         case = cases[identity[1]]
-        expected = PAIR_CONDITIONS[case.comparison]
+        if pair_conditions is not None and case.comparison in pair_conditions:
+            expected = pair_conditions[case.comparison]
+        else:
+            expected = PAIR_CONDITIONS[case.comparison]
         if not all(condition in arms for condition in expected):
             continue
         left = _run_result(arms[expected[0]])
@@ -360,7 +365,17 @@ def _invoke_judge(
 def judge_result_directory(result_dir: Path, config: dict) -> list[dict]:
     cases = _case_index(config)
     records = _read_jsonl(result_dir / "raw.jsonl")
-    tasks = judge_tasks(records, cases, int(config["seed"]))
+    pair_conditions = {}
+    for comparison, conditions in config.get("conditions", {}).items():
+        if not isinstance(conditions, list) or len(conditions) != 2:
+            raise ValueError(f"judge comparison must have exactly two conditions: {comparison}")
+        pair_conditions[comparison] = (conditions[0], conditions[1])
+    tasks = judge_tasks(
+        records,
+        cases,
+        int(config["seed"]),
+        pair_conditions=pair_conditions,
+    )
     output_path = result_dir / "judges.jsonl"
     lock_path = result_dir / "judges.lock"
     with _exclusive_file_lock(lock_path):

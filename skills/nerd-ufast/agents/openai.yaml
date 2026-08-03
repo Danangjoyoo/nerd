@@ -1,0 +1,6 @@
+interface:
+  display_name: "Nerd UFast"
+  short_description: "Prompt-only work in three strict waves"
+  default_prompt: "Use $nerd-ufast to complete this through one batched context wave, one action wave, and one V0/V1 proof decision."
+policy:
+  allow_implicit_invocation: false

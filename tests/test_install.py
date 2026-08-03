@@ -44,7 +44,11 @@ class InstallScriptTests(unittest.TestCase):
             for _ in range(runs):
                 results.append(
                     subprocess.run(
-                        ["sh", str(INSTALLER), target],
+                        [
+                            "sh",
+                            str(INSTALLER),
+                            target,
+                        ],
                         cwd=ROOT,
                         env=env,
                         text=True,

@@ -10,7 +10,9 @@ if [ "$#" -gt 1 ]; then
   exit 2
 fi
 
-case "${1:-all}" in
+target=${1:-all}
+
+case "$target" in
   claude)
     set -- claude-code
     ;;

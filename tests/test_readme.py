@@ -21,6 +21,7 @@ SKILLS = (
     "nerd-silent",
     "nerd-fast",
     "nerd-xfast",
+    "nerd-ufast",
 )
 START = "<!-- BENCHMARK_RESULTS:START -->"
 END = "<!-- BENCHMARK_RESULTS:END -->"
@@ -91,11 +92,25 @@ class ReadmeContractTests(unittest.TestCase):
         self.assertNotIn("npx skills add danangjoyoo/nerd", body)
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
+        self.assertNotIn("--ufast", body)
+        self.assertNotIn("UFast tool host", body)
 
     def test_every_public_skill_is_listed_once(self):
         body = README.read_text(encoding="utf-8")
         for name in SKILLS:
             self.assertEqual(body.count(f"`{name}`"), 1)
+
+    def test_speed_skill_descriptions_express_their_distinct_positioning(self):
+        body = README.read_text(encoding="utf-8")
+        for phrase in (
+            "Cleverly quick thinking",
+            "High speed work",
+            "Super high speed for rapid output",
+            "Prompt-only ultra-fast work",
+        ):
+            self.assertIn(phrase, body)
+        self.assertIn("UFast and XFast do not compose", body)
+        self.assertIn("It has no bundled scripts, MCP server, registry", body)
 
     # def test_benchmark_markers_are_unique(self):
     #     body = README.read_text(encoding="utf-8")

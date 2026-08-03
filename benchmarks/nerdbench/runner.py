@@ -39,12 +39,14 @@ CONDITION_SKILLS = {
     "nerd-fast-only": ("nerd-fast",),
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
+    "nerd-ufast": ("nerd-smart", "nerd-execute", "nerd-ufast"),
 }
 ISOLATED_CODEX_CONDITIONS = {
     "raw-agent",
     "nerd-fast-only",
     "xfast-baseline",
     "nerd-xfast",
+    "nerd-ufast",
 }
 SMOKE_CASES = {
     "smart": "smart-ambiguous-focus",
@@ -203,9 +205,7 @@ def isolated_codex_environment(
     source_home = Path(
         environment.get("CODEX_HOME", str(Path.home() / ".codex"))
     ).resolve()
-    with tempfile.TemporaryDirectory(
-        prefix="nerd-fast-benchmark-codex-"
-    ) as temporary:
+    with tempfile.TemporaryDirectory(prefix="nerd-benchmark-codex-") as temporary:
         isolated_home = Path(temporary)
         auth = source_home / "auth.json"
         if auth.is_file():
@@ -364,8 +364,21 @@ def _version(command: list[str]) -> str:
     return (result.stdout or result.stderr).strip()
 
 
+def _ufast_source_hashes(config: dict) -> dict[str, str] | None:
+    conditions = {
+        condition
+        for values in config.get("conditions", {}).values()
+        for condition in values
+    }
+    if "nerd-ufast" not in conditions:
+        return None
+    from .ufast_report import current_source_hashes
+
+    return current_source_hashes()
+
+
 def _manifest(config: dict, run_id: str, planned: int, smoke: bool) -> dict:
-    return {
+    manifest = {
         "run_id": run_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "smoke": smoke,
@@ -383,6 +396,10 @@ def _manifest(config: dict, run_id: str, planned: int, smoke: bool) -> dict:
             "cursor": _version(["cursor", "agent", "--version"]),
         },
     }
+    source_hashes = _ufast_source_hashes(config)
+    if source_hashes is not None:
+        manifest["source_hashes"] = source_hashes
+    return manifest
 
 
 def _case_index(config: dict) -> dict[str, BenchmarkCase]:
