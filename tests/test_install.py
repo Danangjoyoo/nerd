@@ -19,6 +19,7 @@ class InstallScriptTests(unittest.TestCase):
         *,
         runs: int = 1,
         initial_files: dict[str, str] | None = None,
+        ufast: bool = False,
     ):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp = Path(temp_dir)
@@ -44,7 +45,12 @@ class InstallScriptTests(unittest.TestCase):
             for _ in range(runs):
                 results.append(
                     subprocess.run(
-                        ["sh", str(INSTALLER), target],
+                        [
+                            "sh",
+                            str(INSTALLER),
+                            target,
+                            *(["--ufast"] if ufast else []),
+                        ],
                         cwd=ROOT,
                         env=env,
                         text=True,
@@ -60,6 +66,32 @@ class InstallScriptTests(unittest.TestCase):
                 if path.is_file()
             }
             return results, arguments, files
+
+    def test_ufast_configuration_is_explicit_codex_only_and_idempotent(self):
+        existing = 'model = "gpt-5.6-terra"\n'
+        results, _, files = self._run(
+            "codex",
+            runs=2,
+            ufast=True,
+            initial_files={".codex/config.toml": existing},
+        )
+        self.assertTrue(all(result.returncode == 0 for result in results))
+        self.assertIn(".nerd/ufast/ufast_core.py", files)
+        self.assertIn(".nerd/ufast/ufast_mcp.py", files)
+        config = files[".codex/config.toml"]
+        self.assertTrue(config.startswith(existing))
+        self.assertEqual(config.count("[mcp_servers.nerd_ufast]"), 1)
+        self.assertIn(".nerd/ufast/ufast_mcp.py", config)
+
+        default_results, _, default_files = self._run("codex")
+        self.assertEqual(default_results[0].returncode, 0)
+        self.assertNotIn(".codex/config.toml", default_files)
+        self.assertNotIn(".nerd/ufast/ufast_mcp.py", default_files)
+
+        unsupported, _, unsupported_files = self._run("claude", ufast=True)
+        self.assertNotEqual(unsupported[0].returncode, 0)
+        self.assertIn("Codex", unsupported[0].stderr)
+        self.assertNotIn(".nerd/ufast/ufast_mcp.py", unsupported_files)
 
     def test_installs_all_skills_for_each_named_client(self):
         for target, agent in (

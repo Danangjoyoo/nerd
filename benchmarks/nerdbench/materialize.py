@@ -34,6 +34,7 @@ LOCAL_CONDITIONS = {
     "nerd-fast-only": ("nerd-fast",),
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
+    "nerd-ufast": ("nerd-smart", "nerd-execute", "nerd-ufast"),
 }
 
 UPSTREAM_CONDITIONS = {
@@ -132,9 +133,15 @@ def _copy_fixture(case: BenchmarkCase, destination: Path) -> None:
     if not source.is_dir():
         raise ValueError(f"missing fixture: {case.fixture}")
     for child in source.iterdir():
+        if child.name == "__pycache__" or child.suffix in {".pyc", ".pyo"}:
+            continue
         target = destination / child.name
         if child.is_dir():
-            shutil.copytree(child, target)
+            shutil.copytree(
+                child,
+                target,
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+            )
         else:
             shutil.copy2(child, target)
 
@@ -165,6 +172,9 @@ def _install_condition(condition: str, agent: str, destination: Path) -> None:
 
 def _initialize_repository(destination: Path) -> None:
     _run(["git", "init", "-q"], destination)
+    exclude = destination / ".git" / "info" / "exclude"
+    with exclude.open("a", encoding="utf-8") as stream:
+        stream.write("\n__pycache__/\n*.py[cod]\n")
     _run(["git", "config", "user.email", "benchmark@nerd.invalid"], destination)
     _run(["git", "config", "user.name", "Nerd Benchmark"], destination)
     _run(["git", "add", "."], destination)

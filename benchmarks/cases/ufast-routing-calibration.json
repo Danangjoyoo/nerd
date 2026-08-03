@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "id": "ufast-routing-discovery",
+      "comparison": "ufast-routing",
+      "prompt": "Add normalize_handle(text): trim whitespace, lowercase letters, replace every non-alphanumeric run with one underscore, and strip boundary underscores. Register it as 'handle' and add focused unit coverage.",
+      "fixture": "xfast-discovery-edit",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "implementation", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "normalizers.py"},
+        {"id": "registry", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "registry.py"},
+        {"id": "tests", "weight": 20, "hard_gate": true, "evaluator": "file", "expected": "test_normalizers.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py normalizers.py registry.py test_normalizers.py::0"},
+        {"id": "behavior", "weight": 20, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    },
+    {
+      "id": "ufast-routing-greeting",
+      "comparison": "ufast-routing",
+      "prompt": "Implement greet(name) in feature.py so it returns 'Hello, <name>!', preserving the supplied name, and add focused unit coverage.",
+      "fixture": "xfast-v3-greeting",
+      "endpoint": "execute",
+      "timeout_seconds": 600,
+      "criteria": [
+        {"id": "implementation", "weight": 25, "hard_gate": true, "evaluator": "file", "expected": "feature.py"},
+        {"id": "tests", "weight": 25, "hard_gate": true, "evaluator": "file", "expected": "test_feature.py"},
+        {"id": "compile", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 -m py_compile feature.py test_feature.py::0"},
+        {"id": "lint", "weight": 10, "hard_gate": true, "evaluator": "command", "expected": "python3 lint_check.py feature.py test_feature.py::0"},
+        {"id": "behavior", "weight": 30, "hard_gate": true, "evaluator": "command", "expected": "python3 -m unittest verify_behavior -v::0"}
+      ]
+    }
+  ]
+}

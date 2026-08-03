@@ -1,0 +1,196 @@
+{
+  "aggregate": {
+    "delta": {
+      "accuracy_points": -1.3333,
+      "speed_percent": -15.267,
+      "token_change_percent": 2.7488,
+      "token_pairs": 15
+    },
+    "pairs": 15,
+    "ufast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 95.3333,
+      "median_latency_seconds": 46.4005,
+      "median_output_tokens": 1712,
+      "pass_rate_percent": 100,
+      "runs": 15
+    },
+    "ufast_tools": {
+      "applied_runs": 14,
+      "fallback_runs": 1,
+      "hit_rate_percent": 100,
+      "median_cold_start_ms": 25.0,
+      "median_operation_ms": 637.0,
+      "tool_call_runs": 15
+    },
+    "xfast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 96.6667,
+      "median_latency_seconds": 41.8326,
+      "median_output_tokens": 1712,
+      "pass_rate_percent": 100,
+      "runs": 15
+    }
+  },
+  "artifacts": {
+    "cases": "benchmarks/pilots/xfast-v3-five-cases/cases.json",
+    "config_dir": "benchmarks/pilots/ufast-vs-xfast/",
+    "result_summary": "benchmarks/pilots/ufast-vs-xfast/result.json"
+  },
+  "comparison": "nerd-ufast-vs-nerd-xfast",
+  "controls": {
+    "case_file": "benchmarks/pilots/xfast-v3-five-cases/cases.json",
+    "case_sha256": "d533163102f0c94ff294d555d15d2ad511782290ad31f02ba239d0821838d880",
+    "cases": 5,
+    "fresh_isolated_agents": true,
+    "models": 3,
+    "pairs": 15,
+    "reasoning_effort": "high",
+    "repetitions_per_model": 1,
+    "same_model_and_effort_within_pairs": true,
+    "verified_host": "Codex",
+    "workload_runs": 30
+  },
+  "created_at": "2026-08-03T04:54:54.663563+00:00",
+  "limitations": [
+    "five Python coding cases",
+    "one repetition per model",
+    "directional evidence, not a universal latency claim",
+    "the local MCP fast path is verified only on Codex"
+  ],
+  "models": {
+    "Luna": {
+      "delta": {
+        "accuracy_points": 2.0,
+        "speed_percent": -88.1788,
+        "token_change_percent": 92.4824,
+        "token_pairs": 5
+      },
+      "pairs": 5,
+      "ufast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 96.0,
+        "median_latency_seconds": 78.7202,
+        "median_output_tokens": 3559,
+        "pass_rate_percent": 100,
+        "runs": 5
+      },
+      "ufast_tools": {
+        "applied_runs": 4,
+        "fallback_runs": 1,
+        "hit_rate_percent": 100,
+        "median_cold_start_ms": 25.0,
+        "median_operation_ms": 637.0,
+        "tool_call_runs": 5
+      },
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 94.0,
+        "median_latency_seconds": 44.537,
+        "median_output_tokens": 1927,
+        "pass_rate_percent": 100,
+        "runs": 5
+      }
+    },
+    "Sol": {
+      "delta": {
+        "accuracy_points": 0.0,
+        "speed_percent": -15.267,
+        "token_change_percent": 2.7488,
+        "token_pairs": 5
+      },
+      "pairs": 5,
+      "ufast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 96.0,
+        "median_latency_seconds": 47.5867,
+        "median_output_tokens": 1712,
+        "pass_rate_percent": 100,
+        "runs": 5
+      },
+      "ufast_tools": {
+        "applied_runs": 5,
+        "fallback_runs": 0,
+        "hit_rate_percent": 100,
+        "median_cold_start_ms": 24.0,
+        "median_operation_ms": 615.0,
+        "tool_call_runs": 5
+      },
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 96.0,
+        "median_latency_seconds": 45.5412,
+        "median_output_tokens": 1712,
+        "pass_rate_percent": 100,
+        "runs": 5
+      }
+    },
+    "Terra": {
+      "delta": {
+        "accuracy_points": -6.0,
+        "speed_percent": 9.5233,
+        "token_change_percent": -5.4111,
+        "token_pairs": 5
+      },
+      "pairs": 5,
+      "ufast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 94.0,
+        "median_latency_seconds": 37.7919,
+        "median_output_tokens": 1346,
+        "pass_rate_percent": 100,
+        "runs": 5
+      },
+      "ufast_tools": {
+        "applied_runs": 5,
+        "fallback_runs": 0,
+        "hit_rate_percent": 100,
+        "median_cold_start_ms": 25.0,
+        "median_operation_ms": 639.0,
+        "tool_call_runs": 5
+      },
+      "xfast": {
+        "hard_gate_failure_runs": 0,
+        "mean_score": 100.0,
+        "median_latency_seconds": 40.7326,
+        "median_output_tokens": 1423,
+        "pass_rate_percent": 100,
+        "runs": 5
+      }
+    }
+  },
+  "provenance": {
+    "codex_versions": {
+      "Luna": "codex-cli 0.144.5",
+      "Sol": "codex-cli 0.144.5",
+      "Terra": "codex-cli 0.144.5"
+    },
+    "models": {
+      "Luna": "gpt-5.6-luna",
+      "Sol": "gpt-5.6-sol",
+      "Terra": "gpt-5.6-terra"
+    },
+    "nerd_commits": {
+      "Luna": "4fba6727c7eaef0ef7028cec2430fab881f7b40d",
+      "Sol": "4fba6727c7eaef0ef7028cec2430fab881f7b40d",
+      "Terra": "4fba6727c7eaef0ef7028cec2430fab881f7b40d"
+    },
+    "source_hashes": {
+      "benchmark_adapters": "e95989490f0b75513e8432f766e7897a6f43061736f8a768fc3422e51cb0685a",
+      "benchmark_materialize": "92659940ca024eb33fb8bbd3116c498beb0d0ca33a0cfbcf270d37a83f94660c",
+      "benchmark_runner": "5f19bfd20fd1d475b5feccfdecc10e82bd8ea6a96d3be84733f31cae38ffe538",
+      "benchmark_scorer": "5afaa3d5bd90ddfe48811a37f17c993d553d57f54d3b82c1a6bd5170bbed4ba7",
+      "case_corpus": "d533163102f0c94ff294d555d15d2ad511782290ad31f02ba239d0821838d880",
+      "ufast_core": "a775850a573b2e9b6040392366804020d024804fa3aaec21d005109f9af40e7e",
+      "ufast_report": "8468734d6047144fe9545ecb7b39a33c8deaff0df80836c8ab299eb53deaa826",
+      "ufast_server": "42a5d615718dcc0f11cc45ad7924851c17ca8b5b5047e8480d67c553da019882",
+      "ufast_skill": "ea81bd7f63c0e7544b7e53dcde1e052474a9ca56a2416adb7508681e1cdd5737"
+    }
+  },
+  "run_ids": {
+    "Luna": "20260803T043454Z-4fba672-gpt-5.6-luna-high",
+    "Sol": "20260803T045454Z-4fba672-gpt-5.6-sol-high",
+    "Terra": "20260803T044648Z-4fba672-gpt-5.6-terra-high"
+  },
+  "schema_version": 1
+}

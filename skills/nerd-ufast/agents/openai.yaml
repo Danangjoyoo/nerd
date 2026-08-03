@@ -1,0 +1,6 @@
+interface:
+  display_name: "Nerd UFast"
+  short_description: "Generic tool-backed path for supported work"
+  default_prompt: "Use $nerd-ufast to route this request through a supported deterministic tool path, with immediate fallback when unavailable."
+policy:
+  allow_implicit_invocation: false

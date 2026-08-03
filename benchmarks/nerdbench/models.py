@@ -49,6 +49,7 @@ class RunResult:
     events: tuple[dict, ...]
     changed_files: tuple[str, ...]
     command_results: dict[str, int]
+    ufast_evidence: dict | None = None
 
 
 @dataclass(frozen=True)

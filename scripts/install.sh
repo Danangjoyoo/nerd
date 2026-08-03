@@ -2,15 +2,26 @@
 set -eu
 
 usage() {
-  echo "usage: $0 {claude|codex|cursor|all}" >&2
+  echo "usage: $0 {claude|codex|cursor|all} [--ufast]" >&2
 }
 
-if [ "$#" -gt 1 ]; then
+if [ "$#" -gt 2 ]; then
   usage
   exit 2
 fi
 
-case "${1:-all}" in
+target=${1:-all}
+ufast=${2:-}
+if [ -n "$ufast" ] && [ "$ufast" != "--ufast" ]; then
+  usage
+  exit 2
+fi
+if [ "$ufast" = "--ufast" ] && [ "$target" != "codex" ] && [ "$target" != "all" ]; then
+  echo "error: Nerd UFast tool integration is currently verified only for Codex" >&2
+  exit 2
+fi
+
+case "$target" in
   claude)
     set -- claude-code
     ;;
@@ -45,3 +56,7 @@ npx skills add danangjoyoo/nerd \
   --global --agent "$@" --skill '*' --yes
 
 python3 "$script_dir/install_hooks.py" "$@"
+
+if [ "$ufast" = "--ufast" ]; then
+  python3 "$script_dir/install_ufast.py"
+fi

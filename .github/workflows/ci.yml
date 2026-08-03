@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: "22"
       - name: Check Python syntax
-        run: python3 -m compileall -q scripts benchmarks tests
+        run: python3 -m compileall -q scripts benchmarks tests skills/nerd-ufast/scripts
       - name: Run unit and contract tests
         run: python3 -m unittest discover -s tests -v
       - name: Validate public skills

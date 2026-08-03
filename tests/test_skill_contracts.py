@@ -394,6 +394,55 @@ class SmartContractTests(unittest.TestCase):
                     assert_terms(self, smart_reference_body(reference), terms)
 
 
+class UFastContractTests(unittest.TestCase):
+    def test_is_explicit_compact_and_inherits_the_active_workflow(self):
+        body = skill_body("nerd-ufast")
+        metadata = (SKILLS / "nerd-ufast" / "agents" / "openai.yaml").read_text()
+        frontmatter = body.split("---", 2)[1]
+
+        assert_terms(
+            self,
+            body,
+            (
+                "explicitly invokes Nerd UFast",
+                "endpoint, scope, authorization, and active workflow",
+                "never replaces or restarts the active workflow",
+                "ufast_prepare_workspace_change",
+                "ufast_apply_workspace_change",
+                "Call prepare exactly once",
+                "Call apply exactly once",
+                "prepare is the eligibility inspection",
+                "not an unknown or ambiguous condition",
+                "red-green sequence alone is not a fallback reason",
+                "one evidence-driven retry",
+                "Fall back immediately",
+                "The active workflow still owns any remaining proof",
+                "Never combine `nerd-ufast` with `nerd-xfast`",
+                "UFast fast path: applied",
+                "UFast fast path: fell back",
+                "UFast fast path: failed",
+            ),
+        )
+        self.assertIn("Use only when explicitly invoked", frontmatter)
+        self.assertIn("Generic tool-backed ultra-fast execution", frontmatter)
+        self.assertNotIn("Python", frontmatter)
+        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 420)
+        self.assertIn("allow_implicit_invocation: false", metadata)
+        self.assertIn("$nerd-ufast", metadata)
+
+    def test_only_ufast_names_its_namespaced_tools(self):
+        tool_names = (
+            "ufast_prepare_workspace_change",
+            "ufast_apply_workspace_change",
+        )
+        for path in SKILLS.glob("*/SKILL.md"):
+            if path.parent.name == "nerd-ufast":
+                continue
+            body = path.read_text(encoding="utf-8")
+            for tool_name in tool_names:
+                self.assertNotIn(tool_name, body, f"{path} owns a UFast tool")
+
+
 class SurgeryContractTests(unittest.TestCase):
     def test_preserves_diagnostic_records(self):
         body = skill_body("nerd-surgery")
