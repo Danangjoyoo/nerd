@@ -99,6 +99,13 @@ neutral. Structural and verification adapters are registered separately;
 Phase 1 includes Python, JSON, TOML, Node, Go, Rust, Maven, and Gradle detection
 without installing their runtimes or dependencies.
 
+The public edit shape is deliberately flat: each operation contains `path`, the
+indexed `sha256`, and either `old_text`/`new_text` or complete `content`.
+Repeated paths are grouped into one file transaction, and the tool defaults an
+exact replacement to one expected occurrence. The MCP tool is write-capable but
+marked non-destructive because it is hash-guarded, atomic, and recoverable;
+`readOnlyHint` remains false.
+
 The model owns what outcome is needed. Tools own how to map the project, retrieve
 context, mutate files, select backends, and run deterministic checks. Search,
 mutation, and proof accept batched inputs; the test runner parallelizes
@@ -113,6 +120,9 @@ codemod, and AST operations.
   that route, and preserves the active workflow's accuracy and proof contract.
 - UFast calls search directly when a known query can build or reuse the index;
   it does not pay for project index plus search by default.
+- Supported implementation and test changes share one safe-edit batch and one
+  post-edit proof decision. UFast does not create an intermediate red mutation
+  or proof round merely to follow a generic red-green ritual.
 - A registered LSP, codemod, or AST route outranks text editing for its semantic
   intent. Missing semantic backends cause fallback, never lossy emulation.
 - V0 reuses fresh structured proof or makes no verification claim for eligible
@@ -196,6 +206,9 @@ codemods should be preferred.
 - One fast-search call can carry multiple independent queries.
 - Safe edit either leaves the complete verified batch or restores every
   original.
+- Safe edit accepts the ergonomic flat hash/replacement shape, groups repeated
+  paths, and does not require interactive approval for an already authorized,
+  recoverable workspace mutation.
 - Concurrent user edits cause a clean precondition failure rather than
   overwriting files.
 - Unsupported requests continue through the active workflow.

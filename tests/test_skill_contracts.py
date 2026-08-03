@@ -418,6 +418,11 @@ class UFastContractTests(unittest.TestCase):
                 "Keep adaptive dependencies sequential",
                 "Tools handle how; the model decides what",
                 "registered LSP, codemod, or AST route",
+                "{path, sha256, old_text, new_text}",
+                "Batch implementation and tests together",
+                "verify once",
+                "do not create an intermediate red write",
+                "Accept `applied` only when the transaction",
                 "Choose **V0** or **V1** once",
                 "**V0:**",
                 "**V1 automatic:**",
@@ -433,7 +438,7 @@ class UFastContractTests(unittest.TestCase):
         self.assertIn("Use only when explicitly invoked", frontmatter)
         self.assertIn("Generic tool-backed ultra-fast execution", frontmatter)
         self.assertNotIn("Python", frontmatter)
-        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 650)
+        self.assertLessEqual(len(re.findall(r"\b[\w'-]+\b", body)), 680)
         self.assertIn("allow_implicit_invocation: false", metadata)
         self.assertIn("$nerd-ufast", metadata)
 

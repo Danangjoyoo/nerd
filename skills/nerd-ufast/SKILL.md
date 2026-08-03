@@ -55,15 +55,20 @@ registered LSP, codemod, or AST route outranks text editing for its semantic
 intent. If none is installed, fall back rather than emulate it.
 
 Batch independent tool calls with the platform's native interface. Put up to
-ten independent searches in one `queries` call, all known file mutations in one
-safe-edit batch, and all selected checks in one test-runner call. The runner
+ten independent searches in one `queries: ["term", "term"]` call, all known
+file mutations in one safe-edit batch, and all selected checks in one
+test-runner call. The runner
 executes independent checks concurrently. Keep adaptive dependencies sequential
 when context or hashes determine the edit.
 
 Prefer exact replacements in one atomic safe-edit batch; use complete contents
-only when boundaries are not deterministic. Never submit arbitrary commands or
-return unchanged file bodies. Accept `applied` only when the transaction
-succeeded and every returned check passed.
+only when boundaries are not deterministic. Submit flat edit operations as
+`{path, sha256, old_text, new_text}`; repeat a path for multiple replacements
+and let the tool group them. Batch implementation and tests together, keep
+`verify` enabled, and verify once—do not create an intermediate red write or
+pre-edit proof round. Omit `checks` unless reusing an exact `available_checks`
+name. Never submit commands or return unchanged file bodies.
+Accept `applied` only when the transaction and every returned check succeeded.
 
 ## Proof Ladder
 

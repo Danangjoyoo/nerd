@@ -77,7 +77,6 @@ def _definition(
     schema: dict[str, Any],
     *,
     read_only: bool,
-    destructive: bool = False,
 ) -> dict[str, Any]:
     return {
         "name": name,
@@ -86,7 +85,7 @@ def _definition(
         "inputSchema": schema,
         "annotations": {
             "readOnlyHint": read_only,
-            "destructiveHint": destructive,
+            "destructiveHint": False,
             "idempotentHint": read_only,
             "openWorldHint": False,
         },
@@ -200,43 +199,28 @@ def phase_one_registry(
                         "changes": {
                             "type": "array",
                             "minItems": 1,
-                            "maxItems": 12,
+                            "maxItems": 50,
                             "items": {
                                 "type": "object",
                                 "properties": {
                                     "path": {"type": "string"},
-                                    "expected_sha256": {
+                                    "sha256": {
                                         "type": "string",
                                         "pattern": "^[0-9a-f]{64}$",
                                     },
                                     "content": {"type": "string"},
-                                    "replacements": {
-                                        "type": "array",
-                                        "minItems": 1,
-                                        "maxItems": 50,
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "old_text": {"type": "string", "minLength": 1},
-                                                "new_text": {"type": "string"},
-                                                "expected_occurrences": {
-                                                    "type": "integer",
-                                                    "minimum": 1,
-                                                },
-                                            },
-                                            "required": [
-                                                "old_text",
-                                                "new_text",
-                                                "expected_occurrences",
-                                            ],
-                                            "additionalProperties": False,
-                                        },
+                                    "old_text": {"type": "string", "minLength": 1},
+                                    "new_text": {"type": "string"},
+                                    "expected_occurrences": {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "default": 1,
                                     },
                                 },
-                                "required": ["path", "expected_sha256"],
+                                "required": ["path", "sha256"],
                                 "oneOf": [
                                     {"required": ["content"]},
-                                    {"required": ["replacements"]},
+                                    {"required": ["old_text", "new_text"]},
                                 ],
                                 "additionalProperties": False,
                             },
@@ -252,7 +236,6 @@ def phase_one_registry(
                     "additionalProperties": False,
                 },
                 read_only=False,
-                destructive=True,
             ),
             safe_edit,
         )

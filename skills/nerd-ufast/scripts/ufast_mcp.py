@@ -91,15 +91,105 @@ def _safe_edit(arguments: dict[str, Any]) -> dict[str, Any]:
             "checks": [],
             "rolled_back": False,
         }
+    try:
+        changes = _normalize_safe_edit_changes(arguments.get("changes"))
+    except ValueError as error:
+        return {
+            "status": "rejected",
+            "runtime_version": VERSION,
+            "operation_ms": 0,
+            "reason": str(error),
+            "changed_files": [],
+            "checks": [],
+            "rolled_back": False,
+        }
     result = safe_edit(
         _workspace(),
-        arguments.get("changes"),
+        changes,
         verify=arguments.get("verify", True),
         selected_checks=arguments.get("checks"),
     )
     if result.get("status") == "applied":
         PROJECT_INDEX.project_index(refresh=True)
     return result
+
+
+def _normalize_safe_edit_changes(value: object) -> list[dict[str, Any]]:
+    """Group ergonomic flat edit operations into one atomic per-file batch."""
+
+    if not isinstance(value, list) or not 1 <= len(value) <= 50:
+        raise ValueError("changes must contain between 1 and 50 edit operations")
+    grouped: dict[str, dict[str, Any]] = {}
+    allowed = {
+        "path",
+        "sha256",
+        "content",
+        "old_text",
+        "new_text",
+        "expected_occurrences",
+    }
+    for operation in value:
+        if not isinstance(operation, dict) or not set(operation) <= allowed:
+            raise ValueError("Each edit operation must use only the documented fields")
+        path = operation.get("path")
+        digest = operation.get("sha256")
+        if not isinstance(path, str) or not path:
+            raise ValueError("Each edit operation requires a non-empty path")
+        if not isinstance(digest, str):
+            raise ValueError(f"Each edit operation requires the indexed sha256: {path!r}")
+        content_present = "content" in operation
+        replacement_present = "old_text" in operation or "new_text" in operation
+        if content_present == replacement_present:
+            raise ValueError(
+                f"Exactly one of content or old_text/new_text is required: {path!r}"
+            )
+        existing = grouped.get(path)
+        if existing is not None and existing["expected_sha256"] != digest:
+            raise ValueError(f"Conflicting source hashes for {path!r}")
+        if content_present:
+            content = operation.get("content")
+            if not isinstance(content, str):
+                raise ValueError(f"content must be a string for {path!r}")
+            if existing is not None:
+                raise ValueError(f"Complete-content edits cannot be combined for {path!r}")
+            grouped[path] = {
+                "path": path,
+                "expected_sha256": digest,
+                "content": content,
+            }
+            continue
+        old_text = operation.get("old_text")
+        new_text = operation.get("new_text")
+        occurrences = operation.get("expected_occurrences", 1)
+        if not isinstance(old_text, str) or not old_text:
+            raise ValueError(f"old_text must be a non-empty string for {path!r}")
+        if not isinstance(new_text, str):
+            raise ValueError(f"new_text must be a string for {path!r}")
+        if (
+            not isinstance(occurrences, int)
+            or isinstance(occurrences, bool)
+            or occurrences < 1
+        ):
+            raise ValueError(f"expected_occurrences must be positive for {path!r}")
+        if existing is None:
+            existing = {
+                "path": path,
+                "expected_sha256": digest,
+                "replacements": [],
+            }
+            grouped[path] = existing
+        if "content" in existing:
+            raise ValueError(f"Replacement edits cannot follow content for {path!r}")
+        existing["replacements"].append(
+            {
+                "old_text": old_text,
+                "new_text": new_text,
+                "expected_occurrences": occurrences,
+            }
+        )
+    if len(grouped) > 12:
+        raise ValueError("changes may target at most 12 files")
+    return list(grouped.values())
 
 
 def _test_runner(arguments: dict[str, Any]) -> dict[str, Any]:

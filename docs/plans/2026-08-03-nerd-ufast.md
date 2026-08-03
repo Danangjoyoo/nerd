@@ -106,12 +106,17 @@ fallback, and isolation contracts have no unresolved implementation decision.
 
 ### Safe edit
 
-- Accept exact-text replacements or complete contents for existing files.
+- Accept flat `{path, sha256, old_text, new_text}` replacements or complete
+  contents for existing files and group repeated paths internally.
 - Require SHA-256 preconditions and reject stale or ambiguous batches.
 - Enforce workspace containment, file-count, and byte limits.
 - Validate Python, JSON, and TOML structurally before mutation.
 - Write the batch atomically and restore every original after a failed check or
   partial replacement.
+- Keep the recoverable MCP operation non-destructive in annotations so an
+  authorized noninteractive edit is not converted into an approval blocker.
+- Batch implementation and tests together, then verify once; do not add an
+  intermediate red write or pre-edit proof round.
 
 ### Test runner
 

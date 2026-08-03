@@ -551,7 +551,12 @@ class OperationRegistryContractTests(unittest.TestCase):
         )
         definitions = {tool["name"]: tool for tool in registry.tool_definitions()}
         self.assertIn("queries", definitions["ufast_fast_search"]["inputSchema"]["properties"])
-        self.assertTrue(definitions["ufast_safe_edit"]["annotations"]["destructiveHint"])
+        edit_definition = definitions["ufast_safe_edit"]
+        edit_properties = edit_definition["inputSchema"]["properties"]["changes"]["items"]["properties"]
+        self.assertIn("sha256", edit_properties)
+        self.assertIn("old_text", edit_properties)
+        self.assertFalse(edit_definition["annotations"]["readOnlyHint"])
+        self.assertFalse(edit_definition["annotations"]["destructiveHint"])
         self.assertEqual(
             registry.route_for_intent("search_project").name,
             "ufast_fast_search",
@@ -696,17 +701,24 @@ class McpProtocolTests(unittest.TestCase):
                             "changes": [
                                 {
                                     "path": "feature.py",
-                                    "expected_sha256": digest(
+                                    "sha256": digest(
                                         "def greet(name: str) -> str:\n"
                                         "    raise NotImplementedError\n"
                                     ),
-                                    "replacements": [
-                                        {
-                                            "old_text": "    raise NotImplementedError\n",
-                                            "new_text": "    return f'Hello, {name}!'\n",
-                                            "expected_occurrences": 1,
-                                        }
-                                    ],
+                                    "old_text": "def greet(name: str) -> str:\n",
+                                    "new_text": (
+                                        "def greet(name: str) -> str:\n"
+                                        "    \"\"\"Return a personalized greeting.\"\"\"\n"
+                                    ),
+                                },
+                                {
+                                    "path": "feature.py",
+                                    "sha256": digest(
+                                        "def greet(name: str) -> str:\n"
+                                        "    raise NotImplementedError\n"
+                                    ),
+                                    "old_text": "    raise NotImplementedError\n",
+                                    "new_text": "    return f'Hello, {name}!'\n",
                                 }
                             ]
                         },
@@ -763,6 +775,10 @@ class McpProtocolTests(unittest.TestCase):
         )
         self.assertEqual(responses[4]["result"]["structuredContent"]["status"], "applied")
         self.assertEqual(responses[4]["result"]["structuredContent"]["route"], "safe_edit")
+        self.assertEqual(
+            responses[4]["result"]["structuredContent"]["edit_mode"],
+            "exact_replacements",
+        )
         self.assertEqual(responses[5]["result"]["structuredContent"]["status"], "passed")
         self.assertEqual(
             responses[5]["result"]["structuredContent"]["route"],
