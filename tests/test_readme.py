@@ -88,9 +88,31 @@ class ReadmeContractTests(unittest.TestCase):
         for target in ("claude", "codex", "cursor", "all"):
             self.assertIn(f"./scripts/install.sh {target}", body)
         self.assertIn("automatic Smart hook", body)
+        self.assertNotIn("nerd-ufast-tools", body)
         self.assertNotIn("npx skills add danangjoyoo/nerd", body)
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
+
+    def test_ufast_directional_benchmark_is_current(self):
+        body = README.read_text(encoding="utf-8")
+        self.assertEqual(body.count("<!-- UFAST_BENCHMARK:START -->"), 1)
+        self.assertEqual(body.count("<!-- UFAST_BENCHMARK:END -->"), 1)
+        region = body.split("<!-- UFAST_BENCHMARK:START -->", 1)[1].split(
+            "<!-- UFAST_BENCHMARK:END -->", 1
+        )[0]
+        for expected in (
+            "UFast is archived",
+            "is not included in Nerd installs",
+            "2 cases, 1 repetition, and 1 model",
+            "100.00%",
+            "27.71% slower",
+            "44.70% more output tokens",
+            "54.93s",
+            "43.77s",
+            "20260803T164208Z-24e573e-gpt-5.6-luna-high/result.json",
+            "directional evidence only",
+        ):
+            self.assertIn(expected, region)
 
     def test_every_public_skill_is_listed_once(self):
         body = README.read_text(encoding="utf-8")

@@ -1,0 +1,25 @@
+{
+  "seed": 8042026,
+  "warmup_pairs": 5,
+  "measured_pairs": 100,
+  "bootstrap_samples": 2000,
+  "inspect": [
+    {
+      "id": "inspect-small",
+      "symbol": "target_small",
+      "context_lines": 2,
+      "max_results": 1
+    },
+    {
+      "id": "inspect-large",
+      "symbol": "target_large",
+      "context_lines": 2,
+      "max_results": 3
+    }
+  ],
+  "apply_verify": [
+    {"id": "apply-small"},
+    {"id": "apply-large"}
+  ]
+}
+

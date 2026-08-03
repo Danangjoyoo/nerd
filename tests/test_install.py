@@ -31,6 +31,17 @@ class InstallScriptTests(unittest.TestCase):
                 encoding="utf-8",
             )
             fake_npx.chmod(0o755)
+            fake_agent = temp / "agent-cli"
+            fake_agent.write_text(
+                "#!/bin/sh\n"
+                "if [ \"$1 $2\" = \"mcp get\" ]; then exit 1; fi\n"
+                "if [ \"$1 $2 $3\" = \"agent mcp list\" ]; then exit 0; fi\n"
+                "exit 0\n",
+                encoding="utf-8",
+            )
+            fake_agent.chmod(0o755)
+            for name in ("codex", "claude", "cursor"):
+                (temp / name).symlink_to(fake_agent)
             for relative, body in (initial_files or {}).items():
                 path = fake_home / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,6 +139,11 @@ class InstallScriptTests(unittest.TestCase):
         self.assertIn(".claude/settings.json", files)
         self.assertIn(".codex/hooks.json", files)
         self.assertIn(".cursor/hooks.json", files)
+
+    def test_install_does_not_register_archived_ufast_tools(self):
+        results, _, files = self._run("all")
+        self.assertEqual(results[0].returncode, 0, results[0].stderr)
+        self.assertFalse(any(path.startswith(".nerd/mcp/") for path in files))
 
     def test_reinstall_is_idempotent_and_preserves_existing_hooks(self):
         existing = json.dumps(

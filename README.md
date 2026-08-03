@@ -111,3 +111,20 @@ In this pilot, XFast was 55.39% faster and used 58.50% fewer output tokens.
 
 [Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/xfast-v3-five-cases/) · [Result summary](benchmarks/pilots/xfast-v3-five-cases/result.json)
 <!-- XFAST_BENCHMARK:END -->
+
+<!-- UFAST_BENCHMARK:START -->
+## UFast directional pilot
+
+UFast is archived under [docs/experiments/nerd-ufast](docs/experiments/nerd-ufast/) and is not included in Nerd installs.
+
+Across 2 cases, 1 repetition, and 1 model at Luna-high, both XFast and UFast scored 100.00%. The paired result put UFast 27.71% slower with 44.70% more output tokens.
+
+| Mode | Accuracy | Median latency | Median output tokens |
+| --- | ---: | ---: | ---: |
+| XFast | 100.00% | 43.77s | 1,769.5 |
+| UFast | 100.00% | 54.93s | 2,324.0 |
+
+This is directional evidence only. The isolated run exercised UFast's skill-only fallback path, not its registered `inspect` and `apply_verify` MCP tools.
+
+[Cases](benchmarks/pilots/ufast-v1-two-cases/cases.json) · [Config](benchmarks/pilots/ufast-v1-two-cases/gpt-5.6-luna-high.json) · [Fresh result](benchmarks/pilots/ufast-v1-two-cases/runs/20260803T164208Z-24e573e-gpt-5.6-luna-high/result.json)
+<!-- UFAST_BENCHMARK:END -->

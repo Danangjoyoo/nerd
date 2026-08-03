@@ -65,6 +65,12 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
 
+    def test_ufast_is_archived_outside_public_skills(self):
+        self.assertFalse((ROOT / "skills" / "nerd-ufast").exists())
+        self.assertTrue(
+            (ROOT / "docs" / "experiments" / "nerd-ufast" / "skill" / "SKILL.md").is_file()
+        )
+
     def test_smart_reference_files_match_registry(self):
         references = ROOT / "skills" / "nerd-smart" / "references"
         actual = {path.name for path in references.glob("*.md")}

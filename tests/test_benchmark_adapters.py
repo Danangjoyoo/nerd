@@ -63,6 +63,30 @@ class AdapterCommandTests(unittest.TestCase):
         self.assertIn("-c", command)
         self.assertIn('model_reasoning_effort="xhigh"', command)
 
+    def test_codex_ufast_registers_only_its_bundled_mcp_server(self):
+        run = replace(
+            spec("codex", "gpt-5.6-luna", "medium"),
+            condition="nerd-ufast",
+        )
+        command = get_adapter("codex").build_command(run, "prompt")
+        server = (
+            run.workspace
+            / ".agents"
+            / "skills"
+            / "nerd-ufast"
+            / "scripts"
+            / "mcp_server.py"
+        )
+        self.assertIn('mcp_servers.nerd-ufast-tools.command="python3"', command)
+        self.assertIn(
+            f"mcp_servers.nerd-ufast-tools.args={json.dumps([str(server)])}",
+            command,
+        )
+
+        xfast = replace(run, condition="nerd-xfast")
+        xfast_command = get_adapter("codex").build_command(xfast, "prompt")
+        self.assertFalse(any("mcp_servers.nerd-ufast-tools" in item for item in xfast_command))
+
     def test_claude_command_is_noninteractive_and_persistent_state_is_disabled(self):
         command = get_adapter("claude").build_command(
             spec("claude", "claude-test"), "prompt"
@@ -96,6 +120,8 @@ class AdapterParseTests(unittest.TestCase):
         self.assertEqual(tokens, 42)
         self.assertNotIn("must-redact", repr(events))
         self.assertIn("[REDACTED]", repr(events))
+        self.assertIn("'input_tokens': 100", repr(events))
+        self.assertIn("'output_tokens': 42", repr(events))
 
     def test_claude_json_extracts_result_and_tokens(self):
         stdout = (EVENTS / "claude.json").read_text()

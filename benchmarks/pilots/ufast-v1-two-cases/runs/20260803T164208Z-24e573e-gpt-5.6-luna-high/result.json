@@ -1,0 +1,66 @@
+{
+  "aggregate": {
+    "cases": {
+      "ufast-v1-high-complexity": {
+        "accuracy_delta_points": 0.0,
+        "speed_percent": -14.3787,
+        "token_saved_percent": -2.2776
+      },
+      "ufast-v1-low-complexity": {
+        "accuracy_delta_points": 0.0,
+        "speed_percent": -41.0433,
+        "token_saved_percent": -87.1287
+      }
+    },
+    "delta": {
+      "accuracy_points": 0.0,
+      "speed_percent": -27.711,
+      "token_pairs": 2,
+      "token_saved_percent": -44.7032
+    },
+    "pairs": 2,
+    "ufast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 54.9304,
+      "median_output_tokens": 2324.0,
+      "pass_rate_percent": 100,
+      "runs": 2
+    },
+    "xfast": {
+      "hard_gate_failure_runs": 0,
+      "mean_score": 100.0,
+      "median_latency_seconds": 43.773,
+      "median_output_tokens": 1769.5,
+      "pass_rate_percent": 100,
+      "runs": 2
+    }
+  },
+  "comparison": "ufast-v1-vs-xfast",
+  "controls": {
+    "arms": [
+      "nerd-xfast",
+      "nerd-ufast"
+    ],
+    "cases": 2,
+    "fresh_isolated_agents": true,
+    "models": 1,
+    "repetitions": 1
+  },
+  "created_at": "2026-08-03T16:42:08.176151+00:00",
+  "limitations": [
+    "two coding cases",
+    "one repetition",
+    "one model",
+    "directional evidence only",
+    "individual LLM-call timing and complete runtime tool manifests may be unavailable"
+  ],
+  "provenance": {
+    "codex_version": "codex-cli 0.144.5",
+    "model": "gpt-5.6-luna",
+    "nerd_commit": "24e573e8f2766479ec88f0a79cb1f53bfeaab698",
+    "reasoning_effort": "high"
+  },
+  "run_id": "20260803T164208Z-24e573e-gpt-5.6-luna-high",
+  "schema_version": 1
+}

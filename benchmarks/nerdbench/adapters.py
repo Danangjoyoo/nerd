@@ -10,12 +10,22 @@ from .models import RunSpec
 
 
 SENSITIVE_KEY = re.compile(r"(TOKEN|SECRET|KEY|PASSWORD|AUTH)", re.IGNORECASE)
+SAFE_USAGE_KEYS = {
+    "input_tokens",
+    "cached_input_tokens",
+    "output_tokens",
+    "reasoning_output_tokens",
+}
 
 
 def sanitize(value):
     if isinstance(value, dict):
         return {
-            key: "[REDACTED]" if SENSITIVE_KEY.search(str(key)) else sanitize(item)
+            key: sanitize(item)
+            if str(key) in SAFE_USAGE_KEYS
+            else "[REDACTED]"
+            if SENSITIVE_KEY.search(str(key))
+            else sanitize(item)
             for key, item in value.items()
         }
     if isinstance(value, list):
@@ -50,6 +60,23 @@ def _usage_tokens(event: dict) -> int | None:
         return None
     value = usage.get("output_tokens")
     return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def usage_tokens(events) -> dict[str, int | None]:
+    values = {
+        "input_tokens": None,
+        "cached_input_tokens": None,
+        "output_tokens": None,
+    }
+    for event in events:
+        usage = event.get("usage")
+        if not isinstance(usage, dict):
+            continue
+        for key in values:
+            candidate = usage.get(key)
+            if isinstance(candidate, int) and not isinstance(candidate, bool):
+                values[key] = candidate
+    return values
 
 
 class AgentAdapter(ABC):
@@ -99,8 +126,27 @@ class CodexAdapter(AgentAdapter):
             "nerd-fast-only",
             "xfast-baseline",
             "nerd-xfast",
+            "nerd-ufast",
         }:
             command.extend(["--ignore-user-config", "--ignore-rules"])
+        if spec.condition == "nerd-ufast":
+            server = (
+                spec.workspace
+                / ".agents"
+                / "skills"
+                / "nerd-ufast"
+                / "scripts"
+                / "mcp_server.py"
+            )
+            command.extend(
+                [
+                    "-c",
+                    'mcp_servers.nerd-ufast-tools.command="python3"',
+                    "-c",
+                    "mcp_servers.nerd-ufast-tools.args="
+                    + json.dumps([str(server)]),
+                ]
+            )
         if spec.model:
             command.extend(["--model", spec.model])
         if spec.reasoning_effort:

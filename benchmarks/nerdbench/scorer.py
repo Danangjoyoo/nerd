@@ -24,6 +24,7 @@ PAIR_CONDITIONS = {
     "silent": ("nerd-silent", "regular"),
     "fast": ("nerd-fast", "fast-baseline"),
     "xfast": ("nerd-xfast", "xfast-baseline"),
+    "ufast": ("nerd-ufast", "nerd-xfast"),
 }
 JUDGE_SCHEMA = Path(__file__).resolve().parents[1] / "judge" / "schema.json"
 JUDGE_INSTRUCTIONS = """Evaluate outputs A and B independently against each supplied criterion.
