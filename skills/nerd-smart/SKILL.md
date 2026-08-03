@@ -17,7 +17,7 @@ Skill hooks, mentions, and indirect instructions are not authorization.
 
 ## Foundation
 
-Align the smallest real goal before substantive work. For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md) and use it as internal knowledge, not as another skill.
+Align the smallest real goal before substantive work. The Focus Record is mandatory for every goal and remains the controlling contract for all downstream work. For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md) and use it as internal knowledge, not as another skill.
 
 ## Endpoint Mapping
 
@@ -32,8 +32,8 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | — |
 | **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. | [Behavior spec](references/spec-template.md) / [system design](references/system-design-template.md) |
 | **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | [Overview](references/document-overview-template.md) / [how-to](references/document-how-to-template.md) / [reference](references/document-reference-template.md) |
-| **Plan** | Turn a confirmed outcome into ordered implementation steps. | Create a KISS breakdown, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | Create a KISS breakdown, make the simplest sufficient change, verify it, and stop. | — |
+| **Plan** | Turn a confirmed outcome into ordered implementation steps. | State the mandatory Focus Record. Create a KISS breakdown alongside it, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | State the mandatory Focus Record. Create a KISS breakdown alongside it, make the simplest sufficient change, verify it, and stop. | — |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | — |
 
 Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
@@ -44,9 +44,9 @@ For non-Plan template output, write a file only when persistence is part of the 
 
 ## Focus First
 
-Infer the smallest plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
+Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with a KISS Breakdown or another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
 
-Use at most two clarification rounds. By round two, show this block and ask the user to approve or correct only material errors:
+Use at most two clarification rounds. When clarification is necessary, show the recommended record as soon as the fields support it and no later than round two, then ask the user to approve or correct only material errors:
 
 > **Focus Record**
 > - **Intention:** [Smallest real goal]
@@ -90,7 +90,9 @@ Work only from the active goal's Focus Record. Do not borrow scope, assumptions,
 
 ## KISS Implementation Discipline
 
-Use this template when Endpoint Mapping calls for a KISS breakdown. Fill it from the resolved Focus Record, state it briefly, and proceed without another confirmation when clear:
+Use this template when Endpoint Mapping calls for a KISS breakdown, and only then. Do not add KISS to another endpoint merely because the task involves implementation or simplicity.
+
+KISS is subordinate to Focus and never replaces or abbreviates it. Whenever KISS is used, show the current resolved Focus Record immediately before the KISS Breakdown in the same response or artifact. If a reference template contains KISS but omits the Focus Record, insert the complete Focus Record before KISS. Derive every KISS field from that stated record without changing its intention, expectation, scope, or role. Then state KISS briefly and proceed without another confirmation when clear:
 
 > **KISS Breakdown**
 > - **Required outcome:** [Smallest observable behavior that must change]
