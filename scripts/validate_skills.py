@@ -21,6 +21,8 @@ PUBLIC_SKILLS = (
 REQUIRED_REFERENCES = {
     "nerd-smart": (
         "brainstorming.md",
+        "multi-goal-ledger.md",
+        "principle-selection.md",
         "spec-template.md",
         "system-design-template.md",
         "plan-template.md",
@@ -99,6 +101,30 @@ def _discovered_skill_dirs(skills_root: Path) -> set[str]:
     }
 
 
+def _reference_links(text: str) -> set[str]:
+    return set(
+        re.findall(
+            r"\]\((?:references/)?([^/#)]+\.md)(?:#[^)]+)?\)",
+            text,
+        )
+    )
+
+
+def _reachable_reference_names(body: str, references_root: Path) -> set[str]:
+    reachable: set[str] = set()
+    pending = list(_reference_links(body))
+    while pending:
+        reference = pending.pop()
+        if reference in reachable:
+            continue
+        path = references_root / reference
+        if not path.is_file():
+            continue
+        reachable.add(reference)
+        pending.extend(_reference_links(path.read_text(encoding="utf-8")))
+    return reachable
+
+
 def validate_repository(root: Path) -> list[str]:
     root = root.resolve()
     skills_root = root / "skills"
@@ -159,6 +185,7 @@ def validate_repository(root: Path) -> list[str]:
 
         references_root = skill_dir / "references"
         expected_references = REQUIRED_REFERENCES[name]
+        reachable_references = _reachable_reference_names(body, references_root)
         for reference in expected_references:
             path = references_root / reference
             if not path.is_file():
@@ -171,9 +198,9 @@ def validate_repository(root: Path) -> list[str]:
                 violations.append(
                     f"skills/{name}/references/{reference}: frontmatter is forbidden"
                 )
-            if f"references/{reference}" not in body:
+            if reference not in reachable_references:
                 violations.append(
-                    f"skills/{name}/SKILL.md: missing link references/{reference}"
+                    f"skills/{name}/SKILL.md: missing reachable link references/{reference}"
                 )
 
         if references_root.is_dir():

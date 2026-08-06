@@ -6,6 +6,7 @@ from scripts.validate_skills import (
     PUBLIC_SKILLS,
     REQUIRED_REFERENCES,
     REQUIRED_SCRIPTS,
+    _reachable_reference_names,
     validate_repository,
 )
 
@@ -34,6 +35,8 @@ class SkillStructureTests(unittest.TestCase):
             {
                 "nerd-smart": (
                     "brainstorming.md",
+                    "multi-goal-ledger.md",
+                    "principle-selection.md",
                     "spec-template.md",
                     "system-design-template.md",
                     "plan-template.md",
@@ -79,6 +82,20 @@ class SkillStructureTests(unittest.TestCase):
         references = ROOT / "skills" / "nerd-smart" / "references"
         actual = {path.name for path in references.glob("*.md")}
         self.assertEqual(actual, set(REQUIRED_REFERENCES["nerd-smart"]))
+
+    def test_reference_reachability_follows_lazy_links(self):
+        with tempfile.TemporaryDirectory() as directory:
+            references = Path(directory)
+            (references / "entry.md").write_text(
+                "[Nested](nested.md)", encoding="utf-8"
+            )
+            (references / "nested.md").write_text("# Nested", encoding="utf-8")
+            self.assertEqual(
+                _reachable_reference_names(
+                    "[Entry](references/entry.md)", references
+                ),
+                {"entry.md", "nested.md"},
+            )
 
     def test_superpowers_license_files_are_absent(self):
         self.assertEqual(list(ROOT.rglob("LICENSE.superpowers")), [])

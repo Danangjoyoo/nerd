@@ -36,15 +36,15 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Execute** | Make an authorized change or deliver a confirmed outcome. | State the mandatory Focus Record. Create a principle breakdown alongside it, make the simplest sufficient change, verify it, and stop. | — |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | — |
 
-Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
+Template rules:
 
-For template output, always show the filled artifact in the session; reference files are scaffolds, not output files. For every Plan output, write the filled plan to Markdown before completing the response. Use an explicit user-provided Markdown path or directory when given. Otherwise create and use `~/.agent/tmp/` as the default plan directory. Choose a descriptive non-overwriting `.md` filename, report its absolute path, and never ask whether or where to write the Plan. An explicit session-only or no-file instruction disables this default persistence.
-
-For non-Plan template output, write a file only when persistence is part of the confirmed intention. If the user gives a named directory or Markdown path, use it. If persistence is explicit but no path is given, choose a descriptive non-overwriting `.md` path from an established repository convention when one is evident, otherwise use the current working directory. Report every written path and do not ask a follow-up question. Otherwise keep the artifact session-only. Persistence never changes content or advances the endpoint.
+- Resolve Focus and endpoint first. Templates are optional for tiny outputs, and an explicit user format wins. Load only the matched reference—both Specify references only for combined behavior and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template change the endpoint.
+- Always show the filled artifact in the session; references are scaffolds.
+- Persistence: write Plans to Markdown by default unless the user requests session-only or no-file. Persist other artifacts only when requested. Use a supplied path; otherwise use `~/.agent/tmp/` for Plans or the repository convention or current directory for other artifacts. Choose a descriptive non-overwriting filename, report its absolute path, and never ask where to write it.
 
 ## Focus First
 
-Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with a Principle Breakdown or another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
+Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
 
 Use at most two clarification rounds. When clarification is necessary, show the recommended record as soon as the fields support it and no later than round two, then ask the user to approve or correct only material errors:
 
@@ -58,77 +58,21 @@ Any reply that does not correct a material field accepts the record. Proceed wit
 
 ## Multi-Goal Intake
 
-At the beginning of every request, before resolving focus, scan for two or more independently completable goals. Bullets, numbered items, or separate imperative lines are signals, not proof. Treat an item as a separate goal only when it has its own endpoint or stopping condition. Keep constraints, examples, acceptance criteria, or substeps with their parent goal.
+At the beginning of every request, two or more independently completable outcomes form a goal queue; bullets or separate commands are signals, not proof. Constraints, examples, acceptance criteria, and substeps stay with their parent goal. Before substantive work, load [references/multi-goal-ledger.md](references/multi-goal-ledger.md) and create its ledger.
 
-When multiple goals exist:
+Keep one Focus Record per goal and exactly one goal active. Preserve explicit or listed order unless a hard dependency requires otherwise; confirm reordering only when it conflicts with explicit order or materially changes outcome, safety, cost, or rework.
 
-1. Create one Markdown ledger in the agent's runtime-provided temporary directory; if none is available, use `~/.agent/tmp/`. Use a stable conversation, thread, or task identifier in its name and retain the absolute ledger path until the queue is complete.
-2. Preserve each original command line and its listed position. Add a concise normalized goal beside it. Before writing, redact credential and secret values while retaining useful placeholders. Do not store unrelated conversation.
-3. Write this structure:
+Reread the ledger before each later turn or state transition, update changes immediately, and reconstruct it from explicit user input if missing. Work only from the active record—never inherit another goal's scope, endpoint, principle, or proof. At its endpoint, complete the active goal and activate the next eligible goal. If work drifts, ask whether to switch goals or return.
 
-> **Goal Ledger**
-> - **Path:** [Absolute ledger path]
-> - **Order basis:** [Explicit, listed, or dependency-adjusted with reason]
->
-> **Goal [ID] — [Short name]**
-> - **Source:** [Original bullet, number, or command line]
-> - **Status:** [Queued, active, blocked, done, or cancelled]
-> - **Depends on:** [Goal IDs or none]
-> - **Focus Record:**
->   - **Intention:** [Smallest real goal]
->   - **Expectation:** [One endpoint]
->   - **Scope:** [Only this goal and approved adjacents]
->   - **Role:** [Single best role]
-
-Status is **queued**, **active**, **blocked**, **done**, or **cancelled**. Never collapse independent goals into one Focus Record. Resolve one Focus Record for every goal before substantive work, then keep exactly one goal **active**.
-
-Preserve an explicit user order. When no order is explicit, default to listed order. Reorder only for a hard dependency. If reordering conflicts with the user's order or materially changes outcome, safety, cost, or rework, verify the order with one question before proceeding; otherwise record the dependency and reason in the ledger.
-
-Before starting, resuming, switching, or completing a goal, and at the beginning of every later turn while the queue exists, reread the ledger from its absolute path and treat it as the source of truth. If the ledger is missing or unreadable, reconstruct it from explicit user input and do not continue from memory. When the user adds, removes, reorders, or changes a goal, update the ledger before acting. Record every status and dependency change immediately.
-
-Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, principle, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
-
-Principle selection is per goal, never per queue. Each goal that reaches Plan or Execute runs Principle Selection again from its own evidence, and a goal at any other endpoint selects no principle at all. Never inherit, reuse, or carry forward the previous goal's principle: one goal may resolve to `Comprehensive + DRY` while the next resolves to `KISS`, in the same queue and the same turn.
+Principle selection is per goal: resolve it independently for each active Plan or Execute goal, and select no principle at other endpoints.
 
 ## Principle Selection and Discipline
 
-Use this template when Endpoint Mapping calls for a principle breakdown, and only then. Do not add a principle breakdown to another endpoint merely because the task involves implementation or simplicity. When a goal queue exists, resolve the principle separately for each goal as it becomes active, using only that goal's evidence.
+Apply principle selection only after Focus resolves the active endpoint to **Plan** or **Execute**, including code writing or implementation work. Then load and follow [references/principle-selection.md](references/principle-selection.md). Other endpoints can directly use [references/comprehensive.md](references/comprehensive.md) if the context/topic is complex else optional.
 
-Selection has two independent steps. Run both, in order, and load only the selected references. DRY is never selected on its own.
+For **Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor**, do not evaluate, load, mention, infer, inherit, or let an implementation principle shape reasoning, scope, recommendations, or output. Subject matter never overrides the endpoint: reviewing code remains Review and selects no principle.
 
-**Step 1 — Test DRY.** DRY is a composable modifier, not a scale principle. Add it when either threshold is met in the confirmed scope, and otherwise omit it:
-
-| DRY threshold | Applies when |
-| --- | --- |
-| Rule of three | The same behavior already exists at **three or more** call sites. |
-| Duplicated contract | **Two or more independently maintained copies** of one contract sit across a module or service boundary and will drift apart without a single owner. |
-
-The duplicated-contract threshold is the only exception to the rule of three, because divergence across a boundary is a correctness defect rather than a style preference. Count copies, not boundaries: two copies of a contract on either side of a single boundary already meet it. Below both thresholds, omit DRY and record the accepted trade-off. DRY requires proven existing duplication, never predicted duplication, and the size of the requested edit never overrides the count: three duplicated sites meet the threshold even when the change at each site is a single line. See [dry.md](references/dry.md).
-
-**Step 2 — Choose exactly one scale principle.** KISS, YAGNI, and Comprehensive are mutually exclusive:
-
-| Order | Condition observed in the confirmed scope | Principle | Reference |
-| --- | --- | --- | --- |
-| 1 | Default: a local change that crosses no boundary | **KISS** | [kiss.md](references/kiss.md) |
-| 2 | A one-off script, throwaway automation, or glue code carrying speculative features, configuration, or extension points | **YAGNI** | [yagni.md](references/yagni.md) |
-| 3 | The change crosses modules or services, or alters a durable contract or data shape | **Comprehensive** | [comprehensive.md](references/comprehensive.md) |
-
-When two of these rows appear to hold, take the later row and record the rejected one as an accepted trade-off.
-
-State the result as the scale principle alone, such as `KISS`, or as a pair when Step 1 applied, such as `KISS + DRY` or `Comprehensive + DRY`. Never state `DRY` by itself.
-
-YAGNI never removes work an approved architectural outcome, an explicit requirement, or a correctness or security constraint requires. Comprehensive never licenses speculative features; it licenses the failure handling, migration, observability, and test breadth the architectural change already requires.
-
-The selected principle is subordinate to Focus and never replaces or abbreviates it. Whenever a principle breakdown is used, show the current resolved Focus Record immediately before the Principle Breakdown in the same response or artifact. If a reference template contains the breakdown but omits the Focus Record, insert the complete Focus Record before it. Derive every field from that stated record without changing its intention, expectation, scope, or role. Then state the breakdown briefly and proceed without another confirmation when clear:
-
-> **Principle Breakdown**
-> - **Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY, plus the deciding evidence]
-> - **Required outcome:** [Smallest observable behavior that must change]
-> - **Smallest change:** [Most direct path under the selected principle]
-> - **Proof:** [Focused check that demonstrates the outcome]
-> - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
-
-Treat **Not needed** as out of scope and stop when **Proof** passes.
+When a goal queue exists, apply this gate independently as each goal becomes active; never select a principle for the queue itself.
 
 ## Confirmation Style
 
