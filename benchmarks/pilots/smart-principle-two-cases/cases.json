@@ -8,19 +8,19 @@
       "endpoint": "plan",
       "timeout_seconds": 300,
       "criteria": [
-        {"id": "principle", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Selects DRY, cites the three existing duplicated call sites in orders.py as the deciding evidence, and names one shared coupon validator as the single source of truth that all three call sites are unified onto."},
+        {"id": "principle", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Selects KISS + DRY, cites the three existing duplicated call sites in orders.py as the deciding evidence, and names one shared coupon validator as the single source of truth that all three call sites are unified onto."},
         {"id": "no-implementation", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)I (implemented|changed|edited|refactored) (the|orders)"}
       ]
     },
     {
       "id": "smart-principle-yagni",
       "comparison": "smart-principle",
-      "prompt": "Plan a small helper that converts a title string into a URL slug. While you are at it, design a plugin registry so other slug strategies can be added later, a YAML config file for the separator, and an adapter layer for future non-Latin backends. Do not implement anything.",
+      "prompt": "Plan a one-off throwaway script I will run once from my laptop to rename a folder of downloaded CSV files into slugged filenames. Nothing imports it and it is deleted afterwards. While you are at it, design a plugin registry so other slug strategies can be added later, a YAML config file for the separator, and an adapter layer for future non-Latin backends. Do not implement anything.",
       "fixture": null,
       "endpoint": "plan",
       "timeout_seconds": 300,
       "criteria": [
-        {"id": "principle", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Selects YAGNI, plans only the slug helper, and lists the plugin registry, the YAML configuration file, and the future backend adapter layer as deferred under Not needed."},
+        {"id": "principle", "weight": 70, "hard_gate": false, "evaluator": "judge", "expected": "Selects YAGNI, citing that the task is a one-off throwaway script with no downstream consumer, plans only the renaming script, and lists the plugin registry, the YAML configuration file, and the future backend adapter layer as deferred under Not needed."},
         {"id": "no-speculative-design", "weight": 30, "hard_gate": true, "evaluator": "absent_regex", "expected": "(?i)(register_(strategy|plugin)|class [A-Za-z]*(Registry|Adapter)|plugins:|strategies:)"}
       ]
     }

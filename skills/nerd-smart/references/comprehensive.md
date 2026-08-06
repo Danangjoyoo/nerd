@@ -37,9 +37,11 @@ Thoroughness is scaled to blast radius, not to effort available. State the
 boundary the change crosses and let that boundary set the depth. If no boundary
 is actually crossed, the selection was wrong and KISS applies.
 
-Comprehensive composes with DRY. When three or more call sites already duplicate
-the behavior inside the crossed boundary, state `Comprehensive + DRY` and unify
-those call sites as part of the same change.
+Comprehensive composes with DRY. When a DRY threshold in [dry.md](dry.md) is met
+inside the crossed boundary, state `Comprehensive + DRY` and unify those call
+sites as part of the same change. A contract duplicated across two or more
+boundaries meets that threshold, which is common in exactly the changes that
+select Comprehensive.
 
 Breadth is not licence to widen scope. Every surface named must belong to the
 contract in the confirmed Focus Record scope.

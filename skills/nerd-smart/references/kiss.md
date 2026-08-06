@@ -10,8 +10,8 @@ Use this reference when the selection table resolves to KISS.
   durable contract or data shape; if it does, select Comprehensive instead.
 - The work is not a one-off script carrying speculative surface; if it is,
   select YAGNI instead.
-- The behavior lives at one or two call sites. Count them before choosing; at
-  three or more, add DRY and state the pair as `KISS + DRY`.
+- The behavior lives at one or two call sites. When a DRY threshold in
+  [dry.md](dry.md) is met, add DRY and state the pair as `KISS + DRY`.
 - The future shape of the requirement is unclear, contested, or unstated.
 - A correct, obvious solution already exists on a direct path through existing
   code.

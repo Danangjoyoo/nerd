@@ -92,20 +92,30 @@ Work only from the active goal's Focus Record. Do not borrow scope, assumptions,
 
 Use this template when Endpoint Mapping calls for a principle breakdown, and only then. Do not add a principle breakdown to another endpoint merely because the task involves implementation or simplicity.
 
-Select the principle from the condition observed in the confirmed scope, and load only the selected references:
+Selection has two independent steps. Run both, in order, and load only the selected references. DRY is never selected on its own.
+
+**Step 1 — Test DRY.** DRY is a composable modifier, not a scale principle. Add it when either threshold is met in the confirmed scope, and otherwise omit it:
+
+| DRY threshold | Applies when |
+| --- | --- |
+| Rule of three | The same behavior already exists at **three or more** call sites. |
+| Duplicated contract | A contract is duplicated across **two or more** module or service boundaries and its copies will drift apart without a single owner. |
+
+The duplicated-contract threshold is the only exception to the rule of three, because divergence across a boundary is a correctness defect rather than a style preference. Below both thresholds, omit DRY and record the accepted trade-off. DRY requires proven existing duplication, never predicted duplication, and the size of the requested edit never overrides the count: three duplicated sites meet the threshold even when the change at each site is a single line. See [dry.md](references/dry.md).
+
+**Step 2 — Choose exactly one scale principle.** KISS, YAGNI, and Comprehensive are mutually exclusive:
 
 | Order | Condition observed in the confirmed scope | Principle | Reference |
 | --- | --- | --- | --- |
-| 1 | The same behavior already exists at three or more call sites, one behavior must change in several places, or a cross-module contract will drift | **DRY** | [dry.md](references/dry.md) |
-| 2 | Default: a local change at one or two call sites | **KISS** | [kiss.md](references/kiss.md) |
-| 3 | A one-off script, throwaway automation, or glue code carrying speculative features, configuration, or extension points | **YAGNI** | [yagni.md](references/yagni.md) |
-| 4 | The change crosses modules or services, or alters a durable contract or data shape | **Comprehensive** | [comprehensive.md](references/comprehensive.md) |
+| 1 | Default: a local change that crosses no boundary | **KISS** | [kiss.md](references/kiss.md) |
+| 2 | A one-off script, throwaway automation, or glue code carrying speculative features, configuration, or extension points | **YAGNI** | [yagni.md](references/yagni.md) |
+| 3 | The change crosses modules or services, or alters a durable contract or data shape | **Comprehensive** | [comprehensive.md](references/comprehensive.md) |
 
-Choose exactly one scale principle from KISS, YAGNI, and Comprehensive. They are mutually exclusive: KISS is the default, YAGNI applies only to scripting work, and Comprehensive replaces both when the change is architectural.
+When two of these rows appear to hold, take the later row and record the rejected one as an accepted trade-off.
 
-DRY is separate and composes. Count the call sites first. Add DRY to the selected scale principle whenever three or more call sites already duplicate the behavior, and state the pair as `Comprehensive + DRY` or `KISS + DRY`. The size of the requested edit never overrides the count: three duplicated sites add DRY even when the change at each site is a single line, and a small edit is not evidence of a local change. DRY requires proven existing duplication, never predicted duplication.
+State the result as the scale principle alone, such as `KISS`, or as a pair when Step 1 applied, such as `KISS + DRY` or `Comprehensive + DRY`. Never state `DRY` by itself.
 
-YAGNI never removes work an approved architectural outcome, an explicit requirement, or a correctness or security constraint requires. Comprehensive never licenses speculative features; it licenses the failure handling, migration, observability, and test breadth the architectural change already requires. When rows 2, 3, and 4 still appear to hold, take the later row and record the rejected one as an accepted trade-off.
+YAGNI never removes work an approved architectural outcome, an explicit requirement, or a correctness or security constraint requires. Comprehensive never licenses speculative features; it licenses the failure handling, migration, observability, and test breadth the architectural change already requires.
 
 The selected principle is subordinate to Focus and never replaces or abbreviates it. Whenever a principle breakdown is used, show the current resolved Focus Record immediately before the Principle Breakdown in the same response or artifact. If a reference template contains the breakdown but omits the Focus Record, insert the complete Focus Record before it. Derive every field from that stated record without changing its intention, expectation, scope, or role. Then state the breakdown briefly and proceed without another confirmation when clear:
 
