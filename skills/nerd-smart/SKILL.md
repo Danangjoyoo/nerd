@@ -86,11 +86,13 @@ Preserve an explicit user order. When no order is explicit, default to listed or
 
 Before starting, resuming, switching, or completing a goal, and at the beginning of every later turn while the queue exists, reread the ledger from its absolute path and treat it as the source of truth. If the ledger is missing or unreadable, reconstruct it from explicit user input and do not continue from memory. When the user adds, removes, reorders, or changes a goal, update the ledger before acting. Record every status and dependency change immediately.
 
-Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
+Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, principle, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
+
+Principle selection is per goal, never per queue. Each goal that reaches Plan or Execute runs Principle Selection again from its own evidence, and a goal at any other endpoint selects no principle at all. Never inherit, reuse, or carry forward the previous goal's principle: one goal may resolve to `Comprehensive + DRY` while the next resolves to `KISS`, in the same queue and the same turn.
 
 ## Principle Selection and Discipline
 
-Use this template when Endpoint Mapping calls for a principle breakdown, and only then. Do not add a principle breakdown to another endpoint merely because the task involves implementation or simplicity.
+Use this template when Endpoint Mapping calls for a principle breakdown, and only then. Do not add a principle breakdown to another endpoint merely because the task involves implementation or simplicity. When a goal queue exists, resolve the principle separately for each goal as it becomes active, using only that goal's evidence.
 
 Selection has two independent steps. Run both, in order, and load only the selected references. DRY is never selected on its own.
 

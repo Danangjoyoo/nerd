@@ -190,6 +190,9 @@ class SmartContractTests(unittest.TestCase):
                 "do not continue from memory",
                 "update the ledger before acting",
                 "Do not borrow scope",
+                "endpoint, principle, or proof",
+                "Principle selection is per goal, never per queue",
+                "Never inherit, reuse, or carry forward the previous goal's principle",
             ),
         )
 
