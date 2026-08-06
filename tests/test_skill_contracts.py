@@ -153,54 +153,80 @@ class SmartContractTests(unittest.TestCase):
     def test_multi_goal_intake_persists_and_rereads_ordered_focus_records(self):
         body = skill_body("nerd-smart")
         intake = body.split("## Multi-Goal Intake", 1)[1].split(
-            "## KISS Implementation Discipline", 1
+            "## Principle Selection and Discipline", 1
         )[0]
+        ledger = " ".join(smart_reference_body("multi-goal-ledger.md").split())
 
         assert_terms(
             self,
             intake,
             (
                 "At the beginning of every request",
+                "two or more independently completable outcomes",
+                "bullets or separate commands are signals, not proof",
+                "Constraints, examples, acceptance criteria, and substeps",
+                "references/multi-goal-ledger.md",
+                "one Focus Record per goal",
+                "exactly one goal active",
+                "explicit or listed order",
+                "hard dependency",
+                "Reread the ledger",
+                "reconstruct it from explicit user input if missing",
+                "never inherit another goal's scope, endpoint, principle, or proof",
+                "activate the next eligible goal",
+                "ask whether to switch goals or return",
+                "Principle selection is per goal",
+                "active Plan or Execute goal",
+                "select no principle at other endpoints",
+            ),
+        )
+        assert_terms(
+            self,
+            ledger,
+            (
                 "two or more independently completable goals",
-                "Bullets, numbered items, or separate imperative lines",
-                "constraints, examples, acceptance criteria, or substeps",
                 "runtime-provided temporary directory",
                 "`~/.agent/tmp/`",
                 "stable conversation, thread, or task identifier",
                 "absolute ledger path",
-                "Preserve each original command line",
-                "redact credential and secret values",
+                "Preserve each original command line and its listed position",
+                "Redact credential and secret values",
                 "**Goal Ledger**",
                 "**Order basis:**",
                 "**Source:**",
                 "**Status:**",
                 "**Depends on:**",
                 "queued**, **active**, **blocked**, **done**, or **cancelled",
-                "Never collapse independent goals into one Focus Record",
+                "Never collapse independent goals",
                 "one Focus Record for every goal",
                 "exactly one goal **active**",
-                "Preserve an explicit user order",
+                "Preserve explicit user order",
                 "default to listed order",
                 "hard dependency",
                 "verify the order",
                 "Before starting, resuming, switching, or completing a goal",
                 "reread the ledger",
                 "source of truth",
-                "If the ledger is missing or unreadable",
+                "If it is missing or unreadable",
                 "do not continue from memory",
-                "update the ledger before acting",
-                "Do not borrow scope",
+                "Update the ledger before acting",
+                "borrow scope, assumptions, endpoint, principle, or proof",
+                "Principle selection is per goal, never per queue",
+                "never carry a previous goal's principle forward",
             ),
         )
 
-    def test_kiss_discipline_defines_compact_breakdown(self):
+    def test_principle_discipline_defines_compact_breakdown(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
         )[0]
-        discipline = body.split("## KISS Implementation Discipline", 1)[1].split(
+        discipline = body.split("## Principle Selection and Discipline", 1)[1].split(
             "## Confirmation Style", 1
         )[0]
+        selection = " ".join(
+            smart_reference_body("principle-selection.md").split()
+        )
 
         for endpoint in ("Plan", "Execute"):
             row = next(
@@ -208,15 +234,67 @@ class SmartContractTests(unittest.TestCase):
                 for line in mapping.splitlines()
                 if line.startswith(f"| **{endpoint}** |")
             )
-            self.assertIn("Create a KISS breakdown", row)
+            self.assertIn("Create a principle breakdown", row)
+
+        for endpoint in (
+            "Discuss",
+            "Ideate",
+            "Explore",
+            "Diagnose",
+            "Review",
+            "Specify",
+            "Document",
+            "Monitor",
+        ):
+            row = next(
+                line
+                for line in mapping.splitlines()
+                if line.startswith(f"| **{endpoint}** |")
+            )
+            self.assertNotIn("principle", row.casefold())
 
         assert_terms(
             self,
             discipline,
             (
-                "Use this template when Endpoint Mapping calls for a KISS breakdown",
+                "only after Focus resolves the active endpoint to **Plan** or **Execute**",
+                "code writing or implementation work",
+                "references/principle-selection.md",
+                "Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor",
+                "do not evaluate, load, mention, infer, inherit",
+                "let an implementation principle shape reasoning, scope, recommendations, or output",
+                "Subject matter never overrides the endpoint",
+                "reviewing code remains Review and selects no principle",
+                "apply this gate independently",
+                "never select a principle for the queue itself",
+            ),
+        )
+        assert_terms(
+            self,
+            selection,
+            (
+                "only after the active endpoint resolves to Plan or Execute",
+                "Selection has two independent steps",
+                "DRY is never selected on its own",
+                "Step 1 — Test DRY",
+                "Step 2 — Choose One Scale Principle",
+                "composable modifier, not a scale principle",
+                "Rule of three",
+                "**three or more** call sites",
+                "**Two or more independently maintained copies**",
+                "Count copies, not boundaries",
+                "only exception to the rule of three",
+                "[kiss.md](kiss.md)",
+                "[dry.md](dry.md)",
+                "[yagni.md](yagni.md)",
+                "[comprehensive.md](comprehensive.md)",
+                "mutually exclusive",
+                "`Comprehensive + DRY`",
+                "Never state `DRY` by itself",
+                "proven existing duplication",
                 "resolved Focus Record",
-                "**KISS Breakdown**",
+                "**Principle Breakdown**",
+                "**Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY",
                 "**Required outcome:**",
                 "**Smallest change:**",
                 "**Proof:**",
@@ -252,15 +330,15 @@ class SmartContractTests(unittest.TestCase):
             self,
             mapping,
             (
-                "after the Focus Record is resolved",
-                "templates are optional for tiny outputs",
-                "explicit user format takes precedence",
-                "Load only the matched reference, one by default",
-                "combined specification and system design",
+                "Resolve Focus and endpoint first",
+                "Templates are optional for tiny outputs",
+                "explicit user format wins",
+                "Load only the matched reference",
+                "both Specify references only for combined behavior and system design",
                 "Strip bracketed prompts",
                 "omit irrelevant sections",
                 "mark unknowns",
-                "never let a template advance the endpoint",
+                "never let a template change the endpoint",
             ),
         )
 
@@ -274,22 +352,17 @@ class SmartContractTests(unittest.TestCase):
             self,
             mapping,
             (
-                "always show the filled artifact in the session",
-                "reference files are scaffolds, not output files",
-                "For every Plan output",
-                "write the filled plan to Markdown before completing the response",
-                "explicit user-provided Markdown path or directory",
-                "create and use `~/.agent/tmp/` as the default plan directory",
-                "descriptive non-overwriting `.md` filename",
+                "Always show the filled artifact in the session",
+                "references are scaffolds",
+                "write Plans to Markdown by default",
+                "session-only or no-file",
+                "Persist other artifacts only when requested",
+                "Use a supplied path",
+                "`~/.agent/tmp/` for Plans",
+                "repository convention or current directory",
+                "descriptive non-overwriting filename",
                 "report its absolute path",
-                "never ask whether or where to write the Plan",
-                "session-only or no-file instruction disables this default persistence",
-                "For non-Plan template output",
-                "only when persistence is part of the confirmed intention",
-                "established repository convention",
-                "do not ask a follow-up question",
-                "Otherwise keep the artifact session-only",
-                "Persistence never changes content or advances the endpoint",
+                "never ask where to write it",
             ),
         )
 
@@ -343,7 +416,7 @@ class SmartContractTests(unittest.TestCase):
             ),
             "plan-template.md": (
                 "ordered implementation",
-                "## KISS Breakdown",
+                "## Principle Breakdown",
                 "### Task",
                 "**Files:**",
                 "**Change:**",
@@ -593,7 +666,7 @@ class ExecuteContractTests(unittest.TestCase):
             "## Execute Directly", 1
         )[0]
         rows = re.findall(
-            r"^\| \*\*(Focus Record|KISS|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            r"^\| \*\*(Focus Record|Principle|Current plan|Execution scope|TODOs|Verification)\*\* \|",
             discipline,
             re.MULTILINE,
         )
@@ -619,9 +692,10 @@ class ExecuteContractTests(unittest.TestCase):
             discipline,
             (
                 "| **Focus Record** | Mandatory |",
-                "| **KISS** | Mandatory |",
-                "KISS Breakdown",
-                "derive it internally",
+                "| **Principle** | Mandatory |",
+                "Principle Breakdown",
+                "defaulting to KISS",
+                "derive the breakdown internally",
                 "without adding a user-facing gate",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",

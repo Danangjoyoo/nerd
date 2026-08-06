@@ -19,6 +19,7 @@ from .models import BenchmarkCase, RunResult, RunSpec, ScoreResult
 
 PAIR_CONDITIONS = {
     "smart": ("nerd-smart", "superpowers-brainstorming"),
+    "smart-principle": ("nerd-smart", "nerd-smart-baseline"),
     "surgery": ("nerd-surgery", "superpowers-systematic-debugging"),
     "execute": ("nerd-execute", "superpowers-executing-plans"),
     "silent": ("nerd-silent", "regular"),

@@ -1,0 +1,55 @@
+{
+  "agent_versions": {
+    "claude": "2.1.206 (Claude Code)",
+    "codex": "codex-cli 0.146.0",
+    "cursor": "2026.07.09-a3815c0"
+  },
+  "config": {
+    "agents": [
+      "claude"
+    ],
+    "case_files": [
+      "benchmarks/pilots/smart-principle-two-cases/cases.json"
+    ],
+    "conditions": {
+      "smart-principle": [
+        "nerd-smart-baseline",
+        "nerd-smart"
+      ]
+    },
+    "judge": {
+      "agent": "codex",
+      "model": "gpt-5.6-terra",
+      "reasoning_effort": "xhigh",
+      "timeout_seconds": 120
+    },
+    "models": {
+      "claude": "claude-sonnet-4-6"
+    },
+    "parallelism": 1,
+    "repetitions": 1,
+    "schema_version": 1,
+    "seed": 7152026,
+    "target": {
+      "display_name": "Claude Sonnet 4.6 \u00b7 medium \u00b7 Principle trilogy",
+      "id": "claude-sonnet-4-6-medium",
+      "reasoning_effort": "medium"
+    },
+    "upstream": {
+      "commit": "d884ae04edebef577e82ff7c4e143debd0bbec99",
+      "repository": "https://github.com/obra/superpowers.git",
+      "tag": "v6.1.1",
+      "tag_object": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+    }
+  },
+  "created_at": "2026-08-05T07:22:51.571468+00:00",
+  "nerd_commit": "0eaa5b521a0944fbe5641cea0c9fd2821d1b5ca7",
+  "planned_runs": 4,
+  "platform": "macOS-26.4-arm64-arm-64bit",
+  "publication_state": "pending-score",
+  "python": "3.9.6",
+  "run_id": "20260805T072251Z-0eaa5b5-claude-sonnet-4-6-medium",
+  "smoke": false,
+  "upstream_commit": "d884ae04edebef577e82ff7c4e143debd0bbec99",
+  "upstream_tag_object": "c984ea2e7aeffdcc865784fd6c5e3ab75da0209a"
+}

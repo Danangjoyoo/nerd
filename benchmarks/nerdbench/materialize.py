@@ -35,6 +35,18 @@ LOCAL_CONDITIONS = {
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
     "nerd-ufast": ("nerd-ufast",),
+    "nerd-smart-baseline": ("nerd-smart-baseline",),
+}
+
+# Frozen skill snapshots that live outside skills/. The installed directory name
+# is the key, so a baseline snapshot keeps the same skill identity as its
+# post-change counterpart.
+OUT_OF_TREE_SKILL_SOURCES = {
+    "nerd-ufast": (ROOT / "docs" / "experiments" / "nerd-ufast" / "skill", "nerd-ufast"),
+    "nerd-smart-baseline": (
+        ROOT / "docs" / "experiments" / "nerd-smart-principle-baseline" / "skill",
+        "nerd-smart",
+    ),
 }
 
 UPSTREAM_CONDITIONS = {
@@ -158,14 +170,12 @@ def _install_condition(condition: str, agent: str, destination: Path) -> None:
         raise ValueError(f"unknown benchmark condition: {condition}")
 
     for name in skill_names:
-        source = (
-            ROOT / "docs" / "experiments" / "nerd-ufast" / "skill"
-            if name == "nerd-ufast"
-            else source_root / name
+        source, installed_name = OUT_OF_TREE_SKILL_SOURCES.get(
+            name, (source_root / name, name)
         )
         if not (source / "SKILL.md").is_file():
             raise ValueError(f"condition skill is missing: {source}")
-        shutil.copytree(source, skill_root / name)
+        shutil.copytree(source, skill_root / installed_name)
 
 
 def _initialize_repository(destination: Path) -> None:

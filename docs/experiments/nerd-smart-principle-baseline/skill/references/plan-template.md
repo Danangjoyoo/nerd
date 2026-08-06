@@ -28,11 +28,10 @@ record work already being executed.
 
 - [Required: Record approved requirements, decisions, and source artifacts.]
 
-## Principle Breakdown
+## KISS Breakdown
 
-- **Principle:** [Required: KISS, YAGNI, or Comprehensive, optionally combined with DRY, plus the deciding evidence.]
 - **Required outcome:** [Required: Smallest behavior or artifact that must change.]
-- **Smallest change:** [Required: Most direct path under the selected principle.]
+- **Smallest change:** [Required: Most direct existing path and minimal surface.]
 - **Proof:** [Required: Focused evidence that demonstrates completion.]
 - **Not needed:** [Required: Explicitly excluded abstractions or adjacent work.]
 
