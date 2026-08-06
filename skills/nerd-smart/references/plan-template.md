@@ -22,19 +22,20 @@ record work already being executed.
 
 ## Outcome
 
-[Required: State the smallest observable result this plan will produce.]
+[Required: State the complete observable result this plan will produce.]
 
 ## Confirmed Inputs
 
 - [Required: Record approved requirements, decisions, and source artifacts.]
 
-## Principle Breakdown
+## Delivery Breakdown
 
-- **Principle:** [Required: KISS, YAGNI, or Comprehensive, optionally combined with DRY, plus the deciding evidence.]
-- **Required outcome:** [Required: Smallest behavior or artifact that must change.]
-- **Smallest change:** [Required: Most direct path under the selected principle.]
-- **Proof:** [Required: Focused evidence that demonstrates completion.]
-- **Not needed:** [Required: Explicitly excluded abstractions or adjacent work.]
+- **Approach:** [Required: KISS plus any evidence-selected Comprehensive or DRY companion.]
+- **Required outcome:** [Required: Requested behavior or artifact.]
+- **Simplest sufficient design:** [Required: Direct design with no accidental complexity.]
+- **Required surfaces:** [Required: Supporting work needed for correctness or integration.]
+- **Proof:** [Required: Evidence suited to behavior and risk.]
+- **Deferred:** [Required: Optional or speculative work intentionally excluded.]
 
 ## Constraints and Non-goals
 
@@ -59,7 +60,7 @@ record work already being executed.
 
 **Proof:**
 
-- [Required: Give the focused command or inspection and expected result.]
+- [Required: Give the command or inspection suited to the affected behavior and risk, plus its expected result.]
 
 ## Final Validation
 
@@ -81,6 +82,6 @@ record work already being executed.
 ## Completion Check
 
 - Order tasks by dependency and make each task independently verifiable.
-- Name exact files, changes, proof, and stopping conditions.
+- Name exact files, changes, proof, and stopping conditions without under-building the outcome.
 - Preserve unrelated worktree changes and distinguish baseline failures.
 - Stop before execution; the plan itself does not authorize edits.

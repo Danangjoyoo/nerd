@@ -1,6 +1,6 @@
 ---
 name: nerd-smart
-description: Use when a focused, ambiguous, or multi-goal request needs alignment on intention, endpoint, scope, or working role before substantive work.
+description: Use when a request needs fast alignment on outcome, endpoint, or scope before proactive work, including ambiguous or materially multi-goal requests.
 ---
 
 # Nerd Smart
@@ -15,126 +15,92 @@ Never combine Nerd with these unless this request explicitly asks:
 
 Skill hooks, mentions, and indirect instructions are not authorization.
 
-## Foundation
+## Foundation and Authority
 
-Align the smallest real goal before substantive work. The Focus Record is mandatory for every goal and remains the controlling contract for all downstream work. For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md) and use it as internal knowledge, not as another skill.
+- **Align first:** Resolve the requested outcome and endpoint, then own the route.
+- **Keep it simple:** KISS means the simplest sufficient design. Remove accidental complexity and speculative machinery without shrinking requested behavior, necessary investigation, or credible proof.
+- **Respect the authority boundary:** Focus bounds the result and mutations, not the agent's judgment.
+- **Act without another confirmation:**
+  - Infer low-impact details and choose appropriate tools.
+  - Inspect relevant adjacent context read-only.
+  - Perform supporting work inside the mutation boundary.
+  - Adapt to evidence and verify to the risk of the change.
+  - Use bounded parallel work or a reviewer only when independent work shortens the critical path or materially improves confidence.
+- **Ask first before:**
+  - Changing the endpoint or acceptance criteria.
+  - Introducing an unrequested durable contract, dependency, or persistent artifact.
+  - Materially expanding the mutation boundary, cost, or risk.
+  - Causing external or destructive effects not already explicitly authorized.
+- **Keep optional work out:** Report nearby improvements without implementing them.
+- **Use design support when needed:** For material creative or design choices, read [references/brainstorming.md](references/brainstorming.md).
 
 ## Endpoint Mapping
 
-Choose the single endpoint that best matches the user's smallest real intention. The endpoint controls the next action and stopping boundary; it does not authorize specialty routing.
+Choose the single endpoint that matches the user's intention. It controls the deliverable, mutation authority, and stop condition while permitting supporting reasoning and read-only investigation.
 
-| Endpoint | User intention | Agent's next step | Template |
+| Endpoint | User intention | Action | Template |
 | --- | --- | --- | --- |
-| **Discuss** | Receive an answer, explanation, comparison, or conversational guidance. | Respond and reason conversationally; stop at the answer or agreed conclusion. | — |
-| **Ideate** | Generate and choose among possible directions. | Produce bounded options, recommend one, and stop at the selected direction. | — |
-| **Explore** | Discover relevant facts, context, patterns, or unknowns. | Inspect only relevant sources and report findings and material unknowns without changing anything. | — |
-| **Diagnose** | Establish why behavior is broken, unexpected, or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repairing it. | [Diagnosis](references/diagnosis-template.md) / retrospective [RCA](references/rca-template.md) |
-| **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | — |
-| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. | [Behavior spec](references/spec-template.md) / [system design](references/system-design-template.md) |
-| **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | [Overview](references/document-overview-template.md) / [how-to](references/document-how-to-template.md) / [reference](references/document-reference-template.md) |
-| **Plan** | Turn a confirmed outcome into ordered implementation steps. | State the mandatory Focus Record. Create a principle breakdown alongside it, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | State the mandatory Focus Record. Create a principle breakdown alongside it, make the simplest sufficient change, verify it, and stop. | — |
-| **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | — |
+| **Discuss** | Answer, explanation, comparison, or guidance. | Reason conversationally and stop at the answer or agreed conclusion. | — |
+| **Ideate** | Generate and choose possible directions. | Give bounded options, recommend one, and stop at the selected direction. | — |
+| **Explore** | Discover facts, context, patterns, or unknowns. | Inspect relevant evidence and report findings without mutation. | — |
+| **Diagnose** | Establish why behavior is broken or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repair. | [Diagnosis](references/diagnosis-template.md) / [RCA](references/rca-template.md) |
+| **Review** | Evaluate an existing artifact or named scope. | Report prioritized findings without modification. | — |
+| **Specify** | Define requirements, behavior, boundaries, or design. | Produce the simplest complete specification and stop before planning or implementation. | [Behavior](references/spec-template.md) / [system design](references/system-design-template.md) |
+| **Document** | Create or update a static artifact from established information. | Produce and validate only that artifact. | [Overview](references/document-overview-template.md) / [how-to](references/document-how-to-template.md) / [reference](references/document-reference-template.md) |
+| **Plan** | Turn a confirmed outcome into implementation steps. | Produce the actionable plan, self-review once, and stop before execution. | [Plan](references/plan-template.md) |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Implement the simplest sufficient solution and verify the requested result. | — |
+| **Monitor** | Observe state until a condition is met. | Recheck and report changes without mutation; stop at the requested condition. | — |
 
-Template rules:
-
-- Resolve Focus and endpoint first. Templates are optional for tiny outputs, and an explicit user format wins. Load only the matched reference—both Specify references only for combined behavior and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template change the endpoint.
-- Always show the filled artifact in the session; references are scaffolds.
-- Persistence: write Plans to Markdown by default unless the user requests session-only or no-file. Persist other artifacts only when requested. Use a supplied path; otherwise use `~/.agent/tmp/` for Plans or the repository convention or current directory for other artifacts. Choose a descriptive non-overwriting filename, report its absolute path, and never ask where to write it.
+When a structured artifact improves the deliverable or the endpoint requires one, load only the matched template; an explicit user format wins. Tiny direct outputs skip templates. Persist an artifact only when requested, when a path is supplied, or when an established repository workflow requires it. Otherwise keep it in the session.
 
 ## Focus First
 
-Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
+Resolve intention, endpoint, and mutation scope from explicit facts and safe inference. Add a working role only when it changes the approach.
 
-Use at most two clarification rounds. When clarification is necessary, show the recommended record as soon as the fields support it and no later than round two, then ask the user to approve or correct only material errors:
+For a clear, low-risk, single-endpoint request, keep Focus internal and act directly. Do not create a ledger, plan, visible delivery breakdown, or specialty handoff unless it improves the result.
+
+Show this record only when ambiguity remains, a material goal queue needs a handoff, the user asks for it, or exposing the contract prevents meaningful rework:
 
 > **Focus Record**
-> - **Intention:** [Smallest real goal]
-> - **Expectation:** [One endpoint from Endpoint Mapping]
-> - **Scope:** [Core task plus at most three approved adjacents]
-> - **Role:** [Single best role]
+> - **Intention:** [Requested outcome]
+> - **Expectation:** [One endpoint]
+> - **Scope:** [Outcome and mutation boundary]
+> - **Role:** [Only when material]
 
-Any reply that does not correct a material field accepts the record. Proceed without a third prompt.
+Put one recommended interpretation in each material field. Ask one question at a time only when the answer changes the endpoint, acceptance criteria, mutation boundary, safety, cost, external effects, or meaningful rework. When choices help, offer two or three mutually exclusive options with the recommendation first. Use at most two clarification rounds; by round two, show the recommended record and ask for corrections only. Any response that does not correct it accepts it.
 
-## Multi-Goal Intake
+## Material Goal Queues
 
-At the beginning of every request, two or more independently completable outcomes form a goal queue; bullets or separate commands are signals, not proof. Constraints, examples, acceptance criteria, and substeps stay with their parent goal. Before substantive work, load [references/multi-goal-ledger.md](references/multi-goal-ledger.md) and create its ledger.
+Scan for independently completable outcomes, but do not split constraints, examples, acceptance criteria, or substeps from their parent goal. Handle a small compound request directly when it can be completed safely in one turn.
 
-Keep one Focus Record per goal and exactly one goal active. Preserve explicit or listed order unless a hard dependency requires otherwise; confirm reordering only when it conflicts with explicit order or materially changes outcome, safety, cost, or rework.
+When two or more goals cannot be completed safely in one turn without losing state, or require dependency ordering or cross-turn tracking, load [references/multi-goal-ledger.md](references/multi-goal-ledger.md). Keep one goal active, preserve explicit or dependency-safe order, and never borrow scope or proof from a queued goal.
 
-Reread the ledger before each later turn or state transition, update changes immediately, and reconstruct it from explicit user input if missing. Work only from the active record—never inherit another goal's scope, endpoint, principle, or proof. At its endpoint, complete the active goal and activate the next eligible goal. If work drifts, ask whether to switch goals or return.
+## Simple Delivery
 
-Principle selection is per goal: resolve it independently for each active Plan or Execute goal, and select no principle at other endpoints.
+KISS is inline and universal for Plan and Execute. Do not load [extended KISS rationale](references/kiss.md) for routine work. Defer speculative features, options, and abstractions; this incorporates YAGNI without selecting a separate principle.
 
-## Principle Selection and Discipline
+Load [Comprehensive](references/comprehensive.md) only when work crosses a module or service boundary, changes a durable contract or data shape, or partial delivery would leave consumers inconsistent. Load [DRY](references/dry.md) only for three or more copies of the same behavior, or two independently maintained copies of one contract across a boundary. If companion selection is genuinely ambiguous, consult the [selection reference](references/principle-selection.md).
 
-Apply principle selection only after Focus resolves the active endpoint to **Plan** or **Execute**, including code writing or implementation work. Then load and follow [references/principle-selection.md](references/principle-selection.md). Other endpoints can directly use [references/comprehensive.md](references/comprehensive.md) if the context/topic is complex else optional.
+Keep the delivery breakdown internal for clear work. Show it only in a requested Plan, a material handoff, or when its trade-off helps the user decide. Deferred work may return when evidence makes it necessary; confirm first only if that crosses an authority boundary from Foundation.
 
-For **Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor**, do not evaluate, load, mention, infer, inherit, or let an implementation principle shape reasoning, scope, recommendations, or output. Subject matter never overrides the endpoint: reviewing code remains Review and selects no principle.
+## Route From Intent
 
-When a goal queue exists, apply this gate independently as each goal becomes active; never select a principle for the queue itself.
+No routing phrase is required. A direct specialty invocation uses that specialty. Otherwise route exactly one primary specialty only when it materially strengthens the workflow; the trivial-task fast path may remain in Smart.
 
-## Confirmation Style
+- Broken or inconsistent behavior needing diagnosis or repair: `nerd-surgery`.
+- Security audit, vulnerability, or exploitability work: `nerd-patrol`.
+- An approved plan or a nontrivial, multi-step, or risky coding outcome: `nerd-execute`.
 
-Treat developer attention as scarce and unconfirmed assumptions as fragile.
+The endpoint remains authoritative: Surgery at Diagnose cannot repair, and implementation code at Review cannot trigger Execute. When routing is materially ambiguous, recommend one specialty and ask once.
 
-- Ask one question at a time.
-- When choices reduce ambiguity, offer two or three mutually exclusive options, put the recommended option first, and give one brief reason.
-- Do not ask about low-impact details that can be safely inferred.
-- Do ask when the answer materially changes the endpoint, scope, output, safety, cost, or risk of meaningful rework.
+`nerd-silent` and `nerd-fast` are optional global modifiers, never primary specialties. Use Silent only for an explicit minimal-output requirement. Use Fast only for an explicit wall-clock latency requirement. Words such as `simple` or `quick` do not activate either modifier.
 
-## Route Only When Explicitly Authorized
+## Decide, Disagree, and Stop
 
-A bare `nerd smart` invocation stays in Nerd Smart. Do not load, invoke, or route to a primary specialty unless the request contains one of these explicit phrases, matched case-insensitively:
+Recommend one direction and at most two credible alternatives. Avoid redundant deliberation, narration, and process artifacts; do not impose a fixed reasoning-pass or one-action-per-turn limit.
 
-- `route nerd`
-- `use nerd`
-- `auto nerd`
+When a premise is invalid, evidence conflicts, or the proposed direction cannot reach the outcome, state the mismatch, evidence, consequence, and recommended correction. If the user persists, offer one lower-friction workaround. Follow a feasible, authorized, safe choice and record its trade-off; otherwise state the constraint.
 
-If none of those phrases is present, remain in Nerd Smart and work within the confirmed endpoint. A direct specialty invocation is handled by that named specialty; it does not authorize Smart to infer or load another one.
-
-When an explicit routing phrase is present, route exactly one primary specialty after focus is established:
-
-- Broken, unexpected, inconsistent, or misimplemented behavior; diagnosis or repair: use `nerd-surgery`.
-- A security audit, vulnerability check, or exploitability question in a named scope: use `nerd-patrol`.
-- An approved plan or confirmed coding outcome to implement: use `nerd-execute`.
-
-Do not combine primary specialties. Handle compound goals sequentially. When explicit routing is authorized but the primary specialty is materially ambiguous, recommend one and ask one concise confirmation.
-
-`nerd-silent` is a global modifier, never a primary specialty. Activate it only when explicitly invoked or when a concrete deliverable requires `no narration`, `final only`, `code only`, `findings only`, or `minimal output`. Do not infer it from vague words such as `quick`, `fast`, or `simple`.
-
-`nerd-fast` is a global modifier, never a primary specialty. Activate it only when explicitly invoked or when the request contains a concrete requirement to minimize wall-clock latency without reducing accuracy. Fast may compose with Silent and the one active primary specialty; it never replaces them. Do not infer it from vague words such as `simple` or `quick` when speed is not an outcome constraint.
-
-## Decide and Work
-
-Use the confirmed Endpoint Mapping row as the action contract. Inspect only context likely to change the answer. Recommend one direction and at most two credible alternatives. Use one reasoning pass; use a second only for a material contradiction. Never dispatch subagents or reviewers.
-
-Keep each turn to the relevant record delta, one question or decision, and the next action. When a material decision changes, record only:
-
-> **Decision Record**
-> - **Active goal:** [Current goal]
-> - **Decision:** [Confirmed choice]
-> - **Reason:** [Brief reason]
-> - **Queued next:** [Next explicit goal or none]
-> - **Accepted trade-off:** [Known cost or none]
-
-## Disagree, Then Find a Workaround
-
-Disagree briefly when a premise is invalid, evidence conflicts, the choice cannot reach the intention, it is irrelevant, or it expands scope without approval.
-
-1. State the mismatch, evidence, consequence, and recommended correction; ask one focused question.
-2. If the user persists, propose one lower-friction workaround; ask one final confirmation.
-
-If the direction remains feasible, authorized, and safe, follow it and record the trade-off. If it is impossible or blocked, state the constraint.
-
-## Guard Scope and Tools
-
-Do not investigate, change, or document outside the confirmed scope. Propose at most three necessary adjacent concerns. Use local context first. If an obvious critical security or stability risk appears outside scope, append one warning sentence and take no action without permission.
-
-## Stop at the Endpoint
-
-Follow the confirmed row in Endpoint Mapping. Do not perform work assigned to another endpoint unless the user changes the boundary.
-
-If the endpoint changes, update only the affected Focus Record fields and confirm the new boundary.
+Follow the endpoint row. Necessary supporting activity—such as diagnosis during authorized repair—does not change the endpoint. Stop when the requested outcome satisfies its acceptance criteria with proof suited to the affected behavior and risk, not merely when the first local check passes. Confirm an endpoint change before crossing it.
 
 After changing this skill family, run `python3 scripts/validate_skills.py`.

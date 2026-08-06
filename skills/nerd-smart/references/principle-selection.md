@@ -1,68 +1,44 @@
-# Plan and Execute Principle Selection
+# Optional Delivery Companion Selection
 
 ## Use When
 
-Use this reference only after the active endpoint resolves to Plan or Execute.
-When a goal queue exists, select from only the active goal's evidence. Never use
-this reference for another endpoint or select one principle for an entire queue.
+Use this reference only when a Plan or Execute goal has credible evidence for
+cross-boundary completeness or proven duplication and the right companion is
+unclear. Routine work uses Smart's inline KISS rule and loads no principle
+reference.
+
+KISS always applies. [Extended KISS rationale](kiss.md) is available when its
+meaning is disputed, not as a routine prerequisite. YAGNI's useful rule—defer
+speculative surface—is folded into KISS; [legacy YAGNI rationale](yagni.md) is
+retained only for that explanation and is never selected separately.
 
 ## Selection
 
-Selection has two independent steps. Run both in order and load only the
-selected principle references. DRY is never selected on its own.
+Select from observed evidence:
 
-### Step 1 — Test DRY
+| Evidence | Selection | Reference |
+| --- | --- | --- |
+| Work crosses modules or services, changes a durable contract or data shape, or partial delivery leaves consumers inconsistent. | **KISS + Comprehensive** | [comprehensive.md](comprehensive.md) |
+| The same behavior has three or more maintained copies, or one contract has two independently maintained copies across a boundary. | **KISS + DRY** | [dry.md](dry.md) |
+| Both conditions hold. | **KISS + Comprehensive + DRY** | Load both references. |
+| Neither condition holds. | **KISS** | Load neither reference. |
 
-DRY is a composable modifier, not a scale principle. Add it when either threshold
-is met in the confirmed scope; otherwise omit it.
+Predicted reuse, edit size, and hypothetical future requirements are not
+evidence. Comprehensive determines required delivery breadth; DRY determines
+whether proven duplication needs one owner.
 
-| DRY threshold | Applies when |
-| --- | --- |
-| Rule of three | The same behavior already exists at **three or more** call sites. |
-| Duplicated contract | **Two or more independently maintained copies** of one contract sit across a module or service boundary and will drift apart without a single owner. |
+## Delivery Breakdown
 
-The duplicated-contract threshold is the only exception to the rule of three,
-because divergence across a boundary is a correctness defect rather than a
-style preference. Count copies, not boundaries: two copies on either side of a
-single boundary meet it. Below both thresholds, omit DRY and record the accepted
-trade-off. DRY requires proven existing duplication, never predicted
-duplication, and edit size never overrides the count. See [dry.md](dry.md).
+Keep this internal for clear work. Show it only in a requested Plan, a material
+handoff, or when the trade-off helps the user decide:
 
-### Step 2 — Choose One Scale Principle
+> **Delivery Breakdown**
+> - **Approach:** [KISS plus an evidence-selected companion]
+> - **Required outcome:** [Requested observable result]
+> - **Simplest sufficient design:** [Direct design without accidental complexity]
+> - **Required surfaces:** [Supporting work needed for correctness or integration]
+> - **Proof:** [Evidence suited to behavior and risk]
+> - **Deferred:** [Optional or speculative work excluded]
 
-KISS, YAGNI, and Comprehensive are mutually exclusive:
-
-| Order | Condition observed in the confirmed scope | Principle | Reference |
-| --- | --- | --- | --- |
-| 1 | Default: a local change that crosses no boundary | **KISS** | [kiss.md](kiss.md) |
-| 2 | A one-off script, throwaway automation, or glue code carrying speculative features, configuration, or extension points | **YAGNI** | [yagni.md](yagni.md) |
-| 3 | The change crosses modules or services, or alters a durable contract or data shape | **Comprehensive** | [comprehensive.md](comprehensive.md) |
-
-When two rows appear to hold, take the later row and record the rejected one as
-an accepted trade-off. State the scale principle alone, such as `KISS`, or pair
-it with DRY when Step 1 applied, such as `KISS + DRY` or `Comprehensive + DRY`.
-Never state `DRY` by itself.
-
-YAGNI never removes work required by an approved architectural outcome, explicit
-requirement, or correctness or security constraint. Comprehensive never licenses
-speculative features; it licenses only the failure handling, migration,
-observability, and test breadth the architectural change already requires.
-
-## Principle Breakdown
-
-The selected principle is subordinate to Focus and never replaces or abbreviates
-it. Show the current resolved Focus Record immediately before this breakdown in
-the same response or artifact. Derive every field from that record without
-changing its intention, expectation, scope, or role, then proceed without
-another confirmation when clear:
-
-> **Principle Breakdown**
-> - **Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY, plus the deciding evidence]
-> - **Required outcome:** [Smallest observable behavior that must change]
-> - **Smallest change:** [Most direct path under the selected principle]
-> - **Proof:** [Focused check that demonstrates the outcome]
-> - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
-
-If a template contains the breakdown but omits the Focus Record, insert the
-complete Focus Record before it. Treat **Not needed** as out of scope and stop
-when **Proof** passes.
+Deferred is provisional. Restore an item when evidence makes it necessary, and
+ask first only when doing so crosses Smart's authority boundary.

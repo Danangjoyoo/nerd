@@ -1,53 +1,46 @@
-# Comprehensive Principle Knowledge
+# Comprehensive Companion Knowledge
 
-Use this reference when the selection table resolves to Comprehensive.
+Use this reference alongside KISS only when Smart's cross-boundary trigger
+selects Comprehensive.
 
 ## Use When
 
 - The change crosses a module or service boundary rather than staying inside one
   implementation.
-- It alters a durable contract: an API shape, a persisted data shape, a message
-  schema, or a migration other systems depend on.
+- It alters a durable contract: an API shape, persisted data, a message schema,
+  or a migration other systems depend on.
 - Partial delivery would leave callers, stored data, or downstream consumers in
   an inconsistent state.
-- KISS and YAGNI would under-build the outcome, not simplify it.
+- A merely local proof would not establish the complete outcome.
 
 ## Field Meaning
 
-- **Required outcome:** the whole behavior the boundary must guarantee,
-  including the failure paths, not only the success path.
-- **Smallest change:** the complete set of surfaces the contract touches —
-  producer, consumer, stored shape, and migration — kept minimal per surface but
-  never left partial.
-- **Proof:** coverage proportionate to blast radius: the success path, the
-  relevant failure and rollback paths, and compatibility for existing callers or
-  stored data.
-- **Not needed:** surfaces outside the contract, and depth beyond what the
-  boundary requires.
+- **Required outcome:** the behavior the boundary must guarantee,
+  including relevant failure and compatibility paths.
+- **Simplest sufficient design:** the direct coherent path across producer,
+  consumer, stored shape, and migration surfaces, kept simple at each surface.
+- **Required surfaces:** every surface that must move together to preserve
+  the contract; breadth comes from the existing boundary, not speculation.
+- **Proof:** evidence suited to the boundary and risk, including relevant
+  success, failure, rollback, migration, and compatibility behavior.
+- **Deferred:** surfaces outside the contract and depth beyond what its risk
+  requires.
 
 ## Guardrails
 
-- Comprehensive licenses completeness, never speculation.
-  - It authorizes the error handling, migration, rollback, observability, and
-    test breadth the architectural change already requires.
-  - It does not authorize plugin systems, configuration layers, or extension
-    points for hypothetical futures; those remain YAGNI material regardless of
-    how architectural the task feels.
-- Thoroughness is scaled to blast radius, not to effort available.
-  - State the boundary the change crosses and let that boundary set the depth.
-  - If no boundary is actually crossed, the selection was wrong and KISS
-    applies.
-- Comprehensive composes with DRY.
-  - When a DRY threshold in [dry.md](dry.md) is met inside the crossed
-    boundary, state `Comprehensive + DRY` and unify those call sites as part of
-    the same change.
-  - Two independently maintained copies of one contract across a module or
-    service boundary meet that threshold, which is common in exactly the
-    changes that select Comprehensive.
-- Breadth is not permission to widen scope. Every surface named must belong to
-  the contract in the confirmed Focus Record scope.
+- Comprehensive means coherent delivery across the boundary, not maximal depth. KISS remains authoritative and
+  excludes unnecessary layers, options, and future-facing machinery.
+- It authorizes only the error handling, migration, rollback, observability, and
+  proof breadth the crossed boundary actually requires.
+- Thoroughness scales to blast radius and consequence, not available effort or
+  a desire to appear exhaustive.
+- Read-only investigation may cross the initial named surface to establish the
+  real contract. Mutation remains within the confirmed or clearly implied
+  boundary; material expansion requires confirmation.
+- When a DRY threshold in [dry.md](dry.md) is met inside the crossed boundary,
+  add DRY and unify the proven duplicated contract.
 
 ## Endpoint
 
-- Comprehensive shapes the change; it does not advance the endpoint.
-- Stop when **Proof** passes and treat **Not needed** as out of scope.
+Comprehensive shapes delivery depth; it does not advance the endpoint. Stop
+when the requested outcome passes proof suited to the boundary and its risk.

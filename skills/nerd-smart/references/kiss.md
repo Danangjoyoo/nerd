@@ -1,51 +1,37 @@
-# KISS Principle Knowledge
+# Extended KISS Rationale
 
-Use this reference when the selection table resolves to KISS.
+Smart defines KISS inline; routine Plan and Execute work must not load this
+reference. Use it only when the meaning of simplicity is disputed or a design
+looks small locally while moving complexity elsewhere.
 
-## Use When
+## Meaning
 
-- The change is local and no other scale principle has decisive evidence. KISS
-  is the default scale principle.
-- The change does not cross a module or service boundary and does not alter a
-  durable contract or data shape; if it does, select Comprehensive instead.
-- The work is not a one-off script carrying speculative surface; if it is,
-  select YAGNI instead.
-- The behavior lives at one or two call sites. When a DRY threshold in
-  [dry.md](dry.md) is met, add DRY and state the pair as `KISS + DRY`.
-- The future shape of the requirement is unclear, contested, or unstated.
-- A correct, obvious solution already exists on a direct path through existing
-  code.
+KISS means the simplest sufficient design, not the fewest changed lines, files,
+checks, or minutes. A solution is not simple when it hides coupling, duplicates
+a durable contract, shifts complexity to callers, or omits required failure and
+compatibility behavior.
 
-## Field Meaning
+Prefer the clearest direct path with fewer concepts, dependencies, and new
+boundaries when that path remains correct and maintainable. Do not add layers,
+services, dependencies, generalized interfaces, configuration systems, or
+extension points without an explicit requirement, established convention,
+observed duplication, or concrete correctness, security, or measured
+performance reason.
 
-- **Required outcome:** the smallest observable behavior that must change,
-  stated without reference to structure.
-- **Smallest change:** the most direct existing path, preferring fewer concepts,
-  files, dependencies, and changed boundaries over elegance.
-- **Proof:** the nearest focused check that demonstrates the outcome.
-- **Not needed:** speculative abstractions, refactors, infrastructure, and
-  future features excluded from this change.
+## YAGNI Is Included
 
-## Guardrails
+Defer speculative features, options, backends, hooks, and abstractions. This is
+part of KISS rather than a separately selected workflow. Deferral never removes
+work required by the requested outcome, repository convention, or a correctness,
+security, accessibility, data-integrity, or compatibility constraint.
 
-- KISS is structural, not temporal. It answers what the simplest correct shape
-  is now, not what will be needed later.
-- KISS may leave duplication in place only below every DRY threshold in
-  [dry.md](dry.md).
-  - At one or two call sites inside a single module, record the accepted
-    trade-off rather than pre-abstracting.
-  - At three or more, DRY composes with KISS and the call sites are unified,
-    however small the edit at each site happens to be.
-  - A one-line change repeated three times is duplication, not a local change.
-- The duplicated-contract exception survives KISS.
-  - Two independently maintained copies of one contract across a module or
-    service boundary add DRY even though the count is only two, so `KISS + DRY`
-    is correct there.
-  - Never use the "one or two call sites" allowance to skip that case.
-- Simplicity never overrides correctness, security, or an explicit requirement.
-  A solution that is simpler because it is wrong is not KISS.
+## Whole-Path Simplicity
 
-## Endpoint
+Judge simplicity across the affected path. Investigation, integration work,
+migration, cleanup, and verification remain necessary when evidence requires
+them. A focused check is sufficient only when it proves the requested result at
+the risk of the change.
 
-- KISS shapes the change; it does not advance the endpoint.
-- Stop when **Proof** passes and treat **Not needed** as out of scope.
+Optional nearby improvements stay deferred and may be reported. Restore a
+deferred item when evidence makes it necessary; confirm first only when doing so
+crosses Smart's authority boundary.

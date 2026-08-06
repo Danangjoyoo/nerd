@@ -28,15 +28,15 @@ The helper preserves existing hook configuration and is safe to run again. Codex
 
 | Skill | Description |
 | --- | --- |
-| `nerd-smart` | Aligns intention, endpoint, scope, and one working specialty before substantive work. |
+| `nerd-smart` | Aligns the complete outcome and authorization boundary, then routes and works proactively without overengineering. |
 | `nerd-surgery` | Diagnoses broken behavior from evidence and repairs only at an authorized execute endpoint. |
 | `nerd-patrol` | Examines a confirmed security scope and reports only reachable, evidence-backed findings. |
-| `nerd-execute` | Implements approved plans or confirmed small changes using repository patterns and fresh proof. |
+| `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
 | `nerd-xfast` | Produces the smallest sufficient answer or authorized edit through one immutable action chain, immediate output, and bounded end proof. |
 
-Smart routes one primary specialty; Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor.
+Smart may route one primary specialty when it strengthens the workflow; Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 
 Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
 
