@@ -32,8 +32,8 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | — |
 | **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. | [Behavior spec](references/spec-template.md) / [system design](references/system-design-template.md) |
 | **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | [Overview](references/document-overview-template.md) / [how-to](references/document-how-to-template.md) / [reference](references/document-reference-template.md) |
-| **Plan** | Turn a confirmed outcome into ordered implementation steps. | State the mandatory Focus Record. Create a principle breakdown alongside it, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | State the mandatory Focus Record. Create a principle breakdown alongside it, make the simplest sufficient change, verify it, and stop. | — |
+| **Plan** | Turn a confirmed outcome into ordered implementation steps. | State the mandatory Focus Record. Create a KISS breakdown alongside it, produce only the actionable plan, perform one brief self-review, and stop before execution. | [Plan](references/plan-template.md) |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | State the mandatory Focus Record. Create a KISS breakdown alongside it, make the simplest sufficient change, verify it, and stop. | — |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | — |
 
 Choose templates after the Focus Record is resolved; templates are optional for tiny outputs and an explicit user format takes precedence. Load only the matched reference, one by default; load both Specify references only for a combined specification and system design. Strip bracketed prompts, omit irrelevant sections, mark unknowns, and never let a template advance the endpoint.
@@ -44,7 +44,7 @@ For non-Plan template output, write a file only when persistence is part of the 
 
 ## Focus First
 
-Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with a Principle Breakdown or another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
+Before any substantive work, infer the smallest plausible goal, finalize four fields, and show the completed Focus Record in the session. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. The Focus Record is mandatory even for clear, tiny, or direct requests; never omit it, leave it implicit, or replace it with a KISS Breakdown or another artifact. When every field is clear, show the record and proceed without asking for approval. Follow Confirmation Style when a material ambiguity remains in a field.
 
 Use at most two clarification rounds. When clarification is necessary, show the recommended record as soon as the fields support it and no later than round two, then ask the user to approve or correct only material errors:
 
@@ -88,31 +88,15 @@ Before starting, resuming, switching, or completing a goal, and at the beginning
 
 Work only from the active goal's Focus Record. Do not borrow scope, assumptions, endpoint, or proof from queued goals. At the active endpoint, update its status, reread the ledger, and activate the next eligible goal. If the active goal drifts, ask whether to switch or return and record the answer before acting.
 
-## Principle Selection and Discipline
+## KISS Implementation Discipline
 
-Use this template when Endpoint Mapping calls for a principle breakdown, and only then. Do not add a principle breakdown to another endpoint merely because the task involves implementation or simplicity.
+Use this template when Endpoint Mapping calls for a KISS breakdown, and only then. Do not add KISS to another endpoint merely because the task involves implementation or simplicity.
 
-Select the principle from the condition observed in the confirmed scope, and load only the selected references:
+KISS is subordinate to Focus and never replaces or abbreviates it. Whenever KISS is used, show the current resolved Focus Record immediately before the KISS Breakdown in the same response or artifact. If a reference template contains KISS but omits the Focus Record, insert the complete Focus Record before KISS. Derive every KISS field from that stated record without changing its intention, expectation, scope, or role. Then state KISS briefly and proceed without another confirmation when clear:
 
-| Order | Condition observed in the confirmed scope | Principle | Reference |
-| --- | --- | --- | --- |
-| 1 | The same behavior already exists at three or more call sites, one behavior must change in several places, or a cross-module contract will drift | **DRY** | [dry.md](references/dry.md) |
-| 2 | Default: a local change at one or two call sites | **KISS** | [kiss.md](references/kiss.md) |
-| 3 | A one-off script, throwaway automation, or glue code carrying speculative features, configuration, or extension points | **YAGNI** | [yagni.md](references/yagni.md) |
-| 4 | The change crosses modules or services, or alters a durable contract or data shape | **Comprehensive** | [comprehensive.md](references/comprehensive.md) |
-
-Choose exactly one scale principle from KISS, YAGNI, and Comprehensive. They are mutually exclusive: KISS is the default, YAGNI applies only to scripting work, and Comprehensive replaces both when the change is architectural.
-
-DRY is separate and composes. Count the call sites first. Add DRY to the selected scale principle whenever three or more call sites already duplicate the behavior, and state the pair as `Comprehensive + DRY` or `KISS + DRY`. The size of the requested edit never overrides the count: three duplicated sites add DRY even when the change at each site is a single line, and a small edit is not evidence of a local change. DRY requires proven existing duplication, never predicted duplication.
-
-YAGNI never removes work an approved architectural outcome, an explicit requirement, or a correctness or security constraint requires. Comprehensive never licenses speculative features; it licenses the failure handling, migration, observability, and test breadth the architectural change already requires. When rows 2, 3, and 4 still appear to hold, take the later row and record the rejected one as an accepted trade-off.
-
-The selected principle is subordinate to Focus and never replaces or abbreviates it. Whenever a principle breakdown is used, show the current resolved Focus Record immediately before the Principle Breakdown in the same response or artifact. If a reference template contains the breakdown but omits the Focus Record, insert the complete Focus Record before it. Derive every field from that stated record without changing its intention, expectation, scope, or role. Then state the breakdown briefly and proceed without another confirmation when clear:
-
-> **Principle Breakdown**
-> - **Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY, plus the deciding evidence]
+> **KISS Breakdown**
 > - **Required outcome:** [Smallest observable behavior that must change]
-> - **Smallest change:** [Most direct path under the selected principle]
+> - **Smallest change:** [Most direct existing path and minimal change surface]
 > - **Proof:** [Focused check that demonstrates the outcome]
 > - **Not needed:** [Speculative abstractions, refactors, infrastructure, or future features]
 

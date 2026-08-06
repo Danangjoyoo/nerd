@@ -153,7 +153,7 @@ class SmartContractTests(unittest.TestCase):
     def test_multi_goal_intake_persists_and_rereads_ordered_focus_records(self):
         body = skill_body("nerd-smart")
         intake = body.split("## Multi-Goal Intake", 1)[1].split(
-            "## KISS Implementation Discipline", 1
+            "## Principle Selection and Discipline", 1
         )[0]
 
         assert_terms(
@@ -193,12 +193,12 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_kiss_discipline_defines_compact_breakdown(self):
+    def test_principle_discipline_defines_compact_breakdown(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
         )[0]
-        discipline = body.split("## KISS Implementation Discipline", 1)[1].split(
+        discipline = body.split("## Principle Selection and Discipline", 1)[1].split(
             "## Confirmation Style", 1
         )[0]
 
@@ -208,15 +208,28 @@ class SmartContractTests(unittest.TestCase):
                 for line in mapping.splitlines()
                 if line.startswith(f"| **{endpoint}** |")
             )
-            self.assertIn("Create a KISS breakdown", row)
+            self.assertIn("Create a principle breakdown", row)
 
         assert_terms(
             self,
             discipline,
             (
-                "Use this template when Endpoint Mapping calls for a KISS breakdown",
+                "Use this template when Endpoint Mapping calls for a principle breakdown",
+                "Choose exactly one scale principle from KISS, YAGNI, and Comprehensive",
+                "references/kiss.md",
+                "references/dry.md",
+                "references/yagni.md",
+                "references/comprehensive.md",
+                "KISS is the default",
+                "YAGNI applies only to scripting work",
+                "Comprehensive replaces both when the change is architectural",
+                "DRY is separate and composes",
+                "`Comprehensive + DRY`",
+                "Count the call sites",
+                "proven existing duplication",
                 "resolved Focus Record",
-                "**KISS Breakdown**",
+                "**Principle Breakdown**",
+                "**Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY",
                 "**Required outcome:**",
                 "**Smallest change:**",
                 "**Proof:**",
@@ -343,7 +356,7 @@ class SmartContractTests(unittest.TestCase):
             ),
             "plan-template.md": (
                 "ordered implementation",
-                "## KISS Breakdown",
+                "## Principle Breakdown",
                 "### Task",
                 "**Files:**",
                 "**Change:**",
@@ -593,7 +606,7 @@ class ExecuteContractTests(unittest.TestCase):
             "## Execute Directly", 1
         )[0]
         rows = re.findall(
-            r"^\| \*\*(Focus Record|KISS|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            r"^\| \*\*(Focus Record|Principle|Current plan|Execution scope|TODOs|Verification)\*\* \|",
             discipline,
             re.MULTILINE,
         )
@@ -619,9 +632,10 @@ class ExecuteContractTests(unittest.TestCase):
             discipline,
             (
                 "| **Focus Record** | Mandatory |",
-                "| **KISS** | Mandatory |",
-                "KISS Breakdown",
-                "derive it internally",
+                "| **Principle** | Mandatory |",
+                "Principle Breakdown",
+                "defaulting to KISS",
+                "derive the breakdown internally",
                 "without adding a user-facing gate",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",

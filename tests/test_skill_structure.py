@@ -42,6 +42,10 @@ class SkillStructureTests(unittest.TestCase):
                     "document-reference-template.md",
                     "diagnosis-template.md",
                     "rca-template.md",
+                    "kiss.md",
+                    "dry.md",
+                    "yagni.md",
+                    "comprehensive.md",
                 ),
                 "nerd-surgery": (
                     "systematic-debugging.md",

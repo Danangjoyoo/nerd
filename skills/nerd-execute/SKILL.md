@@ -51,8 +51,8 @@ Use this template internally. Do not display or narrate a conditional item unles
 | Item | Requirement | Rule |
 | --- | --- | --- |
 | **Focus Record** | Mandatory | Read and obey the resolved intention, endpoint, scope, and role. Never infer around an unresolved field. |
-| **KISS** | Mandatory | Read and obey Nerd Smart's KISS Breakdown. If the handoff contains only the Focus Record, derive it internally before editing without adding a user-facing gate. |
-| **Current plan** | Conditional | If the user created or approved a plan in the current context, read it once and execute its remaining work under KISS. Preserve its outcome and constraints, but simplify steps that add unevidenced complexity. Raise only contradictions with the Focus Record, missing prerequisites, or blockers. Otherwise, do not search for, request, or create a plan. |
+| **Principle** | Mandatory | Read and obey Nerd Smart's Principle Breakdown and its selected principle. If the handoff contains only the Focus Record, derive the breakdown internally before editing, defaulting to KISS, without adding a user-facing gate. |
+| **Current plan** | Conditional | If the user created or approved a plan in the current context, read it once and execute its remaining work under the selected principle. Preserve its outcome and constraints, but simplify steps that add unevidenced complexity. Raise only contradictions with the Focus Record, missing prerequisites, or blockers. Otherwise, do not search for, request, or create a plan. |
 | **Execution scope** | Conditional | Inherit the Focus Record scope. Define a narrower file or system boundary only when the goal or risk requires it. |
 | **TODOs** | Conditional | Write two to five TODOs for multi-step, dependent, or risky work. For a small direct change, execute without a checklist. |
 | **Verification** | Conditional | Run the smallest relevant check when behavior, risk, or a completion claim needs proof. When no proportionate check is available, skip it and report **Not verified**. |
@@ -61,7 +61,7 @@ Use this template internally. Do not display or narrate a conditional item unles
 
 Begin immediately once the Focus Record is resolved. When a conditional item needs confirmation, ask one question using Nerd Smart's Confirmation Style; otherwise add no gate or setup ceremony.
 
-Apply KISS throughout execution. Start with the most direct existing path and prefer fewer concepts, files, dependencies, and changed boundaries. Do not add an abstraction, layer, service, dependency, configuration system, or generalized interface unless required by an explicit requirement, an established repository convention, observed evidence, or a concrete correctness, security, or measured performance constraint.
+Apply KISS throughout execution unless the Principle Breakdown selected DRY or YAGNI, then apply that principle instead. Start with the most direct existing path and prefer fewer concepts, files, dependencies, and changed boundaries. Do not add an abstraction, layer, service, dependency, configuration system, or generalized interface unless required by an explicit requirement, an established repository convention, observed evidence, or a concrete correctness, security, or measured performance constraint.
 
 Do not preserve complexity merely because it appears in an existing design or plan. When a simpler path satisfies the same Focus Record, constraints, and proof, simplify the plan and implement that path. Ask only if simplification would change an approved outcome or constraint.
 

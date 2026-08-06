@@ -4,3 +4,4 @@ benchmarks/.cache/
 benchmarks/work/
 benchmarks/results/*
 !benchmarks/results/.gitkeep
+.DS_Store

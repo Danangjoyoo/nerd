@@ -196,6 +196,28 @@ class MaterializationTests(unittest.TestCase):
             for skill in ("nerd-smart", "nerd-execute", "nerd-fast"):
                 self.assertTrue((installed / skill / "SKILL.md").is_file())
 
+    def test_smart_baseline_condition_installs_the_frozen_snapshot(self):
+        from benchmarks.nerdbench.materialize import ROOT, materialize_run
+
+        case_item = load_cases(CASES / "smart.json")[0]
+        snapshot = (
+            ROOT / "docs" / "experiments" / "nerd-smart-principle-baseline" / "skill"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = materialize_run(
+                case_item,
+                "nerd-smart-baseline",
+                "claude",
+                Path(directory) / "baseline",
+            )
+            installed = workspace / ".claude" / "skills" / "nerd-smart" / "SKILL.md"
+            self.assertTrue(installed.is_file())
+            self.assertEqual(
+                installed.read_text(encoding="utf-8"),
+                (snapshot / "SKILL.md").read_text(encoding="utf-8"),
+            )
+            self.assertNotIn("Principle Breakdown", installed.read_text(encoding="utf-8"))
+
     def test_upstream_commit_mismatch_is_rejected(self):
         from benchmarks.nerdbench.materialize import verify_superpowers_checkout
 

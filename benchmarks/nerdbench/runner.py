@@ -40,7 +40,18 @@ CONDITION_SKILLS = {
     "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
     "nerd-ufast": ("nerd-ufast",),
+    # The frozen snapshot installs as nerd-smart, so both arms receive an
+    # identical invocation and differ only in the skill body.
+    "nerd-smart-baseline": ("nerd-smart",),
 }
+# Plan-endpoint cases persist artifacts to shared /tmp, which the agent
+# addresses by name and TMPDIR cannot redirect. A leftover file lets the next
+# run read the previous run's plan instead of solving the task. Remove only
+# these exact benchmark-owned paths; never glob a shared directory, which would
+# race against unrelated work on the same machine.
+PRERUN_CLEANUP_PATHS = (
+    Path("/tmp/orders-coupon-min-length-plan.md"),
+)
 ISOLATED_CODEX_CONDITIONS = {
     "raw-agent",
     "nerd-fast-only",
@@ -198,23 +209,30 @@ def isolated_codex_environment(
     environ: dict[str, str] | None = None,
 ):
     environment = dict(os.environ if environ is None else environ)
-    if spec.agent != "codex" or spec.condition not in ISOLATED_CODEX_CONDITIONS:
-        yield environment
-        return
+    # Every run gets a private scratch directory. Plan-endpoint runs persist
+    # artifacts to the runtime temporary directory, so a shared one lets run N
+    # read run N-1's plan and skip the task.
+    with tempfile.TemporaryDirectory(prefix="nerd-benchmark-scratch-") as scratch:
+        for key in ("TMPDIR", "TMP", "TEMP"):
+            environment[key] = scratch
 
-    source_home = Path(
-        environment.get("CODEX_HOME", str(Path.home() / ".codex"))
-    ).resolve()
-    with tempfile.TemporaryDirectory(
-        prefix="nerd-fast-benchmark-codex-"
-    ) as temporary:
-        isolated_home = Path(temporary)
-        auth = source_home / "auth.json"
-        if auth.is_file():
-            (isolated_home / "auth.json").symlink_to(auth)
-        environment["CODEX_HOME"] = str(isolated_home)
-        environment["HOME"] = str(isolated_home)
-        yield environment
+        if spec.agent != "codex" or spec.condition not in ISOLATED_CODEX_CONDITIONS:
+            yield environment
+            return
+
+        source_home = Path(
+            environment.get("CODEX_HOME", str(Path.home() / ".codex"))
+        ).resolve()
+        with tempfile.TemporaryDirectory(
+            prefix="nerd-fast-benchmark-codex-"
+        ) as temporary:
+            isolated_home = Path(temporary)
+            auth = source_home / "auth.json"
+            if auth.is_file():
+                (isolated_home / "auth.json").symlink_to(auth)
+            environment["CODEX_HOME"] = str(isolated_home)
+            environment["HOME"] = str(isolated_home)
+            yield environment
 
 
 def _git_output(args: list[str], cwd: Path = ROOT) -> str:
@@ -271,8 +289,21 @@ def _timeout_text(value: str | bytes | None) -> str:
     return value
 
 
+def _clear_leaked_artifacts() -> list[str]:
+    removed = []
+    for path in PRERUN_CLEANUP_PATHS:
+        try:
+            if path.is_file():
+                path.unlink()
+                removed.append(str(path))
+        except OSError:
+            continue
+    return removed
+
+
 def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
     materialize_run(case, spec.condition, spec.agent, spec.workspace)
+    leaked = _clear_leaked_artifacts()
     prompt = condition_prompt(spec.condition, case.prompt)
     adapter = get_adapter(spec.agent)
     command = adapter.build_command(spec, prompt)
@@ -300,6 +331,12 @@ def execute_run(case: BenchmarkCase, spec: RunSpec) -> tuple[RunResult, str]:
 
     command_results = {}
     recorded_events = list(events)
+    if leaked:
+        # Visible in the evidence: this run started with another run's artifact
+        # present, so earlier results for the same case are suspect.
+        recorded_events.append(
+            {"type": "benchmark.cleared_leaked_artifacts", "paths": leaked}
+        )
     for proof in _proof_commands(case):
         proof_started = time.monotonic()
         result = subprocess.run(
@@ -414,7 +451,7 @@ def _smoke_specs(specs: tuple[RunSpec, ...]) -> tuple[RunSpec, ...]:
         comparison = spec.run_id.split("--", 1)[0]
         if spec.agent != smoke_agent or spec.repetition != 1:
             continue
-        if spec.case_id != SMOKE_CASES[comparison]:
+        if spec.case_id != SMOKE_CASES.get(comparison):
             continue
         chosen.append(spec)
     return tuple(chosen)

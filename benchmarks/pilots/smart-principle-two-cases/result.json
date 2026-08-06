@@ -1,0 +1,122 @@
+{
+  "caveats": [
+    "1 repetition per cell; no significance can be claimed. Baseline variance alone spans the full score range observed.",
+    "output_tokens are completion tokens only; the raw record has no input-token field.",
+    "The judge criteria are strict about a literal 'Not needed' section, which both arms often omit, so the YAGNI case discriminates format compliance as much as principle choice.",
+    "Plan-endpoint file persistence interacts badly with the harness: it caused a cross-run /tmp leak (now cleaned per run) and voided one opus run via a write-approval prompt."
+  ],
+  "conditions": {
+    "BASE": "nerd-smart-baseline (frozen 0eaa5b5, no trilogy)",
+    "CHANGE": "nerd-smart (KISS/DRY/YAGNI trilogy)"
+  },
+  "findings": [
+    "Only one genuine positive: opus-4.8-medium YAGNI case, CHANGE 100.0 vs BASE 30.0 (judge: CHANGE listed the registry, YAML config, and adapter layer under Not needed; BASE deferred them without the section).",
+    "Sonnet-4.6-medium showed no separation on either case: all four runs scored 30.0.",
+    "BASELINE IS NON-DETERMINISTIC AT n=1: in an earlier clean run the sonnet baseline scored 100 on the dry case (extracted a shared validator); in this run the identical baseline scored 30. An earlier claim that the trilogy caused a regression was baseline variance, and is retracted.",
+    "Across both clean sonnet runs the CHANGE arm chose KISS on the dry case and emitted the pre-change 'KISS Breakdown' block name rather than the new 'Principle Breakdown' format, despite the updated skill being verified present in the workspace.",
+    "The DRY case never produced a pass in any arm or model, so the ordered-selection-table fix remains unproven.",
+    "Hard gates (no premature implementation, no speculative design) passed in all 8 runs."
+  ],
+  "pilot": "smart-principle-two-cases",
+  "repetitions": 1,
+  "targets": {
+    "claude-opus-4-8-medium": {
+      "cases": {
+        "dry": {
+          "BASE": {
+            "final_text_chars": 1379,
+            "hard_gates_failed": [],
+            "latency_seconds": 76.3,
+            "output_tokens": 2694,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          },
+          "CHANGE": {
+            "final_text_chars": 131,
+            "hard_gates_failed": [],
+            "latency_seconds": 91.5,
+            "output_tokens": 3653,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          }
+        },
+        "yagni": {
+          "BASE": {
+            "final_text_chars": 1407,
+            "hard_gates_failed": [],
+            "latency_seconds": 36.7,
+            "output_tokens": 1412,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          },
+          "CHANGE": {
+            "final_text_chars": 1733,
+            "hard_gates_failed": [],
+            "latency_seconds": 33.2,
+            "output_tokens": 1343,
+            "principle_criterion": true,
+            "score": 100.0,
+            "started_contaminated": false
+          }
+        }
+      },
+      "run_dir": "benchmarks/results/20260805T075517Z-0eaa5b5-claude-opus-4-8-medium"
+    },
+    "claude-sonnet-4-6-medium": {
+      "cases": {
+        "dry": {
+          "BASE": {
+            "final_text_chars": 323,
+            "hard_gates_failed": [],
+            "latency_seconds": 77.8,
+            "output_tokens": 2327,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          },
+          "CHANGE": {
+            "final_text_chars": 1171,
+            "hard_gates_failed": [],
+            "latency_seconds": 77.0,
+            "output_tokens": 2410,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          }
+        },
+        "yagni": {
+          "BASE": {
+            "final_text_chars": 1474,
+            "hard_gates_failed": [],
+            "latency_seconds": 36.0,
+            "output_tokens": 1152,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          },
+          "CHANGE": {
+            "final_text_chars": 1540,
+            "hard_gates_failed": [],
+            "latency_seconds": 64.3,
+            "output_tokens": 2403,
+            "principle_criterion": false,
+            "score": 30.0,
+            "started_contaminated": false
+          }
+        }
+      },
+      "run_dir": "benchmarks/results/20260805T075048Z-0eaa5b5-claude-sonnet-4-6-medium"
+    }
+  },
+  "voided_runs": [
+    {
+      "arm": "CHANGE",
+      "case": "dry",
+      "reason": "final_text is a 131-char write-approval prompt; the plan was produced in-session but not captured by the adapter, so the judge scored no deliverable",
+      "target": "claude-opus-4-8-medium"
+    }
+  ]
+}
