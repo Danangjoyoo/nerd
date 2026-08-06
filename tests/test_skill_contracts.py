@@ -34,34 +34,28 @@ class SmartContractTests(unittest.TestCase):
         "rca-template.md",
     )
 
-    def test_bare_smart_stays_in_smart_without_loading_specialties(self):
+    def test_routes_from_intent_and_keeps_a_trivial_task_fast_path(self):
         body = skill_body("nerd-smart")
-        metadata = (SKILLS / "nerd-smart" / "agents" / "openai.yaml").read_text()
         assert_terms(
             self,
             body,
             (
-                "A bare `nerd smart` invocation stays in Nerd Smart",
-                "Do not load, invoke, or route to a primary specialty",
-                "`route nerd`",
-                "`use nerd`",
-                "`auto nerd`",
-                "If none of those phrases is present, remain in Nerd Smart",
-                "A direct specialty invocation is handled by that named specialty",
+                "## Route From Intent",
+                "No routing phrase is required",
+                "A direct specialty invocation uses that specialty",
+                "route exactly one primary specialty only when it materially strengthens the workflow",
+                "the trivial-task fast path may remain in Smart",
+                "The endpoint remains authoritative",
             ),
         )
         frontmatter = body.split("---", 2)[1]
-        self.assertIn("multi-goal request", frontmatter)
-        self.assertIn("working role before substantive work", frontmatter)
-        self.assertNotIn("appropriate Nerd specialty", frontmatter)
-        self.assertIn("Multi-goal focus", metadata)
-        self.assertIn("opt-in specialty routing", metadata)
-        self.assertNotIn(
-            "Route exactly one primary specialty after focus is established",
-            body,
-        )
+        self.assertIn("fast alignment", frontmatter)
+        self.assertIn("proactive work", frontmatter)
+        self.assertIn("materially multi-goal requests", frontmatter)
+        for obsolete in ("`route nerd`", "`use nerd`", "`auto nerd`"):
+            self.assertNotIn(obsolete, body)
 
-    def test_explicit_nerd_routing_selects_one_specialty_and_global_modifiers(self):
+    def test_intent_routing_selects_one_specialty_and_global_modifiers(self):
         body = skill_body("nerd-smart")
         assert_terms(
             self,
@@ -77,21 +71,52 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_preserves_focus_and_decision_records(self):
+    def test_foundation_preserves_bounded_initiative_and_scope(self):
+        body = skill_body("nerd-smart")
+        foundation = body.split("## Foundation and Authority", 1)[1].split(
+            "## Endpoint Mapping", 1
+        )[0]
+
+        assert_terms(
+            self,
+            foundation,
+            (
+                "Resolve the requested outcome and endpoint, then own the route",
+                "KISS means the simplest sufficient design",
+                "without shrinking requested behavior, necessary investigation, or credible proof",
+                "Focus bounds the result and mutations, not the agent's judgment",
+                "Infer low-impact details and choose appropriate tools",
+                "Inspect relevant adjacent context read-only",
+                "Perform supporting work inside the mutation boundary",
+                "Adapt to evidence and verify to the risk of the change",
+                "Use bounded parallel work or a reviewer",
+                "Changing the endpoint or acceptance criteria",
+                "Introducing an unrequested durable contract, dependency, or persistent artifact",
+                "Materially expanding the mutation boundary, cost, or risk",
+                "external or destructive effects not already explicitly authorized",
+                "Report nearby improvements without implementing them",
+            ),
+        )
+
+    def test_keeps_focus_internal_for_clear_work_and_exposes_it_when_needed(self):
         body = skill_body("nerd-smart")
         assert_terms(
             self,
             body,
             (
                 "**Focus Record**",
-                "**Decision Record**",
                 "**Intention:**",
                 "**Expectation:**",
                 "**Scope:**",
                 "**Role:**",
+                "Add a working role only when it changes the approach",
+                "keep Focus internal and act directly",
+                "Show this record only when ambiguity remains",
+                "**Role:** [Only when material]",
                 "at most two clarification rounds",
             ),
         )
+        self.assertNotIn("**Decision Record**", body)
 
     def test_centralizes_behavior_in_exactly_ten_endpoint_mappings(self):
         body = skill_body("nerd-smart")
@@ -115,45 +140,54 @@ class SmartContractTests(unittest.TestCase):
                 "Plan",
                 "Execute",
                 "Monitor",
-                "The endpoint controls the next action and stopping boundary",
-                "does not authorize specialty routing",
-                "one brief self-review",
+                "controls the deliverable, mutation authority, and stop condition",
+                "supporting reasoning and read-only investigation",
+                "self-review once",
             ),
         )
         self.assertIn(
-            "**Expectation:** [One endpoint from Endpoint Mapping]",
+            "**Expectation:** [One endpoint]",
             body,
         )
-        stop_rule = body.split("## Stop at the Endpoint", 1)[1]
-        self.assertIn("Follow the confirmed row in Endpoint Mapping", stop_rule)
-        self.assertNotIn("- Discuss or ideate", stop_rule)
+        stop_rule = body.split("## Decide, Disagree, and Stop", 1)[1]
+        assert_terms(
+            self,
+            stop_rule,
+            (
+                "do not impose a fixed reasoning-pass or one-action-per-turn limit",
+                "Follow the endpoint row",
+                "Necessary supporting activity",
+                "proof suited to the affected behavior and risk",
+                "not merely when the first local check passes",
+                "Confirm an endpoint change before crossing it",
+            ),
+        )
 
     def test_confirmation_style_balances_question_cost_and_risk(self):
         body = skill_body("nerd-smart")
-        confirmation = body.split("## Confirmation Style", 1)[1].split(
-            "## Route Only When Explicitly Authorized", 1
+        confirmation = body.split("## Focus First", 1)[1].split(
+            "## Material Goal Queues", 1
         )[0]
 
         assert_terms(
             self,
             confirmation,
             (
-                "Ask one question at a time",
+                "Ask one question at a time only when the answer changes",
+                "acceptance criteria",
+                "mutation boundary",
+                "external effects",
                 "two or three mutually exclusive options",
-                "recommended option first",
-                "Do not ask about low-impact details",
-                "Do ask when the answer materially changes",
+                "recommendation first",
+                "Use at most two clarification rounds",
+                "Any response that does not correct it accepts it",
             ),
         )
-        focus = body.split("## Focus First", 1)[1].split(
-            "## Confirmation Style", 1
-        )[0]
-        self.assertIn("Follow Confirmation Style", focus)
 
-    def test_multi_goal_intake_persists_and_rereads_ordered_focus_records(self):
+    def test_material_goal_queues_persist_and_reread_ordered_focus_records(self):
         body = skill_body("nerd-smart")
-        intake = body.split("## Multi-Goal Intake", 1)[1].split(
-            "## Principle Selection and Discipline", 1
+        intake = body.split("## Material Goal Queues", 1)[1].split(
+            "## Simple Delivery", 1
         )[0]
         ledger = " ".join(smart_reference_body("multi-goal-ledger.md").split())
 
@@ -161,34 +195,28 @@ class SmartContractTests(unittest.TestCase):
             self,
             intake,
             (
-                "At the beginning of every request",
-                "two or more independently completable outcomes",
-                "bullets or separate commands are signals, not proof",
-                "Constraints, examples, acceptance criteria, and substeps",
+                "independently completable outcomes",
+                "do not split constraints, examples, acceptance criteria, or substeps",
+                "small compound request directly",
+                "two or more goals cannot be completed safely in one turn",
+                "dependency ordering or cross-turn tracking",
                 "references/multi-goal-ledger.md",
-                "one Focus Record per goal",
-                "exactly one goal active",
-                "explicit or listed order",
-                "hard dependency",
-                "Reread the ledger",
-                "reconstruct it from explicit user input if missing",
-                "never inherit another goal's scope, endpoint, principle, or proof",
-                "activate the next eligible goal",
-                "ask whether to switch goals or return",
-                "Principle selection is per goal",
-                "active Plan or Execute goal",
-                "select no principle at other endpoints",
+                "Keep one goal active",
+                "explicit or dependency-safe order",
+                "never borrow scope or proof from a queued goal",
             ),
         )
         assert_terms(
             self,
             ledger,
             (
-                "two or more independently completable goals",
+                "material goal queue",
+                "two or more independently completable outcomes",
+                "small compound request",
                 "runtime-provided temporary directory",
                 "`~/.agent/tmp/`",
                 "stable conversation, thread, or task identifier",
-                "absolute ledger path",
+                "retain the absolute path until the queue is complete",
                 "Preserve each original command line and its listed position",
                 "Redact credential and secret values",
                 "**Goal Ledger**",
@@ -198,7 +226,7 @@ class SmartContractTests(unittest.TestCase):
                 "**Depends on:**",
                 "queued**, **active**, **blocked**, **done**, or **cancelled",
                 "Never collapse independent goals",
-                "one Focus Record for every goal",
+                "one Focus Record for every material goal",
                 "exactly one goal **active**",
                 "Preserve explicit user order",
                 "default to listed order",
@@ -210,100 +238,82 @@ class SmartContractTests(unittest.TestCase):
                 "If it is missing or unreadable",
                 "do not continue from memory",
                 "Update the ledger before acting",
-                "borrow scope, assumptions, endpoint, principle, or proof",
-                "Principle selection is per goal, never per queue",
-                "never carry a previous goal's principle forward",
+                "borrow scope, assumptions, endpoint, delivery approach, or proof",
+                "Companion selection is per active Plan or Execute goal, never per queue",
+                "Do not carry a previous goal's delivery approach forward",
             ),
         )
 
-    def test_principle_discipline_defines_compact_breakdown(self):
+    def test_simple_delivery_uses_inline_kiss_and_lazy_evidence_companions(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
         )[0]
-        discipline = body.split("## Principle Selection and Discipline", 1)[1].split(
-            "## Confirmation Style", 1
+        delivery = body.split("## Simple Delivery", 1)[1].split(
+            "## Route From Intent", 1
         )[0]
         selection = " ".join(
             smart_reference_body("principle-selection.md").split()
         )
 
-        for endpoint in ("Plan", "Execute"):
-            row = next(
-                line
-                for line in mapping.splitlines()
-                if line.startswith(f"| **{endpoint}** |")
-            )
-            self.assertIn("Create a principle breakdown", row)
-
-        for endpoint in (
-            "Discuss",
-            "Ideate",
-            "Explore",
-            "Diagnose",
-            "Review",
-            "Specify",
-            "Document",
-            "Monitor",
-        ):
-            row = next(
-                line
-                for line in mapping.splitlines()
-                if line.startswith(f"| **{endpoint}** |")
-            )
-            self.assertNotIn("principle", row.casefold())
+        plan_row = next(
+            line for line in mapping.splitlines() if line.startswith("| **Plan** |")
+        )
+        execute_row = next(
+            line
+            for line in mapping.splitlines()
+            if line.startswith("| **Execute** |")
+        )
+        self.assertIn("actionable plan", plan_row)
+        self.assertIn("simplest sufficient solution", execute_row)
 
         assert_terms(
             self,
-            discipline,
+            delivery,
             (
-                "only after Focus resolves the active endpoint to **Plan** or **Execute**",
-                "code writing or implementation work",
+                "KISS is inline and universal for Plan and Execute",
+                "Do not load [extended KISS rationale]",
+                "for routine work",
+                "Defer speculative features, options, and abstractions",
+                "incorporates YAGNI without selecting a separate principle",
+                "Load [Comprehensive]",
+                "crosses a module or service boundary",
+                "changes a durable contract or data shape",
+                "partial delivery would leave consumers inconsistent",
+                "Load [DRY]",
+                "three or more copies of the same behavior",
+                "two independently maintained copies of one contract across a boundary",
                 "references/principle-selection.md",
-                "Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor",
-                "do not evaluate, load, mention, infer, inherit",
-                "let an implementation principle shape reasoning, scope, recommendations, or output",
-                "Subject matter never overrides the endpoint",
-                "reviewing code remains Review and selects no principle",
-                "apply this gate independently",
-                "never select a principle for the queue itself",
+                "Keep the delivery breakdown internal for clear work",
+                "Deferred work may return when evidence makes it necessary",
             ),
         )
         assert_terms(
             self,
             selection,
             (
-                "only after the active endpoint resolves to Plan or Execute",
-                "Selection has two independent steps",
-                "DRY is never selected on its own",
-                "Step 1 — Test DRY",
-                "Step 2 — Choose One Scale Principle",
-                "composable modifier, not a scale principle",
-                "Rule of three",
-                "**three or more** call sites",
-                "**Two or more independently maintained copies**",
-                "Count copies, not boundaries",
-                "only exception to the rule of three",
-                "[kiss.md](kiss.md)",
-                "[dry.md](dry.md)",
-                "[yagni.md](yagni.md)",
-                "[comprehensive.md](comprehensive.md)",
-                "mutually exclusive",
-                "`Comprehensive + DRY`",
-                "Never state `DRY` by itself",
-                "proven existing duplication",
-                "resolved Focus Record",
-                "**Principle Breakdown**",
-                "**Principle:** [KISS, YAGNI, or Comprehensive, optionally combined with DRY",
+                "Routine work uses Smart's inline KISS rule and loads no principle reference",
+                "KISS always applies",
+                "YAGNI's useful rule",
+                "folded into KISS",
+                "never selected separately",
+                "**KISS + Comprehensive**",
+                "**KISS + DRY**",
+                "**KISS + Comprehensive + DRY**",
+                "Predicted reuse, edit size, and hypothetical future requirements are not evidence",
+                "**Delivery Breakdown**",
+                "**Approach:**",
                 "**Required outcome:**",
-                "**Smallest change:**",
+                "**Simplest sufficient design:**",
+                "**Required surfaces:**",
                 "**Proof:**",
-                "**Not needed:**",
-                "proceed without another confirmation when clear",
-                "Treat **Not needed** as out of scope",
-                "stop when **Proof** passes",
+                "**Deferred:**",
+                "Deferred is provisional",
+                "ask first only when doing so crosses Smart's authority boundary",
             ),
         )
+        self.assertNotIn("**Principle Breakdown**", selection)
+        self.assertNotIn("**Not needed:**", selection)
 
     def test_uses_internal_brainstorming_reference(self):
         body = skill_body("nerd-smart")
@@ -317,7 +327,7 @@ class SmartContractTests(unittest.TestCase):
         )[0]
         self.assertNotIn("## Use Endpoint Templates", body)
         self.assertIn(
-            "| Endpoint | User intention | Agent's next step | Template |",
+            "| Endpoint | User intention | Action | Template |",
             mapping,
         )
 
@@ -330,19 +340,14 @@ class SmartContractTests(unittest.TestCase):
             self,
             mapping,
             (
-                "Resolve Focus and endpoint first",
-                "Templates are optional for tiny outputs",
-                "explicit user format wins",
-                "Load only the matched reference",
-                "both Specify references only for combined behavior and system design",
-                "Strip bracketed prompts",
-                "omit irrelevant sections",
-                "mark unknowns",
-                "never let a template change the endpoint",
+                "When a structured artifact improves the deliverable or the endpoint requires one",
+                "load only the matched template",
+                "an explicit user format wins",
+                "Tiny direct outputs skip templates",
             ),
         )
 
-    def test_template_artifacts_persist_plans_by_default_without_asking(self):
+    def test_template_artifacts_persist_only_when_requested_or_required(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
@@ -352,19 +357,14 @@ class SmartContractTests(unittest.TestCase):
             self,
             mapping,
             (
-                "Always show the filled artifact in the session",
-                "references are scaffolds",
-                "write Plans to Markdown by default",
-                "session-only or no-file",
-                "Persist other artifacts only when requested",
-                "Use a supplied path",
-                "`~/.agent/tmp/` for Plans",
-                "repository convention or current directory",
-                "descriptive non-overwriting filename",
-                "report its absolute path",
-                "never ask where to write it",
+                "Persist an artifact only when requested",
+                "when a path is supplied",
+                "when an established repository workflow requires it",
+                "Otherwise keep it in the session",
             ),
         )
+        self.assertNotIn("write Plans to Markdown by default", mapping)
+        self.assertNotIn("`~/.agent/tmp/` for Plans", mapping)
 
     def test_endpoint_templates_share_safe_adaptation_contract(self):
         references = SKILLS / "nerd-smart" / "references"
@@ -416,7 +416,12 @@ class SmartContractTests(unittest.TestCase):
             ),
             "plan-template.md": (
                 "ordered implementation",
-                "## Principle Breakdown",
+                "complete observable result",
+                "## Delivery Breakdown",
+                "**Approach:**",
+                "**Simplest sufficient design:**",
+                "**Required surfaces:**",
+                "**Deferred:**",
                 "### Task",
                 "**Files:**",
                 "**Change:**",
@@ -509,8 +514,9 @@ class SurgeryContractTests(unittest.TestCase):
             body,
             (
                 "resolved Focus Record",
-                "all four fields are explicit",
+                "intention, endpoint, and scope are explicit",
                 "endpoint is **Diagnose** or **Execute**",
+                "Role is required only when it changes the approach",
                 "Do not investigate or repair before the record is resolved",
             ),
         )
@@ -666,7 +672,7 @@ class ExecuteContractTests(unittest.TestCase):
             "## Execute Directly", 1
         )[0]
         rows = re.findall(
-            r"^\| \*\*(Focus Record|Principle|Current plan|Execution scope|TODOs|Verification)\*\* \|",
+            r"^\| \*\*(Focus Record|Delivery|Current plan|Execution scope|TODOs|Verification)\*\* \|",
             discipline,
             re.MULTILINE,
         )
@@ -679,12 +685,15 @@ class ExecuteContractTests(unittest.TestCase):
                 "<INHERITANCE>",
                 "<FAST-TRACK>",
                 "resolved Focus Record",
-                "all four fields are explicit",
+                "intention, endpoint, and mutation scope are explicit",
                 "endpoint is **Execute**",
                 "no material ambiguity remains",
+                "Role is required only when it changes the approach",
                 "resolve one material question before continuing",
                 "Use this template internally",
-                "Execute inline without subagents",
+                "Execute directly",
+                "use bounded parallel work only for independent subtasks",
+                "retain responsibility for integration",
             ),
         )
         assert_terms(
@@ -692,11 +701,11 @@ class ExecuteContractTests(unittest.TestCase):
             discipline,
             (
                 "| **Focus Record** | Mandatory |",
-                "| **Principle** | Mandatory |",
-                "Principle Breakdown",
-                "defaulting to KISS",
-                "derive the breakdown internally",
-                "without adding a user-facing gate",
+                "Obey Role when present; its omission never blocks clear work",
+                "| **Delivery** | Mandatory |",
+                "Apply Smart's inline KISS rule",
+                "Load Comprehensive or DRY only when their evidence trigger is met",
+                "Keep the breakdown internal unless a Plan, handoff, or decision requires it",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",
                 "do not search for, request, or create a plan",
@@ -704,7 +713,7 @@ class ExecuteContractTests(unittest.TestCase):
                 "| **TODOs** | Conditional |",
                 "two to five TODOs",
                 "| **Verification** | Conditional |",
-                "smallest relevant check",
+                "proof suited to the affected behavior and risk",
                 "**Not verified**",
             ),
         )
@@ -722,8 +731,11 @@ class ExecuteContractTests(unittest.TestCase):
             execution,
             (
                 "Apply KISS throughout execution",
-                "most direct existing path",
-                "fewer concepts, files, dependencies, and changed boundaries",
+                "add Comprehensive or DRY only when selected by evidence",
+                "Defer speculative surface as part of KISS",
+                "clearest direct existing path",
+                "fewer concepts, dependencies, and new boundaries",
+                "when they do not reduce correctness or maintainability",
                 "Do not add an abstraction, layer, service, dependency",
                 "an explicit requirement",
                 "an established repository convention",
@@ -731,26 +743,36 @@ class ExecuteContractTests(unittest.TestCase):
                 "a concrete correctness, security, or measured performance constraint",
                 "Do not preserve complexity merely because it appears",
                 "simplify the plan",
+                "including adjacent callers, callees, configuration, and dependencies when relevant",
+                "Read-only evidence gathering does not expand the mutation boundary",
             ),
         )
 
-    def test_executes_with_minimal_test_recovery_and_completion_evidence(self):
+    def test_executes_with_risk_suited_proof_and_evidence_driven_recovery(self):
         body = skill_body("nerd-execute")
         assert_terms(
             self,
             body,
             (
-                "write or update one focused test",
+                "start with a focused test",
                 "confirm the expected failure",
-                "implement the minimum change",
+                "implement the simplest sufficient change",
+                "Add affected integration or risk checks when credible proof requires them",
+                "run validation suited to the change",
                 "pre-edit baseline only when",
-                "two evidence-driven correction attempts",
+                "record what the evidence disproved",
+                "choose the next discriminating check or correction",
+                "Stop only at a real blocker",
+                "no viable in-scope path remains",
+                "required authority or access is missing",
+                "Never stop merely because an attempt count was reached",
                 "Do not claim a check passed without fresh output",
                 "**Done:**",
                 "**Verified by:**",
                 "**Not verified**",
             ),
         )
+        self.assertNotIn("at most two evidence-driven correction attempts", body)
 
     def test_uses_exactly_ten_optional_generic_proof_mappings(self):
         body = skill_body("nerd-execute")
