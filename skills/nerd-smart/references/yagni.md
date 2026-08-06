@@ -26,25 +26,25 @@ Use this reference when the selection table resolves to YAGNI.
 
 ## Guardrails
 
-YAGNI is temporal, not structural. It answers whether to build something now,
-while KISS answers what shape to build.
-
-YAGNI never removes work required by an approved architectural outcome, an
-explicit requirement, an established repository convention, or a correctness,
-security, or measured performance constraint. Reserve it for scripting work. A
-change that crosses a module or service boundary, or alters a durable contract
-or data shape, selects Comprehensive instead, however small it looks.
-
-Deferral is a recommendation, not a silent deletion. When the user asked for the
-speculative surface directly, state the mismatch and the recommended reduction
-and ask once before dropping it.
-
-Asking never replaces the deliverable. Produce the breakdown and the endpoint's
-output for the required behavior in the same response, list every deferred item
-under **Not needed**, and put the question after them. A response that only
-raises the objection has skipped the endpoint.
+- YAGNI is temporal, not structural. It answers whether to build something now,
+  while KISS answers what shape to build.
+- YAGNI never removes work required by an approved architectural outcome, an
+  explicit requirement, an established repository convention, or a correctness,
+  security, or measured performance constraint.
+- Reserve it for scripting work. A change that crosses a module or service
+  boundary, or alters a durable contract or data shape, selects Comprehensive
+  instead, however small it looks.
+- Deferral is a recommendation, not a silent deletion. When the user asked for
+  the speculative surface directly, state the mismatch and the recommended
+  reduction and ask once before dropping it.
+- Asking never replaces the deliverable.
+  - Produce the breakdown and the endpoint's output for the required behavior in
+    the same response.
+  - List every deferred item under **Not needed**, and put the question after
+    them.
+  - A response that only raises the objection has skipped the endpoint.
 
 ## Endpoint
 
-YAGNI shapes the change; it does not advance the endpoint. Stop when **Proof**
-passes and treat **Not needed** as out of scope.
+- YAGNI shapes the change; it does not advance the endpoint.
+- Stop when **Proof** passes and treat **Not needed** as out of scope.

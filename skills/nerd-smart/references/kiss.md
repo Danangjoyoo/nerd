@@ -28,25 +28,24 @@ Use this reference when the selection table resolves to KISS.
 
 ## Guardrails
 
-KISS is structural, not temporal. It answers what the simplest correct shape is
-now, not what will be needed later.
-
-KISS may leave duplication in place only below every DRY threshold in
-[dry.md](dry.md). At one or two call sites inside a single module, record the
-accepted trade-off rather than pre-abstracting. At three or more, DRY composes
-with KISS and the call sites are unified, however small the edit at each site
-happens to be. A one-line change repeated three times is duplication, not a
-local change.
-
-The duplicated-contract exception survives KISS. Two independently maintained
-copies of one contract across a module or service boundary add DRY even though
-the count is only two, so `KISS + DRY` is correct there. Never use the "one or
-two call sites" allowance to skip that case.
-
-Simplicity never overrides correctness, security, or an explicit requirement. A
-solution that is simpler because it is wrong is not KISS.
+- KISS is structural, not temporal. It answers what the simplest correct shape
+  is now, not what will be needed later.
+- KISS may leave duplication in place only below every DRY threshold in
+  [dry.md](dry.md).
+  - At one or two call sites inside a single module, record the accepted
+    trade-off rather than pre-abstracting.
+  - At three or more, DRY composes with KISS and the call sites are unified,
+    however small the edit at each site happens to be.
+  - A one-line change repeated three times is duplication, not a local change.
+- The duplicated-contract exception survives KISS.
+  - Two independently maintained copies of one contract across a module or
+    service boundary add DRY even though the count is only two, so `KISS + DRY`
+    is correct there.
+  - Never use the "one or two call sites" allowance to skip that case.
+- Simplicity never overrides correctness, security, or an explicit requirement.
+  A solution that is simpler because it is wrong is not KISS.
 
 ## Endpoint
 
-KISS shapes the change; it does not advance the endpoint. Stop when **Proof**
-passes and treat **Not needed** as out of scope.
+- KISS shapes the change; it does not advance the endpoint.
+- Stop when **Proof** passes and treat **Not needed** as out of scope.

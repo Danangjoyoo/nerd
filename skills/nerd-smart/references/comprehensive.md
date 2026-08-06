@@ -27,26 +27,27 @@ Use this reference when the selection table resolves to Comprehensive.
 
 ## Guardrails
 
-Comprehensive licenses completeness, never speculation. It authorizes the error
-handling, migration, rollback, observability, and test breadth the architectural
-change already requires. It does not authorize plugin systems, configuration
-layers, or extension points for hypothetical futures; those remain YAGNI
-material regardless of how architectural the task feels.
-
-Thoroughness is scaled to blast radius, not to effort available. State the
-boundary the change crosses and let that boundary set the depth. If no boundary
-is actually crossed, the selection was wrong and KISS applies.
-
-Comprehensive composes with DRY. When a DRY threshold in [dry.md](dry.md) is met
-inside the crossed boundary, state `Comprehensive + DRY` and unify those call
-sites as part of the same change. A contract duplicated across two or more
-boundaries meets that threshold, which is common in exactly the changes that
-select Comprehensive.
-
-Breadth is not licence to widen scope. Every surface named must belong to the
-contract in the confirmed Focus Record scope.
+- Comprehensive licenses completeness, never speculation.
+  - It authorizes the error handling, migration, rollback, observability, and
+    test breadth the architectural change already requires.
+  - It does not authorize plugin systems, configuration layers, or extension
+    points for hypothetical futures; those remain YAGNI material regardless of
+    how architectural the task feels.
+- Thoroughness is scaled to blast radius, not to effort available.
+  - State the boundary the change crosses and let that boundary set the depth.
+  - If no boundary is actually crossed, the selection was wrong and KISS
+    applies.
+- Comprehensive composes with DRY.
+  - When a DRY threshold in [dry.md](dry.md) is met inside the crossed
+    boundary, state `Comprehensive + DRY` and unify those call sites as part of
+    the same change.
+  - Two independently maintained copies of one contract across a module or
+    service boundary meet that threshold, which is common in exactly the
+    changes that select Comprehensive.
+- Breadth is not permission to widen scope. Every surface named must belong to
+  the contract in the confirmed Focus Record scope.
 
 ## Endpoint
 
-Comprehensive shapes the change; it does not advance the endpoint. Stop when
-**Proof** passes and treat **Not needed** as out of scope.
+- Comprehensive shapes the change; it does not advance the endpoint.
+- Stop when **Proof** passes and treat **Not needed** as out of scope.
