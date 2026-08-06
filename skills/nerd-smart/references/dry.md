@@ -12,8 +12,10 @@ Exactly one of these two thresholds must be met. There is no third trigger.
 - **Rule of three.** The same behavior already exists at three or more call
   sites in the confirmed scope, and the evidence is observed rather than
   predicted.
-- **Duplicated contract.** A contract is duplicated across two or more module or
-  service boundaries and its copies will drift apart without a single owner.
+- **Duplicated contract.** Two or more independently maintained copies of one
+  contract sit across a module or service boundary and will drift apart without
+  a single owner. Count copies, not boundaries: two copies on either side of a
+  single boundary already meet this threshold.
 
 The duplicated-contract threshold is the only exception to the rule of three. It
 exists because divergence across a boundary is a correctness defect, not a style
@@ -40,7 +42,8 @@ stay separate.
 DRY requires proven existing duplication. Predicted duplication and an
 anticipated third caller are never sufficient. A second occurrence is not
 sufficient either, unless it is the duplicated-contract case above, where two
-copies across a boundary do meet the threshold. When no threshold is met, omit
+independently maintained copies across a module or service boundary do meet the
+threshold. When no threshold is met, omit
 DRY and record the trade-off instead.
 
 DRY is not a licence to build a framework, plugin system, or configuration layer

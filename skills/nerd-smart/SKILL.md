@@ -99,9 +99,9 @@ Selection has two independent steps. Run both, in order, and load only the selec
 | DRY threshold | Applies when |
 | --- | --- |
 | Rule of three | The same behavior already exists at **three or more** call sites. |
-| Duplicated contract | A contract is duplicated across **two or more** module or service boundaries and its copies will drift apart without a single owner. |
+| Duplicated contract | **Two or more independently maintained copies** of one contract sit across a module or service boundary and will drift apart without a single owner. |
 
-The duplicated-contract threshold is the only exception to the rule of three, because divergence across a boundary is a correctness defect rather than a style preference. Below both thresholds, omit DRY and record the accepted trade-off. DRY requires proven existing duplication, never predicted duplication, and the size of the requested edit never overrides the count: three duplicated sites meet the threshold even when the change at each site is a single line. See [dry.md](references/dry.md).
+The duplicated-contract threshold is the only exception to the rule of three, because divergence across a boundary is a correctness defect rather than a style preference. Count copies, not boundaries: two copies of a contract on either side of a single boundary already meet it. Below both thresholds, omit DRY and record the accepted trade-off. DRY requires proven existing duplication, never predicted duplication, and the size of the requested edit never overrides the count: three duplicated sites meet the threshold even when the change at each site is a single line. See [dry.md](references/dry.md).
 
 **Step 2 — Choose exactly one scale principle.** KISS, YAGNI, and Comprehensive are mutually exclusive:
 
