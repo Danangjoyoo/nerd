@@ -1202,19 +1202,75 @@ class XFastContractTests(unittest.TestCase):
             body,
             (
                 "selection is finished",
-                "Use one reasoning pass",
+                "Do not talk before acting, expose thinking, or narrate reasoning",
+                "Emit only requested outputs and the required Finish lines",
                 "simplest sufficient solution",
                 "recommend one KISS direction",
                 "at most two credible alternatives",
                 "Every action must directly produce the requested output, unlock a named write, or select final proof",
                 "one narrow discovery batch",
                 "Stop reading when the smallest sufficient output or complete write set is known",
+                "Batch tooling",
+                "`rg ... && rg ...`",
+                "`grep ... && grep ...`",
+                "minimum fact → maximum output → immediate write",
+                "reuse fact → immediate write",
+                "Never rediscover a sufficient fact",
                 "single-agent",
                 "For a non-write request",
                 "smallest decision-ready answer",
                 "one structured, single-agent multi-file patch",
                 "Do not dispatch subagents or reviewers",
                 "Do not inspect, compile, lint, test, review, narrate, or clean up between writes",
+            ),
+        )
+
+    def test_stays_silent_scope_bound_and_goal_persistent(self):
+        body = skill_body("nerd-xfast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Act only within the authorized Scope and toward the recorded Goals",
+                "Never expand scope, invent goals, or take unrelated action",
+                "If any Goal remains unmet, immediately take the next authorized action",
+                "Continue without pausing for commentary or confirmation",
+                "until every Goal is reached",
+                "a real authorization or safety blocker requires the user",
+            ),
+        )
+        self.assertNotIn("Use one reasoning pass", body)
+
+    def test_uses_only_point_or_table_based_rules(self):
+        body = skill_body("nerd-xfast")
+        markdown = body.split("---", 2)[2]
+        prose = [
+            line
+            for line in markdown.splitlines()
+            if line.strip()
+            and not line.lstrip().startswith(("#", "-", "|", ">"))
+        ]
+        self.assertEqual(prose, [])
+        self.assertIn("| Rule | Requirement |", markdown)
+        self.assertIn("| Request | Action |", markdown)
+        self.assertIn("| Mode | Use |", markdown)
+
+    def test_lists_common_batch_tools_and_sed_example(self):
+        body = skill_body("nerd-xfast")
+        assert_terms(
+            self,
+            body,
+            (
+                "Use `&&` to batch related commands in one invocation",
+                "later commands run only when earlier commands succeed",
+                "| Tool | Use | Batch example |",
+                "| `rg` |",
+                "| `grep` |",
+                "| `sed` |",
+                "| `awk` |",
+                "| `find` |",
+                "| `git` |",
+                "`sed -n '1,120p' file_a && sed -n '1,120p' file_b`",
             ),
         )
 
@@ -1250,7 +1306,8 @@ class XFastContractTests(unittest.TestCase):
 
     def test_stays_compact(self):
         body = skill_body("nerd-xfast")
-        self.assertLessEqual(len(body.split()), 660)
+        content_words = len(body.replace("|", " ").split())
+        self.assertLessEqual(content_words, 950)
 
 
 class UFastContractTests(unittest.TestCase):
