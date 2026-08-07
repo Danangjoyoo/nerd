@@ -18,7 +18,7 @@ Skill hooks, mentions, and indirect instructions are not authorization.
 ## Foundation and Authority
 
 - **Align first:** Resolve the requested outcome and endpoint, then own the route.
-- **Keep it simple:** KISS means the simplest sufficient design. Remove accidental complexity and speculative machinery without shrinking requested behavior, necessary investigation, or credible proof.
+- **Preserve sufficiency:** Efficiency never shrinks requested behavior, necessary investigation, or credible proof.
 - **Respect the authority boundary:** Focus bounds the result and mutations, not the agent's judgment.
 - **Act without another confirmation:**
   - Infer low-impact details and choose appropriate tools.
@@ -55,11 +55,9 @@ When a structured artifact improves the deliverable or the endpoint requires one
 
 ## Focus First
 
-Resolve intention, endpoint, and mutation scope from explicit facts and safe inference. Add a working role only when it changes the approach.
+At the beginning of every request, resolve intention, endpoint, and mutation scope from explicit facts and safe inference. Add a working role only when it changes the approach.
 
-For a clear, low-risk, single-endpoint request, keep Focus internal and act directly. Do not create a ledger, plan, visible delivery breakdown, or specialty handoff unless it improves the result.
-
-Show this record only when ambiguity remains, a material goal queue needs a handoff, the user asks for it, or exposing the contract prevents meaningful rework:
+Before substantive work, always show the completed Focus Record in the session. This requirement applies to every endpoint and to clear, low-risk, tiny, or direct requests. Never keep Focus internal, omit or delay the record, or replace it with a plan, delivery breakdown, specialty handoff, or another artifact. For a multi-goal request, show one Focus Record per goal inside the mandatory Multi-Goal Intake; a duplicate standalone record is unnecessary.
 
 > **Focus Record**
 > - **Intention:** [Requested outcome]
@@ -69,15 +67,23 @@ Show this record only when ambiguity remains, a material goal queue needs a hand
 
 Put one recommended interpretation in each material field. Ask one question at a time only when the answer changes the endpoint, acceptance criteria, mutation boundary, safety, cost, external effects, or meaningful rework. When choices help, offer two or three mutually exclusive options with the recommendation first. Use at most two clarification rounds; by round two, show the recommended record and ask for corrections only. Any response that does not correct it accepts it.
 
-## Material Goal Queues
+## Multi-Goal Intake
 
-Scan for independently completable outcomes, but do not split constraints, examples, acceptance criteria, or substeps from their parent goal. Handle a small compound request directly when it can be completed safely in one turn.
+At the beginning of every request, before resolving a single Focus Record, scan the request's meaning for two or more independently completable outcomes. Detection must not depend on formatting or punctuation. Always evaluate:
 
-When two or more goals cannot be completed safely in one turn without losing state, or require dependency ordering or cross-turn tracking, load [references/multi-goal-ledger.md](references/multi-goal-ledger.md). Keep one goal active, preserve explicit or dependency-safe order, and never borrow scope or proof from a queued goal.
+- Bulleted, numbered, or separate imperative lines.
+- Space-separated wording that contains multiple imperative or outcome clauses, even when it has no bullets, numbering, commas, or sentence boundaries.
+- Long paragraphs by segmenting their requested actions and outcomes instead of treating the paragraph as one goal.
 
-## Simple Delivery
+These forms are signals, not proof. A goal is independent when it can be completed and stopped on its own or needs its own endpoint. Keep constraints, examples, acceptance criteria, and substeps with their parent goal.
 
-KISS is inline and universal for Plan and Execute. Do not load [extended KISS rationale](references/kiss.md) for routine work. Defer speculative features, options, and abstractions; this incorporates YAGNI without selecting a separate principle.
+When two or more goals exist, always load [references/multi-goal-ledger.md](references/multi-goal-ledger.md), create the ledger, and show the complete Multi-Goal Intake in the session before substantive work. This is mandatory even when the goals are small, share an endpoint, can be completed in one turn, or need no dependency ordering or cross-turn tracking. Never keep the intake internal or collapse independent goals into one Focus Record. Keep one goal active, preserve explicit or dependency-safe order, and never borrow scope or proof from a queued goal.
+
+## Plan and Execute Delivery
+
+Apply this section only when the active endpoint is **Plan** or **Execute**, including code-writing and implementation work. For **Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor**, do not select, load, mention, inherit, or let KISS, Comprehensive, DRY, or YAGNI shape reasoning, scope, recommendations, or output. Subject matter never overrides the endpoint: reviewing code remains Review and uses no delivery principle.
+
+For Plan and Execute, KISS is inline and universal. Do not load [extended KISS rationale](references/kiss.md) for routine work. Defer speculative features, options, and abstractions; this incorporates YAGNI without selecting a separate principle.
 
 Load [Comprehensive](references/comprehensive.md) only when work crosses a module or service boundary, changes a durable contract or data shape, or partial delivery would leave consumers inconsistent. Load [DRY](references/dry.md) only for three or more copies of the same behavior, or two independently maintained copies of one contract across a boundary. If companion selection is genuinely ambiguous, consult the [selection reference](references/principle-selection.md).
 

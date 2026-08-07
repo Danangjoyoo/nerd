@@ -82,8 +82,8 @@ class SmartContractTests(unittest.TestCase):
             foundation,
             (
                 "Resolve the requested outcome and endpoint, then own the route",
-                "KISS means the simplest sufficient design",
-                "without shrinking requested behavior, necessary investigation, or credible proof",
+                "Preserve sufficiency",
+                "Efficiency never shrinks requested behavior, necessary investigation, or credible proof",
                 "Focus bounds the result and mutations, not the agent's judgment",
                 "Infer low-impact details and choose appropriate tools",
                 "Inspect relevant adjacent context read-only",
@@ -98,11 +98,14 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_keeps_focus_internal_for_clear_work_and_exposes_it_when_needed(self):
+    def test_always_shows_focus_for_every_endpoint(self):
         body = skill_body("nerd-smart")
+        focus = body.split("## Focus First", 1)[1].split(
+            "## Multi-Goal Intake", 1
+        )[0]
         assert_terms(
             self,
-            body,
+            focus,
             (
                 "**Focus Record**",
                 "**Intention:**",
@@ -110,12 +113,16 @@ class SmartContractTests(unittest.TestCase):
                 "**Scope:**",
                 "**Role:**",
                 "Add a working role only when it changes the approach",
-                "keep Focus internal and act directly",
-                "Show this record only when ambiguity remains",
+                "always show the completed Focus Record in the session",
+                "applies to every endpoint",
+                "clear, low-risk, tiny, or direct requests",
+                "Never keep Focus internal",
+                "show one Focus Record per goal inside the mandatory Multi-Goal Intake",
                 "**Role:** [Only when material]",
                 "at most two clarification rounds",
             ),
         )
+        self.assertNotIn("Show this record only", focus)
         self.assertNotIn("**Decision Record**", body)
 
     def test_centralizes_behavior_in_exactly_ten_endpoint_mappings(self):
@@ -166,7 +173,7 @@ class SmartContractTests(unittest.TestCase):
     def test_confirmation_style_balances_question_cost_and_risk(self):
         body = skill_body("nerd-smart")
         confirmation = body.split("## Focus First", 1)[1].split(
-            "## Material Goal Queues", 1
+            "## Multi-Goal Intake", 1
         )[0]
 
         assert_terms(
@@ -184,10 +191,10 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_material_goal_queues_persist_and_reread_ordered_focus_records(self):
+    def test_multi_goal_intake_is_visible_and_format_agnostic(self):
         body = skill_body("nerd-smart")
-        intake = body.split("## Material Goal Queues", 1)[1].split(
-            "## Simple Delivery", 1
+        intake = body.split("## Multi-Goal Intake", 1)[1].split(
+            "## Plan and Execute Delivery", 1
         )[0]
         ledger = " ".join(smart_reference_body("multi-goal-ledger.md").split())
 
@@ -195,12 +202,22 @@ class SmartContractTests(unittest.TestCase):
             self,
             intake,
             (
+                "At the beginning of every request",
+                "before resolving a single Focus Record",
                 "independently completable outcomes",
-                "do not split constraints, examples, acceptance criteria, or substeps",
-                "small compound request directly",
-                "two or more goals cannot be completed safely in one turn",
-                "dependency ordering or cross-turn tracking",
+                "must not depend on formatting or punctuation",
+                "Bulleted, numbered, or separate imperative lines",
+                "Space-separated wording",
+                "no bullets, numbering, commas, or sentence boundaries",
+                "Long paragraphs by segmenting their requested actions and outcomes",
+                "forms are signals, not proof",
+                "completed and stopped on its own or needs its own endpoint",
+                "constraints, examples, acceptance criteria, and substeps",
+                "When two or more goals exist, always load",
                 "references/multi-goal-ledger.md",
+                "show the complete Multi-Goal Intake in the session",
+                "mandatory even when the goals are small, share an endpoint, can be completed in one turn",
+                "Never keep the intake internal or collapse independent goals",
                 "Keep one goal active",
                 "explicit or dependency-safe order",
                 "never borrow scope or proof from a queued goal",
@@ -210,23 +227,29 @@ class SmartContractTests(unittest.TestCase):
             self,
             ledger,
             (
-                "material goal queue",
-                "two or more independently completable outcomes",
-                "small compound request",
+                "every request containing two or more independently completable outcomes",
+                "mandatory even when all goals are small, share an endpoint, fit in one turn",
+                "Detect goals from meaning, not layout or punctuation",
+                "bullets, numbered items, and separate imperative lines",
+                "space-separated wording for multiple imperative or outcome clauses",
+                "long paragraphs by segmenting their requested actions and outcomes",
+                "forms are signals, not proof",
                 "runtime-provided temporary directory",
                 "`~/.agent/tmp/`",
                 "stable conversation, thread, or task identifier",
                 "retain the absolute path until the queue is complete",
                 "Preserve each original command line and its listed position",
                 "Redact credential and secret values",
-                "**Goal Ledger**",
+                "show the complete intake in the session",
+                "displayed intake and persisted ledger must match",
+                "**Multi-Goal Intake**",
                 "**Order basis:**",
                 "**Source:**",
                 "**Status:**",
                 "**Depends on:**",
                 "queued**, **active**, **blocked**, **done**, or **cancelled",
                 "Never collapse independent goals",
-                "one Focus Record for every material goal",
+                "one visible Focus Record for every goal",
                 "exactly one goal **active**",
                 "Preserve explicit user order",
                 "default to listed order",
@@ -234,6 +257,7 @@ class SmartContractTests(unittest.TestCase):
                 "verify the order",
                 "Before starting, resuming, switching, or completing a goal",
                 "reread the ledger",
+                "show the current Multi-Goal Intake in the session",
                 "source of truth",
                 "If it is missing or unreadable",
                 "do not continue from memory",
@@ -244,12 +268,12 @@ class SmartContractTests(unittest.TestCase):
             ),
         )
 
-    def test_simple_delivery_uses_inline_kiss_and_lazy_evidence_companions(self):
+    def test_plan_and_execute_delivery_uses_inline_kiss_and_lazy_companions(self):
         body = skill_body("nerd-smart")
         mapping = body.split("## Endpoint Mapping", 1)[1].split(
             "## Focus First", 1
         )[0]
-        delivery = body.split("## Simple Delivery", 1)[1].split(
+        delivery = body.split("## Plan and Execute Delivery", 1)[1].split(
             "## Route From Intent", 1
         )[0]
         selection = " ".join(
@@ -267,11 +291,36 @@ class SmartContractTests(unittest.TestCase):
         self.assertIn("actionable plan", plan_row)
         self.assertIn("simplest sufficient solution", execute_row)
 
+        for endpoint in (
+            "Discuss",
+            "Ideate",
+            "Explore",
+            "Diagnose",
+            "Review",
+            "Specify",
+            "Document",
+            "Monitor",
+        ):
+            row = next(
+                line
+                for line in mapping.splitlines()
+                if line.startswith(f"| **{endpoint}** |")
+            )
+            for principle in ("KISS", "YAGNI", "DRY", "Comprehensive"):
+                self.assertNotIn(principle, row)
+
         assert_terms(
             self,
             delivery,
             (
-                "KISS is inline and universal for Plan and Execute",
+                "only when the active endpoint is **Plan** or **Execute**",
+                "code-writing and implementation work",
+                "Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor",
+                "do not select, load, mention, inherit",
+                "let KISS, Comprehensive, DRY, or YAGNI shape reasoning, scope, recommendations, or output",
+                "Subject matter never overrides the endpoint",
+                "reviewing code remains Review and uses no delivery principle",
+                "For Plan and Execute, KISS is inline and universal",
                 "Do not load [extended KISS rationale]",
                 "for routine work",
                 "Defer speculative features, options, and abstractions",

@@ -1,16 +1,25 @@
-# Multi-Goal Ledger Protocol
+# Multi-Goal Intake and Ledger Protocol
 
 ## Use When
 
-Use a ledger only for a material goal queue: two or more independently
-completable outcomes that need separate endpoints, dependency ordering,
-cross-turn tracking, or protection from being dropped.
+Use this protocol for every request containing two or more independently
+completable outcomes. The intake and its ledger are mandatory even when all
+goals are small, share an endpoint, fit in one turn, or need no dependency
+ordering or cross-turn tracking.
 
-Do not create a ledger for several bullets that are constraints, examples,
-acceptance criteria, or substeps of one outcome. Also skip it for a small
-compound request that can be completed safely in one turn without losing state.
+Detect goals from meaning, not layout or punctuation. Always inspect:
 
-## Create the Ledger
+- bullets, numbered items, and separate imperative lines;
+- space-separated wording for multiple imperative or outcome clauses, even
+  without delimiters; and
+- long paragraphs by segmenting their requested actions and outcomes.
+
+These forms are signals, not proof. Treat an outcome as a separate goal only
+when it can be completed and stopped independently or needs its own endpoint.
+Keep constraints, examples, acceptance criteria, and substeps with their parent
+goal.
+
+## Create and Show the Intake
 
 Create one Markdown ledger in the runtime-provided temporary directory, or use
 `~/.agent/tmp/` when none is available. Use a stable conversation, thread, or
@@ -21,9 +30,10 @@ Preserve each original command line and its listed position beside a concise
 normalized goal. Redact credential and secret values while retaining useful
 placeholders, and do not store unrelated conversation.
 
-Use this structure:
+Before substantive work, show the complete intake in the session using this
+structure. The displayed intake and persisted ledger must match:
 
-> **Goal Ledger**
+> **Multi-Goal Intake**
 > - **Path:** [Absolute ledger path]
 > - **Order basis:** [Explicit, listed, or dependency-adjusted with reason]
 >
@@ -39,7 +49,7 @@ Use this structure:
 
 ## Queue Invariants
 
-Keep one Focus Record for every material goal and exactly one goal **active**.
+Keep one visible Focus Record for every goal and exactly one goal **active**.
 Status is **queued**, **active**, **blocked**, **done**, or **cancelled**. Never
 collapse independent goals or borrow scope, assumptions, endpoint, delivery
 approach, or proof from queued goals.
@@ -53,8 +63,9 @@ Otherwise record the dependency and reason in the ledger.
 
 Before starting, resuming, switching, or completing a goal, and at the beginning
 of every later turn while the queue exists, reread the ledger from its absolute
-path and treat it as the source of truth. If it is missing or unreadable,
-reconstruct it from explicit user input and do not continue from memory.
+path, show the current Multi-Goal Intake in the session, and treat it as the
+source of truth. If it is missing or unreadable, reconstruct it from explicit
+user input and do not continue from memory.
 
 Update the ledger before acting when the user adds, removes, reorders, or changes
 a goal. Record every status and dependency change immediately. At the active
