@@ -7,6 +7,7 @@ from scripts.validate_skills import (
     PUBLIC_SKILLS,
     REQUIRED_REFERENCES,
     REQUIRED_SCRIPTS,
+    _reference_graph,
     _reachable_reference_names,
     validate_repository,
 )
@@ -57,16 +58,59 @@ class SkillStructureTests(unittest.TestCase):
                     "comprehensive.md",
                 ),
                 "nerd-memory": (
+                    "recall-and-apply.md",
+                    "learn-and-correct.md",
+                    "deny-split-forget.md",
                     "memory-contract.md",
                     "research.md",
                 ),
                 "nerd-loop": (
                     "runtime-contract.md",
-                    "definition-of-done.md",
-                    "convergence.md",
-                    "iteration.md",
-                    "behavioral-memory.md",
-                    "loop-profiles.md",
+                    "durable-runtime.md",
+                    "profiles/index.md",
+                    "profiles/selection.md",
+                    "profiles/catalog.md",
+                    "profiles/persistence.md",
+                    "profiles/endpoint-map.md",
+                    "profiles/routes.md",
+                    "profiles/lifecycle.md",
+                    "profiles/composition.md",
+                    "profiles/examples.md",
+                    "dod/index.md",
+                    "dod/foundation.md",
+                    "dod/construction.md",
+                    "dod/evidence.md",
+                    "dod/task-guidance.md",
+                    "dod/template.md",
+                    "dod/research.md",
+                    "iteration/index.md",
+                    "iteration/core.md",
+                    "iteration/planning.md",
+                    "iteration/scheduling.md",
+                    "iteration/ledger.md",
+                    "iteration/recovery.md",
+                    "iteration/continuity.md",
+                    "iteration/templates.md",
+                    "iteration/research.md",
+                    "convergence/index.md",
+                    "convergence/foundation.md",
+                    "convergence/measurement.md",
+                    "convergence/dynamics.md",
+                    "convergence/thresholds.md",
+                    "convergence/qualitative-patterns.md",
+                    "convergence/anti-patterns.md",
+                    "convergence/template.md",
+                    "convergence/research.md",
+                    "memory/index.md",
+                    "memory/admission.md",
+                    "memory/contract.md",
+                    "memory/operation.md",
+                    "memory/children.md",
+                    "memory/learning.md",
+                    "memory/durable-recovery.md",
+                    "memory/routing.md",
+                    "memory/examples.md",
+                    "memory/conformance.md",
                 ),
                 "nerd-surgery": (
                     "systematic-debugging.md",
@@ -98,10 +142,19 @@ class SkillStructureTests(unittest.TestCase):
             (ROOT / "docs" / "experiments" / "nerd-ufast" / "skill" / "SKILL.md").is_file()
         )
 
-    def test_smart_reference_files_match_registry(self):
-        references = ROOT / "skills" / "nerd-smart" / "references"
-        actual = {path.name for path in references.glob("*.md")}
-        self.assertEqual(actual, set(REQUIRED_REFERENCES["nerd-smart"]))
+    def test_reference_files_match_registry(self):
+        for skill, expected in REQUIRED_REFERENCES.items():
+            references = ROOT / "skills" / skill / "references"
+            actual = (
+                {
+                    path.relative_to(references).as_posix()
+                    for path in references.rglob("*.md")
+                }
+                if references.is_dir()
+                else set()
+            )
+            with self.subTest(skill=skill):
+                self.assertEqual(actual, set(expected))
 
     def test_reference_reachability_follows_lazy_links(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -115,6 +168,60 @@ class SkillStructureTests(unittest.TestCase):
                     "[Entry](references/entry.md)", references
                 ),
                 {"entry.md", "nested.md"},
+            )
+
+    def test_reference_reachability_supports_safe_nested_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            references = root / "references"
+            topic = references / "topic"
+            topic.mkdir(parents=True)
+            (topic / "index.md").write_text(
+                "[Core](core.md) [Escape](../../escape.md)",
+                encoding="utf-8",
+            )
+            (topic / "core.md").write_text("# Core", encoding="utf-8")
+            (root / "escape.md").write_text("# Escape", encoding="utf-8")
+
+            self.assertEqual(
+                _reachable_reference_names(
+                    "[Topic](references/topic/index.md)",
+                    references,
+                ),
+                {"topic/index.md", "topic/core.md"},
+            )
+
+    def test_reference_graph_resolves_parents_cycles_and_reports_bad_edges(self):
+        with tempfile.TemporaryDirectory() as directory:
+            references = Path(directory)
+            topic = references / "topic"
+            topic.mkdir()
+            (references / "runtime-contract.md").write_text(
+                "[Topic](topic/index.md)", encoding="utf-8"
+            )
+            (topic / "index.md").write_text(
+                "[Core](core.md#scope) [External](https://example.com/research.md)",
+                encoding="utf-8",
+            )
+            (topic / "core.md").write_text(
+                "[Runtime](../runtime-contract.md) [Missing](missing.md) "
+                "[Unsafe](/tmp/escape.md)",
+                encoding="utf-8",
+            )
+
+            reachable, violations = _reference_graph(
+                "[Runtime](references/runtime-contract.md)",
+                references,
+            )
+            self.assertEqual(
+                reachable,
+                {"runtime-contract.md", "topic/index.md", "topic/core.md"},
+            )
+            self.assertTrue(
+                any("dangling reference link missing.md" in item for item in violations)
+            )
+            self.assertTrue(
+                any("unsafe reference link /tmp/escape.md" in item for item in violations)
             )
 
     def test_superpowers_license_files_are_absent(self):

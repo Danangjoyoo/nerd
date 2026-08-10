@@ -1,8 +1,18 @@
 # Nerd Memory Runtime and Data Contract
 
-Read this reference before reading, writing, consolidating, applying, or
-forgetting memory. The deterministic runtime is the enforcement boundary;
-`SKILL.md` explains how an agent must use it.
+Read this implementation reference only when changing the runtime, schema,
+threat model, or evaluation. Routine operators must use the workflow reference
+selected by `SKILL.md`; the deterministic runtime remains the enforcement
+boundary.
+
+## Contents
+
+- Safety, consent, and endpoint schema
+- Observations and pattern lifecycle
+- Proposals, confirmation, and consumption
+- Denial, contextual splitting, and forgetting
+- Schema migration and stale-writer fencing
+- CLI contract and required evaluation
 
 ## Safety Theorem
 

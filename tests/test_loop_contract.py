@@ -15,7 +15,74 @@ def normalized(text: str) -> str:
     return " ".join(text.split())
 
 
+def topic_body(topic: str) -> str:
+    root = LOOP / "references" / topic
+    return "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(root.glob("*.md"))
+    )
+
+
 class LoopContractTests(unittest.TestCase):
+    def test_large_optional_topics_use_compact_routing_indexes(self):
+        topics = ("iteration", "profiles", "convergence", "dod", "memory")
+        for topic in topics:
+            with self.subTest(topic=topic):
+                topic_root = LOOP / "references" / topic
+                index = topic_root / "index.md"
+                self.assertTrue(index.is_file())
+                index_words = len(index.read_text(encoding="utf-8").split())
+                self.assertLessEqual(index_words, 500)
+                child_words = []
+                for chunk in topic_root.glob("*.md"):
+                    words = len(chunk.read_text(encoding="utf-8").split())
+                    self.assertLessEqual(
+                        words,
+                        1_600,
+                        chunk,
+                    )
+                    if chunk != index:
+                        child_words.append(words)
+                self.assertLessEqual(index_words + max(child_words), 2_000)
+
+        for obsolete in (
+            "iteration.md",
+            "loop-profiles.md",
+            "convergence.md",
+            "definition-of-done.md",
+            "behavioral-memory.md",
+        ):
+            self.assertFalse((LOOP / "references" / obsolete).exists())
+
+    def test_common_loop_instructions_stay_within_context_budget(self):
+        skill_words = len(body("SKILL.md").split())
+        runtime_words = len(body("references/runtime-contract.md").split())
+        durable_words = len(body("references/durable-runtime.md").split())
+
+        self.assertLessEqual(skill_words, 1_100)
+        self.assertLessEqual(runtime_words, 1_700)
+        self.assertLessEqual(durable_words, 2_100)
+        self.assertLessEqual(skill_words + runtime_words, 2_700)
+        self.assertLessEqual(skill_words + runtime_words + durable_words, 4_800)
+
+    def test_reference_load_boundaries_are_state_driven(self):
+        skill = normalized(body("SKILL.md"))
+        runtime = body("references/runtime-contract.md")
+        durable = normalized(body("references/durable-runtime.md"))
+        memory = topic_body("memory")
+
+        self.assertIn("Admitted state is `S2` or `S3`", skill)
+        self.assertIn("durable checkpoint on a lower profile", skill)
+        self.assertNotIn("`INTENT_COMMITTED`", runtime)
+        self.assertNotIn("ROUTING_PROFILE_", runtime)
+        self.assertIn("`INTENT_COMMITTED`", durable)
+        self.assertNotIn("ROUTING_PROFILE_", durable)
+        self.assertIn("ROUTING_PROFILE_ACTIVATED", memory)
+        self.assertIn(
+            "Nerd Memory composes only when the current user explicitly invokes it",
+            skill,
+        )
+
     def test_skill_covers_the_original_task_completion_goal(self):
         skill = normalized(body("SKILL.md"))
         for term in (
@@ -32,11 +99,12 @@ class LoopContractTests(unittest.TestCase):
 
         for reference in (
             "runtime-contract.md",
-            "definition-of-done.md",
-            "convergence.md",
-            "iteration.md",
-            "behavioral-memory.md",
-            "loop-profiles.md",
+            "durable-runtime.md",
+            "profiles/index.md",
+            "dod/index.md",
+            "iteration/index.md",
+            "convergence/index.md",
+            "memory/index.md",
         ):
             self.assertIn(f"references/{reference}", skill)
 
@@ -58,98 +126,110 @@ class LoopContractTests(unittest.TestCase):
     def test_transition_priority_and_done_are_deterministic(self):
         contract = body("references/runtime-contract.md")
         transition = contract.split("## Transition Priority", 1)[1].split(
-            "## Nerd Memory Routing Compilation", 1
-        )[0]
+            "## Extensions and Conformance", 1
+        )[0].casefold()
         ordered = (
             "stop unauthorized or unsafe work",
-            "honor an authoritative cancellation",
+            "honor authoritative cancellation",
             "reconcile an ambiguous effect",
             "apply current user or higher-authority revisions",
             "validate verifier integrity",
-            "if the completion expression passes, return `DONE`",
-            "apply an already-reached hard terminal condition",
-            "derive the ready set",
+            "if the completion expression passes, return `done`",
+            "apply a reached hard terminal",
             "enter `PAUSED`",
             "diagnose dynamics",
             "select the lexicographically first eligible ready focus",
         )
-        offsets = [transition.index(term) for term in ordered]
+        offsets = [transition.index(term.casefold()) for term in ordered]
         self.assertEqual(offsets, sorted(offsets))
 
         self.assertIn("`DONE` is reachable only through the DoD decision", contract)
-        self.assertIn("only the completion expression can return `DONE`", contract)
+        self.assertIn(
+            "only authenticated DoD evidence reaches `DONE`",
+            normalized(contract),
+        )
 
     def test_durable_effects_use_two_phase_commit_order(self):
-        contract = body("references/runtime-contract.md")
-        protocol = contract.split("## Iteration and Two-Phase Effect Protocol", 1)[
-            1
-        ].split("## Transition Priority", 1)[0]
+        durable = body("references/durable-runtime.md")
+        protocol = durable.split("## Two-Phase Effect Protocol", 1)[1].split(
+            "## Unknown Effects and Recovery", 1
+        )[0]
         ordered = (
             "**Intent commit:**",
             "`INTENT_COMMITTED`",
             "**Execute:**",
-            "**Outcome commit:**",
+            "**Outcome observation:**",
             "`ACTION_OBSERVED`",
             "`VERIFICATION_RECORDED`",
             "`ITERATION_COMMITTED`",
             "Exactly one cause-labelled successor",
         )
-        offsets = [protocol.index(term) for term in ordered]
+        protocol_folded = protocol.casefold()
+        offsets = [protocol_folded.index(term.casefold()) for term in ordered]
         self.assertEqual(offsets, sorted(offsets))
         self.assertIn("Never require a receipt before its action", protocol)
-        iteration = body("references/iteration.md")
+        iteration = topic_body("iteration")
         self.assertNotIn("ACTION_PLANNED", iteration)
         self.assertNotIn("ITERATION_SELECTED and ACTION_INTENT", iteration)
 
     def test_memory_integration_uses_seven_fields_and_atomic_routing(self):
-        skill = normalized(body("SKILL.md"))
-        memory = normalized(body("references/behavioral-memory.md"))
+        memory = normalized(topic_body("memory"))
         contract = normalized(body("references/runtime-contract.md"))
-        for text in (skill, memory, contract):
+        for text in (memory, contract):
             self.assertNotIn("six-field", text.casefold())
             self.assertNotIn("six pattern", text.casefold())
 
         for term in (
             "`goal`, `task`, `action`, `result`, `boundary`, `verification`, and `routing`",
-            "Preserve a remembered `routing` chain atomically",
             "authenticated registry",
             "fail closed",
-            "lowering a profile floor",
+            "Advance exactly one index",
+            "Route completion never proves the task DoD",
         ):
-            self.assertTrue(term in skill or term in memory or term in contract, term)
+            self.assertTrue(term in memory or term in contract, term)
 
-        self.assertIn("## Mapping the Seven Pattern Types", body("references/behavioral-memory.md"))
-        self.assertIn("| `routing` |", body("references/behavioral-memory.md"))
+        self.assertIn("## Mapping the Seven Pattern Types", body("references/memory/contract.md"))
+        self.assertIn("| `routing` |", body("references/memory/contract.md"))
         self.assertIn("all seven pattern types compile", memory)
 
     def test_runtime_claims_are_bound_to_evidence_authority_and_revisions(self):
         contract = normalized(body("references/runtime-contract.md"))
+        durable = normalized(body("references/durable-runtime.md"))
+        memory = normalized(topic_body("memory"))
+
         for term in (
-            "Freeze the sorted complete mandatory criterion and integration ID sets",
-            "hash that immutable definition with its DoD revision",
-            "host-authenticated record bound to the criterion ID",
-            "wrong verifier, wrong owner",
-            "Every event carries the next expected revision",
-            "same ID with different payload",
-            "every profile",
-            "explicit agent-bound allowed-authority map",
-            "Reject corrupt or unreachable combinations before returning a resume directive",
-            "authenticated completion receipt",
-            "`ROUTING_BOUND` is exactly pending/index-zero/revision-zero",
-            "hashed identity of the corresponding `ITERATION_COMMITTED`",
-            "receipt from another proposal or iteration commit is invalid",
-            "exact accepted DoD contract",
-            "structured authenticated evidence-bound committed outcome",
+            "trusted-adapter inputs",
+            "cannot self-attest",
+            "Freeze the sorted mandatory and integration ID sets",
+            "host-authenticated record bound to the criterion",
+            "exact admitted envelope",
         ):
             self.assertIn(term, contract)
 
+        for term in (
+            "Every event carries the next expected revision",
+            "same ID with different content",
+            "freeze the exact accepted DoD definition",
+            "complete authenticated criterion and integration evidence",
+        ):
+            self.assertIn(term, durable)
+
+        for term in (
+            "Resolve every agent, skill, tool, and MCP identifier in every profile",
+            "explicit agent-bound authority map",
+            "authenticated completion receipt",
+            "hashed identity of its exact `ITERATION_COMMITTED` event",
+            "reachable revision",
+        ):
+            self.assertIn(term, memory)
+
     def test_dod_verdicts_and_approval_decisions_are_authenticated(self):
         contract = normalized(body("references/runtime-contract.md"))
-        dod = normalized(body("references/definition-of-done.md"))
+        dod = normalized(topic_body("dod"))
         for term in (
-            "exact accepted DoD hash and revision",
+            "exact DoD hash and revision",
             "Criterion status is a checked projection of that authenticated verdict",
-            "without evidence it must be `UNKNOWN`",
+            "without evidence it is `UNKNOWN`",
             "`APPROVED | REJECTED` decision",
             "Presence alone is not approval",
             "each displayed status equals its verdict",
@@ -160,50 +240,54 @@ class LoopContractTests(unittest.TestCase):
     def test_all_reducers_share_admission_and_cumulative_budget(self):
         contract = normalized(body("references/runtime-contract.md"))
         for term in (
-            "Its `admission_hash` covers every field in that envelope",
-            "Pass that exact admitted envelope to `decide`, `effect`, and `routing`",
+            "Its `admission_hash` covers every envelope field except the hash itself",
+            "Pass that exact admitted envelope and current cumulative budget state to `decide`, `effect`, and `routing`",
             "one authenticated cumulative `budget_state`",
-            "never accepts a free-standing `budget_remaining`",
-            "Every `ITERATION_COMMITTED` consumes exactly one unit",
-            "reject a stale, skipped, reset, or cross-admission budget revision",
+            "never accept a free-standing `budget_remaining`",
+            "Every committed iteration consumes exactly one unit",
+            "Reject stale, skipped, reset, or cross-admission budget state",
         ):
             self.assertIn(term, contract)
 
     def test_transition_validation_is_staged_by_priority(self):
         contract = normalized(body("references/runtime-contract.md"))
         for term in (
-            "parse only through the first matching priority stage",
-            "Malformed same-stage or higher-priority data fails closed",
-            "malformed lower-priority admission, DoD, budget, wake, value, or dynamics data cannot suppress a valid earlier transition",
+            "Parse only through the first matching priority stage",
+            "Malformed same-stage or higher-priority inputs fail closed",
+            "malformed lower-priority admission, DoD, budget, wake, value, or dynamics data cannot suppress an earlier safety, cancellation, reconciliation, or revision result",
         ):
             self.assertIn(term, contract)
 
     def test_profile_floor_and_routing_compatibility_are_explicit(self):
         contract = normalized(body("references/runtime-contract.md"))
-        profiles = normalized(body("references/loop-profiles.md"))
+        profiles = normalized(topic_body("profiles"))
+        memory = normalized(topic_body("memory"))
         for term in (
             "`high_impact` and `high_consequence`",
             "`primary | modifier | middleware | controller`",
             "at most one primary specialty",
-            "selected incompatible pair fails admission",
-            "ordinary S2 checkpoint does not pay for it",
+            "A selected incompatible pair fails admission",
+            "ordinary S2 checkpoint does not pay for effect reconciliation",
         ):
-            self.assertTrue(term in contract or term in profiles, term)
+            self.assertTrue(
+                term in contract or term in profiles or term in memory,
+                term,
+            )
 
     def test_terminal_receipts_and_handoff_are_identity_bound(self):
-        contract = normalized(body("references/runtime-contract.md"))
+        durable = normalized(body("references/durable-runtime.md"))
         for term in (
             "A passing loop-scoped DoD must choose `LOOP_DONE`",
-            "typed non-success receipt is required for `LOOP_TERMINATED`",
-            "canonical packet reference, integer revision, and content hash",
-            "authenticated acceptance record says `ACCEPTED`",
-            "binds that exact packet reference, revision, and hash",
+            "every non-success terminal requires its typed receipt",
+            "canonical reference, integer revision, and content hash",
+            "authenticated record says `ACCEPTED`",
+            "binds that exact reference, revision, and hash",
         ):
-            self.assertIn(term, contract)
+            self.assertIn(term, durable)
 
     def test_memory_requires_explicit_current_request_activation(self):
         skill = normalized(body("SKILL.md"))
-        memory = normalized(body("references/behavioral-memory.md"))
+        memory = normalized(topic_body("memory"))
         self.assertIn(
             "Nerd Memory composes only when the current user explicitly invokes it for the current request",
             skill,
@@ -215,30 +299,34 @@ class LoopContractTests(unittest.TestCase):
         self.assertIn("does not load or query Nerd Memory", memory)
 
     def test_identity_strings_are_canonical(self):
-        contract = normalized(body("references/runtime-contract.md"))
-        self.assertIn("canonical nonempty string", contract)
-        self.assertIn("reject whitespace-only values", contract)
-        self.assertIn("leading or trailing whitespace", contract)
+        durable = normalized(body("references/durable-runtime.md"))
+        self.assertIn("Identity-bearing strings are canonical and nonempty", durable)
+        self.assertIn("Reject whitespace-only", durable)
+        self.assertIn("leading/trailing whitespace", durable)
 
     def test_event_wait_and_route_semantics_are_not_caller_optional(self):
-        contract = normalized(body("references/runtime-contract.md"))
+        corpus = normalized(
+            "\n".join(
+                (
+                    body("references/runtime-contract.md"),
+                    body("references/durable-runtime.md"),
+                    topic_body("profiles"),
+                )
+            )
+        ).replace("`", "")
         for term in (
-            "registered wake condition plus deadline is a viable event-driven transition",
-            "even when no active action currently has positive value",
+            "authenticated registered condition and deadline",
+            "waiting consumes no active iteration budget",
             "direct is valid only when the resulting profile remains D0",
-            "pr_delivery and durable monitor routes require authenticated wake-event capability",
-            "later hard-terminal union cannot encode UNSAFE or CANCELLED",
+            "authenticated wake-event registration for a durable monitor or pr_delivery route",
+            "Stop unauthorized or unsafe work",
+            "Honor authoritative cancellation",
         ):
-            self.assertIn(term, contract.replace("`", ""))
+            self.assertIn(term, corpus)
 
     def test_every_mapped_route_has_one_template_and_consistent_floor(self):
-        profiles = body("references/loop-profiles.md")
-        mapping = profiles.split("## Nerd Endpoint Mapping", 1)[1].split(
-            "## Route Templates", 1
-        )[0]
-        template_region = profiles.split("## Route Templates", 1)[1].split(
-            "## Escalation and De-escalation", 1
-        )[0]
+        mapping = body("references/profiles/endpoint-map.md")
+        template_region = body("references/profiles/routes.md")
         mapped_routes = set(re.findall(r"`([a-z_]+)/(?:D0|L1|L2|L3|L4)`", mapping))
         defined = re.findall(
             r"^### .* — `([a-z_]+)`, base (D0|L1|L2|L3|L4)",
@@ -255,9 +343,9 @@ class LoopContractTests(unittest.TestCase):
         )
 
     def test_cost_guards_prevent_reference_overinstantiation(self):
-        convergence = normalized(body("references/convergence.md"))
-        iteration = normalized(body("references/iteration.md"))
-        profiles = normalized(body("references/loop-profiles.md"))
+        convergence = normalized(topic_body("convergence"))
+        iteration = normalized(topic_body("iteration"))
+        profiles = normalized(topic_body("profiles"))
         for term in (
             "D0/L1 do not instantiate its full history model",
             "L2 uses a compact subset",
@@ -269,24 +357,24 @@ class LoopContractTests(unittest.TestCase):
             self.assertTrue(term in convergence or term in iteration or term in profiles, term)
 
     def test_bug_finding_done_is_evidence_not_plan_activity(self):
-        profiles = normalized(body("references/loop-profiles.md"))
+        profiles = normalized(topic_body("profiles"))
         self.assertIn("Finishing a probe plan is activity, not proof", profiles)
         self.assertIn("declared evidence-coverage criteria pass", profiles)
         self.assertIn("required residual-risk statement is complete", profiles)
 
     def test_all_normative_references_share_authority_source(self):
-        for reference in (
-            "definition-of-done.md",
-            "convergence.md",
-            "iteration.md",
-            "behavioral-memory.md",
-            "loop-profiles.md",
-        ):
+        references = [LOOP / "references" / "durable-runtime.md"]
+        for topic in ("profiles", "dod", "iteration", "convergence", "memory"):
+            references.extend(sorted((LOOP / "references" / topic).glob("*.md")))
+        for reference in references:
             with self.subTest(reference=reference):
-                self.assertIn("runtime-contract.md", body(f"references/{reference}"))
+                self.assertIn(
+                    "runtime-contract.md",
+                    reference.read_text(encoding="utf-8"),
+                )
 
-        dod = normalized(body("references/definition-of-done.md"))
-        memory = normalized(body("references/behavioral-memory.md"))
+        dod = normalized(topic_body("dod"))
+        memory = normalized(topic_body("memory"))
         self.assertIn("mandatory or advisory", dod)
         self.assertIn("mandatory and advisory checked-in material", memory)
 
@@ -302,11 +390,11 @@ class LoopContractTests(unittest.TestCase):
         )
 
     def test_self_refinement_has_a_convergence_dod(self):
-        skill = normalized(body("SKILL.md"))
-        self.assertIn("Define the refinement DoD before editing", skill)
-        self.assertIn("no valid Blocker/High finding remains open", skill)
-        self.assertIn("two successive fresh reviews produce no new valid Blocker/High finding", skill)
-        self.assertIn("Reviewer agreement alone is not proof", skill)
+        skill = normalized(body("SKILL.md")).casefold()
+        self.assertIn("define the refinement dod before editing", skill)
+        self.assertIn("no valid blocker/high finding remains open", skill)
+        self.assertIn("two successive fresh reviews produce no new valid blocker/high finding", skill)
+        self.assertIn("reviewer agreement alone is not proof", skill)
 
 
 if __name__ == "__main__":

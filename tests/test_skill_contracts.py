@@ -21,6 +21,18 @@ def memory_reference_body(name: str) -> str:
     return (SKILLS / "nerd-memory" / "references" / name).read_text()
 
 
+def memory_guidance_body() -> str:
+    references = (
+        "recall-and-apply.md",
+        "learn-and-correct.md",
+        "deny-split-forget.md",
+    )
+    return "\n".join(
+        (skill_body("nerd-memory"),)
+        + tuple(memory_reference_body(name) for name in references)
+    )
+
+
 def assert_terms(test: unittest.TestCase, body: str, terms: tuple[str, ...]) -> None:
     for term in terms:
         test.assertIn(term, body)
@@ -1511,19 +1523,67 @@ class UFastContractTests(unittest.TestCase):
 
 
 class MemoryContractTests(unittest.TestCase):
+    def test_memory_interaction_output_is_compact(self):
+        skill = normalized(skill_body("nerd-memory"))
+        recall = memory_reference_body("recall-and-apply.md")
+        learning = normalized(memory_reference_body("learn-and-correct.md"))
+        denial = memory_reference_body("deny-split-forget.md")
+
+        assert_terms(
+            self,
+            skill,
+            (
+                "## Interaction Output",
+                "Keep Memory middleware silent",
+                "exactly one paragraph",
+                "`Nerd-memory memorized: <compact wording>`",
+                "at most 30 words after the prefix",
+                "Never print templates, contracts, schemas, raw runtime JSON",
+            ),
+        )
+        self.assertIn("Nerd-memory proposes:", recall)
+        self.assertIn("Nerd-memory proposes a split:", denial)
+        self.assertIn("one compact paragraph", learning)
+        self.assertNotIn("> **Memory Proposal**", recall)
+        self.assertNotIn("> **Memory Split Proposal**", denial)
+
+    def test_operational_guidance_stays_progressively_disclosed_and_compact(self):
+        skill = skill_body("nerd-memory")
+        workflows = {
+            name: memory_reference_body(name)
+            for name in (
+                "recall-and-apply.md",
+                "learn-and-correct.md",
+                "deny-split-forget.md",
+            )
+        }
+
+        self.assertLessEqual(len(skill.split()), 1000)
+        self.assertLessEqual(
+            len((skill + workflows["recall-and-apply.md"]).split()),
+            1800,
+        )
+        for name, body in workflows.items():
+            self.assertLessEqual(len(body.split()), 800, name)
+            self.assertIn(f"references/{name}", skill)
+        self.assertIn(
+            "Read only the reference matching the active operation",
+            normalized(skill),
+        )
+
     def test_defines_all_seven_longitudinal_pattern_types(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         assert_terms(
             self,
             body,
             (
-                "**goal:**",
-                "**task:**",
-                "**action:**",
-                "**result:**",
-                "**boundary:**",
-                "**verification:**",
-                "**routing:**",
+                "| `goal` |",
+                "| `task` |",
+                "| `action` |",
+                "| `result` |",
+                "| `boundary` |",
+                "| `verification` |",
+                "| `routing` |",
                 "independent root task episode",
                 "Consolidation creates inactive candidates",
                 "does not activate them",
@@ -1531,17 +1591,17 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_memory_influence_always_stops_at_exact_confirmation(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         assert_terms(
             self,
             body,
             (
-                "## Non-Negotiable Memory Gate",
+                "## Core Contract",
                 "taint the whole proposal and stop before acting",
                 "generated confirmation phrase from a new, direct user response",
                 "trusted thread/turn reference",
                 "Never invent or reuse a confirmation-event reference",
-                "silence",
+                "Silence",
                 "This version has no standing-confirmation bypass",
                 "Never call an executor from a pending proposal",
                 "immediately consume its one-use grant",
@@ -1550,19 +1610,19 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_endpoint_routes_every_input_or_explicitly_abstains(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
             body,
             (
-                "Build a Memory-Blind Baseline",
+                "Build the Memory-Blind Baseline",
                 "Every input must yield one of",
                 "pending memory proposal",
                 "`abstain`",
                 "Never force a nearest match",
-                "`confirmed` patterns can construct a scoped endpoint for an arbitrary current input",
-                "If it is `memory_conflict`",
+                "use only `confirmed` patterns matching the exact namespace, scope, and trigger context",
+                "For `memory_conflict`",
             ),
         )
         assert_terms(
@@ -1583,13 +1643,13 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_current_guidance_and_normal_authority_outrank_memory(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         assert_terms(
             self,
             body,
             (
                 "Current explicit values are authoritative",
-                "memory may not replace or broaden them",
+                "memory may not replace, weaken, or broaden them",
                 "never grants",
                 "action authority",
                 "Current direct guidance outranks every memory",
@@ -1599,13 +1659,13 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_memory_blind_baseline_cannot_launder_remembered_material(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
             body,
             (
-                "Protect that authority from provenance laundering",
+                "Protect current-input authority from provenance laundering",
                 "stored observation (including inert telemetry)",
                 "pending, denied, or split-derived value",
                 "`baseline_source=direct_user`",
@@ -1633,7 +1693,7 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_provenance_prevents_external_and_self_reinforcement(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
@@ -1646,7 +1706,7 @@ class MemoryContractTests(unittest.TestCase):
                 "assistant inference",
                 "generated summaries",
                 "learned descendants",
-                "execution success cannot establish or reinforce",
+                "execution success, and test output cannot establish or reinforce",
                 "Never store secrets",
             ),
         )
@@ -1677,10 +1737,10 @@ class MemoryContractTests(unittest.TestCase):
                 "Load Nerd Memory only from a host-authenticated direct-user skill invocation",
                 "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
                 "A plain natural-language mention is not activation",
-                "Without an active explicit invocation, do not read Memory references",
-                "Retained text is not a new invocation",
-                "This contract cannot evict host context",
-                "It is never activation, standing permission",
+                "Without active explicit invocation, do not read operational references",
+                "Retained skill text is not a new invocation",
+                "start a fresh session when physical context removal is required",
+                "it is never activation, standing permission",
                 "Never search another namespace",
             ),
         )
@@ -1710,13 +1770,13 @@ class MemoryContractTests(unittest.TestCase):
         self.assertNotIn("when Nerd Memory is enabled", frontmatter)
 
     def test_schema_upgrades_fence_already_open_older_runtimes(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
             body,
             (
-                "close and recreate every long-lived MemoryStore",
+                "close and recreate every long-lived `MemoryStore`",
                 "never retry a proposal or action through the stale handle",
                 "database rejects stale writers",
             ),
@@ -1734,7 +1794,7 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_conflict_revision_and_forget_invalidate_pending_authority(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
@@ -1743,7 +1803,7 @@ class MemoryContractTests(unittest.TestCase):
                 "A direct correction immediately contests",
                 "invalidates dependent pending proposals and grants",
                 "Never resolve two equally authoritative conflicts",
-                "use `preview-forget`",
+                "Use `preview-forget`",
                 "redact dependent denial/split records",
             ),
         )
@@ -1761,19 +1821,19 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_agent_skill_tool_and_mcp_routing_is_atomic_and_fail_closed(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         smart = normalized(skill_body("nerd-smart"))
         assert_terms(
             self,
             body,
             (
-                "ordered execution chain of atomic profiles",
-                "binding each agent to its skills, tools, and MCP servers",
+                "Ordered atomic agent profiles",
+                "agent profiles binding skills, tools, and MCP servers",
                 "Treat a returned routing profile as a recommendation",
                 "Resolve every named agent, skill, tool, and MCP server",
-                "never silently drop, substitute, reorder, install, or invoke",
-                "Actual agent/skill/tool/MCP usage may be logged only as `agent_inference`",
+                "never silently drop, substitute, reorder, install, delegate, or invoke",
+                "Log actual agent/skill/tool/MCP usage only as inert `agent_inference`",
             ),
         )
         assert_terms(
@@ -1803,19 +1863,19 @@ class MemoryContractTests(unittest.TestCase):
         )
 
     def test_denial_is_neutral_and_generic_routes_need_confirmed_splits(self):
-        body = normalized(skill_body("nerd-memory"))
+        body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
         assert_terms(
             self,
             body,
             (
-                "Handle a Denied Memory Recommendation",
+                "Deny a Recommendation",
                 "It is evidence only that this exact recommendation was rejected",
                 "agent_mistake",
                 "human_forgot",
                 "route_too_generic",
                 "Do not infer the third explanation",
-                "Memory Split Proposal",
+                "Nerd-memory proposes a split",
                 "strictly specializes the parent scope",
                 "the parent remains the fallback elsewhere",
                 "memory write only",
