@@ -200,6 +200,12 @@ class InstallScriptTests(unittest.TestCase):
                     context = context[key]
                 self.assertIn("Always invoke", context)
                 self.assertIn("nerd-smart", context)
+                self.assertNotIn("nerd-memory", context)
+                self.assertIn("standing authorization applies only to `nerd-smart`", context)
+                self.assertIn(
+                    "does not load, invoke, enable, or authorize any other skill",
+                    context,
+                )
                 self.assertIn("No hook authorizes combining Nerd", context)
                 for incompatible in ("Superpowers", "Ponytail", "Caveman"):
                     self.assertIn(incompatible, context)

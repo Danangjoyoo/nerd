@@ -93,6 +93,47 @@ Keep the delivery breakdown internal for clear work. Show it only in a requested
 
 No routing phrase is required. A direct specialty invocation uses that specialty. Otherwise route exactly one primary specialty only when it materially strengthens the workflow; the trivial-task fast path may remain in Smart.
 
+Only after a host-authenticated direct-user invocation—`$nerd-memory` in Codex
+or `/nerd-memory` in Claude Code and Cursor—load it as pre-routing middleware
+rather than a primary specialty. A plain natural-language mention is not
+activation. Installation, availability, relevance, enablement, prior use, and
+Smart's standing hook never activate Memory; enablement is storage consent
+only. Without an active request-scoped invocation, do not load its contract,
+inspect consent or state, open its store, retrieve or observe patterns,
+generate a proposal, or write memory. Continue with a memory-blind Smart route.
+
+After explicit activation, first resolve the current input and show a
+memory-blind Focus Record and endpoint. Then let Memory construct a scoped
+proposal before specialty routing. If memory changes any field, show its exact
+proposal and stop for the generated explicit confirmation phrase; Smart's rule
+that silence accepts a Focus Record does not apply. Route or act only after the
+one-use memory grant is consumed. Bound confirmation, denial, correction, and
+split replies may finish that active workflow without repeating the skill name;
+a later request requires a new explicit invocation. A memory-free result,
+disabled store, conflict, or abstention adds no authority and may continue or
+clarify under Smart's normal rules.
+
+Never seed that baseline from a remembered, proposed, denied, or split-derived
+value. If a current explicit field overlaps memory, attach Memory's unique
+direct-user baseline attestation only when the exact value independently came
+from the current authenticated user event.
+
+If the consumed endpoint contains a remembered `routing` chain, keep each
+agent bound to exactly its displayed skills, tools, and MCP servers. Resolve
+the complete ordered chain against the current host registry and current
+authority. If any component is missing, disallowed, renamed, or incompatible,
+stop and show the mismatch; never silently drop, substitute, reorder, install,
+delegate to, or invoke remembered components.
+
+When `nerd-loop` is installed and the user explicitly invokes it or an
+evidence-driven back edge materially improves task completion, hand Loop the
+resolved Focus Record, endpoint, current explicit seven-field baseline, and
+mutation boundary. Loop is a macro controller rather than a primary specialty:
+it selects the cheapest adequate recurrence/state profile and may give one
+bounded iteration at a time to one primary specialty. Skip Loop when one direct
+action or answer plus decisive proof is sufficient. Never combine Nerd Loop
+with Nerd XFast; ask the user to choose if both are invoked.
+
 - Broken or inconsistent behavior needing diagnosis or repair: `nerd-surgery`.
 - Security audit, vulnerability, or exploitability work: `nerd-patrol`.
 - An approved plan or a nontrivial, multi-step, or risky coding outcome: `nerd-execute`.

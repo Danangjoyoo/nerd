@@ -3,13 +3,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import sys
+from urllib.parse import unquote, urlsplit
 
 
 PUBLIC_SKILLS = (
     "nerd-smart",
+    "nerd-memory",
+    "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
     "nerd-execute",
@@ -17,6 +20,8 @@ PUBLIC_SKILLS = (
     "nerd-fast",
     "nerd-xfast",
 )
+
+MANUAL_ONLY_SKILLS = ("nerd-memory",)
 
 REQUIRED_REFERENCES = {
     "nerd-smart": (
@@ -36,6 +41,61 @@ REQUIRED_REFERENCES = {
         "yagni.md",
         "comprehensive.md",
     ),
+    "nerd-memory": (
+        "recall-and-apply.md",
+        "learn-and-correct.md",
+        "deny-split-forget.md",
+        "memory-contract.md",
+        "research.md",
+    ),
+    "nerd-loop": (
+        "runtime-contract.md",
+        "durable-runtime.md",
+        "profiles/index.md",
+        "profiles/selection.md",
+        "profiles/catalog.md",
+        "profiles/persistence.md",
+        "profiles/endpoint-map.md",
+        "profiles/routes.md",
+        "profiles/lifecycle.md",
+        "profiles/composition.md",
+        "profiles/examples.md",
+        "dod/index.md",
+        "dod/foundation.md",
+        "dod/construction.md",
+        "dod/evidence.md",
+        "dod/task-guidance.md",
+        "dod/template.md",
+        "dod/research.md",
+        "iteration/index.md",
+        "iteration/core.md",
+        "iteration/planning.md",
+        "iteration/scheduling.md",
+        "iteration/ledger.md",
+        "iteration/recovery.md",
+        "iteration/continuity.md",
+        "iteration/templates.md",
+        "iteration/research.md",
+        "convergence/index.md",
+        "convergence/foundation.md",
+        "convergence/measurement.md",
+        "convergence/dynamics.md",
+        "convergence/thresholds.md",
+        "convergence/qualitative-patterns.md",
+        "convergence/anti-patterns.md",
+        "convergence/template.md",
+        "convergence/research.md",
+        "memory/index.md",
+        "memory/admission.md",
+        "memory/contract.md",
+        "memory/operation.md",
+        "memory/children.md",
+        "memory/learning.md",
+        "memory/durable-recovery.md",
+        "memory/routing.md",
+        "memory/examples.md",
+        "memory/conformance.md",
+    ),
     "nerd-surgery": (
         "systematic-debugging.md",
         "test-first-repair.md",
@@ -50,6 +110,8 @@ REQUIRED_REFERENCES = {
 
 REQUIRED_SCRIPTS = {
     "nerd-smart": ("prompt_hook.py",),
+    "nerd-memory": ("memory.py",),
+    "nerd-loop": ("loop.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),
     "nerd-execute": (),
@@ -101,28 +163,85 @@ def _discovered_skill_dirs(skills_root: Path) -> set[str]:
     }
 
 
+_MARKDOWN_LINK = re.compile(r"\]\(\s*<?([^\s)>]+\.md(?:#[^\s)>]*)?)>?")
+
+
 def _reference_links(text: str) -> set[str]:
-    return set(
-        re.findall(
-            r"\]\((?:references/)?([^/#)]+\.md)(?:#[^)]+)?\)",
-            text,
+    """Return local Markdown reference targets, preserving relative paths."""
+    links: set[str] = set()
+    for match in _MARKDOWN_LINK.finditer(text):
+        raw = unquote(match.group(1)).split("#", 1)[0]
+        parsed = urlsplit(raw)
+        if parsed.scheme or parsed.netloc:
+            continue
+        if raw.startswith("references/"):
+            raw = raw.removeprefix("references/")
+        links.add(raw)
+    return links
+
+
+def _resolve_reference_name(source: str | None, target: str) -> str | None:
+    """Resolve a reference-relative target without allowing root escape."""
+    if not target or "\\" in target or target.startswith("/"):
+        return None
+    raw = PurePosixPath(target)
+    if raw.is_absolute():
+        return None
+    base = PurePosixPath(source).parent if source else PurePosixPath()
+    parts: list[str] = []
+    for part in (base / raw).parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            if not parts:
+                return None
+            parts.pop()
+            continue
+        if ":" in part:
+            return None
+        parts.append(part)
+    if not parts:
+        return None
+    return PurePosixPath(*parts).as_posix()
+
+
+def _reference_graph(
+    body: str,
+    references_root: Path,
+) -> tuple[set[str], list[str]]:
+    """Traverse local reference links and report unsafe or dangling edges."""
+    root = references_root.resolve()
+    reachable: set[str] = set()
+    violations: list[str] = []
+    pending = [(None, target) for target in _reference_links(body)]
+    while pending:
+        source, target = pending.pop()
+        reference = _resolve_reference_name(source, target)
+        source_label = source or "SKILL.md"
+        if reference is None:
+            violations.append(f"{source_label}: unsafe reference link {target}")
+            continue
+        path = references_root / reference
+        try:
+            path.resolve().relative_to(root)
+        except ValueError:
+            violations.append(f"{source_label}: reference escapes root {target}")
+            continue
+        if not path.is_file():
+            violations.append(f"{source_label}: dangling reference link {target}")
+            continue
+        if reference in reachable:
+            continue
+        reachable.add(reference)
+        pending.extend(
+            (reference, child)
+            for child in _reference_links(path.read_text(encoding="utf-8"))
         )
-    )
+    return reachable, violations
 
 
 def _reachable_reference_names(body: str, references_root: Path) -> set[str]:
-    reachable: set[str] = set()
-    pending = list(_reference_links(body))
-    while pending:
-        reference = pending.pop()
-        if reference in reachable:
-            continue
-        path = references_root / reference
-        if not path.is_file():
-            continue
-        reachable.add(reference)
-        pending.extend(_reference_links(path.read_text(encoding="utf-8")))
-    return reachable
+    return _reference_graph(body, references_root)[0]
 
 
 def validate_repository(root: Path) -> list[str]:
@@ -153,9 +272,13 @@ def validate_repository(root: Path) -> list[str]:
         metadata, frontmatter_errors = _frontmatter(body)
         for error in frontmatter_errors:
             violations.append(f"skills/{name}/SKILL.md: {error}")
-        if set(metadata) != {"name", "description"}:
+        expected_frontmatter_keys = {"name", "description"}
+        if name in MANUAL_ONLY_SKILLS:
+            expected_frontmatter_keys.add("disable-model-invocation")
+        if set(metadata) != expected_frontmatter_keys:
+            expected_keys = ", ".join(sorted(expected_frontmatter_keys))
             violations.append(
-                f"skills/{name}/SKILL.md: frontmatter keys must be name, description"
+                f"skills/{name}/SKILL.md: frontmatter keys must be {expected_keys}"
             )
         if metadata.get("name") != name:
             violations.append(
@@ -163,6 +286,13 @@ def validate_repository(root: Path) -> list[str]:
             )
         if not metadata.get("description"):
             violations.append(f"skills/{name}/SKILL.md: description is required")
+        if (
+            name in MANUAL_ONLY_SKILLS
+            and metadata.get("disable-model-invocation") != "true"
+        ):
+            violations.append(
+                f"skills/{name}/SKILL.md: disable-model-invocation must be true"
+            )
 
         folded = body.casefold()
         for banned in BANNED_RUNTIME_REFERENCES:
@@ -182,10 +312,22 @@ def validate_repository(root: Path) -> list[str]:
                 violations.append(
                     f"skills/{name}/agents/openai.yaml: default prompt must name ${name}"
                 )
+            if (
+                name in MANUAL_ONLY_SKILLS
+                and "allow_implicit_invocation: false" not in metadata_body
+            ):
+                violations.append(
+                    f"skills/{name}/agents/openai.yaml: implicit invocation must be false"
+                )
 
         references_root = skill_dir / "references"
         expected_references = REQUIRED_REFERENCES[name]
-        reachable_references = _reachable_reference_names(body, references_root)
+        reachable_references, reference_violations = _reference_graph(
+            body,
+            references_root,
+        )
+        for violation in reference_violations:
+            violations.append(f"skills/{name}/references/{violation}")
         for reference in expected_references:
             path = references_root / reference
             if not path.is_file():
@@ -204,6 +346,14 @@ def validate_repository(root: Path) -> list[str]:
                 )
 
         if references_root.is_dir():
+            actual_references = {
+                path.relative_to(references_root).as_posix()
+                for path in references_root.rglob("*.md")
+            }
+            for reference in sorted(actual_references - set(expected_references)):
+                violations.append(
+                    f"unregistered file: skills/{name}/references/{reference}"
+                )
             for nested_skill in references_root.rglob("SKILL.md"):
                 relative = nested_skill.relative_to(root)
                 violations.append(f"nested skill is forbidden: {relative}")

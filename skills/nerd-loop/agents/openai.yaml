@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Loop"
+  short_description: "Cost-proportional task-completion loops"
+  default_prompt: "Use $nerd-loop to select the cheapest adequate loop profile and drive this task to a verified Definition of Done."
