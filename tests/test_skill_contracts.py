@@ -17,9 +17,17 @@ def smart_reference_body(name: str) -> str:
     return (SKILLS / "nerd-smart" / "references" / name).read_text()
 
 
+def memory_reference_body(name: str) -> str:
+    return (SKILLS / "nerd-memory" / "references" / name).read_text()
+
+
 def assert_terms(test: unittest.TestCase, body: str, terms: tuple[str, ...]) -> None:
     for term in terms:
         test.assertIn(term, body)
+
+
+def normalized(body: str) -> str:
+    return " ".join(body.split())
 
 
 class SmartContractTests(unittest.TestCase):
@@ -1500,6 +1508,369 @@ class UFastContractTests(unittest.TestCase):
 
     def test_stays_compact(self):
         self.assertLessEqual(len(skill_body("nerd-ufast").split()), 1000)
+
+
+class MemoryContractTests(unittest.TestCase):
+    def test_defines_all_seven_longitudinal_pattern_types(self):
+        body = normalized(skill_body("nerd-memory"))
+        assert_terms(
+            self,
+            body,
+            (
+                "**goal:**",
+                "**task:**",
+                "**action:**",
+                "**result:**",
+                "**boundary:**",
+                "**verification:**",
+                "**routing:**",
+                "independent root task episode",
+                "Consolidation creates inactive candidates",
+                "does not activate them",
+            ),
+        )
+
+    def test_memory_influence_always_stops_at_exact_confirmation(self):
+        body = normalized(skill_body("nerd-memory"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Non-Negotiable Memory Gate",
+                "taint the whole proposal and stop before acting",
+                "generated confirmation phrase from a new, direct user response",
+                "trusted thread/turn reference",
+                "Never invent or reuse a confirmation-event reference",
+                "silence",
+                "This version has no standing-confirmation bypass",
+                "Never call an executor from a pending proposal",
+                "immediately consume its one-use grant",
+                "memory_gate_only",
+            ),
+        )
+
+    def test_endpoint_routes_every_input_or_explicitly_abstains(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "Build a Memory-Blind Baseline",
+                "Every input must yield one of",
+                "pending memory proposal",
+                "`abstain`",
+                "Never force a nearest match",
+                "`confirmed` patterns can construct a scoped endpoint for an arbitrary current input",
+                "If it is `memory_conflict`",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                '"endpoint": "discuss | ideate | explore | diagnose | review | specify | document | plan | execute | monitor | abstain"',
+                '"goal": null',
+                '"task": []',
+                '"action": []',
+                '"result": null',
+                '"boundary": []',
+                '"verification": []',
+                '"routing": []',
+                "A valid retrieval result may be empty",
+                "cannot be confirmed or consumed",
+            ),
+        )
+
+    def test_current_guidance_and_normal_authority_outrank_memory(self):
+        body = normalized(skill_body("nerd-memory"))
+        assert_terms(
+            self,
+            body,
+            (
+                "Current explicit values are authoritative",
+                "memory may not replace or broaden them",
+                "never grants",
+                "action authority",
+                "Current direct guidance outranks every memory",
+                "even when one hundred older episodes agree",
+                "normal Nerd authority checks",
+            ),
+        )
+
+    def test_memory_blind_baseline_cannot_launder_remembered_material(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "Protect that authority from provenance laundering",
+                "stored observation (including inert telemetry)",
+                "pending, denied, or split-derived value",
+                "`baseline_source=direct_user`",
+                "unique authenticated `baseline_ref`",
+                "independently present in the current user event",
+                "not confirmation of a memory proposal or authorization to act",
+                "provenance only; does not confirm memory or authorize action",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "memory-laundering bypass",
+                "historical memory-generated diffs",
+                "all stored observations—including inert agent telemetry",
+                "routing profiles naming the same agent",
+                "partial routing copies",
+                "attestation is hash-bound to that exact baseline",
+                "consumes the event reference globally",
+                "fails closed until a fresh direct-user baseline attestation",
+                "bounded set of source IDs",
+                "`error.details.baseline_collisions`",
+            ),
+        )
+
+    def test_provenance_prevents_external_and_self_reinforcement(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "direct current-user guidance or correction",
+                "The same episode counts once",
+                "External content",
+                "tool results",
+                "assistant inference",
+                "generated summaries",
+                "learned descendants",
+                "execution success cannot establish or reinforce",
+                "Never store secrets",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "Eligible authority sources are `direct_user` and `user_correction`",
+                "Source classification is based on the trusted event channel",
+                "counts once",
+                "A pattern may not derive support from itself or any descendant",
+            ),
+        )
+
+    def test_runtime_is_explicit_activation_only_opt_in_local_and_namespaced(self):
+        raw_body = skill_body("nerd-memory")
+        body = normalized(raw_body)
+        frontmatter = normalized(raw_body.split("---", 2)[1])
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        metadata = normalized(
+            (SKILLS / "nerd-memory" / "agents" / "openai.yaml").read_text()
+        )
+        assert_terms(
+            self,
+            body,
+            (
+                "python3 <skill-root>/scripts/memory.py",
+                "Load Nerd Memory only from a host-authenticated direct-user skill invocation",
+                "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
+                "A plain natural-language mention is not activation",
+                "Without an active explicit invocation, do not read Memory references",
+                "Retained text is not a new invocation",
+                "This contract cannot evict host context",
+                "It is never activation, standing permission",
+                "Never search another namespace",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "local SQLite",
+                "uses the Python standard library",
+                "Activation and storage consent are independent",
+                "unless the current direct user event invoked `$nerd-memory` in Codex or `/nerd-memory` in Claude Code or Cursor",
+                "A plain natural-language mention is not activation",
+                "later requests require a new explicit invocation",
+                "Memory is opt-in per namespace",
+                "Namespace equality is exact",
+                "Every successful command writes one JSON value to stdout",
+                "A prompt-only simulation does not satisfy this contract",
+            ),
+        )
+        self.assertIn("allow_implicit_invocation: false", metadata)
+        self.assertNotIn("allow_implicit_invocation: true", metadata)
+        self.assertIn("$nerd-memory", metadata)
+        self.assertIn("current user explicitly invokes $nerd-memory", frontmatter)
+        self.assertIn("/nerd-memory (Claude/Cursor)", frontmatter)
+        self.assertIn("disable-model-invocation: true", frontmatter)
+        self.assertIn("Never auto-load", frontmatter)
+        self.assertNotIn("when Nerd Memory is enabled", frontmatter)
+
+    def test_schema_upgrades_fence_already_open_older_runtimes(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "close and recreate every long-lived MemoryStore",
+                "never retry a proposal or action through the stale handle",
+                "database rejects stale writers",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "Persistent `INSERT`, `UPDATE`, and `DELETE` triggers",
+                "connection-local runtime-version function",
+                "pre-upgrade connection either lacks that function or reports the older version",
+                "stop-and-restart operations",
+                "no stale proposal, confirmation, consumption, split, or memory mutation may proceed",
+            ),
+        )
+
+    def test_conflict_revision_and_forget_invalidate_pending_authority(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "A direct correction immediately contests",
+                "invalidates dependent pending proposals and grants",
+                "Never resolve two equally authoritative conflicts",
+                "use `preview-forget`",
+                "redact dependent denial/split records",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "exact matched pattern IDs and revisions",
+                "consumable exactly once",
+                "store-globally unused confirmation reference",
+                "atomically marks the grant used",
+                "preview-forget",
+                "Any intervening evidence or lineage change makes the preview stale",
+            ),
+        )
+
+    def test_agent_skill_tool_and_mcp_routing_is_atomic_and_fail_closed(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        smart = normalized(skill_body("nerd-smart"))
+        assert_terms(
+            self,
+            body,
+            (
+                "ordered execution chain of atomic profiles",
+                "binding each agent to its skills, tools, and MCP servers",
+                "Treat a returned routing profile as a recommendation",
+                "Resolve every named agent, skill, tool, and MCP server",
+                "never silently drop, substitute, reorder, install, or invoke",
+                "Actual agent/skill/tool/MCP usage may be logged only as `agent_inference`",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                '"agent": "codex"',
+                '"skills": ["nerd-smart"]',
+                '"tools": ["web.run"]',
+                '"mcp_servers": ["github"]',
+                "`codex`, `claude-code`, or `cursor`",
+                "Routing uses `fill` only",
+                "must never be merged or cross-combined",
+                "current authenticated registry",
+                "Missing or disallowed components fail closed",
+            ),
+        )
+        assert_terms(
+            self,
+            smart,
+            (
+                "remembered `routing` chain",
+                "keep each agent bound to exactly its displayed skills, tools, and MCP servers",
+                "current host registry and current authority",
+                "never silently drop, substitute, reorder, install",
+            ),
+        )
+
+    def test_denial_is_neutral_and_generic_routes_need_confirmed_splits(self):
+        body = normalized(skill_body("nerd-memory"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "Handle a Denied Memory Recommendation",
+                "It is evidence only that this exact recommendation was rejected",
+                "agent_mistake",
+                "human_forgot",
+                "route_too_generic",
+                "Do not infer the third explanation",
+                "Memory Split Proposal",
+                "strictly specializes the parent scope",
+                "the parent remains the fallback elsewhere",
+                "memory write only",
+                "requires a fresh endpoint proposal afterward",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "A denied proposal is terminal",
+                "Statistical prevalence must never select a diagnosis",
+                "This version implements specialization, not a complete partition",
+                "activation_reason=explicit_split",
+                "One user event can authorize at most one transition",
+                "confirm-split --split-id ID",
+                "all unselected applied bindings",
+                "returns no endpoint",
+            ),
+        )
+
+    def test_smart_composes_memory_only_after_explicit_activation(self):
+        smart = normalized(skill_body("nerd-smart"))
+        hook = normalized(
+            (SKILLS / "nerd-smart" / "scripts" / "prompt_hook.py").read_text()
+        )
+        assert_terms(
+            self,
+            smart,
+            (
+                "Only after a host-authenticated direct-user invocation",
+                "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
+                "load it as pre-routing middleware rather than a primary specialty",
+                "A plain natural-language mention is not activation",
+                "Smart's standing hook never activate Memory",
+                "Without an active request-scoped invocation",
+                "Continue with a memory-blind Smart route",
+                "memory-blind Focus Record and endpoint",
+                "stop for the generated explicit confirmation phrase",
+                "silence accepts a Focus Record does not apply",
+                "one-use memory grant is consumed",
+                "remembered `routing` chain",
+                "current host registry and current authority",
+            ),
+        )
+        self.assertNotIn("When `nerd-memory` is installed and enabled", smart)
+        assert_terms(
+            self,
+            hook,
+            (
+                "standing authorization applies only to `nerd-smart`",
+                "does not load, invoke, enable, or authorize any other skill",
+            ),
+        )
+        self.assertNotIn("nerd-memory", hook)
 
 
 class FamilyContractTests(unittest.TestCase):

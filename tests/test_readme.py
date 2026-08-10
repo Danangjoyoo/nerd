@@ -15,6 +15,8 @@ README = ROOT / "README.md"
 FAST_RAW_RESULT = ROOT / "benchmarks" / "pilots" / "fast-raw-one-case" / "result.json"
 SKILLS = (
     "nerd-smart",
+    "nerd-memory",
+    "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
     "nerd-execute",

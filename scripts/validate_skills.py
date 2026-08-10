@@ -10,6 +10,8 @@ import sys
 
 PUBLIC_SKILLS = (
     "nerd-smart",
+    "nerd-memory",
+    "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
     "nerd-execute",
@@ -17,6 +19,8 @@ PUBLIC_SKILLS = (
     "nerd-fast",
     "nerd-xfast",
 )
+
+MANUAL_ONLY_SKILLS = ("nerd-memory",)
 
 REQUIRED_REFERENCES = {
     "nerd-smart": (
@@ -36,6 +40,15 @@ REQUIRED_REFERENCES = {
         "yagni.md",
         "comprehensive.md",
     ),
+    "nerd-memory": ("memory-contract.md", "research.md"),
+    "nerd-loop": (
+        "runtime-contract.md",
+        "definition-of-done.md",
+        "convergence.md",
+        "iteration.md",
+        "behavioral-memory.md",
+        "loop-profiles.md",
+    ),
     "nerd-surgery": (
         "systematic-debugging.md",
         "test-first-repair.md",
@@ -50,6 +63,8 @@ REQUIRED_REFERENCES = {
 
 REQUIRED_SCRIPTS = {
     "nerd-smart": ("prompt_hook.py",),
+    "nerd-memory": ("memory.py",),
+    "nerd-loop": ("loop.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),
     "nerd-execute": (),
@@ -153,9 +168,13 @@ def validate_repository(root: Path) -> list[str]:
         metadata, frontmatter_errors = _frontmatter(body)
         for error in frontmatter_errors:
             violations.append(f"skills/{name}/SKILL.md: {error}")
-        if set(metadata) != {"name", "description"}:
+        expected_frontmatter_keys = {"name", "description"}
+        if name in MANUAL_ONLY_SKILLS:
+            expected_frontmatter_keys.add("disable-model-invocation")
+        if set(metadata) != expected_frontmatter_keys:
+            expected_keys = ", ".join(sorted(expected_frontmatter_keys))
             violations.append(
-                f"skills/{name}/SKILL.md: frontmatter keys must be name, description"
+                f"skills/{name}/SKILL.md: frontmatter keys must be {expected_keys}"
             )
         if metadata.get("name") != name:
             violations.append(
@@ -163,6 +182,13 @@ def validate_repository(root: Path) -> list[str]:
             )
         if not metadata.get("description"):
             violations.append(f"skills/{name}/SKILL.md: description is required")
+        if (
+            name in MANUAL_ONLY_SKILLS
+            and metadata.get("disable-model-invocation") != "true"
+        ):
+            violations.append(
+                f"skills/{name}/SKILL.md: disable-model-invocation must be true"
+            )
 
         folded = body.casefold()
         for banned in BANNED_RUNTIME_REFERENCES:
@@ -181,6 +207,13 @@ def validate_repository(root: Path) -> list[str]:
             if f"$" + name not in metadata_body:
                 violations.append(
                     f"skills/{name}/agents/openai.yaml: default prompt must name ${name}"
+                )
+            if (
+                name in MANUAL_ONLY_SKILLS
+                and "allow_implicit_invocation: false" not in metadata_body
+            ):
+                violations.append(
+                    f"skills/{name}/agents/openai.yaml: implicit invocation must be false"
                 )
 
         references_root = skill_dir / "references"

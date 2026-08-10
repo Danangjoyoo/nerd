@@ -1,0 +1,6 @@
+interface:
+  display_name: "Nerd Memory"
+  short_description: "Confirmation-gated workflow and execution-route memory"
+  default_prompt: "Use $nerd-memory to construct a scoped endpoint from my confirmed recurring patterns, including atomic agent/skill/tool/MCP routes, show every remembered change, and wait for exact confirmation before acting."
+policy:
+  allow_implicit_invocation: false

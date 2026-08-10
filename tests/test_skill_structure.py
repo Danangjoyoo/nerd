@@ -3,6 +3,7 @@ import tempfile
 import unittest
 
 from scripts.validate_skills import (
+    MANUAL_ONLY_SKILLS,
     PUBLIC_SKILLS,
     REQUIRED_REFERENCES,
     REQUIRED_SCRIPTS,
@@ -15,11 +16,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SkillStructureTests(unittest.TestCase):
+    def test_manual_only_skill_set_is_exact(self):
+        self.assertEqual(MANUAL_ONLY_SKILLS, ("nerd-memory",))
+
     def test_public_skill_set_is_exact(self):
         self.assertEqual(
             PUBLIC_SKILLS,
             (
                 "nerd-smart",
+                "nerd-memory",
+                "nerd-loop",
                 "nerd-surgery",
                 "nerd-patrol",
                 "nerd-execute",
@@ -50,6 +56,18 @@ class SkillStructureTests(unittest.TestCase):
                     "yagni.md",
                     "comprehensive.md",
                 ),
+                "nerd-memory": (
+                    "memory-contract.md",
+                    "research.md",
+                ),
+                "nerd-loop": (
+                    "runtime-contract.md",
+                    "definition-of-done.md",
+                    "convergence.md",
+                    "iteration.md",
+                    "behavioral-memory.md",
+                    "loop-profiles.md",
+                ),
                 "nerd-surgery": (
                     "systematic-debugging.md",
                     "test-first-repair.md",
@@ -69,6 +87,8 @@ class SkillStructureTests(unittest.TestCase):
         self.assertFalse((ROOT / "skills" / "nerd-fast" / "references").exists())
         self.assertFalse((ROOT / "skills" / "nerd-xfast" / "references").exists())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-smart"], ("prompt_hook.py",))
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-memory"], ("memory.py",))
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-loop"], ("loop.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
 

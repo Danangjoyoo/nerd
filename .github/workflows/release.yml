@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      EXPECTED_SKILL_COUNT: 7
+      EXPECTED_SKILL_COUNT: 9
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -40,12 +40,12 @@ jobs:
           cat > "$RUNNER_TEMP/nerd-release/assert-skills" <<'SCRIPT'
           #!/usr/bin/env bash
           set -euo pipefail
-          EXPECTED_SKILL_COUNT=7
+          EXPECTED_SKILL_COUNT=9
           INPUT="$(cat)"
           FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-[a-z0-9-]+' | sort -u)"
           COUNT="$(printf '%s\n' "$FOUND" | grep -Ec '^nerd-' || true)"
           test "$COUNT" -eq "$EXPECTED_SKILL_COUNT"
-          test "$FOUND" = $'nerd-execute\nnerd-fast\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery\nnerd-xfast'
+          test "$FOUND" = $'nerd-execute\nnerd-fast\nnerd-loop\nnerd-memory\nnerd-patrol\nnerd-silent\nnerd-smart\nnerd-surgery\nnerd-xfast'
           test "$(printf '%s\n' "$FOUND" | wc -l | tr -d ' ')" -eq "$EXPECTED_SKILL_COUNT"
           SCRIPT
           chmod +x "$RUNNER_TEMP/nerd-release/assert-skills"
@@ -58,7 +58,7 @@ jobs:
           TAG_LIST="$(npx skills add "https://github.com/Danangjoyoo/nerd/tree/$GITHUB_REF_NAME" --list)"
           printf '%s\n' "$TAG_LIST"
           printf '%s\n' "$TAG_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast nerd-xfast; do
+          for skill in nerd-smart nerd-memory nerd-loop nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast nerd-xfast; do
             printf '%s\n' "$TAG_LIST" | grep -F "$skill"
           done
       - name: Verify public shorthand discovery
@@ -68,7 +68,7 @@ jobs:
           PUBLIC_LIST="$(npx skills add danangjoyoo/nerd --list)"
           printf '%s\n' "$PUBLIC_LIST"
           printf '%s\n' "$PUBLIC_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast nerd-xfast; do
+          for skill in nerd-smart nerd-memory nerd-loop nerd-surgery nerd-patrol nerd-execute nerd-silent nerd-fast nerd-xfast; do
             printf '%s\n' "$PUBLIC_LIST" | grep -F "$skill"
           done
       - name: Verify isolated multi-agent install
@@ -77,10 +77,28 @@ jobs:
           set -euo pipefail
           export HOME="$RUNNER_TEMP/nerd-home"
           mkdir -p "$HOME"
-          npx skills add danangjoyoo/nerd --copy --global --skill '*' \
+          SOURCE="danangjoyoo/nerd"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            SOURCE="https://github.com/Danangjoyoo/nerd/tree/$GITHUB_REF_NAME"
+          fi
+          npx skills add "$SOURCE" --copy --global --skill '*' \
             --agent codex --agent claude-code --agent cursor --yes
           for agent in codex claude-code cursor; do
             INSTALLED="$(npx skills list --global --agent "$agent")"
             printf '%s\n' "$INSTALLED"
             printf '%s\n' "$INSTALLED" | "$RUNNER_TEMP/nerd-release/assert-skills"
           done
+          MEMORY_SKILLS="$(find "$HOME" -path '*/nerd-memory/SKILL.md' -type f)"
+          test -n "$MEMORY_SKILLS"
+          while IFS= read -r skill_file; do
+            grep -Fx 'disable-model-invocation: true' "$skill_file"
+          done <<EOF
+          $MEMORY_SKILLS
+          EOF
+          OPENAI_METADATA="$(find "$HOME" -path '*/nerd-memory/agents/openai.yaml' -type f)"
+          test -n "$OPENAI_METADATA"
+          while IFS= read -r metadata_file; do
+            grep -F 'allow_implicit_invocation: false' "$metadata_file"
+          done <<EOF
+          $OPENAI_METADATA
+          EOF
