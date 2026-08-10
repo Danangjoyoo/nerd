@@ -2023,7 +2023,7 @@ def reduce_effect_events(request: Mapping[str, Any]) -> dict[str, Any]:
                 )
             commit_ref = _nonempty_string(event["commit_ref"], f"{name}.commit_ref")
             if commit_ref in budget["committed_commit_refs"]:
-                raise ContractError("iteration commit_ref already consumed budget")
+                raise ContractError("iteration commit reference already consumed budget")
             consumption = _mapping(
                 event["budget_consumption"], f"{name}.budget_consumption"
             )
@@ -2043,7 +2043,7 @@ def reduce_effect_events(request: Mapping[str, Any]) -> dict[str, Any]:
                 consumption["ref"], f"{name}.budget_consumption.ref"
             )
             if consumption_ref in budget["committed_consumption_refs"]:
-                raise ContractError("budget consumption ref was already used")
+                raise ContractError("budget consumption reference was already used")
             if consumption["admission_hash"] != admission["admission_hash"]:
                 raise ContractError("budget consumption admission_hash mismatch")
             expected_budget_revision = _integer(

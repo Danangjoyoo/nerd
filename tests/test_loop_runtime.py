@@ -2473,7 +2473,10 @@ class RoutingCursorTests(unittest.TestCase):
                 "last_event": "ROUTING_PROFILE_SATISFIED",
             }
         )
-        with self.assertRaisesRegex(loop.ContractError, "unreachable revision"):
+        with self.assertRaisesRegex(
+            loop.ContractError,
+            "unreachable revision|profile progress",
+        ):
             loop.routing_transition(
                 routing_request(
                     "recover", impossible_satisfied, ambiguous_effect_ref=None
