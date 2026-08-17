@@ -265,7 +265,11 @@ class EndpointRouteContractTests(unittest.TestCase):
         assert_terms(
             self,
             skill_body("nerd-plan"),
-            ("implementation plan template", "self-review once", "Stop before execution"),
+            (
+                "implementation plan template",
+                "self-review internally",
+                "Stop before execution",
+            ),
         )
 
     def test_plan_persistence_depends_on_invocation_source(self):
@@ -299,8 +303,8 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Goal Ledger",
                 "Testable work: red, green, refactor",
                 "Task Dependency Graph (TDG)",
-                "Give each task an ID, dependencies, ownership, gate, and dependents",
-                "Mark critical path and execution waves",
+                "one compact table with task ID, dependency, and produced outcome",
+                "Add critical path or waves only when they change execution",
                 "Unless the user requires sequential work",
                 "Subagents need disjoint ownership",
                 "one worktree and branch per node",
@@ -315,20 +319,20 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             template,
             (
-                "## Context",
+                "## Summary",
+                "| Task | Depends on | Produces |",
                 "**Focus:**",
-                "**Goal `[ID]`:**",
-                "## Task Dependency Graph (TDG)",
-                "**Critical path:**",
-                "**Waves:**",
-                "**Red:**",
-                "**Green:**",
-                "**Refactor:**",
-                "## Parallel Worktree and Integration Strategy",
-                "Cherry-pick one branch at a time",
+                "**Interfaces:**",
+                "Consumes:",
+                "Produces:",
+                "Write the failing test",
+                "Run the test and confirm failure",
+                "Implement the minimum change",
+                "Run focused and regression proof",
                 "Require explicit authorization before any planned remote push",
             ),
         )
+        self.assertNotIn("## Self-Review", template)
 
     def test_plan_delivery_is_compact_bullets(self):
         body = skill_body("nerd-plan")

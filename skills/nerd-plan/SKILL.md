@@ -40,7 +40,19 @@ different endpoint, return to Smart before continuing.
 Read the [implementation plan template](references/plan-template.md). Produce
 ordered, independently verifiable tasks with exact files, changes, proof, and
 stopping conditions. Preserve confirmed inputs, mark material unknowns, and
-self-review once for completeness and simplicity.
+self-review internally for completeness and simplicity.
+
+## Writing
+
+- Prefer **tables**, then **bullets**, then short **paragraphs**.
+- State each fact once. Merge overlapping outcome, input, constraint, proof,
+  and acceptance material instead of restating it in multiple sections.
+- Keep the dependency table structural; keep implementation detail inside its
+  owning task.
+- Omit narration, repeated rationale, visible self-review, and empty or
+  non-applicable sections.
+- Optimize for the implementer who sees one task: give that task exact files,
+  interfaces, steps, commands, and expected results.
 
 ## Planning Discipline
 
@@ -48,7 +60,7 @@ self-review once for completeness and simplicity.
 | --- | --- |
 | **Context** | Copy the Focus Record. For multiple goals, preserve Goal Ledger IDs, boundaries, dependencies, and one active goal. Never merge goals or proof. |
 | **TDD** | Testable work: red, green, refactor, focused proof, regression proof. Other work: baseline check, minimal change, post-change proof. |
-| **Task Dependency Graph (TDG)** | Give each task an ID, dependencies, ownership, gate, and dependents. Mark critical path and execution waves. Keep only dependent work sequential. |
+| **Task Dependency Graph (TDG)** | Use one compact table with task ID, dependency, and produced outcome. Add critical path or waves only when they change execution. Do not repeat the table inside tasks. |
 | **Speed** | Unless the user requires sequential work, batch known operations and parallelize independent TDG nodes when net faster. Subagents need disjoint ownership, environment support, and one integration owner. Keep adaptive work sequential. |
 | **Worktrees** | For parallel mutations, use one worktree and branch per node. Edit and commit sequentially inside each. Push only with explicit authority. Cherry-pick into the originating target one branch at a time in TDG order; validate each pick, resolve conflicts, then run final proof. Isolation lowers risk; it cannot guarantee conflict-free or correct integration. |
 | **Boundary** | Plan batching, delegation, worktrees, commits, pushes, and cherry-picks. Do not execute them. |
