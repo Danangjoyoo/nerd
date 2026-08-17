@@ -1,6 +1,6 @@
 # DRY Modifier Knowledge
 
-Use this reference when Smart's duplication trigger adds DRY. DRY composes with
+Use this reference when Nerd Plan's duplication trigger adds DRY. DRY composes with
 KISS and Comprehensive when applicable; never state it on its own.
 
 ## Use When

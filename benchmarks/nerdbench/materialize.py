@@ -21,18 +21,31 @@ AGENT_SKILL_PATHS = {
     "cursor": Path(".agents/skills"),
 }
 
+ENDPOINT_ROUTE_SKILLS = (
+    "nerd-brainstorm",
+    "nerd-explore",
+    "nerd-diagnose",
+    "nerd-review",
+    "nerd-spec",
+    "nerd-document",
+    "nerd-plan",
+    "nerd-execute",
+    "nerd-monitor",
+)
+SMART_ROUTE_SUITE = ("nerd-smart", *ENDPOINT_ROUTE_SKILLS)
+
 LOCAL_CONDITIONS = {
-    "nerd-smart": ("nerd-smart",),
-    "nerd-surgery": ("nerd-smart", "nerd-surgery"),
-    "nerd-execute": ("nerd-smart", "nerd-execute"),
-    "regular": ("nerd-smart",),
-    "nerd-silent": ("nerd-smart", "nerd-silent"),
-    "nerd-patrol": ("nerd-smart", "nerd-patrol"),
-    "fast-baseline": ("nerd-smart", "nerd-execute"),
-    "nerd-fast": ("nerd-smart", "nerd-execute", "nerd-fast"),
+    "nerd-smart": SMART_ROUTE_SUITE,
+    "nerd-surgery": (*SMART_ROUTE_SUITE, "nerd-surgery"),
+    "nerd-execute": SMART_ROUTE_SUITE,
+    "regular": SMART_ROUTE_SUITE,
+    "nerd-silent": (*SMART_ROUTE_SUITE, "nerd-silent"),
+    "nerd-patrol": (*SMART_ROUTE_SUITE, "nerd-patrol"),
+    "fast-baseline": SMART_ROUTE_SUITE,
+    "nerd-fast": (*SMART_ROUTE_SUITE, "nerd-fast"),
     "raw-agent": (),
     "nerd-fast-only": ("nerd-fast",),
-    "xfast-baseline": ("nerd-smart", "nerd-execute", "nerd-fast"),
+    "xfast-baseline": (*SMART_ROUTE_SUITE, "nerd-fast"),
     "nerd-xfast": ("nerd-xfast",),
     "nerd-ufast": ("nerd-ufast",),
     "nerd-smart-baseline": ("nerd-smart-baseline",),

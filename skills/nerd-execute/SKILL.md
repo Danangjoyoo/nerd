@@ -25,6 +25,10 @@ A Focus Record is resolved when intention, endpoint, and mutation scope are expl
 The resolved Focus Record is the only universal gate. A current plan, narrower execution scope, TODOs, and verification mechanics are conditional. Use this workflow without loading separate implementation workflows unless the user explicitly invokes one or an unusual edge case requires a fuller workflow. Execute directly; use bounded parallel work only for independent subtasks when it materially improves speed or proof, and retain responsibility for integration.
 </FAST-TRACK>
 
+Nerd Execute is the sole owner of the **Execute** endpoint. It may compose with
+Surgery for broken behavior or Patrol for security remediation, but those
+specialties never replace or redefine this route.
+
 ## Rules
 
 Use a mapping only when the task's boundary or proof is unclear. Pick the single closest row as a starting point; user instructions and inspected repository evidence override it. Skip mappings for fully specified tasks.
@@ -51,7 +55,7 @@ Use this template internally. Do not display or narrate a conditional item unles
 | Item | Requirement | Rule |
 | --- | --- | --- |
 | **Focus Record** | Mandatory | Read and obey the resolved intention, endpoint, and scope. Obey Role when present; its omission never blocks clear work. Never infer around a material unresolved field. |
-| **Delivery** | Mandatory | Apply Smart's inline KISS rule. Load Comprehensive or DRY only when their evidence trigger is met. Keep the breakdown internal unless a Plan, handoff, or decision requires it. |
+| **Delivery** | Mandatory | Apply KISS inline. Cover every affected surface when work crosses a module or service boundary, changes a durable contract or data shape, or partial delivery would leave consumers inconsistent. Unify behavior only for three maintained copies or two independently maintained contract copies across a boundary. Keep the breakdown internal unless a handoff or decision requires it. |
 | **Current plan** | Conditional | If the user created or approved a plan in the current context, read it once and execute its remaining work under the selected delivery approach. Preserve its outcome and constraints, but simplify steps that add unevidenced complexity. Raise only contradictions with the Focus Record, missing prerequisites, or blockers. Otherwise, do not search for, request, or create a plan. |
 | **Execution scope** | Conditional | Inherit the Focus Record scope. Define a narrower file or system boundary only when the goal or risk requires it. |
 | **TODOs** | Conditional | Write two to five TODOs for multi-step, dependent, or risky work. For a small direct change, execute without a checklist. |
@@ -61,7 +65,9 @@ Use this template internally. Do not display or narrate a conditional item unles
 
 Begin immediately once the Focus Record is resolved. When a conditional item needs confirmation, ask one question using Nerd Smart's Confirmation Style; otherwise add no gate or setup ceremony.
 
-Apply KISS throughout execution and add Comprehensive or DRY only when selected by evidence. Defer speculative surface as part of KISS. Start with the clearest direct existing path and prefer fewer concepts, dependencies, and new boundaries when they do not reduce correctness or maintainability. Do not add an abstraction, layer, service, dependency, configuration system, or generalized interface unless required by an explicit requirement, an established repository convention, observed evidence, or a concrete correctness, security, or measured performance constraint.
+Apply KISS throughout execution. Cover cross-boundary completeness and proven
+duplication only at the thresholds in the Delivery rule. Defer speculative
+surface as part of KISS. Start with the clearest direct existing path and prefer fewer concepts, dependencies, and new boundaries when they do not reduce correctness or maintainability. Do not add an abstraction, layer, service, dependency, configuration system, or generalized interface unless required by an explicit requirement, an established repository convention, observed evidence, or a concrete correctness, security, or measured performance constraint.
 
 Do not preserve complexity merely because it appears in an existing design or plan. When a simpler path satisfies the same Focus Record, constraints, and proof, simplify the plan and implement that path. Ask only if simplification would change an approved outcome or constraint.
 

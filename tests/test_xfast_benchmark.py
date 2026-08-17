@@ -5,7 +5,7 @@ import unittest
 
 from benchmarks.nerdbench.adapters import get_adapter
 from benchmarks.nerdbench.cases import load_cases
-from benchmarks.nerdbench.materialize import materialize_run
+from benchmarks.nerdbench.materialize import ENDPOINT_ROUTE_SKILLS, materialize_run
 from benchmarks.nerdbench.models import RunSpec
 from benchmarks.nerdbench.runner import condition_prompt, load_config, schedule_runs
 from benchmarks.nerdbench.xfast_report import (
@@ -238,7 +238,7 @@ class XFastConditionTests(unittest.TestCase):
             xfast_skills = xfast / ".agents" / "skills"
             self.assertEqual(
                 {path.name for path in regular_skills.iterdir()},
-                {"nerd-smart", "nerd-execute", "nerd-fast"},
+                {"nerd-smart", "nerd-fast", *ENDPOINT_ROUTE_SKILLS},
             )
             self.assertEqual(
                 {path.name for path in xfast_skills.iterdir()},

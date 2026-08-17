@@ -13,10 +13,6 @@ def skill_body(name: str) -> str:
     return (root / "SKILL.md").read_text()
 
 
-def smart_reference_body(name: str) -> str:
-    return (SKILLS / "nerd-smart" / "references" / name).read_text()
-
-
 def memory_reference_body(name: str) -> str:
     return (SKILLS / "nerd-memory" / "references" / name).read_text()
 
@@ -42,509 +38,376 @@ def normalized(body: str) -> str:
     return " ".join(body.split())
 
 
-class SmartContractTests(unittest.TestCase):
-    TEMPLATE_REFERENCES = (
-        "spec-template.md",
-        "system-design-template.md",
-        "plan-template.md",
-        "document-overview-template.md",
-        "document-how-to-template.md",
-        "document-reference-template.md",
-        "diagnosis-template.md",
-        "rca-template.md",
-    )
+class EndpointRouteContractTests(unittest.TestCase):
+    ROUTES = {
+        "Discuss": "nerd-brainstorm",
+        "Ideate": "nerd-brainstorm",
+        "Explore": "nerd-explore",
+        "Diagnose": "nerd-diagnose",
+        "Review": "nerd-review",
+        "Specify": "nerd-spec",
+        "Document": "nerd-document",
+        "Plan": "nerd-plan",
+        "Execute": "nerd-execute",
+        "Monitor": "nerd-monitor",
+    }
 
-    def test_routes_from_intent_and_keeps_a_trivial_task_fast_path(self):
+    def test_smart_maps_exactly_ten_endpoints(self):
         body = skill_body("nerd-smart")
+        rows = dict(
+            re.findall(
+                r"^\| \*\*([A-Za-z]+)\*\* \| `(nerd-[a-z-]+)` \|$",
+                body,
+                re.MULTILINE,
+            )
+        )
+        self.assertEqual(rows, self.ROUTES)
+        self.assertEqual(len(set(rows.values())), 9)
+        self.assertEqual(rows["Discuss"], rows["Ideate"])
         assert_terms(
             self,
             body,
             (
-                "## Route From Intent",
-                "No routing phrase is required",
-                "A direct specialty invocation uses that specialty",
-                "route exactly one primary specialty only when it materially strengthens the workflow",
-                "the trivial-task fast path may remain in Smart",
-                "The endpoint remains authoritative",
+                "Choose exactly one route",
+                "The route owns the deliverable, mutation authority",
+                "hand the resolved record to the matched route",
+                "Never keep endpoint workflows or templates in Smart",
             ),
         )
-        frontmatter = body.split("---", 2)[1]
-        self.assertIn("fast alignment", frontmatter)
-        self.assertIn("proactive work", frontmatter)
-        self.assertIn("materially multi-goal requests", frontmatter)
-        for obsolete in ("`route nerd`", "`use nerd`", "`auto nerd`"):
-            self.assertNotIn(obsolete, body)
 
-    def test_intent_routing_selects_one_specialty_and_global_modifiers(self):
-        body = skill_body("nerd-smart")
+    def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
+        body = normalized(skill_body("nerd-brainstorm"))
         assert_terms(
             self,
             body,
             (
-                "nerd-surgery",
-                "nerd-patrol",
-                "nerd-execute",
-                "nerd-silent",
-                "nerd-fast",
-                "exactly one primary specialty",
-                "modifier",
+                "only the **Discuss** and **Ideate** endpoints",
+                "## Focus Record",
+                "## Operating Discipline",
+                "## Healthy Collaboration",
+                "## Discuss",
+                "## Ideate",
+                "### Diverge",
+                "### Examine Objectively",
+                "### Converge Together",
+                "false balance",
+                "same burden of evidence",
+                "Do not claim consensus",
+                "Do not create or update an artifact",
+                "Confirm through Smart before changing endpoints",
             ),
         )
 
-    def test_foundation_preserves_bounded_initiative_and_scope(self):
+    def test_smart_is_alignment_only(self):
         body = skill_body("nerd-smart")
-        foundation = body.split("## Foundation and Authority", 1)[1].split(
-            "## Endpoint Mapping", 1
-        )[0]
+        references = SKILLS / "nerd-smart" / "references"
+        self.assertEqual(
+            {path.name for path in references.glob("*.md")},
+            {"multi-goal-ledger.md"},
+        )
+        for forbidden in (
+            "## Plan and Execute Delivery",
+            "references/brainstorming.md",
+            "references/plan-template.md",
+            "references/diagnosis-template.md",
+        ):
+            self.assertNotIn(forbidden, body)
 
+    def test_routes_require_their_exact_resolved_endpoint(self):
+        for endpoint, skill in self.ROUTES.items():
+            with self.subTest(endpoint=endpoint):
+                body = skill_body(skill)
+                if skill != "nerd-execute":
+                    expected_endpoint = (
+                        "only the **Discuss** and **Ideate** endpoints"
+                        if skill == "nerd-brainstorm"
+                        else f"only the **{endpoint}** endpoint"
+                    )
+                    assert_terms(
+                        self,
+                        body,
+                        (
+                            "Use `nerd-smart` first",
+                            expected_endpoint,
+                            "return to Smart before continuing",
+                        ),
+                    )
+
+    def test_route_descriptions_are_explicit_and_distinct(self):
+        descriptions = {}
+        for skill in set(self.ROUTES.values()):
+            body = skill_body(skill)
+            frontmatter = body.split("---", 2)[1]
+            match = re.search(r"^description:\s*(.+)$", frontmatter, re.MULTILINE)
+            self.assertIsNotNone(match)
+            descriptions[skill] = match.group(1)
+        self.assertEqual(len(set(descriptions.values())), len(descriptions))
+
+    def test_read_only_routes_forbid_mutation(self):
+        expected = {
+            "nerd-brainstorm": "Do not create or update an artifact",
+            "nerd-explore": "Do not modify files or external state",
+            "nerd-diagnose": "Do not repair, edit, or execute corrective actions",
+            "nerd-review": "Do not modify the reviewed artifact",
+            "nerd-spec": "Do not turn it into implementation steps",
+            "nerd-plan": "Stop before execution",
+            "nerd-monitor": "Do not modify the observed process or external state",
+        }
+        for skill, term in expected.items():
+            with self.subTest(skill=skill):
+                self.assertIn(term, skill_body(skill))
+
+    def test_route_reference_ownership_is_endpoint_local(self):
+        expected = {
+            "nerd-smart": {"multi-goal-ledger.md"},
+            "nerd-brainstorm": {"brainstorming.md"},
+            "nerd-diagnose": {"diagnosis-template.md", "rca-template.md"},
+            "nerd-spec": {"spec-template.md", "system-design-template.md"},
+            "nerd-document": {
+                "document-overview-template.md",
+                "document-how-to-template.md",
+                "document-reference-template.md",
+            },
+            "nerd-plan": {
+                "plan-template.md",
+                "principle-selection.md",
+                "comprehensive.md",
+                "dry.md",
+                "kiss.md",
+                "yagni.md",
+            },
+        }
+        for skill, references in expected.items():
+            root = SKILLS / skill / "references"
+            with self.subTest(skill=skill):
+                self.assertEqual(
+                    {path.name for path in root.glob("*.md")},
+                    references,
+                )
+
+    def test_template_routes_preserve_artifact_boundaries(self):
         assert_terms(
             self,
-            foundation,
+            skill_body("nerd-diagnose"),
+            ("Load only the matched template", "Persist an artifact only when"),
+        )
+        assert_terms(
+            self,
+            skill_body("nerd-spec"),
+            ("Load only the matched template", "Persist an artifact only"),
+        )
+        assert_terms(
+            self,
+            skill_body("nerd-document"),
+            ("Choose one matched template", "Validate the artifact"),
+        )
+        assert_terms(
+            self,
+            skill_body("nerd-plan"),
+            ("implementation plan template", "self-review once", "Stop before execution"),
+        )
+
+    def test_plan_persistence_depends_on_invocation_source(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
             (
-                "Resolve the requested outcome and endpoint, then own the route",
-                "Preserve sufficiency",
-                "Efficiency never shrinks requested behavior, necessary investigation, or credible proof",
-                "Focus bounds the result and mutations, not the agent's judgment",
-                "Infer low-impact details and choose appropriate tools",
-                "Inspect relevant adjacent context read-only",
-                "Perform supporting work inside the mutation boundary",
-                "Adapt to evidence and verify to the risk of the change",
-                "Use bounded parallel work or a reviewer",
-                "Changing the endpoint or acceptance criteria",
-                "Introducing an unrequested durable contract, dependency, or persistent artifact",
-                "Materially expanding the mutation boundary, cost, or risk",
-                "external or destructive effects not already explicitly authorized",
-                "Report nearby improvements without implementing them",
+                "Always save Markdown",
+                "Smart route: runtime temp directory",
+                "`/tmp`",
+                "`~/.agent/tmp/`",
+                "Direct user invocation",
+                "`./docs/plans/`",
+                "Direct stays direct after Smart resolves Focus",
+                "show the path",
             ),
         )
 
-    def test_always_shows_focus_for_every_endpoint(self):
-        body = skill_body("nerd-smart")
-        focus = body.split("## Focus First", 1)[1].split(
-            "## Multi-Goal Intake", 1
-        )[0]
+    def test_plan_enforces_focus_tdd_tdg_and_safe_parallel_integration(self):
+        raw_body = skill_body("nerd-plan")
+        body = normalized(raw_body)
+        template = normalized(
+            (SKILLS / "nerd-plan" / "references" / "plan-template.md").read_text()
+        )
         assert_terms(
             self,
-            focus,
+            body,
+            (
+                "Copy the Focus Record",
+                "Goal Ledger",
+                "Testable work: red, green, refactor",
+                "Task Dependency Graph (TDG)",
+                "Give each task an ID, dependencies, ownership, gate, and dependents",
+                "Mark critical path and execution waves",
+                "Unless the user requires sequential work",
+                "Subagents need disjoint ownership",
+                "one worktree and branch per node",
+                "Push only with explicit authority",
+                "one branch at a time in TDG order",
+                "cannot guarantee conflict-free or correct integration",
+                "Do not execute them",
+            ),
+        )
+        self.assertIn("| Discipline | Rule |", raw_body)
+        assert_terms(
+            self,
+            template,
+            (
+                "## Context",
+                "**Focus:**",
+                "**Goal `[ID]`:**",
+                "## Task Dependency Graph (TDG)",
+                "**Critical path:**",
+                "**Waves:**",
+                "**Red:**",
+                "**Green:**",
+                "**Refactor:**",
+                "## Parallel Worktree and Integration Strategy",
+                "Cherry-pick one branch at a time",
+                "Require explicit authorization before any planned remote push",
+            ),
+        )
+
+    def test_plan_delivery_is_compact_bullets(self):
+        body = skill_body("nerd-plan")
+        assert_terms(
+            self,
+            body,
+            (
+                "- **KISS:**",
+                "- **Comprehensive:**",
+                "- **DRY:**",
+                "- **Selection:**",
+                "- **Rationale:**",
+            ),
+        )
+
+    def test_specialties_compose_without_owning_endpoints(self):
+        assert_terms(
+            self,
+            skill_body("nerd-surgery"),
+            ("nerd-diagnose", "nerd-execute", "never an endpoint owner"),
+        )
+        assert_terms(
+            self,
+            skill_body("nerd-patrol"),
+            ("nerd-review", "nerd-execute", "never owns an endpoint"),
+        )
+        execute = skill_body("nerd-execute")
+        self.assertIn("sole owner of the **Execute** endpoint", execute)
+
+    def test_every_route_metadata_names_the_skill(self):
+        for skill in self.ROUTES.values():
+            path = SKILLS / skill / "agents" / "openai.yaml"
+            with self.subTest(skill=skill):
+                self.assertIn(f"$" + skill, path.read_text(encoding="utf-8"))
+
+
+class ReviewContractTests(unittest.TestCase):
+    def test_maps_exactly_two_review_types(self):
+        body = skill_body("nerd-review")
+        section = body.split("## Review Types", 1)[1].split("## Discipline", 1)[0]
+        rows = re.findall(
+            r"^\| \*\*(Plain|Pull request review)\*\* \|",
+            section,
+            re.MULTILINE,
+        )
+        self.assertEqual(rows, ["Plain", "Pull request review"])
+        assert_terms(
+            self,
+            section,
+            (
+                "Choose exactly one",
+                "requested PR, diff, branch, or commit",
+                "named artifact/current state plus necessary context",
+                "base-to-head delta",
+                "only issues introduced or materially worsened by it",
+            ),
+        )
+
+    def test_patrol_requires_evidence_for_deeper_security_review(self):
+        body = skill_body("nerd-review")
+        assert_terms(
+            self,
+            body,
+            (
+                "Do not auto-route to `nerd-patrol`",
+                "only when evidence warrants deeper",
+                "security, vulnerability, unsafe-behavior, or exploitability review",
+                "preserve Review and never remediate",
+            ),
+        )
+
+    def test_review_guidance_stays_compact_and_bulleted(self):
+        skill = skill_body("nerd-review")
+        self.assertLessEqual(len(skill.splitlines()), 125)
+
+        references = SKILLS / "nerd-review" / "references"
+        for path in references.rglob("*.md"):
+            with self.subTest(reference=path.relative_to(references)):
+                body = path.read_text(encoding="utf-8")
+                self.assertLessEqual(len(body.splitlines()), 18)
+                for label in (
+                    "- **Use:**",
+                    "- **Level 1:**",
+                    "- **Level 2:**",
+                    "- **Level 3:**",
+                    "- **Proof:**",
+                    "- **Escalate:**",
+                    "- **Avoid:**",
+                ):
+                    self.assertIn(label, body)
+
+    def test_stack_and_framework_mappings_match_diagnose(self):
+        def mapped_references(skill: str) -> set[str]:
+            return set(
+                re.findall(
+                    r"\(references/((?:stacks|frameworks)/[^)]+\.md)\)",
+                    skill_body(skill),
+                )
+            )
+
+        self.assertEqual(
+            mapped_references("nerd-review"),
+            mapped_references("nerd-diagnose"),
+        )
+
+    def test_separates_three_review_levels_from_severity(self):
+        body = skill_body("nerd-review")
+        assert_terms(
+            self,
+            body,
+            (
+                "## Review Levels",
+                "Syntax, compilation or type failure, and concrete code smells",
+                "Repository consistency, test coverage, and documentation",
+                "Bad architecture, harmful complexity, and design-pattern violations",
+                "A level identifies the review lens, not impact",
+                "Assign severity from impact and reachability, independently of review level",
+                "Critical",
+                "High",
+                "Medium",
+                "Low",
+            ),
+        )
+
+    def test_requires_focus_mapping_evidence_and_findings_first(self):
+        body = skill_body("nerd-review")
+        assert_terms(
+            self,
+            body,
             (
                 "**Focus Record**",
-                "**Intention:**",
-                "**Expectation:**",
-                "**Scope:**",
-                "**Role:**",
-                "Add a working role only when it changes the approach",
-                "always show the completed Focus Record in the session",
-                "applies to every endpoint",
-                "clear, low-risk, tiny, or direct requests",
-                "Never keep Focus internal",
-                "show one Focus Record per goal inside the mandatory Multi-Goal Intake",
-                "**Role:** [Only when material]",
-                "at most two clarification rounds",
+                "**Stack mapping**",
+                "Prove reachability, trigger, impact, and blast radius",
+                "report only findings that survive an adversarial evidence check",
+                "Location: <path:line or smallest exact scope>",
+                "Review level: <Level 1 | Level 2 | Level 3>",
+                "Put findings first",
+                "Do not modify the reviewed artifact",
             ),
         )
-        self.assertNotIn("Show this record only", focus)
-        self.assertNotIn("**Decision Record**", body)
-
-    def test_centralizes_behavior_in_exactly_ten_endpoint_mappings(self):
-        body = skill_body("nerd-smart")
-        mapping = body.split("## Endpoint Mapping", 1)[1].split(
-            "## Focus First", 1
-        )[0]
-        rows = re.findall(r"^\| \*\*[A-Za-z]+\*\* \|", mapping, re.MULTILINE)
-
-        self.assertEqual(len(rows), 10)
-        assert_terms(
-            self,
-            mapping,
-            (
-                "Discuss",
-                "Ideate",
-                "Explore",
-                "Diagnose",
-                "Review",
-                "Specify",
-                "Document",
-                "Plan",
-                "Execute",
-                "Monitor",
-                "controls the deliverable, mutation authority, and stop condition",
-                "supporting reasoning and read-only investigation",
-                "self-review once",
-            ),
-        )
-        self.assertIn(
-            "**Expectation:** [One endpoint]",
-            body,
-        )
-        stop_rule = body.split("## Decide, Disagree, and Stop", 1)[1]
-        assert_terms(
-            self,
-            stop_rule,
-            (
-                "do not impose a fixed reasoning-pass or one-action-per-turn limit",
-                "Follow the endpoint row",
-                "Necessary supporting activity",
-                "proof suited to the affected behavior and risk",
-                "not merely when the first local check passes",
-                "Confirm an endpoint change before crossing it",
-            ),
-        )
-
-    def test_confirmation_style_balances_question_cost_and_risk(self):
-        body = skill_body("nerd-smart")
-        confirmation = body.split("## Focus First", 1)[1].split(
-            "## Multi-Goal Intake", 1
-        )[0]
-
-        assert_terms(
-            self,
-            confirmation,
-            (
-                "Ask one question at a time only when the answer changes",
-                "acceptance criteria",
-                "mutation boundary",
-                "external effects",
-                "two or three mutually exclusive options",
-                "recommendation first",
-                "Use at most two clarification rounds",
-                "Any response that does not correct it accepts it",
-            ),
-        )
-
-    def test_multi_goal_intake_is_visible_and_format_agnostic(self):
-        body = skill_body("nerd-smart")
-        intake = body.split("## Multi-Goal Intake", 1)[1].split(
-            "## Plan and Execute Delivery", 1
-        )[0]
-        ledger = " ".join(smart_reference_body("multi-goal-ledger.md").split())
-
-        assert_terms(
-            self,
-            intake,
-            (
-                "At the beginning of every request",
-                "before resolving a single Focus Record",
-                "independently completable outcomes",
-                "must not depend on formatting or punctuation",
-                "Bulleted, numbered, or separate imperative lines",
-                "Space-separated wording",
-                "no bullets, numbering, commas, or sentence boundaries",
-                "Long paragraphs by segmenting their requested actions and outcomes",
-                "forms are signals, not proof",
-                "completed and stopped on its own or needs its own endpoint",
-                "constraints, examples, acceptance criteria, and substeps",
-                "When two or more goals exist, always load",
-                "references/multi-goal-ledger.md",
-                "show the complete Multi-Goal Intake in the session",
-                "mandatory even when the goals are small, share an endpoint, can be completed in one turn",
-                "Never keep the intake internal or collapse independent goals",
-                "Keep one goal active",
-                "explicit or dependency-safe order",
-                "never borrow scope or proof from a queued goal",
-            ),
-        )
-        assert_terms(
-            self,
-            ledger,
-            (
-                "every request containing two or more independently completable outcomes",
-                "mandatory even when all goals are small, share an endpoint, fit in one turn",
-                "Detect goals from meaning, not layout or punctuation",
-                "bullets, numbered items, and separate imperative lines",
-                "space-separated wording for multiple imperative or outcome clauses",
-                "long paragraphs by segmenting their requested actions and outcomes",
-                "forms are signals, not proof",
-                "runtime-provided temporary directory",
-                "`~/.agent/tmp/`",
-                "stable conversation, thread, or task identifier",
-                "retain the absolute path until the queue is complete",
-                "Preserve each original command line and its listed position",
-                "Redact credential and secret values",
-                "show the complete intake in the session",
-                "displayed intake and persisted ledger must match",
-                "**Multi-Goal Intake**",
-                "**Order basis:**",
-                "**Source:**",
-                "**Status:**",
-                "**Depends on:**",
-                "queued**, **active**, **blocked**, **done**, or **cancelled",
-                "Never collapse independent goals",
-                "one visible Focus Record for every goal",
-                "exactly one goal **active**",
-                "Preserve explicit user order",
-                "default to listed order",
-                "hard dependency",
-                "verify the order",
-                "Before starting, resuming, switching, or completing a goal",
-                "reread the ledger",
-                "show the current Multi-Goal Intake in the session",
-                "source of truth",
-                "If it is missing or unreadable",
-                "do not continue from memory",
-                "Update the ledger before acting",
-                "borrow scope, assumptions, endpoint, delivery approach, or proof",
-                "Companion selection is per active Plan or Execute goal, never per queue",
-                "Do not carry a previous goal's delivery approach forward",
-            ),
-        )
-
-    def test_plan_and_execute_delivery_uses_inline_kiss_and_lazy_companions(self):
-        body = skill_body("nerd-smart")
-        mapping = body.split("## Endpoint Mapping", 1)[1].split(
-            "## Focus First", 1
-        )[0]
-        delivery = body.split("## Plan and Execute Delivery", 1)[1].split(
-            "## Route From Intent", 1
-        )[0]
-        selection = " ".join(
-            smart_reference_body("principle-selection.md").split()
-        )
-
-        plan_row = next(
-            line for line in mapping.splitlines() if line.startswith("| **Plan** |")
-        )
-        execute_row = next(
-            line
-            for line in mapping.splitlines()
-            if line.startswith("| **Execute** |")
-        )
-        self.assertIn("actionable plan", plan_row)
-        self.assertIn("simplest sufficient solution", execute_row)
-
-        for endpoint in (
-            "Discuss",
-            "Ideate",
-            "Explore",
-            "Diagnose",
-            "Review",
-            "Specify",
-            "Document",
-            "Monitor",
-        ):
-            row = next(
-                line
-                for line in mapping.splitlines()
-                if line.startswith(f"| **{endpoint}** |")
-            )
-            for principle in ("KISS", "YAGNI", "DRY", "Comprehensive"):
-                self.assertNotIn(principle, row)
-
-        assert_terms(
-            self,
-            delivery,
-            (
-                "only when the active endpoint is **Plan** or **Execute**",
-                "code-writing and implementation work",
-                "Discuss, Ideate, Explore, Diagnose, Review, Specify, Document, and Monitor",
-                "do not select, load, mention, inherit",
-                "let KISS, Comprehensive, DRY, or YAGNI shape reasoning, scope, recommendations, or output",
-                "Subject matter never overrides the endpoint",
-                "reviewing code remains Review and uses no delivery principle",
-                "For Plan and Execute, KISS is inline and universal",
-                "Do not load [extended KISS rationale]",
-                "for routine work",
-                "Defer speculative features, options, and abstractions",
-                "incorporates YAGNI without selecting a separate principle",
-                "Load [Comprehensive]",
-                "crosses a module or service boundary",
-                "changes a durable contract or data shape",
-                "partial delivery would leave consumers inconsistent",
-                "Load [DRY]",
-                "three or more copies of the same behavior",
-                "two independently maintained copies of one contract across a boundary",
-                "references/principle-selection.md",
-                "Keep the delivery breakdown internal for clear work",
-                "Deferred work may return when evidence makes it necessary",
-            ),
-        )
-        assert_terms(
-            self,
-            selection,
-            (
-                "Routine work uses Smart's inline KISS rule and loads no principle reference",
-                "KISS always applies",
-                "YAGNI's useful rule",
-                "folded into KISS",
-                "never selected separately",
-                "**KISS + Comprehensive**",
-                "**KISS + DRY**",
-                "**KISS + Comprehensive + DRY**",
-                "Predicted reuse, edit size, and hypothetical future requirements are not evidence",
-                "**Delivery Breakdown**",
-                "**Approach:**",
-                "**Required outcome:**",
-                "**Simplest sufficient design:**",
-                "**Required surfaces:**",
-                "**Proof:**",
-                "**Deferred:**",
-                "Deferred is provisional",
-                "ask first only when doing so crosses Smart's authority boundary",
-            ),
-        )
-        self.assertNotIn("**Principle Breakdown**", selection)
-        self.assertNotIn("**Not needed:**", selection)
-
-    def test_uses_internal_brainstorming_reference(self):
-        body = skill_body("nerd-smart")
-        self.assertIn("references/brainstorming.md", body)
-        self.assertNotIn("superpowers:", body.casefold())
-
-    def test_routes_endpoint_templates_lazily_without_changing_endpoint(self):
-        body = skill_body("nerd-smart")
-        mapping = body.split("## Endpoint Mapping", 1)[1].split(
-            "## Focus First", 1
-        )[0]
-        self.assertNotIn("## Use Endpoint Templates", body)
-        self.assertIn(
-            "| Endpoint | User intention | Action | Template |",
-            mapping,
-        )
-
-        for reference in self.TEMPLATE_REFERENCES:
-            link = f"references/{reference}"
-            self.assertIn(link, mapping)
-            self.assertEqual(body.count(link), 1)
-
-        assert_terms(
-            self,
-            mapping,
-            (
-                "When a structured artifact improves the deliverable or the endpoint requires one",
-                "load only the matched template",
-                "an explicit user format wins",
-                "Tiny direct outputs skip templates",
-            ),
-        )
-
-    def test_template_artifacts_persist_only_when_requested_or_required(self):
-        body = skill_body("nerd-smart")
-        mapping = body.split("## Endpoint Mapping", 1)[1].split(
-            "## Focus First", 1
-        )[0]
-
-        assert_terms(
-            self,
-            mapping,
-            (
-                "Persist an artifact only when requested",
-                "when a path is supplied",
-                "when an established repository workflow requires it",
-                "Otherwise keep it in the session",
-            ),
-        )
-        self.assertNotIn("write Plans to Markdown by default", mapping)
-        self.assertNotIn("`~/.agent/tmp/` for Plans", mapping)
-
-    def test_endpoint_templates_share_safe_adaptation_contract(self):
-        references = SKILLS / "nerd-smart" / "references"
-        for reference in self.TEMPLATE_REFERENCES:
-            with self.subTest(reference=reference):
-                path = references / reference
-                self.assertTrue(path.is_file(), f"missing {path}")
-                body = path.read_text() if path.is_file() else ""
-                self.assertFalse(body.startswith("---"))
-                assert_terms(
-                    self,
-                    body,
-                    (
-                        "## Use When",
-                        "## Adaptation Rules",
-                        "## Template",
-                        "## Completion Check",
-                        "[Required:",
-                        "[Optional:",
-                        "Preserve confirmed facts",
-                        "Mark material unknowns",
-                        "Omit irrelevant optional sections",
-                        "Remove bracketed instructions",
-                    ),
-                )
-                folded = body.casefold()
-                for forbidden in (
-                    "$nerd-",
-                    "superpowers:",
-                    "license.superpowers",
-                    "obra/superpowers",
-                ):
-                    self.assertNotIn(forbidden, folded)
-
-    def test_endpoint_templates_keep_artifact_types_distinct(self):
-        expected_terms = {
-            "spec-template.md": (
-                "externally observable",
-                "system-design-template.md",
-                "## Acceptance Criteria",
-                "## Open Questions",
-            ),
-            "system-design-template.md": (
-                "internal architecture",
-                "spec-template.md",
-                "## Components and Responsibilities",
-                "## Failure and Recovery",
-                "## Alternatives and Trade-offs",
-            ),
-            "plan-template.md": (
-                "ordered implementation",
-                "complete observable result",
-                "## Delivery Breakdown",
-                "**Approach:**",
-                "**Simplest sufficient design:**",
-                "**Required surfaces:**",
-                "**Deferred:**",
-                "### Task",
-                "**Files:**",
-                "**Change:**",
-                "**Proof:**",
-                "Stop before execution",
-            ),
-            "document-overview-template.md": (
-                "what the subject is",
-                "## Audience and Purpose",
-                "## Key Concepts",
-                "## Limitations",
-            ),
-            "document-how-to-template.md": (
-                "concrete outcome",
-                "## Prerequisites",
-                "## Steps",
-                "## Verification",
-                "## Troubleshooting",
-            ),
-            "document-reference-template.md": (
-                "precise lookup",
-                "## Terminology",
-                "## Defaults and Invariants",
-                "## Errors and Limitations",
-            ),
-            "diagnosis-template.md": (
-                "current broken",
-                "## Expected Behavior",
-                "## Actual Behavior",
-                "## Hypotheses and Experiments",
-                "Confirmed",
-                "Probable",
-                "Unknown",
-                "Do not repair",
-            ),
-            "rca-template.md": (
-                "retrospective",
-                "## Timeline",
-                "## Detection and Response",
-                "## Contributing Factors",
-                "## Corrective and Preventive Actions",
-                "owner",
-                "due date",
-                "status",
-                "Do not execute",
-            ),
-        }
-
-        for reference, terms in expected_terms.items():
-            with self.subTest(reference=reference):
-                path = SKILLS / "nerd-smart" / "references" / reference
-                self.assertTrue(path.is_file(), f"missing {path}")
-                if path.is_file():
-                    assert_terms(self, smart_reference_body(reference), terms)
 
 
 class SurgeryContractTests(unittest.TestCase):
@@ -580,7 +443,7 @@ class SurgeryContractTests(unittest.TestCase):
         self.assertEqual(len(rows), 6)
         assert_terms(
             self,
-            body,
+            normalized(body),
             (
                 "resolved Focus Record",
                 "intention, endpoint, and scope are explicit",
@@ -772,9 +635,10 @@ class ExecuteContractTests(unittest.TestCase):
                 "| **Focus Record** | Mandatory |",
                 "Obey Role when present; its omission never blocks clear work",
                 "| **Delivery** | Mandatory |",
-                "Apply Smart's inline KISS rule",
-                "Load Comprehensive or DRY only when their evidence trigger is met",
-                "Keep the breakdown internal unless a Plan, handoff, or decision requires it",
+                "Apply KISS inline",
+                "crosses a module or service boundary",
+                "three maintained copies",
+                "Keep the breakdown internal unless a handoff or decision requires it",
                 "| **Current plan** | Conditional |",
                 "user created or approved a plan in the current context",
                 "do not search for, request, or create a plan",
@@ -797,10 +661,11 @@ class ExecuteContractTests(unittest.TestCase):
 
         assert_terms(
             self,
-            execution,
+            normalized(execution),
             (
                 "Apply KISS throughout execution",
-                "add Comprehensive or DRY only when selected by evidence",
+                "Cover cross-boundary completeness and proven",
+                "duplication only at the thresholds in the Delivery rule",
                 "Defer speculative surface as part of KISS",
                 "clearest direct existing path",
                 "fewer concepts, dependencies, and new boundaries",
@@ -1721,6 +1586,33 @@ class MemoryContractTests(unittest.TestCase):
             ),
         )
 
+    def test_direct_invocation_authorizes_saving_without_authorizing_use(self):
+        body = normalized(memory_guidance_body())
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        assert_terms(
+            self,
+            body,
+            (
+                "authenticated invocation is request-scoped permission",
+                "non-destructive memory writes required by the selected workflow",
+                "without asking a second consent question",
+                "Candidate promotion uses that invocation authority",
+                "do not ask for a generated phrase or a second confirmation",
+                "Every later memory-influenced endpoint still requires its own Memory Proposal gate",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "host-authenticated direct invocation supplies request-scoped access consent",
+                "invocation authorizes reads and non-destructive memory writes",
+                "`invocation_authorized=true`",
+                "no generated phrase or second user response is required",
+                "Confirmed is the runtime's active-for-retrieval state; it is never action authorization",
+            ),
+        )
+
     def test_runtime_is_explicit_activation_only_opt_in_local_and_namespaced(self):
         raw_body = skill_body("nerd-memory")
         body = normalized(raw_body)
@@ -1740,7 +1632,8 @@ class MemoryContractTests(unittest.TestCase):
                 "Without active explicit invocation, do not read operational references",
                 "Retained skill text is not a new invocation",
                 "start a fresh session when physical context removal is required",
-                "it is never activation, standing permission",
+                "`enabled` records local persistence state only",
+                "never activation or standing permission to access Memory",
                 "Never search another namespace",
             ),
         )
@@ -1750,11 +1643,13 @@ class MemoryContractTests(unittest.TestCase):
             (
                 "local SQLite",
                 "uses the Python standard library",
-                "Activation and storage consent are independent",
+                "host-authenticated direct invocation supplies request-scoped access consent",
                 "unless the current direct user event invoked `$nerd-memory` in Codex or `/nerd-memory` in Claude Code or Cursor",
+                "calls `enable` with the authenticated invocation-event reference",
+                "without asking a second consent question",
                 "A plain natural-language mention is not activation",
                 "later requests require a new explicit invocation",
-                "Memory is opt-in per namespace",
+                "Memory persists enablement per namespace",
                 "Namespace equality is exact",
                 "Every successful command writes one JSON value to stdout",
                 "A prompt-only simulation does not satisfy this contract",
@@ -1851,16 +1746,8 @@ class MemoryContractTests(unittest.TestCase):
                 "Missing or disallowed components fail closed",
             ),
         )
-        assert_terms(
-            self,
-            smart,
-            (
-                "remembered `routing` chain",
-                "keep each agent bound to exactly its displayed skills, tools, and MCP servers",
-                "current host registry and current authority",
-                "never silently drop, substitute, reorder, install",
-            ),
-        )
+        self.assertIn("`nerd-memory` remains explicit activation only", smart)
+        self.assertNotIn("remembered `routing` chain", smart)
 
     def test_denial_is_neutral_and_generic_routes_need_confirmed_splits(self):
         body = normalized(memory_guidance_body())
@@ -1906,19 +1793,9 @@ class MemoryContractTests(unittest.TestCase):
             self,
             smart,
             (
-                "Only after a host-authenticated direct-user invocation",
-                "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
-                "load it as pre-routing middleware rather than a primary specialty",
-                "A plain natural-language mention is not activation",
-                "Smart's standing hook never activate Memory",
-                "Without an active request-scoped invocation",
-                "Continue with a memory-blind Smart route",
-                "memory-blind Focus Record and endpoint",
-                "stop for the generated explicit confirmation phrase",
-                "silence accepts a Focus Record does not apply",
-                "one-use memory grant is consumed",
-                "remembered `routing` chain",
-                "current host registry and current authority",
+                "`nerd-memory` remains explicit activation only",
+                "Endpoint routes may add one specialty only",
+                "without changing the endpoint",
             ),
         )
         self.assertNotIn("When `nerd-memory` is installed and enabled", smart)

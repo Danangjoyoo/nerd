@@ -2,8 +2,8 @@
 
 Nerd includes shortened internal knowledge derived from
 [`obra/superpowers`](https://github.com/obra/superpowers), version 6.1.1.
-The derived references are bundled with `nerd-smart`, `nerd-surgery`,
-`nerd-patrol`, and `nerd-execute`; they are knowledge files, not
+The derived references are bundled with the endpoint route skills that own
+their use, plus `nerd-surgery` and `nerd-patrol`; they are knowledge files, not
 independently triggerable skills.
 
 ## Superpowers License

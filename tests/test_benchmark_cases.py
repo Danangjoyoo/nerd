@@ -196,6 +196,24 @@ class MaterializationTests(unittest.TestCase):
             for skill in ("nerd-smart", "nerd-execute", "nerd-fast"):
                 self.assertTrue((installed / skill / "SKILL.md").is_file())
 
+    def test_smart_condition_installs_every_endpoint_route(self):
+        from benchmarks.nerdbench.materialize import (
+            ENDPOINT_ROUTE_SKILLS,
+            materialize_run,
+        )
+
+        case_item = load_cases(CASES / "smart.json")[0]
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = materialize_run(
+                case_item,
+                "nerd-smart",
+                "codex",
+                Path(directory) / "smart",
+            )
+            installed = workspace / ".agents" / "skills"
+            for skill in ("nerd-smart", *ENDPOINT_ROUTE_SKILLS):
+                self.assertTrue((installed / skill / "SKILL.md").is_file())
+
     def test_smart_baseline_condition_installs_the_frozen_snapshot(self):
         from benchmarks.nerdbench.materialize import ROOT, materialize_run
 

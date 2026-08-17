@@ -28,17 +28,25 @@ The helper preserves existing hook configuration and is safe to run again. Codex
 
 | Skill | Description |
 | --- | --- |
-| `nerd-smart` | Aligns the complete outcome and authorization boundary, then routes and works proactively without overengineering. |
-| `nerd-memory` | Manual-only memory (`$nerd-memory` in Codex, `/nerd-memory` in Claude/Cursor) for confirmed goal, task, action, result, boundary, verification, and atomic agent/skill/tool/MCP routing patterns; every remembered route needs exact approval, and denied generic routes can become separately confirmed contextual exceptions. |
+| `nerd-smart` | Aligns outcome, endpoint, and authorization, then hands the Focus Record to exactly one endpoint route. |
+| `nerd-brainstorm` | Answers and compares conversationally or generates bounded directions, stopping before artifacts or mutation. |
+| `nerd-explore` | Discovers facts, patterns, constraints, and unknowns through read-only investigation. |
+| `nerd-diagnose` | Establishes confirmed, probable, or unknown causes and stops before repair. |
+| `nerd-review` | Evaluates a named scope and reports prioritized findings without modification. |
+| `nerd-spec` | Defines behavior, requirements, boundaries, or system design before planning. |
+| `nerd-document` | Creates and validates only the requested static documentation artifact. |
+| `nerd-plan` | Produces actionable file-level implementation plans and stops before execution. |
+| `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
+| `nerd-monitor` | Rechecks state without mutation until the requested condition is met. |
+| `nerd-memory` | Manual-only memory (`$nerd-memory` in Codex, `/nerd-memory` in Claude/Cursor) for goal, task, action, result, boundary, verification, and atomic agent/skill/tool/MCP routing patterns; invocation authorizes reading and non-destructive saving, while applying remembered changes still needs exact approval. |
 | `nerd-loop` | Drives code and non-code tasks through the cheapest adequate focused loop, automatic verification, an explicit Definition of Done, and honest bounded stopping. |
 | `nerd-surgery` | Diagnoses broken behavior from evidence and repairs only at an authorized execute endpoint. |
 | `nerd-patrol` | Examines a confirmed security scope and reports only reachable, evidence-backed findings. |
-| `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
 | `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
 | `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
 | `nerd-xfast` | Produces the smallest sufficient answer or authorized edit through one immutable action chain, immediate output, and bounded end proof. |
 
-Smart resolves the endpoint. Memory composes before routing only after the current user invokes `$nerd-memory` in Codex or `/nerd-memory` in Claude/Cursor; a natural-language mention does not load it. It never auto-loads because it is installed, enabled, relevant, or previously used, and enablement grants storage consent only. Memory never authorizes remembered guidance, and every memory-influenced endpoint requires explicit confirmation. A copied or partial remembered value cannot masquerade as current guidance without a unique direct-user baseline attestation. Remembered execution profiles bind an agent to its skills, tools, and MCP servers as one ordered route, then fail closed unless the current host registry and authority still support the whole profile. Loop may control cost-proportional recurrence and one bounded primary specialty at a time. Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path and is mutually exclusive with Loop. The Agent Skills layout supports Codex, Claude Code, and Cursor.
+Smart resolves one of ten endpoints and hands work to one of nine endpoint route skills; Brainstorm owns both Discuss and Ideate. Memory composes before routing only after the current user invokes `$nerd-memory` in Codex or `/nerd-memory` in Claude/Cursor; a natural-language mention does not load it. The invocation grants request-scoped access and non-destructive memory-write permission without a second save confirmation; persisted enablement never auto-loads Memory or grants later access. Memory never authorizes remembered guidance, and every memory-influenced endpoint requires explicit confirmation. A copied or partial remembered value cannot masquerade as current guidance without a unique direct-user baseline attestation. Remembered execution profiles bind an agent to its skills, tools, and MCP servers as one ordered route, then fail closed unless the current host registry and authority still support the whole profile. Surgery and Patrol compose as optional specialties without owning endpoints. Loop may control cost-proportional recurrence. Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path and is mutually exclusive with Loop. The Agent Skills layout supports Codex, Claude Code, and Cursor.
 
 Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
 

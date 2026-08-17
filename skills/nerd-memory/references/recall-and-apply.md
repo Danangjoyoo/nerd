@@ -7,10 +7,13 @@ instructions.
 ## Consent and Isolation
 
 Derive one stable, non-secret namespace scoped to the current user and
-workspace. Never search another namespace. If Memory is disabled after an
-explicit invocation, disclose that the store is local SQLite, separate from
-product memory, and holds the seven endpoint pattern categories. Enable only
-after explicit opt-in. Consent is not activation or standing permission.
+workspace. Never search another namespace. The current host-authenticated
+direct skill invocation is request-scoped permission to read that namespace
+and make non-destructive writes required by the selected workflow. If Memory
+is disabled or unconfigured, call `enable` with the authenticated invocation
+event reference without asking again, unless the user invoked Memory to
+disable it. Persisted enablement is not activation or standing permission for
+later requests.
 
 Use the default database selected by the runtime:
 

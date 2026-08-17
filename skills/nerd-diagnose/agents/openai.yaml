@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Diagnose"
+  short_description: "Establish causes without performing repair"
+  default_prompt: "Use $nerd-diagnose to establish the cause and stop before repair."

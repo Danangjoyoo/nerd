@@ -1,6 +1,6 @@
 # Extended KISS Rationale
 
-Smart defines KISS inline; routine Plan and Execute work must not load this
+Nerd Plan defines KISS inline; routine planning work must not load this
 reference. Use it only when the meaning of simplicity is disputed or a design
 looks small locally while moving complexity elsewhere.
 
@@ -34,4 +34,4 @@ the risk of the change.
 
 Optional nearby improvements stay deferred and may be reported. Restore a
 deferred item when evidence makes it necessary; confirm first only when doing so
-crosses Smart's authority boundary.
+crosses the resolved Focus Record's authority boundary.

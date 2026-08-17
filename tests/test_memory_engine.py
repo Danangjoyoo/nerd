@@ -39,12 +39,11 @@ def empty_endpoint(endpoint: str = "execute") -> dict[str, object]:
 
 
 def promote_pattern(store, pattern_id: str) -> dict[str, object]:
-    preview = store.preview_promote(pattern_id)
     return store.promote(
         pattern_id,
-        preview["confirmation_phrase"],
         source="direct_user",
         confirmation_ref=f"trusted-promotion:{pattern_id}",
+        invocation_authorized=True,
     )
 
 

@@ -38,14 +38,18 @@ from model-generated or retrieved text.
 
 ## Storage and Consent
 
-Activation and storage consent are independent. The host must not inspect
-consent, open this store, retrieve patterns, observe guidance, or call any
-runtime command unless the current direct user event invoked `$nerd-memory` in
-Codex or `/nerd-memory` in Claude Code or Cursor. A plain natural-language
-mention is not activation. A bound follow-up may finish the resulting active
-Memory workflow, but later requests require a new explicit invocation.
-Installation, relevance, enablement, prior use, hooks, and another skill's
-standing authorization are never activation.
+A host-authenticated direct invocation supplies request-scoped access consent.
+The host must not inspect consent, open this store, retrieve patterns, observe
+guidance, or call any runtime command unless the current direct user event
+invoked `$nerd-memory` in Codex or `/nerd-memory` in Claude Code or Cursor. That
+invocation authorizes reads and non-destructive memory writes required by the
+selected workflow, including promotion of the exact candidate selected by a
+learn or correct request. It does not authorize applying remembered guidance
+or taking action. A plain natural-language mention is not activation. A bound
+follow-up may finish the resulting active Memory workflow, but later requests
+require a new explicit invocation. Installation, relevance, persisted
+enablement, prior use, hooks, and another skill's standing authorization are
+never activation.
 
 The default database is:
 
@@ -63,11 +67,13 @@ This is a separate application store, not ChatGPT/Codex built-in memory. Its
 commands do not read or mutate `~/.codex/memories`, product `/memories`
 controls, ChatGPT account memory, or workspace-admin memory settings.
 
-Memory is opt-in per namespace. Enabling records an explicit consent reference,
-not an invocation or standing permission. Disabled memory neither contributes
-proposals nor accepts observations. Keep generation and use logically separate
-even if the initial runtime exposes one combined enable switch; disabling use
-must fail closed.
+Memory persists enablement per namespace. On an active invocation, the host
+calls `enable` with the authenticated invocation-event reference when the
+namespace is disabled or unconfigured, without asking a second consent
+question. An explicit disable operation is the exception and must not
+auto-enable itself. Persisted enablement allows local storage to survive but is
+not activation or standing access permission. Outside an active invocation,
+the host remains memory-blind even when the namespace is enabled.
 
 A namespace is a stable, non-secret tenant key scoped at least to user and
 workspace. Never use an email address, API key, raw repository URL with
@@ -242,14 +248,15 @@ confirmed --------------> contested -> suspended | superseded | forgotten
 
 Consolidation groups identical typed values with identical applicability and
 counts independent root episodes. Reaching `min_episodes` creates or updates a
-`candidate`; no evidence count activates it. Only an explicit operator action
-after direct user review may promote a candidate to `confirmed`. The caller
-first obtains `preview-promote`, displays the candidate, evidence,
-contradictions, same-type routing context, decision digest, and exact phrase,
-then passes only a new exact direct-user response to `promote`. The digest
-binds consent, target material/evidence, and current routing topology.
-Confirmed is the runtime's active-for-retrieval state; it is never action
-authorization.
+`candidate`; no evidence count activates it. The current host-authenticated
+direct skill invocation may promote only the exact candidate selected by its
+learn or correct request. The caller passes the authenticated invocation event
+reference and `invocation_authorized=true`; no generated phrase or second user
+response is required. `preview-promote` remains optional inspection data and
+exposes the candidate, evidence, contradictions, same-type routing context,
+and decision digest. Promotion revalidates consent and the current candidate,
+then globally tombstones the invocation event reference. Confirmed is the
+runtime's active-for-retrieval state; it is never action authorization.
 
 More evidence improves provenance, not authority. Do not assign probabilities
 that conceal disagreement. A contradictory direct correction immediately
@@ -435,9 +442,9 @@ consent change, expiry, changed input/context, equal-or-higher active route, or
 partial failure invalidates or rolls back the entire split.
 
 The globally unique trusted-event tombstone applies across baseline
-attestation, candidate promotion, proposal confirmation, denial, no-change
-denial resolution, split confirmation, and forgetting. One user event can
-authorize at most one transition in the whole store.
+attestation, invocation-authorized candidate promotion, proposal confirmation,
+denial, no-change denial resolution, split confirmation, and forgetting. One
+user event can authorize at most one transition in the whole store.
 
 ## Conflict, Forget, and Restore Semantics
 
@@ -518,7 +525,6 @@ consolidate --namespace NS [--min-episodes N]
 list --namespace NS
 preview-promote --pattern-id ID
 promote --pattern-id ID
-        --phrase "confirm promote <pattern-id> <digest-prefix>"
         --source direct_user --confirmation-ref TRUSTED_EVENT_REF
 propose --namespace NS --episode-id ID --input-text TEXT
         --context JSON --baseline JSON
@@ -578,7 +584,7 @@ Before release, prove all of these with deterministic temporary databases:
 - all seven pattern types survive reopen and consolidate by distinct episodes;
 - one episode repeated one hundred times counts once;
 - at least one fixture spans one hundred or more independent episodes;
-- candidates never retrieve before exact preview-bound direct-user promotion;
+- candidates never retrieve before invocation-authorized direct-user promotion;
 - external/tool/assistant/quoted evidence cannot activate a pattern;
 - secrets are rejected;
 - exact namespace, scope, and triggers prevent leakage and misrouting;
