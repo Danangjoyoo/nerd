@@ -44,7 +44,9 @@ self-review internally for completeness and simplicity.
 
 ## Writing
 
-- Prefer **tables**, then **bullets**, then short **paragraphs**.
+- Prefer **tables**, then **bullets**, then short **paragraphs**. Use tables for
+  repeated records, mappings, comparisons, dependencies, commands, and gates;
+  use bullets for exceptions or short sequences.
 - State each fact once. Merge overlapping outcome, input, constraint, proof,
   and acceptance material instead of restating it in multiple sections.
 - Keep the dependency table structural; keep implementation detail inside its

@@ -12,6 +12,8 @@ record work already being executed.
 - Mark material unknowns as `Unknown` or explicit blockers; never invent
   repository state or approvals.
 - Prefer tables, then bullets, then short paragraphs.
+- Give tables purposeful columns that answer the reader's next question. Do not
+  use a one-column table or move narrative prose into cells.
 - State each fact once. Do not restate task details in summaries, acceptance
   criteria, or self-review sections.
 - Omit irrelevant optional sections instead of leaving empty headings.
@@ -38,7 +40,13 @@ boundary, dependency, and status. Do not copy the full ledger.]
 
 ## Constraints and Non-goals
 
-- [Record only constraints not already captured by the summary or tasks.]
+| Type | Constraint |
+| --- | --- |
+| Preserve | `[Existing API, schema, behavior, or compatibility contract]` |
+| Exclude | `[Explicit non-goal or deferred capability]` |
+| Safety | `[Mutation, data, deployment, or authorization boundary]` |
+
+[Omit rows already captured by the summary or a task.]
 
 ## Tasks
 
@@ -57,14 +65,18 @@ the Smart Goal ID only when needed.]
 
 **Files:**
 
-- Create: `exact/path/to/file.ts`
-- Modify: `exact/path/to/existing.ts:123`
-- Test: `tests/exact/path/to/file.spec.ts`
+| Action | Path |
+| --- | --- |
+| Create | `exact/path/to/file.ts` |
+| Modify | `exact/path/to/existing.ts:123` |
+| Test | `tests/exact/path/to/file.spec.ts` |
 
 **Interfaces:**
 
-- Consumes: `[Exact names, signatures, types, or artifacts from earlier tasks]`
-- Produces: `[Exact names, signatures, types, or artifacts later tasks use]`
+| Direction | Contract |
+| --- | --- |
+| Consumes | `[Exact names, signatures, types, or artifacts from earlier tasks]` |
+| Produces | `[Exact names, signatures, types, or artifacts later tasks use]` |
 
 - [ ] **Step 1: Write the failing test**
 
@@ -103,25 +115,36 @@ confirmed scope.]
 
 ## Final Validation
 
-```bash
-[Required: Fresh focused and repository-relevant commands]
-```
+| Check | Command | Expected |
+| --- | --- | --- |
+| Focused behavior | `[Exact focused test command]` | PASS |
+| Regression | `[Exact affected-suite command]` | PASS |
+| Repository quality | `[Typecheck, lint, build, or equivalent command]` | Exit 0 |
+| Diff hygiene | `git diff --check` | No output |
+
+[Keep only relevant rows. Put conditional setup or environment requirements in
+one bullet below the table.]
 
 ## Acceptance Criteria
 
-- [List only end-to-end conditions not already used as a task gate.]
+| ID | Criterion | Evidence |
+| --- | --- | --- |
+| AC1 | `[Observable end-to-end behavior]` | `[Test, command, artifact, or inspection]` |
+| AC2 | `[Compatibility or safety invariant]` | `[Regression proof]` |
+
+[List only end-to-end conditions not already used as task gates.]
 ````
 
 ## Completion Check
 
-- Order tasks by dependency and make each task independently verifiable.
-- Preserve Focus Record and Goal Ledger boundaries.
-- Keep the dependency table compact; add critical path, waves, or serialized
-  integration only when they affect execution.
-- Use red-green-refactor for testable behavior and equivalent proof otherwise.
-- Name exact files, interfaces, changes, proof, and stopping conditions without
-  under-building the outcome.
-- Preserve unrelated worktree changes and distinguish baseline failures.
-- Require explicit authorization before any planned remote push.
-- Self-review internally; do not add a visible self-review section.
-- Stop before execution; the plan itself does not authorize edits.
+| Concern | Requirement |
+| --- | --- |
+| Ordering | Tasks follow dependencies and remain independently verifiable. |
+| Boundaries | Focus Record and Goal Ledger scopes remain separate. |
+| Dependencies | Critical path, waves, or serialized integration appear only when they affect execution. |
+| Proof | Testable behavior uses red-green-refactor; other work has equivalent baseline and post-change proof. |
+| Precision | Tasks name exact files, interfaces, changes, commands, expected results, and stopping conditions. |
+| Safety | The plan preserves unrelated changes and distinguishes baseline failures. |
+| Authority | Require explicit authorization before any planned remote push or external write. |
+| Brevity | Facts appear once; optional sections, narration, and visible self-review are absent. |
+| Stop | Planning ends before execution; the plan does not authorize implementation. |
