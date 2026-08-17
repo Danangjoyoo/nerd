@@ -113,6 +113,23 @@ git commit -m "type: concise outcome"
 change, and post-change proof. Omit commit steps when commits are outside the
 confirmed scope.]
 
+## Self Review
+
+[Apply `nerd-review` to the completed plan. Use its Level 1–3 lenses and
+evidence discipline; do not write praise, a walkthrough, or unsupported
+confidence statements. Resolve findings before finalizing the validation
+matrix; preserve genuine unknowns as blockers.]
+
+| Checkpoint | Nerd Review lens | Evidence question | Status |
+| --- | --- | --- | --- |
+| Executability | Level 1 — concrete defects | Are every path, symbol, signature, command, dependency, and expected result exact and internally consistent? | Pass / Finding / Unknown |
+| Repository fit | Level 2 — consistency and proof | Does each task follow repository rules and cover every changed contract with the right test or documentation proof? | Pass / Finding / Unknown |
+| Architecture | Level 3 — harmful complexity | Does any task introduce avoidable coupling, unclear ownership, duplicated behavior, or speculative abstraction? | Pass / Finding / Unknown |
+| Scope integrity | Adversarial evidence check | Is every task required by the outcome, and is every acceptance criterion owned and proven exactly once? | Pass / Finding / Unknown |
+
+- **Findings:** `[None, or severity-ranked actionable findings with task IDs and correction direction.]`
+- **Unknowns:** `[None, or evidence gaps that an implementer must resolve before execution.]`
+
 ## Final Validation
 
 | Check | Command | Expected |
@@ -133,22 +150,6 @@ one bullet below the table.]
 | AC2 | `[Compatibility or safety invariant]` | `[Regression proof]` |
 
 [List only end-to-end conditions not already used as task gates.]
-
-## Self Review
-
-[Apply `nerd-review` to the completed plan. Use its Level 1–3 lenses and
-evidence discipline; do not write praise, a walkthrough, or unsupported
-confidence statements.]
-
-| Checkpoint | Nerd Review lens | Evidence question | Status |
-| --- | --- | --- | --- |
-| Executability | Level 1 — concrete defects | Are every path, symbol, signature, command, dependency, and expected result exact and internally consistent? | Pass / Finding / Unknown |
-| Repository fit | Level 2 — consistency and proof | Does each task follow repository rules and cover every changed contract with the right test or documentation proof? | Pass / Finding / Unknown |
-| Architecture | Level 3 — harmful complexity | Does any task introduce avoidable coupling, unclear ownership, duplicated behavior, or speculative abstraction? | Pass / Finding / Unknown |
-| Scope integrity | Adversarial evidence check | Is every task required by the outcome, and is every acceptance criterion owned and proven exactly once? | Pass / Finding / Unknown |
-
-- **Findings:** `[None, or severity-ranked actionable findings with task IDs and correction direction.]`
-- **Unknowns:** `[None, or evidence gaps that an implementer must resolve before execution.]`
 ````
 
 ## Completion Check

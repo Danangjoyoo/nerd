@@ -342,6 +342,9 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Require explicit authorization before any planned remote push",
             ),
         )
+        self.assertLess(
+            template.index("## Self Review"), template.index("## Final Validation")
+        )
 
     def test_plan_delivery_is_compact_bullets(self):
         body = skill_body("nerd-plan")
