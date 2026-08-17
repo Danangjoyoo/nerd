@@ -23,16 +23,18 @@ different endpoint, return to Smart before continuing.
 
 ## Evidence Prerequisites
 
-| Situation | Route first | Required handoff to Plan |
-| --- | --- | --- |
-| A material design direction remains unresolved or several viable approaches need comparison | Return to `nerd-smart`, resolve **Ideate**, and use `nerd-brainstorm`. | User-selected direction, decisive trade-off, rejected alternatives, constraints, and unknowns that could change the choice. |
-| Repository facts, affected paths, interfaces, or constraints remain unknown | Return to `nerd-smart`, resolve **Explore**, and use `nerd-explore`. | Supported facts with exact paths, symbols, or commands; preserve unresolved facts as `Unknown`. |
-| The requested change is a bug fix and its cause is not confirmed | Return to `nerd-smart`, resolve **Diagnose**, and use `nerd-diagnose` with `nerd-surgery`. | Root cause classified as Confirmed, Probable, or Unknown; evidence, smallest prescription, and verification experiment. |
+Plan collaboratively. When another skill can resolve a missing input, use
+`nerd-smart` to hand off to that endpoint, then bring its result back into Plan.
 
-Do not brainstorm, explore, or diagnose inside Plan. Resume the **Plan**
-endpoint through `nerd-smart` after the prerequisite route stops. Do not repeat
-brainstorming, exploration, or diagnosis when a current, scoped handoff already
-provides sufficient evidence and a confirmed direction.
+| Plan needs | Collaborate with | Bring back |
+| --- | --- | --- |
+| A chosen design direction | `nerd-brainstorm` through **Ideate** | Selected direction, trade-off, rejected alternatives, constraints, and choice-changing unknowns. |
+| Repository evidence | `nerd-explore` through **Explore** | Supported paths, symbols, interfaces, commands, constraints, and remaining `Unknown`s. |
+| A bug diagnosis | `nerd-diagnose` with `nerd-surgery` through **Diagnose** | Classified root cause, evidence, smallest prescription, and verification experiment. |
+
+Use every prerequisite skill the work genuinely needs, one resolved endpoint at
+a time. Reuse current handoffs, avoid repeated work, and resume **Plan** through
+`nerd-smart` only after the required direction and evidence are sufficient.
 
 ## Delivery
 

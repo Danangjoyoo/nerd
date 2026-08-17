@@ -296,14 +296,15 @@ class EndpointRouteContractTests(unittest.TestCase):
             body,
             (
                 "## Evidence Prerequisites",
-                "resolve **Ideate**, and use `nerd-brainstorm`",
-                "User-selected direction, decisive trade-off, rejected alternatives",
-                "use `nerd-explore`",
-                "use `nerd-diagnose` with `nerd-surgery`",
-                "Root cause classified as Confirmed, Probable, or Unknown",
-                "Do not brainstorm, explore, or diagnose inside Plan",
-                "Resume the **Plan** endpoint through `nerd-smart`",
-                "Do not repeat brainstorming, exploration, or diagnosis",
+                "Plan collaboratively",
+                "| Plan needs | Collaborate with | Bring back |",
+                "`nerd-brainstorm` through **Ideate**",
+                "`nerd-explore` through **Explore**",
+                "`nerd-diagnose` with `nerd-surgery` through **Diagnose**",
+                "Use every prerequisite skill the work genuinely needs",
+                "one resolved endpoint at a time",
+                "Reuse current handoffs",
+                "resume **Plan** through `nerd-smart`",
             ),
         )
 
