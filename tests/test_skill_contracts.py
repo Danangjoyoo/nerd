@@ -75,6 +75,29 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_smart_explore_discipline_defers_to_the_explore_route(self):
+        body = normalized(skill_body("nerd-smart"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Explore Discipline",
+                "- Load and read the `nerd-explore` skill first",
+                "then follow its exploration discipline",
+                "Never run an exploration loop inside Smart",
+                "Keep alignment reads minimal",
+                "Resolve the endpoint as **Explore** and hand the record to `nerd-explore`",
+            ),
+        )
+        self.assertLess(
+            body.index("## Explore Discipline"),
+            body.index("## Endpoint Mapping"),
+        )
+        self.assertLess(
+            body.index("## Multi-Goal Intake"),
+            body.index("## Explore Discipline"),
+        )
+
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
         assert_terms(

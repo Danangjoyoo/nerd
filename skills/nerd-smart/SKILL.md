@@ -58,6 +58,19 @@ the complete Multi-Goal Intake before substantive work. Keep exactly one goal
 active, preserve explicit or dependency-safe order, and never borrow scope,
 endpoint, or proof from a queued goal.
 
+## Explore Discipline
+
+- Load and read the `nerd-explore` skill first, before any codebase discovery,
+  then follow its exploration discipline.
+- Never run an exploration loop inside Smart.
+- Keep alignment reads minimal: only the exact paths, symbols, artifacts, or
+  commands the request names.
+- Record what stays unknown instead of widening intake into a folder inventory
+  or project sweep.
+- Resolve the endpoint as **Explore** and hand the record to `nerd-explore`
+  when a goal needs discovery or alignment stalls on unresolved facts,
+  patterns, or constraints.
+
 ## Endpoint Mapping
 
 Choose exactly one route. The route owns the deliverable, mutation authority,
@@ -90,7 +103,8 @@ confirmed work without changing the endpoint:
 
 `nerd-silent` and `nerd-fast` are optional global modifiers, never endpoint
 routes. `nerd-loop` may control recurrence without replacing the route.
-`nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would materially strengthen the confirmed work. `nerd-xfast` remains its
+`nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would
+materially strengthen the confirmed work. `nerd-xfast` remains its
 self-contained, explicitly lossy path.
 
 ## Stop
