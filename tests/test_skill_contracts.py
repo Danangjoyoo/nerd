@@ -265,7 +265,11 @@ class EndpointRouteContractTests(unittest.TestCase):
         assert_terms(
             self,
             skill_body("nerd-plan"),
-            ("implementation plan template", "self-review once", "Stop before execution"),
+            (
+                "implementation plan template",
+                "self-review the finished artifact with `nerd-review` checkpoints",
+                "Stop before execution",
+            ),
         )
 
     def test_plan_persistence_depends_on_invocation_source(self):
@@ -285,6 +289,25 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_plan_requires_direction_and_evidence_before_planning(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Evidence Prerequisites",
+                "Plan collaboratively",
+                "| Plan needs | Collaborate with | Bring back |",
+                "`nerd-brainstorm` through **Ideate**",
+                "`nerd-explore` through **Explore**",
+                "`nerd-diagnose` with `nerd-surgery` through **Diagnose**",
+                "Use every prerequisite skill the work genuinely needs",
+                "one resolved endpoint at a time",
+                "Reuse current handoffs",
+                "resume **Plan** through `nerd-smart`",
+            ),
+        )
+
     def test_plan_enforces_focus_tdd_tdg_and_safe_parallel_integration(self):
         raw_body = skill_body("nerd-plan")
         body = normalized(raw_body)
@@ -299,8 +322,9 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Goal Ledger",
                 "Testable work: red, green, refactor",
                 "Task Dependency Graph (TDG)",
-                "Give each task an ID, dependencies, ownership, gate, and dependents",
-                "Mark critical path and execution waves",
+                "pair one compact task/dependency/wave table with a Mermaid `flowchart LR`",
+                "Show sequential edges, parallel fan-out, and synchronization fan-in",
+                "Omit the diagram only for a single task",
                 "Unless the user requires sequential work",
                 "Subagents need disjoint ownership",
                 "one worktree and branch per node",
@@ -315,32 +339,58 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             template,
             (
-                "## Context",
-                "**Focus:**",
-                "**Goal `[ID]`:**",
+                "## Summary",
                 "## Task Dependency Graph (TDG)",
-                "**Critical path:**",
-                "**Waves:**",
-                "**Red:**",
-                "**Green:**",
-                "**Refactor:**",
-                "## Parallel Worktree and Integration Strategy",
-                "Cherry-pick one branch at a time",
+                "| Task | Wave | Depends on | Produces |",
+                "```mermaid",
+                "flowchart LR",
+                'task1["Wave 1: T1 Contract"]',
+                'task2["Wave 2: T2 Runtime"]',
+                'task3["Wave 2: T3 Docs"]',
+                "task1 --> task2",
+                "task1 --> task3",
+                "task2 --> task4",
+                "task3 --> task4",
+                "Sibling nodes in one wave show parallel work",
+                "child waits for every parent",
+                "## Ordered Work",
+                "**Focus:**",
+                "**Interfaces:**",
+                "| Action | Path |",
+                "| Direction | Contract |",
+                "| Consumes |",
+                "| Produces |",
+                "Write the failing test",
+                "Run the test and confirm failure",
+                "Implement the minimum change",
+                "Run focused and regression proof",
+                "| Check | Command | Expected |",
+                "| ID | Criterion | Evidence |",
+                "## Self Review",
+                "| Checkpoint | Nerd Review lens | Evidence question | Status |",
+                "Level 1 — concrete defects",
+                "Level 2 — consistency and proof",
+                "Level 3 — harmful complexity",
+                "| Concern | Requirement |",
                 "Require explicit authorization before any planned remote push",
             ),
         )
+        self.assertLess(
+            template.index("## Self Review"), template.index("## Final Validation")
+        )
 
-    def test_plan_delivery_is_compact_bullets(self):
+    def test_plan_delivery_is_a_compact_decision_table(self):
         body = skill_body("nerd-plan")
         assert_terms(
             self,
             body,
             (
-                "- **KISS:**",
-                "- **Comprehensive:**",
-                "- **DRY:**",
-                "- **Selection:**",
-                "- **Rationale:**",
+                "| Principle | Use when | Action |",
+                "| **KISS** | Default |",
+                "| **Comprehensive** |",
+                "| **DRY** |",
+                "| **Selection** |",
+                "| **Rationale** |",
             ),
         )
 
@@ -1646,6 +1696,41 @@ class MemoryContractTests(unittest.TestCase):
                 "A pattern may not derive support from itself or any descendant",
             ),
         )
+
+    def test_explicitly_endorsed_focus_and_plan_can_capture_behavior(self):
+        skill = normalized(skill_body("nerd-memory"))
+        learning = normalized(memory_reference_body("learn-and-correct.md"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+
+        assert_terms(
+            self,
+            learning,
+            (
+                "fresh authenticated user event",
+                "explicitly accepts the displayed Focus Record",
+                "requests Execute",
+                "exact approved plan",
+                "Focus Record alone",
+                "absence of a veto, not evidence",
+                "relevant verification passes",
+                "no correction since approval",
+                "same root episode",
+                "source=`user_correction`",
+                "invalidates dependent proposals and grants",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "No-feedback is only a veto check",
+                "Smart's implicit acceptance never qualifies",
+                "Use the approval event as every mapped observation's evidence reference",
+                "do not create authority",
+            ),
+        )
+        for name in ("nerd-memory", "nerd-smart", "nerd-execute"):
+            self.assertIn("approved behavior capture", normalized(skill_body(name)))
 
     def test_direct_invocation_authorizes_saving_without_authorizing_use(self):
         body = normalized(memory_guidance_body())

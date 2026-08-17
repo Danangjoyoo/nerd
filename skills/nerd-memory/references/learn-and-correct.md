@@ -20,6 +20,28 @@ or correction.
 Never store secrets, credentials, hidden reasoning, volatile identifiers,
 personal sensitive data, executable code, or permission grants.
 
+## Capture Approved Behavior
+
+Use the existing fields, not a new behavior type. Qualify only when a fresh
+authenticated user event explicitly accepts the displayed Focus Record and
+requests Execute. Include an exact approved plan only when explicitly accepted;
+otherwise capture the Focus Record alone. Silence, continuation, Smart's
+implicit acceptance, and pre-display execution requests do not qualify.
+
+Keep the bundle in context. Map only reviewed Focus/plan content; include
+`routing` only when its complete chain was displayed. After in-boundary
+execution, relevant verification passes, and no correction since approval,
+observe the mapped values in the same root episode with source=`direct_user`
+and the approval event reference. No feedback is absence of a veto, not
+evidence; success and tests only qualify timing. Exclude incidental commands,
+tools, hidden reasoning, unreviewed changes, and inference. Normal
+consolidation and promotion still apply.
+
+Discard a pending bundle on feedback. After capture, record an exact reusable
+replacement under the same key/scope with source=`user_correction`; it contests
+the old behavior and invalidates dependent proposals and grants. For rejection
+without replacement, use deny or forget. Keep task-local differences local.
+
 ## Consolidate and Promote
 
 Consolidate support only across independent root episodes. Consolidation

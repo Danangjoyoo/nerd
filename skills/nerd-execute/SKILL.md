@@ -60,6 +60,7 @@ Use this template internally. Do not display or narrate a conditional item unles
 | **Execution scope** | Conditional | Inherit the Focus Record scope. Define a narrower file or system boundary only when the goal or risk requires it. |
 | **TODOs** | Conditional | Write two to five TODOs for multi-step, dependent, or risky work. For a small direct change, execute without a checklist. |
 | **Verification** | Conditional | Run proof suited to the affected behavior and risk. When no suitable check is available, report **Not verified**. |
+| **Approved behavior capture** | Conditional | Keep an approved behavior capture's Focus/plan in context. After in-boundary verified work with no correction, run Memory learning. Without a plan, capture Focus only. |
 
 ## Execute Directly
 

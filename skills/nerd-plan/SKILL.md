@@ -21,26 +21,53 @@ only the **Plan** endpoint. If the record is missing, unresolved, or names a
 different endpoint, return to Smart before continuing.
 </INHERITANCE>
 
+## Evidence Prerequisites
+
+Plan collaboratively. When another skill can resolve a missing input, use
+`nerd-smart` to hand off to that endpoint, then bring its result back into Plan.
+
+| Plan needs | Collaborate with | Bring back |
+| --- | --- | --- |
+| A chosen design direction | `nerd-brainstorm` through **Ideate** | Selected direction, trade-off, rejected alternatives, constraints, and choice-changing unknowns. |
+| Repository evidence | `nerd-explore` through **Explore** | Supported paths, symbols, interfaces, commands, constraints, and remaining `Unknown`s. |
+| A bug diagnosis | `nerd-diagnose` with `nerd-surgery` through **Diagnose** | Classified root cause, evidence, smallest prescription, and verification experiment. |
+
+Use every prerequisite skill the work genuinely needs, one resolved endpoint at
+a time. Reuse current handoffs, avoid repeated work, and resume **Plan** through
+`nerd-smart` only after the required direction and evidence are sufficient.
+
 ## Delivery
 
-- **KISS:** Plan simplest sufficient design. Defer speculative features,
-  options, and abstractions.
-- **Comprehensive:** Load [guidance](references/comprehensive.md) only for
-  module/service boundaries, durable contracts/data shapes, or inconsistent
-  partial delivery.
-- **DRY:** Load [guidance](references/dry.md) only for 3+ maintained behavior
-  copies or 2 contract copies across a boundary.
-- **Selection:** If ambiguous, read the
-  [selection reference](references/principle-selection.md).
-- **Rationale:** Read extended [KISS](references/kiss.md) or legacy
-  [YAGNI](references/yagni.md) only when disputed.
+| Principle | Use when | Action |
+| --- | --- | --- |
+| **KISS** | Default | Start with the simplest sufficient design; defer speculative features, options, and abstractions unless evidence justifies another principle. |
+| **Comprehensive** | Work crosses module/service boundaries, durable contracts/data shapes, or risks inconsistent partial delivery | Read [guidance](references/comprehensive.md). |
+| **DRY** | Evidence shows 3+ maintained behavior copies or 2 contract copies across a boundary | Read [guidance](references/dry.md). |
+| **Selection** | The right companion principle is unclear | Read the [selection reference](references/principle-selection.md). |
+| **Rationale** | KISS or YAGNI is disputed | Read extended [KISS](references/kiss.md) or legacy [YAGNI](references/yagni.md). |
 
 ## Plan
 
 Read the [implementation plan template](references/plan-template.md). Produce
 ordered, independently verifiable tasks with exact files, changes, proof, and
 stopping conditions. Preserve confirmed inputs, mark material unknowns, and
-self-review once for completeness and simplicity.
+self-review the finished artifact with `nerd-review` checkpoints before saving.
+
+## Writing
+
+- Prefer **tables**, then **bullets**, then short **paragraphs**. Use tables for
+  repeated records, mappings, comparisons, dependencies, commands, and gates;
+  use bullets for exceptions or short sequences.
+- State each fact once. Merge overlapping outcome, input, constraint, proof,
+  and acceptance material instead of restating it in multiple sections.
+- Keep the dependency table structural; keep implementation detail inside its
+  owning task.
+- Omit narration, repeated rationale, and empty or non-applicable sections.
+- Keep the visible Self Review evidence-based: apply Nerd Review Levels 1–3 to
+  executability, repository consistency, and harmful complexity. Record only
+  passed checkpoints, material findings, and unresolved evidence gaps.
+- Optimize for the implementer who sees one task: give that task exact files,
+  interfaces, steps, commands, and expected results.
 
 ## Planning Discipline
 
@@ -48,7 +75,7 @@ self-review once for completeness and simplicity.
 | --- | --- |
 | **Context** | Copy the Focus Record. For multiple goals, preserve Goal Ledger IDs, boundaries, dependencies, and one active goal. Never merge goals or proof. |
 | **TDD** | Testable work: red, green, refactor, focused proof, regression proof. Other work: baseline check, minimal change, post-change proof. |
-| **Task Dependency Graph (TDG)** | Give each task an ID, dependencies, ownership, gate, and dependents. Mark critical path and execution waves. Keep only dependent work sequential. |
+| **Task Dependency Graph (TDG)** | For multi-task plans, pair one compact task/dependency/wave table with a Mermaid `flowchart LR`. Show sequential edges, parallel fan-out, and synchronization fan-in; keep the same task IDs in node labels and the table. Omit the diagram only for a single task. Do not repeat dependencies inside tasks. |
 | **Speed** | Unless the user requires sequential work, batch known operations and parallelize independent TDG nodes when net faster. Subagents need disjoint ownership, environment support, and one integration owner. Keep adaptive work sequential. |
 | **Worktrees** | For parallel mutations, use one worktree and branch per node. Edit and commit sequentially inside each. Push only with explicit authority. Cherry-pick into the originating target one branch at a time in TDG order; validate each pick, resolve conflicts, then run final proof. Isolation lowers risk; it cannot guarantee conflict-free or correct integration. |
 | **Boundary** | Plan batching, delegation, worktrees, commits, pushes, and cherry-picks. Do not execute them. |
