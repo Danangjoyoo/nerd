@@ -36,7 +36,7 @@ class SkillStructureTests(unittest.TestCase):
         )
 
     def test_manual_only_skill_set_is_exact(self):
-        self.assertEqual(MANUAL_ONLY_SKILLS, ("nerd-memory",))
+        self.assertEqual(MANUAL_ONLY_SKILLS, ())
 
     def test_public_skill_set_is_exact(self):
         self.assertEqual(
