@@ -109,7 +109,7 @@ small direct diagnosis needs no template. Persist an artifact only when the
 user requests it, supplies a path, or an established repository workflow
 requires it.
 
-Stop at cause and evidence. Do not repair, modify source or durable artifacts,
-mutate data or infrastructure, or execute corrective actions. A diagnostic
+Stop at cause and evidence. Do not repair, edit, or execute corrective actions.
+Do not modify source or durable artifacts, data, or infrastructure. A diagnostic
 command may create disposable local cache or build output when required to
 observe the failure. Confirm an Execute endpoint through Smart before repair.
