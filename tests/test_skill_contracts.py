@@ -365,17 +365,18 @@ class EndpointRouteContractTests(unittest.TestCase):
             template.index("## Self Review"), template.index("## Final Validation")
         )
 
-    def test_plan_delivery_is_compact_bullets(self):
+    def test_plan_delivery_is_a_compact_decision_table(self):
         body = skill_body("nerd-plan")
         assert_terms(
             self,
             body,
             (
-                "- **KISS:**",
-                "- **Comprehensive:**",
-                "- **DRY:**",
-                "- **Selection:**",
-                "- **Rationale:**",
+                "| Principle | Use when | Action |",
+                "| **KISS** | Always |",
+                "| **Comprehensive** |",
+                "| **DRY** |",
+                "| **Selection** |",
+                "| **Rationale** |",
             ),
         )
 

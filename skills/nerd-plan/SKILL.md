@@ -38,17 +38,13 @@ a time. Reuse current handoffs, avoid repeated work, and resume **Plan** through
 
 ## Delivery
 
-- **KISS:** Plan simplest sufficient design. Defer speculative features,
-  options, and abstractions.
-- **Comprehensive:** Load [guidance](references/comprehensive.md) only for
-  module/service boundaries, durable contracts/data shapes, or inconsistent
-  partial delivery.
-- **DRY:** Load [guidance](references/dry.md) only for 3+ maintained behavior
-  copies or 2 contract copies across a boundary.
-- **Selection:** If ambiguous, read the
-  [selection reference](references/principle-selection.md).
-- **Rationale:** Read extended [KISS](references/kiss.md) or legacy
-  [YAGNI](references/yagni.md) only when disputed.
+| Principle | Use when | Action |
+| --- | --- | --- |
+| **KISS** | Always | Plan the simplest sufficient design; defer speculative features, options, and abstractions. |
+| **Comprehensive** | Work crosses module/service boundaries, durable contracts/data shapes, or risks inconsistent partial delivery | Read [guidance](references/comprehensive.md). |
+| **DRY** | Evidence shows 3+ maintained behavior copies or 2 contract copies across a boundary | Read [guidance](references/dry.md). |
+| **Selection** | The right companion principle is unclear | Read the [selection reference](references/principle-selection.md). |
+| **Rationale** | KISS or YAGNI is disputed | Read extended [KISS](references/kiss.md) or legacy [YAGNI](references/yagni.md). |
 
 ## Plan
 
