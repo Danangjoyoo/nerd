@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""A local, confirmation-gated memory evidence store.
+"""A local, invocation-authorized memory evidence store.
 
 The store deliberately separates five states:
 
 * observations are inert evidence;
 * consolidated patterns are candidates;
+* a direct skill invocation may promote candidates that the user asked to save;
 * promoted patterns may influence a proposal;
 * an exact, expiring, one-use grant may consume that proposal.
 * a denied proposal is inert until an independently confirmed refinement.
@@ -72,7 +73,7 @@ DENIAL_RESOLUTIONS = frozenset({"agent_mistake", "human_forgot"})
 DEFAULT_MIN_EPISODES = 3
 DEFAULT_GRANT_TTL_SECONDS = 300
 MAX_JSON_BYTES = 1_000_000
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 BASELINE_ATTESTATION_EFFECT = (
     "provenance only; does not confirm memory or authorize action"
 )
@@ -1835,12 +1836,11 @@ class MemoryStore:
             "target": cls._pattern_dict(row, connection),
             "routing_context": route_context,
             "decision_hash": decision_hash,
-            "confirmation_phrase": (
-                f"confirm promote {row['pattern_id']} {decision_hash[:12]}"
-            ),
+            "confirmation_phrase": None,
+            "authorization": "current_direct_skill_invocation",
             "effect": (
-                "memory write only; future matching proposals may recommend this pattern "
-                "but still require their own confirmation"
+                "the current direct skill invocation may authorize this memory write; "
+                "future matching proposals still require their own confirmation"
             ),
         }
 
@@ -1873,18 +1873,21 @@ class MemoryStore:
     def promote(
         self,
         pattern_id: str,
-        confirmation: str,
+        confirmation: str | None = None,
         *,
         source: str,
         confirmation_ref: str,
+        invocation_authorized: bool = False,
     ) -> dict[str, Any]:
         pattern_id = _require_text("pattern_id", pattern_id, max_length=128)
-        if not isinstance(confirmation, str):
-            raise MemoryInvariantError("promotion confirmation phrase must match exactly")
+        if invocation_authorized is not True:
+            raise MemoryInvariantError(
+                "pattern promotion requires the current direct skill invocation"
+            )
         source = _require_text("source", source, max_length=64).casefold()
         if source != "direct_user":
             raise MemoryInvariantError(
-                "only a declared direct-user event may promote a memory pattern"
+                "only the current direct-user skill invocation may promote a memory pattern"
             )
         confirmation_ref = _require_text(
             "confirmation_ref", confirmation_ref, max_length=2048
@@ -1905,18 +1908,7 @@ class MemoryStore:
                 row["value_json"],
                 row["operation"],
             )
-            preview = self._promotion_preview_dict(
-                row,
-                connection,
-                consent["revision"],
-            )
-            if not hmac.compare_digest(
-                confirmation,
-                preview["confirmation_phrase"],
-            ):
-                raise MemoryInvariantError(
-                    "promotion confirmation phrase must match exact current preview"
-                )
+            self._promotion_preview_dict(row, connection, consent["revision"])
             self._claim_trusted_event_ref(connection, confirmation_ref, now)
             connection.execute(
                 """
@@ -4238,10 +4230,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
     promote = commands.add_parser(
         "promote",
-        description="Promote the exact current preview from a trusted direct-user event.",
+        description=(
+            "Promote a candidate authorized by the current direct-user skill invocation."
+        ),
     )
     promote.add_argument("--pattern-id", required=True)
-    promote.add_argument("--phrase", required=True)
+    promote.add_argument(
+        "--phrase",
+        help="Deprecated and ignored; direct skill invocation authorizes promotion.",
+    )
     promote.add_argument("--source", required=True, choices=("direct_user",))
     promote.add_argument("--confirmation-ref", required=True)
 
@@ -4388,6 +4385,7 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
             arguments.phrase,
             source=arguments.source,
             confirmation_ref=arguments.confirmation_ref,
+            invocation_authorized=True,
         )
     if command == "propose":
         return store.propose(

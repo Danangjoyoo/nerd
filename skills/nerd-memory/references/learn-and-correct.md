@@ -25,12 +25,14 @@ personal sensitive data, executable code, or permission grants.
 Consolidate support only across independent root episodes. Consolidation
 creates inactive candidates; it does not activate them. Show the candidate's
 value, exact scope and exclusions, support roots and evidence references,
-contradictions, routing context, and intended effect in one compact paragraph.
+contradictions, routing context, and intended effect when review is useful.
 
-Use `preview-promote`, display its exact target, decision digest, effect, and
-generated phrase, then stop. Promote only from a new direct-user event exactly
-repeating that phrase. Promotion makes a pattern `confirmed` for retrieval; it
-does not approve a current proposal or authorize execution. Every later
+The current host-authenticated direct skill invocation authorizes promotion of
+the exact candidate selected by this learn or correct request. Call `promote`
+with that invocation event reference; do not ask for a generated phrase or a
+second confirmation. Never promote unrelated candidates returned by the same
+consolidation. Promotion makes a pattern `confirmed` for retrieval; it does not
+approve a current proposal or authorize execution. Every later
 memory-influenced endpoint still requires its own Memory Proposal gate.
 
 ## Correct Conflicts
@@ -50,4 +52,4 @@ quality separate. A passing command proves only its observed result, not user
 preference, safety, or broad applicability.
 
 After a successful observation, promotion, or correction, output only the
-one-paragraph `Nerd-memory memorized:` receipt defined in `SKILL.md`.
+one compact paragraph `Nerd-memory memorized:` receipt defined in `SKILL.md`.

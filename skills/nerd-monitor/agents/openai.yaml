@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Monitor"
+  short_description: "Observe state until the requested condition"
+  default_prompt: "Use $nerd-monitor to recheck state until the requested condition is met."

@@ -9,13 +9,34 @@ import sys
 from urllib.parse import unquote, urlsplit
 
 
+ENDPOINT_ROUTES = {
+    "Discuss": "nerd-brainstorm",
+    "Ideate": "nerd-brainstorm",
+    "Explore": "nerd-explore",
+    "Diagnose": "nerd-diagnose",
+    "Review": "nerd-review",
+    "Specify": "nerd-spec",
+    "Document": "nerd-document",
+    "Plan": "nerd-plan",
+    "Execute": "nerd-execute",
+    "Monitor": "nerd-monitor",
+}
+
 PUBLIC_SKILLS = (
     "nerd-smart",
+    "nerd-brainstorm",
+    "nerd-explore",
+    "nerd-diagnose",
+    "nerd-review",
+    "nerd-spec",
+    "nerd-document",
+    "nerd-plan",
+    "nerd-execute",
+    "nerd-monitor",
     "nerd-memory",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
-    "nerd-execute",
     "nerd-silent",
     "nerd-fast",
     "nerd-xfast",
@@ -24,23 +45,83 @@ PUBLIC_SKILLS = (
 MANUAL_ONLY_SKILLS = ("nerd-memory",)
 
 REQUIRED_REFERENCES = {
-    "nerd-smart": (
-        "brainstorming.md",
-        "multi-goal-ledger.md",
-        "principle-selection.md",
-        "spec-template.md",
-        "system-design-template.md",
-        "plan-template.md",
+    "nerd-smart": ("multi-goal-ledger.md",),
+    "nerd-brainstorm": ("brainstorming.md",),
+    "nerd-explore": (),
+    "nerd-diagnose": (
+        "diagnosis-template.md",
+        "rca-template.md",
+        "frameworks/fastapi.md",
+        "frameworks/grpc.md",
+        "frameworks/jooq.md",
+        "frameworks/reactjs.md",
+        "frameworks/ruby-on-rails.md",
+        "frameworks/sidekiq.md",
+        "frameworks/springboot.md",
+        "stacks/docker.md",
+        "stacks/go.md",
+        "stacks/java.md",
+        "stacks/javascript.md",
+        "stacks/kotlin.md",
+        "stacks/kubernetes.md",
+        "stacks/mysql.md",
+        "stacks/postgresql.md",
+        "stacks/python.md",
+        "stacks/redis.md",
+        "stacks/ruby.md",
+        "stacks/rust.md",
+        "stacks/terraform.md",
+        "stacks/typescript.md",
+        "types/build-compile-type-failure.md",
+        "types/crash-exception.md",
+        "types/deterministic-wrong-output.md",
+        "types/environment-config-mismatch.md",
+        "types/hang-timeout.md",
+        "types/integration-api-failure.md",
+        "types/intermittent-flaky.md",
+        "types/performance-regression.md",
+        "types/state-data-corruption.md",
+        "types/visual-ui-mismatch.md",
+    ),
+    "nerd-review": (
+        "frameworks/fastapi.md",
+        "frameworks/grpc.md",
+        "frameworks/jooq.md",
+        "frameworks/reactjs.md",
+        "frameworks/ruby-on-rails.md",
+        "frameworks/sidekiq.md",
+        "frameworks/springboot.md",
+        "stacks/docker.md",
+        "stacks/go.md",
+        "stacks/java.md",
+        "stacks/javascript.md",
+        "stacks/kotlin.md",
+        "stacks/kubernetes.md",
+        "stacks/mysql.md",
+        "stacks/postgresql.md",
+        "stacks/python.md",
+        "stacks/redis.md",
+        "stacks/ruby.md",
+        "stacks/rust.md",
+        "stacks/terraform.md",
+        "stacks/typescript.md",
+    ),
+    "nerd-spec": ("spec-template.md", "system-design-template.md"),
+    "nerd-document": (
         "document-overview-template.md",
         "document-how-to-template.md",
         "document-reference-template.md",
-        "diagnosis-template.md",
-        "rca-template.md",
+    ),
+    "nerd-plan": (
+        "principle-selection.md",
+        "plan-template.md",
         "kiss.md",
         "dry.md",
         "yagni.md",
         "comprehensive.md",
     ),
+    "nerd-execute": (),
+    "nerd-monitor": (),
     "nerd-memory": (
         "recall-and-apply.md",
         "learn-and-correct.md",
@@ -102,7 +183,6 @@ REQUIRED_REFERENCES = {
         "verification.md",
     ),
     "nerd-patrol": ("test-first-remediation.md", "verification.md"),
-    "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": (),
     "nerd-xfast": (),
@@ -110,11 +190,19 @@ REQUIRED_REFERENCES = {
 
 REQUIRED_SCRIPTS = {
     "nerd-smart": ("prompt_hook.py",),
+    "nerd-brainstorm": (),
+    "nerd-explore": (),
+    "nerd-diagnose": (),
+    "nerd-review": (),
+    "nerd-spec": (),
+    "nerd-document": (),
+    "nerd-plan": (),
+    "nerd-execute": (),
+    "nerd-monitor": (),
     "nerd-memory": ("memory.py",),
     "nerd-loop": ("loop.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),
-    "nerd-execute": (),
     "nerd-silent": (),
     "nerd-fast": ("symbol_index.py",),
     "nerd-xfast": (),
@@ -362,6 +450,21 @@ def validate_repository(root: Path) -> list[str]:
             path = skill_dir / "scripts" / script
             if not path.is_file():
                 violations.append(f"missing file: skills/{name}/scripts/{script}")
+
+    smart_path = skills_root / "nerd-smart" / "SKILL.md"
+    if smart_path.is_file():
+        route_rows = dict(
+            re.findall(
+                r"^\| \*\*([A-Za-z]+)\*\* \| `(nerd-[a-z0-9-]+)` \|$",
+                smart_path.read_text(encoding="utf-8"),
+                re.MULTILINE,
+            )
+        )
+        if route_rows != ENDPOINT_ROUTES:
+            violations.append(
+                "skills/nerd-smart/SKILL.md: endpoint route mapping must match "
+                "ENDPOINT_ROUTES"
+            )
 
     for path in sorted(root.rglob("LICENSE.superpowers")):
         violations.append(f"forbidden file: {path.relative_to(root)}")

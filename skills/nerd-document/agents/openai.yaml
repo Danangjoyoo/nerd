@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Document"
+  short_description: "Create validated static documentation artifacts"
+  default_prompt: "Use $nerd-document to create and validate only the requested static artifact."

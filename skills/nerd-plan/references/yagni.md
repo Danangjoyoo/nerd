@@ -13,4 +13,4 @@ constraint, an established repository convention, or correctness, security,
 accessibility, data-integrity, performance, or compatibility evidence. If the
 user explicitly requests speculative surface, explain the trade-off before
 dropping it. If later evidence makes a deferred item necessary, restore it and
-ask only when doing so crosses Smart's authority boundary.
+ask only when doing so crosses the resolved Focus Record's authority boundary.

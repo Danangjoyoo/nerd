@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Spec"
+  short_description: "Define behavior and design before planning"
+  default_prompt: "Use $nerd-spec to define the required behavior and stop before planning."

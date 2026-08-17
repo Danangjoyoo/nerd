@@ -1,6 +1,6 @@
 # Comprehensive Companion Knowledge
 
-Use this reference alongside KISS only when Smart's cross-boundary trigger
+Use this reference alongside KISS only when Nerd Plan's cross-boundary trigger
 selects Comprehensive.
 
 ## Use When

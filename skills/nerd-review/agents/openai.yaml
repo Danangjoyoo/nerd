@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Review"
+  short_description: "Review code with stack-aware severity"
+  default_prompt: "Use $nerd-review to inspect this code by stack and report severity-ranked findings without edits."

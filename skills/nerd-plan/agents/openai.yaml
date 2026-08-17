@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Plan"
+  short_description: "Create actionable plans before execution"
+  default_prompt: "Use $nerd-plan to produce an actionable implementation plan and stop before execution."

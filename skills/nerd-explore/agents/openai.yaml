@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Explore"
+  short_description: "Explore codebases with focused evidence"
+  default_prompt: "Use $nerd-explore to investigate this codebase incrementally from the direct evidence and report sourced findings without mutation."

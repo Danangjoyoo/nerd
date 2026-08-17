@@ -4,7 +4,7 @@
 
 Use this reference only when a Plan or Execute goal has credible evidence for
 cross-boundary completeness or proven duplication and the right companion is
-unclear. Routine work uses Smart's inline KISS rule and loads no principle
+unclear. Routine work uses Nerd Plan's inline KISS rule and loads no principle
 reference.
 
 KISS always applies. [Extended KISS rationale](kiss.md) is available when its
@@ -41,4 +41,4 @@ handoff, or when the trade-off helps the user decide:
 > - **Deferred:** [Optional or speculative work excluded]
 
 Deferred is provisional. Restore an item when evidence makes it necessary, and
-ask first only when doing so crosses Smart's authority boundary.
+ask first only when doing so crosses the resolved Focus Record's authority boundary.

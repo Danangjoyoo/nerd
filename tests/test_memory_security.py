@@ -41,12 +41,11 @@ def empty_endpoint(endpoint: str = "execute") -> dict[str, object]:
 
 
 def promote_pattern(store, pattern_id: str) -> dict[str, object]:
-    preview = store.preview_promote(pattern_id)
     return store.promote(
         pattern_id,
-        preview["confirmation_phrase"],
         source="direct_user",
         confirmation_ref=f"trusted-promotion:{pattern_id}",
+        invocation_authorized=True,
     )
 
 
@@ -233,7 +232,7 @@ class MemorySecurityTests(unittest.TestCase):
         self.assertEqual(persisted["support_episodes"], 120)
         self.assertEqual(persisted["value"], value)
 
-    def test_promotion_requires_an_exact_fresh_direct_user_preview(self):
+    def test_direct_invocation_promotes_without_a_second_phrase(self):
         for index in range(3):
             self.observe(episode_id=f"promotion-preview-{index}")
         candidate = self.store.consolidate(self.namespace, min_episodes=3)[0]
@@ -241,40 +240,53 @@ class MemorySecurityTests(unittest.TestCase):
         self.assertEqual(preview["operation"], "promote")
         self.assertEqual(preview["target"]["status"], "candidate")
         self.assertEqual(len(preview["target"]["evidence"]), 3)
+        self.assertIsNone(preview["confirmation_phrase"])
+        self.assertEqual(
+            preview["authorization"],
+            "current_direct_skill_invocation",
+        )
 
         with self.assertRaises(self.engine.MemoryInvariantError):
             self.store.promote(
                 candidate["pattern_id"],
-                preview["confirmation_phrase"].upper(),
                 source="direct_user",
-                confirmation_ref="promotion-preview:wrong-phrase",
+                confirmation_ref="promotion-preview:missing-invocation",
+                invocation_authorized=False,
             )
-        self.observe(episode_id="promotion-preview-new-evidence")
-        self.store.consolidate(self.namespace, min_episodes=3)
         with self.assertRaises(self.engine.MemoryInvariantError):
             self.store.promote(
                 candidate["pattern_id"],
-                preview["confirmation_phrase"],
-                source="direct_user",
-                confirmation_ref="promotion-preview:stale",
-            )
-
-        fresh = self.store.preview_promote(candidate["pattern_id"])
-        with self.assertRaises(self.engine.MemoryInvariantError):
-            self.store.promote(
-                candidate["pattern_id"],
-                fresh["confirmation_phrase"],
                 source="tool_output",
                 confirmation_ref="promotion-preview:tool",
+                invocation_authorized=True,
             )
+
         promoted = self.store.promote(
             candidate["pattern_id"],
-            fresh["confirmation_phrase"],
             source="direct_user",
             confirmation_ref="promotion-preview:accepted",
+            invocation_authorized=True,
         )
         self.assertEqual(promoted["status"], "confirmed")
         self.assertTrue(promoted["memory_write_only"])
+
+        for index in range(3):
+            self.observe(
+                episode_id=f"promotion-second-{index}",
+                pattern_key="second-preference",
+            )
+        second = next(
+            item
+            for item in self.store.consolidate(self.namespace, min_episodes=3)
+            if item["pattern_key"] == "second-preference"
+        )
+        with self.assertRaises(self.engine.MemoryInvariantError):
+            self.store.promote(
+                second["pattern_id"],
+                source="direct_user",
+                confirmation_ref="promotion-preview:accepted",
+                invocation_authorized=True,
+            )
 
     def test_forget_preview_binds_new_evidence_and_tombstones_the_route(self):
         pattern = self.make_active_pattern(
@@ -370,7 +382,7 @@ class MemorySecurityTests(unittest.TestCase):
         self.assertEqual(fresh["status"], "memory_free")
         self.assertEqual(fresh["proposed_endpoint"]["routing"], [])
 
-    def test_v8_migration_adds_baseline_audit_columns_and_invalidates_old_proposals(self):
+    def test_v9_migration_adds_baseline_audit_columns_and_invalidates_old_proposals(self):
         self.make_active_pattern(value=["use the remembered workflow"])
         old_proposal = self.propose(episode_id="pre-v6-proposal")
         self.store.close()
@@ -403,7 +415,7 @@ class MemorySecurityTests(unittest.TestCase):
             {"baseline_source", "baseline_ref", "baseline_collisions_json"}
             <= columns
         )
-        self.assertEqual(version, "8")
+        self.assertEqual(version, "9")
         self.assertEqual(
             self.store.get_proposal(old_proposal["proposal_id"])["status"],
             "invalidated",
@@ -463,13 +475,13 @@ class MemorySecurityTests(unittest.TestCase):
         metadata_writer = sqlite3.connect(self.db)
         try:
             metadata_writer.execute(
-                "UPDATE metadata SET value = '9' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '10' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
             with self.assertRaises(self.engine.MemoryInvariantError):
                 self.propose(episode_id="runtime-version-changed")
             metadata_writer.execute(
-                "UPDATE metadata SET value = '8' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '9' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
         finally:
@@ -1215,15 +1227,10 @@ class MemoryCliLifecycleTests(unittest.TestCase):
 
         listed = self.run_cli("list", "--namespace", self.namespace)
         self.assertEqual([item["pattern_id"] for item in listed], [pattern_id])
-        promotion_preview = self.run_cli(
-            "preview-promote", "--pattern-id", pattern_id
-        )
         promoted = self.run_cli(
             "promote",
             "--pattern-id",
             pattern_id,
-            "--phrase",
-            promotion_preview["confirmation_phrase"],
             "--source",
             "direct_user",
             "--confirmation-ref",

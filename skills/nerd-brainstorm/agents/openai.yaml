@@ -1,0 +1,4 @@
+interface:
+  display_name: "Nerd Brainstorm"
+  short_description: "Discuss or brainstorm without mutation"
+  default_prompt: "Use $nerd-brainstorm to answer, compare, or generate bounded options at the resolved endpoint."

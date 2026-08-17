@@ -7,11 +7,19 @@ CI = ROOT / ".github/workflows/ci.yml"
 RELEASE = ROOT / ".github/workflows/release.yml"
 SKILLS = (
     "nerd-smart",
+    "nerd-brainstorm",
+    "nerd-explore",
+    "nerd-diagnose",
+    "nerd-review",
+    "nerd-spec",
+    "nerd-document",
+    "nerd-plan",
+    "nerd-execute",
+    "nerd-monitor",
     "nerd-memory",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
-    "nerd-execute",
     "nerd-silent",
     "nerd-fast",
     "nerd-xfast",
@@ -74,9 +82,9 @@ class WorkflowContractTests(unittest.TestCase):
         for skill in SKILLS:
             self.assertIn(skill, body)
 
-    def test_release_counts_exactly_nine_public_skills(self):
+    def test_release_counts_exactly_seventeen_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_SKILL_COUNT=9", body)
+        self.assertIn("EXPECTED_SKILL_COUNT=17", body)
         self.assertIn("grep -E", body)
         self.assertIn("wc -l", body)
 
