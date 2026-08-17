@@ -48,15 +48,29 @@ boundary, dependency, and status. Do not copy the full ledger.]
 
 [Omit rows already captured by the summary or a task.]
 
-## Tasks
+## Task Dependency Graph (TDG)
 
-| Task | Depends on | Produces |
-| --- | --- | --- |
-| T1 | None | [Concrete outcome consumed by later work] |
-| T2 | T1 | [Concrete outcome] |
+| Task | Wave | Depends on | Produces |
+| --- | --- | --- | --- |
+| T1 | 1 | None | Contract and failing tests |
+| T2 | 2 | T1 | Runtime implementation |
+| T3 | 2 | T1 | Documentation update |
+| T4 | 3 | T2, T3 | Integrated proof |
+| T5 | 4 | T4 | Delivery handoff |
 
-[Add critical path, waves, integration owner, or worktree strategy only when
-they materially change execution.]
+```text
+Wave 1            Wave 2 (parallel)       Wave 3              Wave 4
+T1 Contract ------+--> T2 Runtime ----+
+                  |                    +--> T4 Integration ---> T5 Delivery
+                  +--> T3 Docs -------+
+```
+
+Legend: `-->` dependency; split branches run in parallel; joined branches wait
+for every parent. Use plain ASCII and the same task IDs as the table. Omit the
+diagram only for a single-task plan. Add critical-path, integration-owner, or
+worktree notes only when they change execution.
+
+## Ordered Work
 
 ### Task [N]: [Component Name]
 

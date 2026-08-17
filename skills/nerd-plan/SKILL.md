@@ -75,7 +75,7 @@ self-review the finished artifact with `nerd-review` checkpoints before saving.
 | --- | --- |
 | **Context** | Copy the Focus Record. For multiple goals, preserve Goal Ledger IDs, boundaries, dependencies, and one active goal. Never merge goals or proof. |
 | **TDD** | Testable work: red, green, refactor, focused proof, regression proof. Other work: baseline check, minimal change, post-change proof. |
-| **Task Dependency Graph (TDG)** | Use one compact table with task ID, dependency, and produced outcome. Add critical path or waves only when they change execution. Do not repeat the table inside tasks. |
+| **Task Dependency Graph (TDG)** | For multi-task plans, pair one compact task/dependency/wave table with a plain-ASCII execution diagram. Show sequential arrows, parallel splits, and synchronization joins; use the same task IDs in both views. Omit the diagram only for a single task. Do not repeat dependencies inside tasks. |
 | **Speed** | Unless the user requires sequential work, batch known operations and parallelize independent TDG nodes when net faster. Subagents need disjoint ownership, environment support, and one integration owner. Keep adaptive work sequential. |
 | **Worktrees** | For parallel mutations, use one worktree and branch per node. Edit and commit sequentially inside each. Push only with explicit authority. Cherry-pick into the originating target one branch at a time in TDG order; validate each pick, resolve conflicts, then run final proof. Isolation lowers risk; it cannot guarantee conflict-free or correct integration. |
 | **Boundary** | Plan batching, delegation, worktrees, commits, pushes, and cherry-picks. Do not execute them. |
