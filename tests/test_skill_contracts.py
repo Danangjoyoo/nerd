@@ -289,6 +289,22 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_plan_requires_evidence_before_planning_unknowns_or_bug_fixes(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Evidence Prerequisites",
+                "use `nerd-explore`",
+                "use `nerd-diagnose` with `nerd-surgery`",
+                "Root cause classified as Confirmed, Probable, or Unknown",
+                "Do not explore or diagnose inside Plan",
+                "Resume the **Plan** endpoint through `nerd-smart`",
+                "Do not repeat exploration or diagnosis",
+            ),
+        )
+
     def test_plan_enforces_focus_tdd_tdg_and_safe_parallel_integration(self):
         raw_body = skill_body("nerd-plan")
         body = normalized(raw_body)
