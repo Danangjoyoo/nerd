@@ -25,12 +25,14 @@ different endpoint, return to Smart before continuing.
 
 | Situation | Route first | Required handoff to Plan |
 | --- | --- | --- |
+| A material design direction remains unresolved or several viable approaches need comparison | Return to `nerd-smart`, resolve **Ideate**, and use `nerd-brainstorm`. | User-selected direction, decisive trade-off, rejected alternatives, constraints, and unknowns that could change the choice. |
 | Repository facts, affected paths, interfaces, or constraints remain unknown | Return to `nerd-smart`, resolve **Explore**, and use `nerd-explore`. | Supported facts with exact paths, symbols, or commands; preserve unresolved facts as `Unknown`. |
 | The requested change is a bug fix and its cause is not confirmed | Return to `nerd-smart`, resolve **Diagnose**, and use `nerd-diagnose` with `nerd-surgery`. | Root cause classified as Confirmed, Probable, or Unknown; evidence, smallest prescription, and verification experiment. |
 
-Do not explore or diagnose inside Plan. Resume the **Plan** endpoint through
-`nerd-smart` after the prerequisite route stops. Do not repeat exploration or
-diagnosis when a current, scoped handoff already provides sufficient evidence.
+Do not brainstorm, explore, or diagnose inside Plan. Resume the **Plan**
+endpoint through `nerd-smart` after the prerequisite route stops. Do not repeat
+brainstorming, exploration, or diagnosis when a current, scoped handoff already
+provides sufficient evidence and a confirmed direction.
 
 ## Delivery
 
