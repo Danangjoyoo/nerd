@@ -52,6 +52,12 @@ class EndpointRouteContractTests(unittest.TestCase):
         "Monitor": "nerd-monitor",
     }
 
+    # nerd-execute states the same gate in its own wording.
+    # nerd-explore is loaded by Smart before any discovery on every route, so a
+    # gate accepting only the Explore endpoint would reject its most common
+    # caller; it owns its record instead of consuming a resolved one.
+    INHERITANCE_EXEMPT = ("nerd-execute", "nerd-explore")
+
     def test_smart_maps_exactly_ten_endpoints(self):
         body = skill_body("nerd-smart")
         rows = dict(
@@ -140,7 +146,7 @@ class EndpointRouteContractTests(unittest.TestCase):
         for endpoint, skill in self.ROUTES.items():
             with self.subTest(endpoint=endpoint):
                 body = skill_body(skill)
-                if skill != "nerd-execute":
+                if skill not in self.INHERITANCE_EXEMPT:
                     expected_endpoint = (
                         "only the **Discuss** and **Ideate** endpoints"
                         if skill == "nerd-brainstorm"
@@ -155,6 +161,38 @@ class EndpointRouteContractTests(unittest.TestCase):
                             "return to Smart before continuing",
                         ),
                     )
+
+    def test_explore_owns_its_record_without_inheriting_smart(self):
+        body = skill_body("nerd-explore")
+        assert_terms(
+            self,
+            body,
+            (
+                "Explore owns its own record",
+                "> - **Question:**",
+                "> - **Boundary:**",
+                "Confirm any endpoint change through `nerd-smart`",
+            ),
+        )
+        for forbidden in (
+            "<INHERITANCE>",
+            "Use `nerd-smart` first",
+            "only the **Explore** endpoint",
+        ):
+            self.assertNotIn(forbidden, body)
+
+    def test_explore_inlines_speed_without_loading_modifier_routes(self):
+        body = skill_body("nerd-explore")
+        assert_terms(
+            self,
+            body,
+            (
+                "## Fast Discipline",
+                "Never load `nerd-fast` or `nerd-xfast`",
+                "never alter the caller's analysis depth, proof, or reporting rigor",
+                "Never trade accuracy for latency",
+            ),
+        )
 
     def test_route_descriptions_are_explicit_and_distinct(self):
         descriptions = {}
