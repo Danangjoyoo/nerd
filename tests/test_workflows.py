@@ -73,9 +73,10 @@ class WorkflowContractTests(unittest.TestCase):
             "--agent claude-code",
             "--agent cursor",
             "*/nerd-memory/SKILL.md",
-            "disable-model-invocation: true",
+            "or when Nerd Smart auto-enables it",
+            "! grep -Fq 'disable-model-invocation'",
             "*/nerd-memory/agents/openai.yaml",
-            "allow_implicit_invocation: false",
+            "allow_implicit_invocation: true",
             "cancel-in-progress: false",
         ):
             self.assertIn(fragment, body)

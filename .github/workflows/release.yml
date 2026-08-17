@@ -91,14 +91,15 @@ jobs:
           MEMORY_SKILLS="$(find "$HOME" -path '*/nerd-memory/SKILL.md' -type f)"
           test -n "$MEMORY_SKILLS"
           while IFS= read -r skill_file; do
-            grep -Fx 'disable-model-invocation: true' "$skill_file"
+            grep -F 'or when Nerd Smart auto-enables it' "$skill_file"
+            ! grep -Fq 'disable-model-invocation' "$skill_file"
           done <<EOF
           $MEMORY_SKILLS
           EOF
           OPENAI_METADATA="$(find "$HOME" -path '*/nerd-memory/agents/openai.yaml' -type f)"
           test -n "$OPENAI_METADATA"
           while IFS= read -r metadata_file; do
-            grep -F 'allow_implicit_invocation: false' "$metadata_file"
+            grep -F 'allow_implicit_invocation: true' "$metadata_file"
           done <<EOF
           $OPENAI_METADATA
           EOF
