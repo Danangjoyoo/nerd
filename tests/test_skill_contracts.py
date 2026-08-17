@@ -267,7 +267,7 @@ class EndpointRouteContractTests(unittest.TestCase):
             skill_body("nerd-plan"),
             (
                 "implementation plan template",
-                "self-review internally",
+                "self-review the finished artifact with `nerd-review` checkpoints",
                 "Stop before execution",
             ),
         )
@@ -333,11 +333,15 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Run focused and regression proof",
                 "| Check | Command | Expected |",
                 "| ID | Criterion | Evidence |",
+                "## Self Review",
+                "| Checkpoint | Nerd Review lens | Evidence question | Status |",
+                "Level 1 — concrete defects",
+                "Level 2 — consistency and proof",
+                "Level 3 — harmful complexity",
                 "| Concern | Requirement |",
                 "Require explicit authorization before any planned remote push",
             ),
         )
-        self.assertNotIn("## Self-Review", template)
 
     def test_plan_delivery_is_compact_bullets(self):
         body = skill_body("nerd-plan")

@@ -40,7 +40,7 @@ different endpoint, return to Smart before continuing.
 Read the [implementation plan template](references/plan-template.md). Produce
 ordered, independently verifiable tasks with exact files, changes, proof, and
 stopping conditions. Preserve confirmed inputs, mark material unknowns, and
-self-review internally for completeness and simplicity.
+self-review the finished artifact with `nerd-review` checkpoints before saving.
 
 ## Writing
 
@@ -51,8 +51,10 @@ self-review internally for completeness and simplicity.
   and acceptance material instead of restating it in multiple sections.
 - Keep the dependency table structural; keep implementation detail inside its
   owning task.
-- Omit narration, repeated rationale, visible self-review, and empty or
-  non-applicable sections.
+- Omit narration, repeated rationale, and empty or non-applicable sections.
+- Keep the visible Self Review evidence-based: apply Nerd Review Levels 1–3 to
+  executability, repository consistency, and harmful complexity. Record only
+  passed checkpoints, material findings, and unresolved evidence gaps.
 - Optimize for the implementer who sees one task: give that task exact files,
   interfaces, steps, commands, and expected results.
 
