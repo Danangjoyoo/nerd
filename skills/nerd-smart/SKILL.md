@@ -104,8 +104,9 @@ confirmed work without changing the endpoint:
 `nerd-silent` and `nerd-fast` are optional global modifiers, never endpoint
 routes. `nerd-loop` may control recurrence without replacing the route.
 `nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would
-materially strengthen the confirmed work. `nerd-xfast` remains its
-self-contained, explicitly lossy path.
+materially strengthen the confirmed work, or for approved behavior capture
+after a fresh user event accepts the displayed record and requests **Execute**.
+`nerd-xfast` remains its self-contained, explicitly lossy path.
 
 ## Stop
 

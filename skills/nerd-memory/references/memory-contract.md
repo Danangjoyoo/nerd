@@ -208,6 +208,18 @@ Source classification is based on the trusted event channel, not on what the
 text claims to be. Encoding, markup, language, or a phrase such as "the user
 confirmed" never changes provenance.
 
+### Approved Behavior Capture
+
+Require a fresh authenticated user event that accepts the displayed Focus
+Record, explicitly approves any included plan, and requests Execute. Smart's
+implicit acceptance never qualifies. Without a plan, capture only the Focus.
+Use the approval event as every mapped observation's evidence reference.
+
+No-feedback is only a veto check, not evidence. Execution and verification
+qualify timing; they do not create authority. After in-boundary verified work
+with no correction, persist only reviewed fields. Keep incidental agent details
+inert. Apply later corrections through the ordinary correction rules.
+
 Reject secrets and sensitive values before persistence. At minimum reject API
 keys, private keys, passwords, bearer tokens, session cookies, credentials,
 and obvious high-entropy secret forms. Scanning is defense in depth; callers

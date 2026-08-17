@@ -1697,6 +1697,41 @@ class MemoryContractTests(unittest.TestCase):
             ),
         )
 
+    def test_explicitly_endorsed_focus_and_plan_can_capture_behavior(self):
+        skill = normalized(skill_body("nerd-memory"))
+        learning = normalized(memory_reference_body("learn-and-correct.md"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+
+        assert_terms(
+            self,
+            learning,
+            (
+                "fresh authenticated user event",
+                "explicitly accepts the displayed Focus Record",
+                "requests Execute",
+                "exact approved plan",
+                "Focus Record alone",
+                "absence of a veto, not evidence",
+                "relevant verification passes",
+                "no correction since approval",
+                "same root episode",
+                "source=`user_correction`",
+                "invalidates dependent proposals and grants",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "No-feedback is only a veto check",
+                "Smart's implicit acceptance never qualifies",
+                "Use the approval event as every mapped observation's evidence reference",
+                "do not create authority",
+            ),
+        )
+        for name in ("nerd-memory", "nerd-smart", "nerd-execute"):
+            self.assertIn("approved behavior capture", normalized(skill_body(name)))
+
     def test_direct_invocation_authorizes_saving_without_authorizing_use(self):
         body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
