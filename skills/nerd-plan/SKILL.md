@@ -40,7 +40,7 @@ a time. Reuse current handoffs, avoid repeated work, and resume **Plan** through
 
 | Principle | Use when | Action |
 | --- | --- | --- |
-| **KISS** | Always | Plan the simplest sufficient design; defer speculative features, options, and abstractions. |
+| **KISS** | Default | Start with the simplest sufficient design; defer speculative features, options, and abstractions unless evidence justifies another principle. |
 | **Comprehensive** | Work crosses module/service boundaries, durable contracts/data shapes, or risks inconsistent partial delivery | Read [guidance](references/comprehensive.md). |
 | **DRY** | Evidence shows 3+ maintained behavior copies or 2 contract copies across a boundary | Read [guidance](references/dry.md). |
 | **Selection** | The right companion principle is unclear | Read the [selection reference](references/principle-selection.md). |

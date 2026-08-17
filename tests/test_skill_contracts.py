@@ -381,7 +381,7 @@ class EndpointRouteContractTests(unittest.TestCase):
             body,
             (
                 "| Principle | Use when | Action |",
-                "| **KISS** | Always |",
+                "| **KISS** | Default |",
                 "| **Comprehensive** |",
                 "| **DRY** |",
                 "| **Selection** |",
