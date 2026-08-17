@@ -3,4 +3,4 @@ interface:
   short_description: "Invocation-authorized memory with gated application"
   default_prompt: "Use $nerd-memory to read or update my recurring patterns from this invocation without a second save confirmation, gate remembered task changes when required, and acknowledge successful writes with one short Nerd-memory memorized paragraph."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true
