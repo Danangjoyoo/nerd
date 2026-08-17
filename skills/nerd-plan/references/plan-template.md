@@ -58,17 +58,26 @@ boundary, dependency, and status. Do not copy the full ledger.]
 | T4 | 3 | T2, T3 | Integrated proof |
 | T5 | 4 | T4 | Delivery handoff |
 
-```text
-Wave 1            Wave 2 (parallel)       Wave 3              Wave 4
-T1 Contract ------+--> T2 Runtime ----+
-                  |                    +--> T4 Integration ---> T5 Delivery
-                  +--> T3 Docs -------+
+```mermaid
+flowchart LR
+    task1["Wave 1: T1 Contract"]
+    task2["Wave 2: T2 Runtime"]
+    task3["Wave 2: T3 Docs"]
+    task4["Wave 3: T4 Integration"]
+    task5["Wave 4: T5 Delivery"]
+
+    task1 --> task2
+    task1 --> task3
+    task2 --> task4
+    task3 --> task4
+    task4 --> task5
 ```
 
-Legend: `-->` dependency; split branches run in parallel; joined branches wait
-for every parent. Use plain ASCII and the same task IDs as the table. Omit the
-diagram only for a single-task plan. Add critical-path, integration-owner, or
-worktree notes only when they change execution.
+Use `flowchart LR`, camelCase node IDs, short quoted labels, and the same task
+IDs as the table. Sibling nodes in one wave show parallel work; converging edges
+show that the child waits for every parent. Omit the diagram only for a
+single-task plan. Add critical-path, integration-owner, or worktree notes only
+when they change execution.
 
 ## Ordered Work
 
