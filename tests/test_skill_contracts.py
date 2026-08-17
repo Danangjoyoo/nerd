@@ -75,6 +75,29 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_smart_explore_discipline_defers_to_the_explore_route(self):
+        body = normalized(skill_body("nerd-smart"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Explore Discipline",
+                "- Load and read the `nerd-explore` skill first",
+                "then follow its exploration discipline",
+                "Never run an exploration loop inside Smart",
+                "Keep alignment reads minimal",
+                "Resolve the endpoint as **Explore** and hand the record to `nerd-explore`",
+            ),
+        )
+        self.assertLess(
+            body.index("## Explore Discipline"),
+            body.index("## Endpoint Mapping"),
+        )
+        self.assertLess(
+            body.index("## Multi-Goal Intake"),
+            body.index("## Explore Discipline"),
+        )
+
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
         assert_terms(
@@ -1593,7 +1616,7 @@ class MemoryContractTests(unittest.TestCase):
             self,
             body,
             (
-                "authenticated invocation is request-scoped permission",
+                "is request-scoped permission to read its current namespace",
                 "non-destructive memory writes required by the selected workflow",
                 "without asking a second consent question",
                 "Candidate promotion uses that invocation authority",
@@ -1613,7 +1636,7 @@ class MemoryContractTests(unittest.TestCase):
             ),
         )
 
-    def test_runtime_is_explicit_activation_only_opt_in_local_and_namespaced(self):
+    def test_runtime_activation_is_bounded_opt_in_local_and_namespaced(self):
         raw_body = skill_body("nerd-memory")
         body = normalized(raw_body)
         frontmatter = normalized(raw_body.split("---", 2)[1])
@@ -1626,14 +1649,15 @@ class MemoryContractTests(unittest.TestCase):
             body,
             (
                 "python3 <skill-root>/scripts/memory.py",
-                "Load Nerd Memory only from a host-authenticated direct-user skill invocation",
+                "Load Nerd Memory from a host-authenticated direct-user skill invocation",
                 "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
-                "A plain natural-language mention is not activation",
-                "Without active explicit invocation, do not read operational references",
+                "or from a Nerd Smart auto-enable",
+                "A plain natural-language mention outside these paths is not activation",
+                "Without active invocation, do not read operational references",
                 "Retained skill text is not a new invocation",
                 "start a fresh session when physical context removal is required",
                 "`enabled` records local persistence state only",
-                "never activation or standing permission to access Memory",
+                "it is never standing permission to access Memory",
                 "Never search another namespace",
             ),
         )
@@ -1655,13 +1679,12 @@ class MemoryContractTests(unittest.TestCase):
                 "A prompt-only simulation does not satisfy this contract",
             ),
         )
-        self.assertIn("allow_implicit_invocation: false", metadata)
-        self.assertNotIn("allow_implicit_invocation: true", metadata)
+        self.assertIn("allow_implicit_invocation: true", metadata)
         self.assertIn("$nerd-memory", metadata)
-        self.assertIn("current user explicitly invokes $nerd-memory", frontmatter)
+        self.assertIn("user invokes $nerd-memory (Codex)", frontmatter)
         self.assertIn("/nerd-memory (Claude/Cursor)", frontmatter)
-        self.assertIn("disable-model-invocation: true", frontmatter)
-        self.assertIn("Never auto-load", frontmatter)
+        self.assertIn("or when Nerd Smart auto-enables it", frontmatter)
+        self.assertNotIn("disable-model-invocation", frontmatter)
         self.assertNotIn("when Nerd Memory is enabled", frontmatter)
 
     def test_schema_upgrades_fence_already_open_older_runtimes(self):
@@ -1746,7 +1769,7 @@ class MemoryContractTests(unittest.TestCase):
                 "Missing or disallowed components fail closed",
             ),
         )
-        self.assertIn("`nerd-memory` remains explicit activation only", smart)
+        self.assertIn("`nerd-memory` may be auto-enabled by Nerd Smart", smart)
         self.assertNotIn("remembered `routing` chain", smart)
 
     def test_denial_is_neutral_and_generic_routes_need_confirmed_splits(self):
@@ -1784,7 +1807,7 @@ class MemoryContractTests(unittest.TestCase):
             ),
         )
 
-    def test_smart_composes_memory_only_after_explicit_activation(self):
+    def test_smart_composes_memory_only_as_a_bounded_specialty(self):
         smart = normalized(skill_body("nerd-smart"))
         hook = normalized(
             (SKILLS / "nerd-smart" / "scripts" / "prompt_hook.py").read_text()
@@ -1793,7 +1816,8 @@ class MemoryContractTests(unittest.TestCase):
             self,
             smart,
             (
-                "`nerd-memory` remains explicit activation only",
+                "`nerd-memory` may be auto-enabled by Nerd Smart",
+                "when memory retrieval would materially strengthen the confirmed work",
                 "Endpoint routes may add one specialty only",
                 "without changing the endpoint",
             ),

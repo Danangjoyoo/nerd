@@ -42,7 +42,7 @@ PUBLIC_SKILLS = (
     "nerd-xfast",
 )
 
-MANUAL_ONLY_SKILLS = ("nerd-memory",)
+MANUAL_ONLY_SKILLS: tuple[()] = ()
 
 REQUIRED_REFERENCES = {
     "nerd-smart": ("multi-goal-ledger.md",),
