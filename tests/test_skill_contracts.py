@@ -1751,8 +1751,9 @@ class MemoryContractTests(unittest.TestCase):
             self,
             contract,
             (
-                "host-authenticated direct invocation supplies request-scoped access consent",
-                "invocation authorizes reads and non-destructive memory writes",
+                "host-authenticated direct invocation, Nerd Smart auto-enable",
+                "supplies request-scoped access consent",
+                "That event authorizes reads and non-destructive memory writes",
                 "`invocation_authorized=true`",
                 "no generated phrase or second user response is required",
                 "Confirmed is the runtime's active-for-retrieval state; it is never action authorization",
@@ -1774,13 +1775,14 @@ class MemoryContractTests(unittest.TestCase):
                 "python3 <skill-root>/scripts/memory.py",
                 "Load Nerd Memory from a host-authenticated direct-user skill invocation",
                 "`$nerd-memory` in Codex or `/nerd-memory` in Claude Code and Cursor",
-                "or from a Nerd Smart auto-enable",
+                "Nerd Smart auto-enable",
+                "user-installed Nerd prompt/session hook",
                 "A plain natural-language mention outside these paths is not activation",
-                "Without active invocation, do not read operational references",
+                "Without an active invocation or current auto-activation hook event",
                 "Retained skill text is not a new invocation",
                 "start a fresh session when physical context removal is required",
                 "`enabled` records local persistence state only",
-                "it is never standing permission to access Memory",
+                "the user-installed hook, not that flag, supplies standing activation",
                 "Never search another namespace",
             ),
         )
@@ -1790,12 +1792,14 @@ class MemoryContractTests(unittest.TestCase):
             (
                 "local SQLite",
                 "uses the Python standard library",
-                "host-authenticated direct invocation supplies request-scoped access consent",
-                "unless the current direct user event invoked `$nerd-memory` in Codex or `/nerd-memory` in Claude Code or Cursor",
-                "calls `enable` with the authenticated invocation-event reference",
+                "host-authenticated direct invocation, Nerd Smart auto-enable",
+                "user-installed Nerd prompt/session hook supplies request-scoped",
+                "calls `enable` with the authenticated event reference",
                 "without asking a second consent question",
                 "A plain natural-language mention is not activation",
-                "later requests require a new explicit invocation",
+                "later requests require a new invocation or hook event",
+                "Removing or disabling the hook revokes future activation",
+                "The hook cannot confirm a Memory Proposal",
                 "Memory persists enablement per namespace",
                 "Namespace equality is exact",
                 "Every successful command writes one JSON value to stdout",
@@ -1804,6 +1808,7 @@ class MemoryContractTests(unittest.TestCase):
         )
         self.assertIn("allow_implicit_invocation: true", metadata)
         self.assertIn("$nerd-memory", metadata)
+        self.assertIn("user-installed Nerd session hook auto-activates it", frontmatter)
         self.assertIn("user invokes $nerd-memory (Codex)", frontmatter)
         self.assertIn("/nerd-memory (Claude/Cursor)", frontmatter)
         self.assertIn("or when Nerd Smart auto-enables it", frontmatter)
@@ -1950,11 +1955,14 @@ class MemoryContractTests(unittest.TestCase):
             self,
             hook,
             (
-                "standing authorization applies only to `nerd-smart`",
-                "does not load, invoke, enable, or authorize any other skill",
+                "Automatically activate the installed `nerd-memory` skill",
+                "memory-blind Focus Record and endpoint",
+                "namespace-scoped local reads and non-destructive Memory writes",
+                "it never",
+                "confirms remembered changes or authorizes actions",
             ),
         )
-        self.assertNotIn("nerd-memory", hook)
+        self.assertIn("nerd-memory", hook)
 
 
 class FamilyContractTests(unittest.TestCase):

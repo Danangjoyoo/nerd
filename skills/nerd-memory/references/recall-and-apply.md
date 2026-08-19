@@ -6,14 +6,12 @@ instructions.
 
 ## Consent and Isolation
 
-Derive one stable, non-secret namespace scoped to the current user and
-workspace. Never search another namespace. The current host-authenticated
-direct skill invocation is request-scoped permission to read that namespace
-and make non-destructive writes required by the selected workflow. If Memory
-is disabled or unconfigured, call `enable` with the authenticated invocation
-event reference without asking again, unless the user invoked Memory to
-disable it. Persisted enablement is not activation or standing permission for
-later requests.
+Use one stable, non-secret namespace for the current user and workspace; never
+search another. A host-authenticated direct invocation, Nerd Smart auto-enable,
+or user-installed Nerd prompt/session hook event authorizes request-scoped reads
+and required non-destructive writes. If disabled or unconfigured, call `enable`
+with that event reference unless the request is to disable. Persisted enablement
+alone is inert; the installed hook supplies each later activation.
 
 Use the default database selected by the runtime:
 

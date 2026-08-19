@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inject standing user authorization to invoke nerd-smart."""
+"""Inject standing user authorization to invoke Nerd routing and Memory."""
 
 from __future__ import annotations
 
@@ -10,9 +10,12 @@ import sys
 
 INSTRUCTION = (
     "Always invoke the installed `nerd-smart` skill before substantive work on "
-    "every user request. Follow its Focus Record and endpoint contract. This "
-    "standing authorization applies only to `nerd-smart` and does not load, invoke, enable, or authorize any other skill. "
-    "No hook authorizes "
+    "every user request. Follow its Focus Record and endpoint contract. "
+    "Automatically activate the installed `nerd-memory` skill for the current "
+    "user-workspace namespace on every request, after building Smart's "
+    "memory-blind Focus Record and endpoint. This standing authorization permits "
+    "only namespace-scoped local reads and non-destructive Memory writes; it never "
+    "confirms remembered changes or authorizes actions. No hook authorizes "
     "combining Nerd with Superpowers, Ponytail, or Caveman; only an explicit "
     "user request in the current prompt authorizes that pairing."
 )
