@@ -83,6 +83,18 @@ auto-enable itself. Persisted enablement allows local storage to survive but is
 not activation by itself. Outside an active invocation or current hook event,
 the host remains memory-blind even when the namespace is enabled.
 
+Before the first MCP-capable operation in a host session, the caller checks the
+current callable registry for all four `nerd-memory-tools` methods. That live
+surface is authoritative; configuration alone proves only registration. A
+missing or disabled registration requires fresh direct-user approval before
+installation or enablement. An enabled registration absent from the live
+registry requires a new or restarted host session, not a manually launched
+stdio process. Hook activation and Memory consent grant none of those external
+configuration or lifecycle permissions. A user may select the behaviorally
+equivalent CLI for the current session; keep that choice session-local, never
+persist it as evidence, and do not repeat the prompt on later automatic
+activations in that session.
+
 A namespace is a stable, non-secret tenant key scoped at least to user and
 workspace. Never use an email address, API key, raw repository URL with
 credentials, or another secret as the namespace. Namespace equality is exact;
@@ -630,6 +642,10 @@ Before release, prove all of these with deterministic temporary databases:
   unsafe or ambiguous profiles, and never activates from runtime telemetry;
 - unavailable or disallowed route components fail closed after consumption
   without silent dropping, substitution, installation, or invocation;
+- transport preflight distinguishes a live four-tool MCP surface from missing,
+  disabled, registered-but-not-live, and unknown setup; installation and
+  enablement require fresh user approval, while a CLI choice remains
+  session-local and suppresses repeated automatic-activation prompts;
 - unresolved same-key conflict contests the patterns and invalidates pending
   approval;
 - equally applicable cross-key patterns with different effects return a

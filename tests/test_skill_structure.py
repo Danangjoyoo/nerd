@@ -147,6 +147,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute": (),
                 "nerd-monitor": (),
                 "nerd-memory": (
+                    "transport-preflight.md",
                     "recall-and-apply.md",
                     "learn-and-correct.md",
                     "deny-split-forget.md",

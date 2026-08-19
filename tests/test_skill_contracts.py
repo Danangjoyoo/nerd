@@ -2050,6 +2050,42 @@ class MemoryTransportContractTests(unittest.TestCase):
     def test_recall_reference_drops_the_help_discovery_step(self):
         self.assertNotIn("memory.py --help", self.recall)
 
+    def test_transport_preflight_requires_live_tools_and_authorized_remedies(self):
+        preflight = normalized(memory_reference_body("transport-preflight.md"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        self.assertIn("references/transport-preflight.md", self.skill)
+        assert_terms(
+            self,
+            preflight,
+            (
+                "once per host session",
+                "current callable tool registry",
+                "memory_recall",
+                "memory_settle",
+                "memory_learn",
+                "memory_inspect",
+                "registered but absent",
+                "restart-required",
+                "install-required",
+                "enable-required",
+                "fresh direct-user approval",
+                "Never launch a stdio server manually",
+                "Use CLI for this session",
+                "Do not persist the transport choice",
+            ),
+        )
+        self.assertIn("transport choice", self.skill)
+        assert_terms(
+            self,
+            contract,
+            (
+                "That live surface is authoritative",
+                "requires fresh direct-user approval",
+                "keep that choice session-local",
+                "do not repeat the prompt",
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

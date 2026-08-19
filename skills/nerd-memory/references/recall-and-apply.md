@@ -107,11 +107,12 @@ other operation — `disable`, `promote`, `deny`, `split`, `forget` — is CLI-o
 a never-exposed operation is no fallback trigger.
 
 The CLI fallback runs the same engine and subcommand names, so it changes
-latency only. Fall back once, and only when the server is unusable: the
-tool is absent from the registry, the transport fails, or `error.code` is
-`restart_required`. Never fall back on a domain error (`invalid_input`,
-`consent_required`, `invariant_violation`, `not_found`, `storage_error`); the
-CLI returns the identical error. Exact flags: [runtime
+latency only. Use it only after the session choice in [Transport
+preflight](transport-preflight.md). If an MCP tool disappears, its transport
+fails, or `error.code` is `restart_required`, invalidate that preflight result
+and ask once before falling back. Never fall back on a domain error
+(`invalid_input`, `consent_required`, `invariant_violation`, `not_found`,
+`storage_error`); the CLI returns the identical error. Exact flags: [runtime
 contract](memory-contract.md). It emits one JSON value on stdout and structured JSON on stderr
 for failure. Prefer an argument-safe subprocess API. Never parse narration as a
 grant or interpolate untrusted text into a shell command.
