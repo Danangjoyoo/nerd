@@ -145,7 +145,7 @@ def _health_check(server: Path, *, server_name: str, expected_tools: set[str]) -
 def _command_environment(home: Path, environment: dict[str, str]) -> dict[str, str]:
     result = dict(environment)
     result["HOME"] = str(home)
-    if "NERD_INSTALL_HOME" in result:
+    if "NERD_INSTALL_HOME" in result and "CODEX_HOME" not in result:
         result["CODEX_HOME"] = str(home / ".codex")
     return result
 

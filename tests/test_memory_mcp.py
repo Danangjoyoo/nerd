@@ -70,15 +70,26 @@ class ServerSession:
         return self.request("tools/call", {"name": name, "arguments": arguments})["result"]
 
     def stderr(self) -> str:
-        return ""
+        assert self.process.stderr
+        try:
+            self.process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            return "<server still running after closing stdout>"
+        return self.process.stderr.read().strip()
 
     def close(self) -> None:
         assert self.process.stdin
         try:
-            self.process.stdin.close()
+            if not self.process.stdin.closed:
+                self.process.stdin.close()
             self.process.wait(timeout=10)
-        except Exception:
+        except (BrokenPipeError, subprocess.TimeoutExpired):
             self.process.kill()
+            self.process.wait(timeout=10)
+        finally:
+            for stream in (self.process.stdout, self.process.stderr):
+                if stream and not stream.closed:
+                    stream.close()
 
 
 class MemoryMcpServerTests(unittest.TestCase):
@@ -132,6 +143,25 @@ class MemoryMcpServerTests(unittest.TestCase):
             self.assertIn("description", tool)
         inspect_tool = next(t for t in tools if t["name"] == "memory_inspect")
         self.assertTrue(inspect_tool["annotations"]["readOnlyHint"])
+
+    def test_closed_stream_reports_server_stderr(self):
+        session = ServerSession.__new__(ServerSession)
+        session.process = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                "import sys; sys.stdin.readline(); "
+                "sys.stderr.write('server failed\\n')",
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        self.addCleanup(session.close)
+
+        with self.assertRaisesRegex(AssertionError, "server failed"):
+            session.send("{}")
 
     def test_recall_matches_the_cli_recall_result(self):
         result = self.session.call("memory_recall", self.recall_arguments())

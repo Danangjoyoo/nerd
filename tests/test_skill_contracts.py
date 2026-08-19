@@ -1977,10 +1977,6 @@ class FamilyContractTests(unittest.TestCase):
             self.assertEqual(match.group(1).strip(), path.parent.name)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class MemoryTransportContractTests(unittest.TestCase):
     """Memory must prefer MCP, fall back to the CLI, and never change behavior."""
 
@@ -2045,3 +2041,7 @@ class MemoryTransportContractTests(unittest.TestCase):
 
     def test_recall_reference_drops_the_help_discovery_step(self):
         self.assertNotIn("memory.py --help", self.recall)
+
+
+if __name__ == "__main__":
+    unittest.main()

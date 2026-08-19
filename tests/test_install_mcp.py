@@ -173,6 +173,18 @@ class SharedInstallMcpTests(unittest.TestCase):
             (home / ".nerd/mcp/registrations.json").read_text(encoding="utf-8")
         )
 
+    def test_command_environment_preserves_explicit_codex_home(self):
+        installer = _load_shared_installer()
+        environment = {
+            "NERD_INSTALL_HOME": "/tmp/nerd-home",
+            "CODEX_HOME": "/tmp/custom-codex-home",
+        }
+
+        result = installer._command_environment(Path("/tmp/nerd-home"), environment)
+
+        self.assertEqual(result["HOME"], "/tmp/nerd-home")
+        self.assertEqual(result["CODEX_HOME"], "/tmp/custom-codex-home")
+
     def test_registers_two_servers_without_collision(self):
         installer = _load_shared_installer()
         with tempfile.TemporaryDirectory() as temporary:
