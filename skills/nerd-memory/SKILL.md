@@ -88,8 +88,8 @@ Preserve these invariants:
 ## Interaction Output
 
 Keep Memory middleware silent unless a durable write succeeds or consent,
-confirmation, conflict, or denial needs attention. Otherwise continue the task
-without workflow narration.
+transport choice, confirmation, conflict, or denial needs attention. Otherwise
+continue the task without workflow narration.
 
 After any successful memory write, return exactly one paragraph:
 
@@ -105,10 +105,11 @@ compact paragraph. The receipt never replaces authorization.
 
 ## Select One Workflow
 
-Resolve this directory as `<skill-root>`. Prefer MCP `nerd-memory-tools`, else
-run `python3 <skill-root>/scripts/memory.py`. Read only the reference matching
-the active operation; load another only if the user transitions to that
-workflow.
+Resolve this directory as `<skill-root>`. Before the first MCP-capable operation
+in each host session, run [Transport preflight](references/transport-preflight.md).
+Then prefer MCP `nerd-memory-tools`, else run
+`python3 <skill-root>/scripts/memory.py`. Read only the reference matching the
+active operation; load another only if the user transitions workflows.
 
 | Operation | Required reference |
 | --- | --- |
