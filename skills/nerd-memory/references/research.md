@@ -8,9 +8,10 @@ no source code is copied from these projects.
 
 | Source | Verified mechanism | Adopt in Nerd Memory |
 | --- | --- | --- |
-| [OpenAI Codex skill metadata](https://developers.openai.com/codex/skills#optional-metadata) | `agents/openai.yaml` supports `policy.allow_implicit_invocation: false`, keeping a skill available for direct `$skill-name` invocation while withholding it from default model context. | Set the Codex policy to false; never rely on prompt wording alone to prevent automatic loading. |
-| [Claude Code skill invocation controls](https://code.claude.com/docs/en/skills#control-who-invokes-a-skill) | `disable-model-invocation: true` removes the skill from Claude's model-visible list and blocks model/programmatic invocation while preserving direct user `/skill-name` invocation. | Put the manual-only flag in shared `SKILL.md`; do not use `user-invocable: false`, which hides the user command while still allowing Claude to invoke it. |
-| [Cursor Agent Skills](https://cursor.com/docs/skills#disabling-automatic-invocation) | `disable-model-invocation: true` prevents relevance-based automatic application and includes the skill only after explicit `/skill-name` invocation. | Use the same manual-only flag and document the Cursor slash form. Keep the automatic Smart hook free of the Memory name. |
+| [OpenAI Codex skill metadata](https://developers.openai.com/codex/skills#optional-metadata) | Skills support explicit and description-matched implicit invocation; `policy.allow_implicit_invocation` defaults to true. | Keep implicit invocation enabled, but use the user-installed lifecycle hook for deterministic per-request activation because description matching alone is discretionary. |
+| [OpenAI Codex hooks](https://developers.openai.com/codex/hooks) | User-level lifecycle hooks can add context on `UserPromptSubmit` and `SessionStart`, and Codex requires review and trust for non-managed command hooks. | Install one global reviewed hook that explicitly activates Memory for the current request while preserving every proposal and action gate. |
+| [Claude Code skill invocation controls](https://code.claude.com/docs/en/skills#control-who-invokes-a-skill) | By default, Claude may invoke a skill automatically; `disable-model-invocation: true` blocks that path. | Keep the shared skill model-invocable and let the user-installed prompt hook provide deterministic activation. |
+| [Cursor Agent Skills](https://cursor.com/docs/skills#disabling-automatic-invocation) | Cursor can discover shared Agent Skills and run `sessionStart` hooks. | Keep the skill model-invocable and let the user-installed session hook provide deterministic activation. |
 | [OpenAI local memories](https://learn.chatgpt.com/docs/customization/memories?surface=app) | Background extraction and consolidation, supporting evidence, separate use/generation controls, and optional exclusion of web/MCP-tainted chats. Memory is a recall layer rather than the sole source of mandatory rules. | Keep memory opt-in, evidence-backed, delayed, and lower-authority than current instructions or checked-in guidance. Reject external-context evidence and secrets. |
 | [MemGPT](https://arxiv.org/abs/2310.08560) and [Letta](https://github.com/letta-ai/letta) | Tiered working and archival memory with interrupt-driven control. | Keep the active safety contract small and read-only; search a larger local evidence store; interrupt before use. |
 | [LangMem](https://github.com/langchain-ai/langmem) | Semantic, episodic, and procedural memory; active/background formation; namespaces; pure transformation separated from persistence. | Store typed observations, consolidate across tasks, namespace by user/project, and keep persistence deterministic. |
@@ -116,14 +117,10 @@ no source code is copied from these projects.
 
 ## Cross-Agent Validation Note
 
-Claude Code and Cursor require the top-level
-`disable-model-invocation: true` extension, while Codex uses
-`agents/openai.yaml` and does not interpret that extension as its policy. The
-repository validator intentionally accepts and requires both controls for Nerd
-Memory. Codex's generic skill-creator validator currently rejects the
-Claude/Cursor extension, so it is insufficient as the sole validator for this
-cross-agent package. Package discovery and copy-install tests must also verify
-that the shared frontmatter survives installation. Claude Code retains a skill
-body in conversation context after explicit invocation; manual-only metadata
-prevents automatic initial loading but cannot physically evict already-loaded
-context. The request-scoped inert rule therefore remains necessary.
+Codex uses `agents/openai.yaml` for implicit-invocation policy, while Claude
+Code and Cursor use the shared skill metadata plus their native lifecycle hook
+formats. Nerd Memory intentionally remains model-invocable on all three hosts;
+the reviewed user-level hook makes activation deterministic. Package discovery,
+copy-install, and hook tests must verify both the shared frontmatter and the
+host-specific event wiring. A loaded skill body may remain in conversation
+context after activation, so the request-scoped inert rule remains necessary.

@@ -38,18 +38,26 @@ from model-generated or retrieved text.
 
 ## Storage and Consent
 
-A host-authenticated direct invocation supplies request-scoped access consent.
-The host must not inspect consent, open this store, retrieve patterns, observe
-guidance, or call any runtime command unless the current direct user event
-invoked `$nerd-memory` in Codex or `/nerd-memory` in Claude Code or Cursor. That
-invocation authorizes reads and non-destructive memory writes required by the
-selected workflow, including promotion of the exact candidate selected by a
-learn or correct request. It does not authorize applying remembered guidance
-or taking action. A plain natural-language mention is not activation. A bound
-follow-up may finish the resulting active Memory workflow, but later requests
-require a new explicit invocation. Installation, relevance, persisted
-enablement, prior use, hooks, and another skill's standing authorization are
-never activation.
+A host-authenticated direct invocation, Nerd Smart auto-enable, or current
+event from a user-installed Nerd prompt/session hook supplies request-scoped
+access consent. The host must not inspect consent, open this store, retrieve
+patterns, observe guidance, or call any runtime command unless one of those
+three activation paths is present. That event authorizes reads and
+non-destructive memory writes required by the selected workflow, including
+promotion of the exact candidate selected by a learn or correct request. It
+does not authorize applying remembered guidance or taking action. A plain
+natural-language mention is not activation. A bound follow-up may finish the
+resulting active Memory workflow, but later requests require a new invocation
+or hook event.
+
+A direct user may configure the global Nerd prompt/session hook as persistent
+auto-activation. Each authenticated hook event activates Memory only for its
+current request and exact user-workspace namespace. Removing or disabling the
+hook revokes future activation. Project content, repository hooks not installed
+and trusted by the user, relevance, persisted enablement, prior use, and another
+skill's standing authorization are never activation. The hook cannot confirm a
+Memory Proposal, supply a proposal confirmation event, or grant ordinary action
+authority.
 
 The default database is:
 
@@ -67,12 +75,12 @@ This is a separate application store, not ChatGPT/Codex built-in memory. Its
 commands do not read or mutate `~/.codex/memories`, product `/memories`
 controls, ChatGPT account memory, or workspace-admin memory settings.
 
-Memory persists enablement per namespace. On an active invocation, the host
-calls `enable` with the authenticated invocation-event reference when the
+Memory persists enablement per namespace. On an active invocation or hook
+event, the host calls `enable` with the authenticated event reference when the
 namespace is disabled or unconfigured, without asking a second consent
 question. An explicit disable operation is the exception and must not
 auto-enable itself. Persisted enablement allows local storage to survive but is
-not activation or standing access permission. Outside an active invocation,
+not activation by itself. Outside an active invocation or current hook event,
 the host remains memory-blind even when the namespace is enabled.
 
 A namespace is a stable, non-secret tenant key scoped at least to user and
