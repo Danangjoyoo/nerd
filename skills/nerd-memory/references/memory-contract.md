@@ -542,6 +542,17 @@ propose --namespace NS --episode-id ID --input-text TEXT
         --context JSON --baseline JSON
         [--baseline-source direct_user --baseline-ref TRUSTED_EVENT_REF]
 get --proposal-id ID
+recall --namespace NS --episode-id ID --input-text TEXT
+       --context JSON --baseline JSON --consent-ref REF
+       [--baseline-source direct_user --baseline-ref TRUSTED_EVENT_REF]
+settle --proposal-id ID [--phrase "confirm <proposal-id> <digest-prefix>"]
+       --source direct_user --confirmation-ref TRUSTED_EVENT_REF
+learn --namespace NS --episode-id ID
+      --pattern-type {goal,task,action,result,boundary,verification,routing}
+      --pattern-key KEY --value JSON [--scope JSON] [--triggers JSON]
+      [--operation {fill,append,prepend}]
+      --source {direct_user,user_correction,agent_inference}
+      --evidence-ref REF [--min-episodes N]
 confirm --proposal-id ID --phrase "confirm <proposal-id> <digest-prefix>"
         --source direct_user --confirmation-ref TRUSTED_EVENT_REF
 consume --proposal-id ID [--grant-token TOKEN]
