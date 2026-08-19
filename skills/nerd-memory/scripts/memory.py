@@ -74,6 +74,17 @@ DEFAULT_MIN_EPISODES = 3
 DEFAULT_GRANT_TTL_SECONDS = 300
 MAX_JSON_BYTES = 1_000_000
 SCHEMA_VERSION = 9
+
+# Both mean the live handle can no longer write safely and the runtime must be
+# restarted. Never retry an operation through a handle that raised either.
+SCHEMA_RESTART_RUNTIME_CHANGED = (
+    "memory runtime schema version changed; restart this runtime"
+)
+SCHEMA_RESTART_ENGINE_STALE = "memory database schema is newer than this engine"
+SCHEMA_RESTART_MESSAGES = (
+    SCHEMA_RESTART_RUNTIME_CHANGED,
+    SCHEMA_RESTART_ENGINE_STALE,
+)
 BASELINE_ATTESTATION_EFFECT = (
     "provenance only; does not confirm memory or authorize action"
 )
@@ -758,7 +769,7 @@ class MemoryStore:
             ).fetchone()
             previous_version = int(current["value"]) if current is not None else 0
             if previous_version > SCHEMA_VERSION:
-                raise MemoryInvariantError("memory database schema is newer than this engine")
+                raise MemoryInvariantError(SCHEMA_RESTART_ENGINE_STALE)
             proposal_columns = {
                 row["name"]
                 for row in self._connection.execute(
@@ -949,9 +960,7 @@ class MemoryStore:
             "SELECT value FROM metadata WHERE key = 'schema_version'"
         ).fetchone()
         if row is None or int(row["value"]) != SCHEMA_VERSION:
-            raise MemoryInvariantError(
-                "memory runtime schema version changed; restart this runtime"
-            )
+            raise MemoryInvariantError(SCHEMA_RESTART_RUNTIME_CHANGED)
 
     @contextmanager
     def _transaction(self) -> Iterator[sqlite3.Connection]:
@@ -1211,6 +1220,120 @@ class MemoryStore:
 
     # Short alias for callers and the CLI protocol.
     status = consent_status
+
+    # Composite operations fuse an existing multi-step workflow into one call
+    # so a caller spends one round trip instead of several. They sequence the
+    # methods below and add no validation, normalisation, or policy of their
+    # own, so every error surfaces exactly as the single-step path raises it.
+
+    def recall(
+        self,
+        *,
+        namespace: str,
+        episode_id: str,
+        input_text: str,
+        context: Mapping[str, Any],
+        baseline: Mapping[str, Any],
+        consent_ref: str,
+        baseline_source: str | None = None,
+        baseline_ref: str | None = None,
+    ) -> dict[str, Any]:
+        """Check consent, enable when required, then propose."""
+        consent = self.consent_status(namespace)
+        was_enabled = bool(consent.get("enabled"))
+        was_configured = bool(consent.get("configured"))
+        disabled_at = consent.get("disabled_at")
+        if not was_enabled:
+            self.enable(namespace, consent_ref=consent_ref)
+        proposal = self.propose(
+            namespace=namespace,
+            episode_id=episode_id,
+            input_text=input_text,
+            context=context,
+            baseline=baseline,
+            baseline_source=baseline_source,
+            baseline_ref=baseline_ref,
+        )
+        return {
+            "consent": {
+                "was_enabled": was_enabled,
+                # `was_configured` and `disabled_at` distinguish an unconfigured
+                # namespace from one the user deliberately disabled. The caller
+                # cannot recover them after the enable, so report both.
+                "was_configured": was_configured,
+                "disabled_at": disabled_at,
+                "enabled": True,
+            },
+            "proposal": proposal,
+        }
+
+    def settle(
+        self,
+        proposal_id: str,
+        confirmation: str | None = None,
+        *,
+        source: str,
+        confirmation_ref: str,
+    ) -> dict[str, Any]:
+        """Consume one proposal, confirming first when memory influenced it.
+
+        A memory-free proposal has no gate and no phrase, so it is consumed
+        directly. Eligibility comes from the stored row, never from the caller,
+        so this cannot be used to skip a required confirmation.
+        """
+        stored = self.get_proposal(proposal_id)
+        if not bool(stored.get("memory_influenced")):
+            if confirmation is not None:
+                raise MemoryInvariantError(
+                    "a memory-free proposal has no confirmation phrase"
+                )
+            return {
+                "confirmation": None,
+                "consumption": self.consume(proposal_id, None),
+            }
+        if confirmation is None:
+            raise MemoryConsentError(
+                "a memory-influenced proposal requires its exact confirmation phrase"
+            )
+        confirmed = self.confirm(
+            proposal_id,
+            confirmation,
+            source=source,
+            confirmation_ref=confirmation_ref,
+        )
+        consumption = self.consume(proposal_id, confirmed.get("grant_token"))
+        return {"confirmation": confirmed, "consumption": consumption}
+
+    def learn(
+        self,
+        *,
+        namespace: str,
+        episode_id: str,
+        pattern_type: str,
+        pattern_key: str,
+        value: Any,
+        source: str,
+        evidence_ref: str,
+        scope: Mapping[str, Any] | None = None,
+        triggers: Sequence[str] | None = None,
+        operation: str = "fill",
+        min_episodes: int = DEFAULT_MIN_EPISODES,
+    ) -> dict[str, Any]:
+        """Append one observation, then reconsolidate the namespace."""
+        observation = self.observe(
+            namespace=namespace,
+            episode_id=episode_id,
+            pattern_type=pattern_type,
+            pattern_key=pattern_key,
+            value=value,
+            scope=scope,
+            triggers=triggers,
+            operation=operation,
+            source=source,
+            evidence_ref=evidence_ref,
+        )
+        consolidation = self.consolidate(namespace, min_episodes=min_episodes)
+        return {"observation": observation, "consolidation": consolidation}
 
     def observe(
         self,
@@ -4286,6 +4409,60 @@ def _build_parser() -> argparse.ArgumentParser:
     consume.add_argument("--proposal-id", required=True)
     consume.add_argument("--grant-token")
 
+    recall = commands.add_parser(
+        "recall",
+        description=(
+            "Composite: consent status, enable when required, then propose, "
+            "in one call. Equivalent to status + enable + propose."
+        ),
+    )
+    recall.add_argument("--namespace", required=True)
+    recall.add_argument("--episode-id", required=True)
+    recall.add_argument("--input-text", required=True)
+    recall.add_argument("--context", required=True, metavar="JSON_OBJECT")
+    recall.add_argument("--baseline", required=True, metavar="JSON_OBJECT")
+    recall.add_argument(
+        "--consent-ref",
+        required=True,
+        help="Invocation event reference used only when Memory is not enabled.",
+    )
+    recall.add_argument("--baseline-source", choices=("direct_user",))
+    recall.add_argument("--baseline-ref")
+
+    settle = commands.add_parser(
+        "settle",
+        description=(
+            "Composite: confirm one proposal, then consume its one-use grant. "
+            "Equivalent to confirm + consume."
+        ),
+    )
+    settle.add_argument("--proposal-id", required=True)
+    settle.add_argument(
+        "--phrase",
+        help="Exact confirmation phrase; omit only for a memory-free proposal.",
+    )
+    settle.add_argument("--source", required=True, choices=("direct_user",))
+    settle.add_argument("--confirmation-ref", required=True)
+
+    learn = commands.add_parser(
+        "learn",
+        description=(
+            "Composite: append one observation, then reconsolidate the "
+            "namespace. Equivalent to observe + consolidate."
+        ),
+    )
+    learn.add_argument("--namespace", required=True)
+    learn.add_argument("--episode-id", required=True)
+    learn.add_argument("--pattern-type", required=True, choices=PATTERN_TYPES)
+    learn.add_argument("--pattern-key", required=True)
+    learn.add_argument("--value", required=True, metavar="JSON")
+    learn.add_argument("--scope", default="{}", metavar="JSON_OBJECT")
+    learn.add_argument("--triggers", default="[]", metavar="JSON_ARRAY")
+    learn.add_argument("--operation", default="fill", choices=sorted(OPERATIONS))
+    learn.add_argument("--source", required=True, choices=sorted(OBSERVATION_SOURCES))
+    learn.add_argument("--evidence-ref", required=True)
+    learn.add_argument("--min-episodes", type=int, default=DEFAULT_MIN_EPISODES)
+
     deny = commands.add_parser(
         "deny",
         description=(
@@ -4408,6 +4585,38 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
         )
     if command == "consume":
         return store.consume(arguments.proposal_id, arguments.grant_token)
+    if command == "recall":
+        return store.recall(
+            namespace=arguments.namespace,
+            episode_id=arguments.episode_id,
+            input_text=arguments.input_text,
+            context=_json_argument("--context", arguments.context),
+            baseline=_json_argument("--baseline", arguments.baseline),
+            consent_ref=arguments.consent_ref,
+            baseline_source=arguments.baseline_source,
+            baseline_ref=arguments.baseline_ref,
+        )
+    if command == "settle":
+        return store.settle(
+            arguments.proposal_id,
+            arguments.phrase,
+            source=arguments.source,
+            confirmation_ref=arguments.confirmation_ref,
+        )
+    if command == "learn":
+        return store.learn(
+            namespace=arguments.namespace,
+            episode_id=arguments.episode_id,
+            pattern_type=arguments.pattern_type,
+            pattern_key=arguments.pattern_key,
+            value=_json_argument("--value", arguments.value),
+            scope=_json_argument("--scope", arguments.scope),
+            triggers=_json_argument("--triggers", arguments.triggers),
+            operation=arguments.operation,
+            source=arguments.source,
+            evidence_ref=arguments.evidence_ref,
+            min_episodes=arguments.min_episodes,
+        )
     if command == "deny":
         return store.deny(
             arguments.proposal_id,

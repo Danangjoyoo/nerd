@@ -199,7 +199,7 @@ REQUIRED_SCRIPTS = {
     "nerd-plan": (),
     "nerd-execute": (),
     "nerd-monitor": (),
-    "nerd-memory": ("memory.py",),
+    "nerd-memory": ("memory.py", "mcp_server.py"),
     "nerd-loop": ("loop.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),

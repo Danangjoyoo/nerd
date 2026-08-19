@@ -1979,3 +1979,69 @@ class FamilyContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MemoryTransportContractTests(unittest.TestCase):
+    """Memory must prefer MCP, fall back to the CLI, and never change behavior."""
+
+    def setUp(self):
+        self.skill = skill_body("nerd-memory")
+        self.recall = memory_reference_body("recall-and-apply.md")
+        self.guidance = memory_guidance_body()
+
+    def test_skill_names_the_mcp_server_and_all_four_tools(self):
+        assert_terms(
+            self,
+            self.guidance,
+            (
+                "nerd-memory-tools",
+                "memory_recall",
+                "memory_settle",
+                "memory_learn",
+                "memory_inspect",
+            ),
+        )
+
+    def test_skill_keeps_the_cli_as_the_documented_fallback(self):
+        assert_terms(
+            self, self.skill, ("scripts/memory.py", "nerd-memory-tools")
+        )
+        assert_terms(self, self.guidance.casefold(), ("fall back", "fallback"))
+
+    def test_fallback_triggers_are_bounded_and_exclude_domain_errors(self):
+        body = normalized(self.guidance)
+        assert_terms(self, body, ("restart_required", "once"))
+        for domain_error in (
+            "invalid_input",
+            "consent_required",
+            "invariant_violation",
+            "not_found",
+        ):
+            self.assertIn(domain_error, body)
+
+    def test_both_surfaces_are_declared_behaviorally_identical(self):
+        body = normalized(self.guidance)
+        self.assertIn("same engine", body)
+        self.assertIn("latency", body)
+
+    def test_guidance_states_that_no_tool_fuses_propose_with_confirm(self):
+        """Behavioral proof lives in tests.test_memory_engine; this pins the text."""
+        body = normalized(self.recall)
+        self.assertIn("No tool fuses propose with confirm", body)
+        self.assertIn("fresh direct-user", body)
+
+    def test_guidance_documents_the_memory_free_settle_exception(self):
+        body = normalized(self.recall)
+        self.assertIn("memory-free proposal", body)
+
+    def test_guidance_lists_cli_only_operations(self):
+        body = normalized(self.recall)
+        for operation in ("disable", "promote", "deny", "split", "forget"):
+            self.assertIn(operation, body)
+
+    def test_recall_reference_documents_both_surfaces(self):
+        assert_terms(self, self.recall, ("nerd-memory-tools", "memory_recall"))
+        assert_terms(self, self.recall.casefold(), ("fall back",))
+
+    def test_recall_reference_drops_the_help_discovery_step(self):
+        self.assertNotIn("memory.py --help", self.recall)

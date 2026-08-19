@@ -38,7 +38,7 @@ The helper preserves existing hook configuration and is safe to run again. Codex
 | `nerd-plan` | Produces actionable file-level implementation plans and stops before execution. |
 | `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
 | `nerd-monitor` | Rechecks state without mutation until the requested condition is met. |
-| `nerd-memory` | Manual-only memory (`$nerd-memory` in Codex, `/nerd-memory` in Claude/Cursor) for goal, task, action, result, boundary, verification, and atomic agent/skill/tool/MCP routing patterns; invocation authorizes reading and non-destructive saving, while applying remembered changes still needs exact approval. |
+| `nerd-memory` | Manual-only memory (`$nerd-memory` in Codex, `/nerd-memory` in Claude/Cursor) for goal, task, action, result, boundary, verification, and atomic agent/skill/tool/MCP routing patterns; invocation authorizes reading and non-destructive saving, while applying remembered changes still needs exact approval. Runs through the `nerd-memory-tools` MCP server when registered, and falls back to its `python3` CLI otherwise; both surfaces run the same engine. |
 | `nerd-loop` | Drives code and non-code tasks through the cheapest adequate focused loop, automatic verification, an explicit Definition of Done, and honest bounded stopping. |
 | `nerd-surgery` | Diagnoses broken behavior from evidence and repairs only at an authorized execute endpoint. |
 | `nerd-patrol` | Examines a confirmed security scope and reports only reachable, evidence-backed findings. |

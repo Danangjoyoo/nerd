@@ -107,9 +107,10 @@ compact paragraph. The receipt never replaces authorization.
 
 ## Select One Workflow
 
-Resolve this directory as `<skill-root>` and run
-`python3 <skill-root>/scripts/memory.py`. Read only the reference matching the
-active operation; load another only if the user transitions to that workflow.
+Resolve this directory as `<skill-root>`. Prefer MCP `nerd-memory-tools`, else
+run `python3 <skill-root>/scripts/memory.py`. Read only the reference matching
+the active operation; load another only if the user transitions to that
+workflow.
 
 | Operation | Required reference |
 | --- | --- |
