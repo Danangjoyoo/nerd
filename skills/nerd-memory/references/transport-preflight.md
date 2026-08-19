@@ -12,21 +12,28 @@ or evidence.
 2. Otherwise use the host's read-only MCP status, get, or list command:
 
 - `restart-required`: registered but absent from the callable registry.
-- `install-required`: registration missing.
+- `install-required`: the MCP server package or command is missing.
+- `registration-required`: the MCP server is not registered with the host.
 - `enable-required`: registration disabled.
 - `setup-unknown`: no decisive probe.
 
 3. Resolve once:
-   - `restart-required`: offer **Restart or reopen the host** or **Use CLI for
-     this session**.
-   - `install-required` or `enable-required`: obtain fresh direct-user approval
-     before changing configuration, or offer **Use CLI for this session**.
+   - `restart-required`: ask the user to restart or reopen the host before claiming MCP is live.
+   - `install-required`, `registration-required`, or `enable-required`: obtain
+     fresh direct-user approval before installing the MCP server or changing
+     host registration or enablement. If approved, make only the approved
+     setup changes and require a new or restarted session before claiming MCP
+     is live.
      Invocation, hooks, Memory consent, and prior installation grant no such
-     authority. Require a new or restarted session before claiming MCP is live.
-   - `setup-unknown`: offer setup diagnosis or **Use CLI for this session**.
+     authority.
+   - `setup-unknown`: run read-only setup diagnosis. If it resolves to an
+     installation, registration, or enablement change, obtain fresh
+     direct-user approval before making that change.
 
-A CLI choice lasts this session and suppresses later hook or Nerd Smart prompts;
-new sessions inherit nothing. Never launch a stdio server manually; the host
-starts it. On `mcp-live` transport failure or `restart_required`, invalidate the
-result and ask once to restart or use CLI. Domain errors are not transport
-failures.
+Using the local Memory CLI script is always approved and requires no additional
+confirmation. When MCP is not live, use the CLI automatically for the current
+Memory operation; do not present it as a choice or ask permission to use it.
+Never launch a stdio server manually; the host starts it. On `mcp-live`
+transport failure or `restart_required`, invalidate the result, ask the user to
+restart or reopen the host, and use the CLI automatically until MCP is live.
+Domain errors are not transport failures.
