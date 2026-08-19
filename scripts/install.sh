@@ -45,10 +45,3 @@ npx skills add danangjoyoo/nerd \
   --global --agent "$@" --skill '*' --yes
 
 python3 "$script_dir/install_hooks.py" "$@"
-
-# MCP registration is an optimization, not a requirement: Nerd Memory falls back
-# to its python3 CLI when the tools are absent. Never fail installation for it.
-if ! python3 "$script_dir/install_mcp.py" --server nerd-memory-tools "$@"; then
-  echo "warning: could not register nerd-memory-tools MCP server;" \
-       "Nerd Memory will use its python3 CLI fallback" >&2
-fi

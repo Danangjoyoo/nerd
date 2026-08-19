@@ -19,7 +19,6 @@ class InstallScriptTests(unittest.TestCase):
         *,
         runs: int = 1,
         initial_files: dict[str, str] | None = None,
-        agent_cli_body: str | None = None,
     ):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp = Path(temp_dir)
@@ -34,13 +33,10 @@ class InstallScriptTests(unittest.TestCase):
             fake_npx.chmod(0o755)
             fake_agent = temp / "agent-cli"
             fake_agent.write_text(
-                agent_cli_body
-                or (
-                    "#!/bin/sh\n"
-                    "if [ \"$1 $2\" = \"mcp get\" ]; then exit 1; fi\n"
-                    "if [ \"$1 $2 $3\" = \"agent mcp list\" ]; then exit 0; fi\n"
-                    "exit 0\n"
-                ),
+                "#!/bin/sh\n"
+                "if [ \"$1 $2\" = \"mcp get\" ]; then exit 1; fi\n"
+                "if [ \"$1 $2 $3\" = \"agent mcp list\" ]; then exit 0; fi\n"
+                "exit 0\n",
                 encoding="utf-8",
             )
             fake_agent.chmod(0o755)
@@ -147,44 +143,7 @@ class InstallScriptTests(unittest.TestCase):
     def test_install_does_not_register_archived_ufast_tools(self):
         results, _, files = self._run("all")
         self.assertEqual(results[0].returncode, 0, results[0].stderr)
-        self.assertFalse(any("nerd-ufast" in path for path in files))
-        state = json.loads(files[".nerd/mcp/registrations.json"])
-        self.assertNotIn("nerd-ufast", state)
-        # The archived installer records its agents under a top-level "agents"
-        # key, so its absence proves that installer never ran.
-        self.assertNotIn("agents", state)
-
-    def test_install_registers_the_memory_mcp_server(self):
-        results, _, files = self._run("all")
-        self.assertEqual(results[0].returncode, 0, results[0].stderr)
-        self.assertIn(".nerd/mcp/nerd-memory/mcp_server.py", files)
-        self.assertIn(".nerd/mcp/nerd-memory/memory.py", files)
-        state = json.loads(files[".nerd/mcp/registrations.json"])
-        self.assertEqual(
-            set(state["nerd-memory-tools"]), {"claude-code", "codex", "cursor"}
-        )
-
-    def test_failed_mcp_registration_is_non_fatal(self):
-        refusing_cli = (
-            "#!/bin/sh\n"
-            "if [ \"$1 $2\" = \"mcp get\" ]; then exit 1; fi\n"
-            "if [ \"$1 $2\" = \"mcp add\" ]; then\n"
-            "  echo 'registry unavailable' >&2\n"
-            "  exit 1\n"
-            "fi\n"
-            "exit 0\n"
-        )
-        results, _, files = self._run("all", agent_cli_body=refusing_cli)
-
-        self.assertEqual(results[0].returncode, 0, results[0].stderr)
-        self.assertIn("nerd-memory-tools", results[0].stderr)
-        self.assertIn("fallback", results[0].stderr)
-        # Skill and hook installation must still have completed.
-        self.assertIn(".claude/settings.json", files)
-        # One agent's failure must not withdraw the agents that did register.
-        state = json.loads(files[".nerd/mcp/registrations.json"])
-        self.assertNotIn("claude-code", state["nerd-memory-tools"])
-        self.assertNotIn("codex", state["nerd-memory-tools"])
+        self.assertFalse(any(path.startswith(".nerd/mcp/") for path in files))
 
     def test_reinstall_is_idempotent_and_preserves_existing_hooks(self):
         existing = json.dumps(

@@ -222,9 +222,7 @@ class SkillStructureTests(unittest.TestCase):
         for skill in ENDPOINT_ROUTES.values():
             if skill != "nerd-execute":
                 self.assertEqual(REQUIRED_SCRIPTS[skill], ())
-        self.assertEqual(
-            REQUIRED_SCRIPTS["nerd-memory"], ("memory.py", "mcp_server.py")
-        )
+        self.assertEqual(REQUIRED_SCRIPTS["nerd-memory"], ("memory.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-loop"], ("loop.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
