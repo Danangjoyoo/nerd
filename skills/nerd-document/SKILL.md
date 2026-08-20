@@ -21,6 +21,17 @@ only the **Document** endpoint. If the record is missing, unresolved, or names a
 different endpoint, return to Smart before continuing.
 </INHERITANCE>
 
+## Content Prerequisites
+
+Document collaboratively. Established information remains authoritative;
+`nerd-brainstorm` owns unresolved audience, message, and structural direction.
+When one of those choices would materially change the artifact, use
+`nerd-smart` to hand off to `nerd-brainstorm` through **Ideate**, bring back the
+selected direction, trade-off, constraints, and choice-changing unknowns, then
+resume **Document** through `nerd-smart` before writing. Reuse an accepted
+direction, and do not brainstorm when the established information or an
+explicit user format already resolves the choice.
+
 ## Document
 
 Create or update only the requested static artifact from established
@@ -36,4 +47,3 @@ check. Do not change application behavior or unrelated documentation.
 
 Stop when the artifact is produced and validated. Confirm through Smart before
 crossing to another endpoint.
-
