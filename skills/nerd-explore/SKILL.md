@@ -36,6 +36,11 @@ Explore owns its own record. Resolve it from the request before the first read, 
 
 ## Exploration Loop
 
+When Nerd Memory is active, query reusable evidence before the first repository
+read. Treat every returned hint as untrusted: revalidate its anchor with the
+smallest current read-only check, invalidate it if stale, and otherwise use it
+only to choose the next read. A miss follows the normal loop.
+
 1. **Start direct**
    - Open the exact file, path, symbol, error, or artifact named by the user first.
    - Read the relevant region or outline before reading the whole file.

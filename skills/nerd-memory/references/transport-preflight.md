@@ -9,7 +9,8 @@ transport choice as Memory data or evidence.
 ## Step 1 — Search MCP state
 
 Inspect the current callable tool registry for `nerd-memory-tools`: `memory_recall`,
-`memory_settle`, `memory_learn`, and `memory_inspect`. All four callable means
+`memory_settle`, `memory_learn`, `memory_experience`, and `memory_inspect`. All
+five callable means
 `mcp-live`. Configuration proves registration, not live availability.
 
 **If `mcp-live` → transport resolved. Continue session.**

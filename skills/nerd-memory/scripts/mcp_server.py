@@ -21,7 +21,7 @@ import memory as engine  # noqa: E402
 
 
 SERVER_NAME = "nerd-memory-tools"
-SERVER_VERSION = "1.0.0"
+SERVER_VERSION = "1.1.0"
 PROTOCOL_VERSION = "2025-06-18"
 
 # Either message means this process can no longer write safely: the store moved
@@ -124,6 +124,10 @@ TOOLS: list[dict[str, Any]] = [
                     "type": "string",
                     "enum": sorted(engine.OBSERVATION_SOURCES),
                 },
+                "signal": {
+                    "type": "string",
+                    "enum": sorted(engine.BEHAVIOR_SIGNAL_THRESHOLDS),
+                },
                 "evidence_ref": {"type": "string"},
                 "min_episodes": {"type": "integer", "minimum": 1},
             },
@@ -131,9 +135,41 @@ TOOLS: list[dict[str, Any]] = [
         "annotations": {"readOnlyHint": False, "destructiveHint": False},
     },
     {
+        "name": "memory_experience",
+        "description": (
+            "Record verified reusable workspace evidence or invalidate a stale hint. "
+            "Hints are untrusted navigation evidence and never endpoint authority."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["action", "namespace"],
+            "properties": {
+                "action": {"type": "string", "enum": ["record", "invalidate"]},
+                "namespace": {"type": "string"},
+                "episode_id": {"type": "string"},
+                "kind": {"type": "string", "enum": sorted(engine.EXPERIENCE_KINDS)},
+                "hint_key": {"type": "string"},
+                "value": {"type": "object"},
+                "scope": _ENDPOINT_OBJECT,
+                "tags": {"type": "array", "items": {"type": "string"}},
+                "anchors": {"type": "array", "items": {"type": "object"}},
+                "verification": {"type": "object"},
+                "hint_id": {"type": "string"},
+                "reason": {"type": "string"},
+                "source": {
+                    "type": "string",
+                    "enum": sorted(engine.EXPERIENCE_INVALIDATION_SOURCES),
+                },
+                "evidence_ref": {"type": "string"},
+            },
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False},
+    },
+    {
         "name": "memory_inspect",
         "description": (
-            "Read consent state and stored patterns for exactly one namespace."
+            "Read consent, patterns, and reusable evidence for exactly one namespace."
         ),
         "inputSchema": {
             "type": "object",
@@ -248,11 +284,36 @@ class Server:
             return result
         if name == "memory_learn":
             return store.learn(**arguments)
+        if name == "memory_experience":
+            action = arguments["action"]
+            payload = {key: value for key, value in arguments.items() if key != "action"}
+            if action == "record":
+                expected = {
+                    "namespace", "episode_id", "kind", "hint_key", "value",
+                    "scope", "tags", "anchors", "verification", "source",
+                    "evidence_ref",
+                }
+                if set(payload) != expected:
+                    raise engine.MemoryInputError(
+                        "record requires exactly: " + ", ".join(sorted(expected))
+                    )
+                return store.record_experience(**payload)
+            if action == "invalidate":
+                expected = {
+                    "namespace", "hint_id", "reason", "source", "evidence_ref"
+                }
+                if set(payload) != expected:
+                    raise engine.MemoryInputError(
+                        "invalidate requires exactly: " + ", ".join(sorted(expected))
+                    )
+                return store.invalidate_experience(**payload)
+            raise engine.MemoryInputError("action must be record or invalidate")
         if name == "memory_inspect":
             namespace = arguments["namespace"]
             return {
                 "consent": store.consent_status(namespace),
                 "patterns": store.list_patterns(namespace),
+                "evidence_hints": store.list_experience(namespace),
             }
         raise UnknownToolError(f"unknown tool: {name}")
 

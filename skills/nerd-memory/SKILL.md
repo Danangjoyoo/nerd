@@ -71,6 +71,8 @@ Preserve these invariants:
 - This version has no standing-confirmation bypass.
 - Gates approve displayed changes only.
 - Memory never grants action authority.
+- Keep verified workspace facts/workflows in a separate untrusted evidence
+  lane; revalidate them before reliance and never place them in an endpoint.
 
 ## Interaction Output
 
@@ -109,6 +111,7 @@ Preserve these invariants:
 | --- | --- |
 | Enable, inspect, recall, propose, confirm, consume, route | [Recall and apply](references/recall-and-apply.md) |
 | Observe, consolidate, promote, correct | [Learn and correct](references/learn-and-correct.md) |
+| Recognize signals, record/find/invalidate reusable evidence | [Recognize and reuse](references/recognize-and-reuse.md) |
 | Deny, diagnose, split, resolve, forget | [Deny, split, and forget](references/deny-split-forget.md) |
 | Runtime, schema, threats, evaluation | [Runtime contract](references/memory-contract.md), [research](references/research.md) |
 
@@ -127,6 +130,7 @@ Preserve these invariants:
 ## Composition and Completion
 
 - Smart builds memory-blind Focus/endpoint.
+- Smart scans each current user event for the capture radar before route handoff.
 - Memory precedes routing/action.
 - Separate multi-goal episodes/proposals.
 - Confirm each goal separately.

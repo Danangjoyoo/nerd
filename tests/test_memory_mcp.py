@@ -14,7 +14,13 @@ SCRIPTS = ROOT / "skills" / "nerd-memory" / "scripts"
 SERVER = SCRIPTS / "mcp_server.py"
 ENGINE = SCRIPTS / "memory.py"
 
-TOOL_NAMES = {"memory_recall", "memory_settle", "memory_learn", "memory_inspect"}
+TOOL_NAMES = {
+    "memory_recall",
+    "memory_settle",
+    "memory_learn",
+    "memory_experience",
+    "memory_inspect",
+}
 
 
 def empty_endpoint(endpoint: str = "plan") -> dict[str, object]:
@@ -135,7 +141,7 @@ class MemoryMcpServerTests(unittest.TestCase):
         self.assertEqual(info["name"], "nerd-memory-tools")
         self.assertEqual(response["result"]["protocolVersion"], "2025-06-18")
 
-    def test_tools_list_exposes_exactly_the_four_tools(self):
+    def test_tools_list_exposes_exactly_the_five_tools(self):
         tools = self.session.request("tools/list")["result"]["tools"]
         self.assertEqual({tool["name"] for tool in tools}, TOOL_NAMES)
         for tool in tools:
@@ -150,6 +156,11 @@ class MemoryMcpServerTests(unittest.TestCase):
         )
         self.assertIn(
             "global_search_ref", recall_tool["inputSchema"]["properties"]
+        )
+        experience_tool = next(t for t in tools if t["name"] == "memory_experience")
+        self.assertEqual(
+            experience_tool["inputSchema"]["properties"]["action"]["enum"],
+            ["record", "invalidate"],
         )
 
     def test_closed_stream_reports_server_stderr(self):
@@ -207,6 +218,84 @@ class MemoryMcpServerTests(unittest.TestCase):
         self.assertEqual(
             json.loads(result["content"][0]["text"]), result["structuredContent"]
         )
+
+    def test_experience_record_matches_cli_and_is_visible_to_recall(self):
+        self.session.call("memory_recall", self.recall_arguments())
+        arguments = {
+            "action": "record",
+            "namespace": self.namespace,
+            "episode_id": "verified-1",
+            "kind": "workspace_fact",
+            "hint_key": "memory-store-location",
+            "value": {"fact": "MemoryStore lives in memory.py"},
+            "scope": {"repo": "nerd"},
+            "tags": ["memory runtime", "sqlite"],
+            "anchors": [
+                {
+                    "path": "skills/nerd-memory/scripts/memory.py",
+                    "symbol": "MemoryStore",
+                }
+            ],
+            "verification": {"kind": "symbol_exists", "status": "passed"},
+            "source": "verified_execution",
+            "evidence_ref": "verified-1:check",
+        }
+        result = self.session.call("memory_experience", arguments)
+        self.assertFalse(result["isError"], result)
+        stored = result["structuredContent"]
+
+        recalled = self.session.call(
+            "memory_recall",
+            self.recall_arguments(
+                episode_id="reuse-1",
+                input_text="inspect the memory runtime",
+            ),
+        )["structuredContent"]
+        self.assertEqual(recalled["evidence_hints"][0]["hint_id"], stored["hint_id"])
+        self.assertEqual(recalled["proposal"]["status"], "memory_free")
+
+        cli_db = Path(self.temp.name) / "experience-cli.sqlite3"
+        self.run_cli(
+            cli_db,
+            "enable",
+            "--namespace",
+            self.namespace,
+            "--consent-ref",
+            "cli:enable",
+        )
+        completed = self.run_cli(
+            cli_db,
+            "record-experience",
+            "--namespace",
+            self.namespace,
+            "--episode-id",
+            arguments["episode_id"],
+            "--kind",
+            arguments["kind"],
+            "--hint-key",
+            arguments["hint_key"],
+            "--value",
+            json.dumps(arguments["value"]),
+            "--scope",
+            json.dumps(arguments["scope"]),
+            "--tags",
+            json.dumps(arguments["tags"]),
+            "--anchors",
+            json.dumps(arguments["anchors"]),
+            "--verification",
+            json.dumps(arguments["verification"]),
+            "--source",
+            arguments["source"],
+            "--evidence-ref",
+            arguments["evidence_ref"],
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        cli_stored = json.loads(completed.stdout)
+        for field in (
+            "hint_id", "kind", "hint_key", "value", "scope", "tags",
+            "anchors", "status", "authority", "revalidation_required",
+        ):
+            self.assertEqual(stored[field], cli_stored[field])
 
     def test_recall_accepts_explicit_global_search_attestation(self):
         result = self.session.call(
@@ -375,7 +464,13 @@ class MemoryMcpArgumentContractTests(unittest.TestCase):
         return result["structuredContent"]["error"]["code"]
 
     def test_missing_required_argument_is_invalid_input(self):
-        for name in ("memory_inspect", "memory_recall", "memory_settle", "memory_learn"):
+        for name in (
+            "memory_inspect",
+            "memory_recall",
+            "memory_settle",
+            "memory_learn",
+            "memory_experience",
+        ):
             with self.subTest(tool=name):
                 self.assertEqual(self.error_code(name, {}), "invalid_input")
 
@@ -384,6 +479,25 @@ class MemoryMcpArgumentContractTests(unittest.TestCase):
             self.error_code("memory_inspect", {"namespace": "user:x", "bogus": 1}),
             "invalid_input",
         )
+
+    def test_experience_actions_require_exact_action_specific_arguments(self):
+        for arguments in (
+            {"action": "record", "namespace": "user:x"},
+            {
+                "action": "invalidate",
+                "namespace": "user:x",
+                "hint_id": "hint_x",
+                "reason": "stale",
+                "source": "verified_execution",
+                "evidence_ref": "check:x",
+                "episode_id": "not-allowed",
+            },
+        ):
+            with self.subTest(action=arguments["action"]):
+                self.assertEqual(
+                    self.error_code("memory_experience", arguments),
+                    "invalid_input",
+                )
 
     def test_global_search_attestation_requires_both_arguments(self):
         base = {

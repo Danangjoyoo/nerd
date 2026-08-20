@@ -71,9 +71,28 @@ OBSERVATION_SOURCES = ELIGIBLE_SOURCES | INERT_SOURCES
 OPERATIONS = frozenset({"fill", "append", "prepend"})
 DENIAL_RESOLUTIONS = frozenset({"agent_mistake", "human_forgot"})
 DEFAULT_MIN_EPISODES = 3
+BEHAVIOR_SIGNAL_THRESHOLDS = {
+    "legacy": 3,
+    "durable_directive": 1,
+    "ordinary_choice": 2,
+    "user_correction": 1,
+}
+BEHAVIOR_SIGNAL_SOURCES = {
+    "legacy": OBSERVATION_SOURCES,
+    "durable_directive": frozenset({"direct_user"}),
+    "ordinary_choice": frozenset({"direct_user"}),
+    "user_correction": frozenset({"user_correction"}),
+}
+EXPERIENCE_KINDS = frozenset({"workspace_fact", "workflow_trace"})
+EXPERIENCE_SOURCES = frozenset({"direct_user", "verified_execution"})
+EXPERIENCE_INVALIDATION_SOURCES = EXPERIENCE_SOURCES | frozenset({"user_correction"})
+EXPERIENCE_VERIFICATION_KINDS = frozenset(
+    {"path_exists", "symbol_exists", "user_attested", "test_passed", "command_passed"}
+)
+MAX_EXPERIENCE_HINTS = 5
 DEFAULT_GRANT_TTL_SECONDS = 300
 MAX_JSON_BYTES = 1_000_000
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 # Both mean the live handle can no longer write safely and the runtime must be
 # restarted. Never retry an operation through a handle that raised either.
@@ -97,6 +116,8 @@ _VERSION_FENCED_TABLES = (
     "observations",
     "patterns",
     "pattern_evidence",
+    "experience_hints",
+    "experience_evidence",
     "forgotten_patterns",
     "proposals",
     "confirmation_events",
@@ -256,6 +277,31 @@ def _reject_sensitive(*values: Any) -> None:
         raise MemoryInputError("sensitive credential material cannot be persisted")
 
 
+_UNSAFE_EXPERIENCE_PATTERNS = (
+    re.compile(
+        r"(?i)\b(?:permission|authorization|authority)\s+(?:is\s+)?"
+        r"(?:granted|approved|confirmed)\b"
+    ),
+    re.compile(
+        r"(?i)\b(?:authorized|allowed|permitted)\s+to\s+"
+        r"(?:execute|run|deploy|delete|write|modify|install|publish)\b"
+    ),
+    re.compile(r"```"),
+    re.compile(
+        r"(?i)(?<!\w)(?:python\d*|node|npm|pnpm|yarn|git|rtk|rm|curl|wget)\s+-"
+    ),
+    re.compile(r"(?:&&|\|\||;\s*(?:rm|curl|wget|sudo)\b)"),
+)
+
+
+def _reject_unsafe_experience_value(value: Any) -> None:
+    text = canonical_json(value)
+    if any(pattern.search(text) for pattern in _UNSAFE_EXPERIENCE_PATTERNS):
+        raise MemoryInputError(
+            "reusable evidence cannot persist executable or permission-bearing material"
+        )
+
+
 def _normalise_scope(scope: Any) -> dict[str, Any]:
     if scope is None:
         return {}
@@ -279,6 +325,129 @@ def _normalise_triggers(triggers: Any) -> list[str]:
             result.append(text)
     result.sort()
     return result
+
+
+def _normalise_behavior_signal(signal: Any, source: str) -> str:
+    if signal is None:
+        signal = "user_correction" if source == "user_correction" else "legacy"
+    result = _require_text("signal", signal, max_length=64).casefold()
+    if result not in BEHAVIOR_SIGNAL_THRESHOLDS:
+        raise MemoryInputError(
+            "signal must be one of: "
+            + ", ".join(sorted(BEHAVIOR_SIGNAL_THRESHOLDS))
+        )
+    if source not in BEHAVIOR_SIGNAL_SOURCES[result]:
+        raise MemoryInputError("signal is not compatible with the observation source")
+    return result
+
+
+def _effective_behavior_threshold(
+    signals: Sequence[str],
+    stricter_floor: int | None = None,
+) -> int:
+    threshold = min(
+        BEHAVIOR_SIGNAL_THRESHOLDS.get(signal, DEFAULT_MIN_EPISODES)
+        for signal in signals
+    )
+    return max(threshold, stricter_floor or 0)
+
+
+def _normalise_experience_value(kind: str, value: Any) -> dict[str, Any]:
+    normalised = _normalise_json(value)
+    if not isinstance(normalised, dict):
+        raise MemoryInputError("experience value must be a JSON object")
+    if kind == "workspace_fact":
+        if set(normalised) != {"fact"}:
+            raise MemoryInputError("workspace_fact value needs exactly fact")
+        fact = _require_text("fact", normalised["fact"], max_length=1024)
+        if "\n" in fact or "\r" in fact:
+            raise MemoryInputError("fact must be a single line")
+        return {"fact": fact}
+    if set(normalised) != {"steps", "result"}:
+        raise MemoryInputError("workflow_trace value needs exactly steps and result")
+    raw_steps = normalised["steps"]
+    if not isinstance(raw_steps, list) or not 1 <= len(raw_steps) <= 12:
+        raise MemoryInputError("workflow steps must contain between 1 and 12 strings")
+    steps: list[str] = []
+    for raw_step in raw_steps:
+        step = _require_text("workflow step", raw_step, max_length=512)
+        if "\n" in step or "\r" in step:
+            raise MemoryInputError("workflow steps must be single-line descriptions")
+        steps.append(step)
+    result = _require_text("workflow result", normalised["result"], max_length=1024)
+    if "\n" in result or "\r" in result:
+        raise MemoryInputError("workflow result must be a single line")
+    return {"steps": steps, "result": result}
+
+
+def _normalise_experience_anchors(anchors: Any) -> list[dict[str, str]]:
+    if not isinstance(anchors, (list, tuple)) or not 1 <= len(anchors) <= 16:
+        raise MemoryInputError("anchors must contain between 1 and 16 repository anchors")
+    result: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for raw_anchor in anchors:
+        if not isinstance(raw_anchor, Mapping):
+            raise MemoryInputError("each anchor must be an object")
+        if not {"path"} <= set(raw_anchor) <= {"path", "symbol"}:
+            raise MemoryInputError("each anchor needs path and optional symbol only")
+        path = _require_text("anchor path", raw_anchor["path"], max_length=1024)
+        if (
+            path.startswith("/")
+            or "\\" in path
+            or any(part in {"", ".", ".."} for part in path.split("/"))
+            or re.match(r"^[A-Za-z]:", path)
+        ):
+            raise MemoryInputError("anchor path must be normalized and repository-relative")
+        anchor = {"path": path}
+        if "symbol" in raw_anchor:
+            anchor["symbol"] = _require_text(
+                "anchor symbol", raw_anchor["symbol"], max_length=512
+            )
+        encoded = canonical_json(anchor)
+        if encoded not in seen:
+            seen.add(encoded)
+            result.append(anchor)
+    result.sort(key=canonical_json)
+    return result
+
+
+def _normalise_experience_verification(verification: Any) -> dict[str, Any]:
+    normalised = _normalise_json(verification)
+    if not isinstance(normalised, dict):
+        raise MemoryInputError("verification must be a JSON object")
+    kind = _require_text("verification kind", normalised.get("kind"), max_length=64).casefold()
+    if kind not in EXPERIENCE_VERIFICATION_KINDS:
+        raise MemoryInputError("verification kind is not supported")
+    status = _require_text(
+        "verification status", normalised.get("status"), max_length=32
+    ).casefold()
+    if status != "passed":
+        raise MemoryInputError("experience verification must have passed")
+    if kind in {"path_exists", "symbol_exists", "user_attested"}:
+        if set(normalised) != {"kind", "status"}:
+            raise MemoryInputError("this verification accepts only kind and status")
+        return {"kind": kind, "status": status}
+    if set(normalised) != {"kind", "status", "argv", "cwd"}:
+        raise MemoryInputError(
+            "command verification needs exactly kind, status, argv, and cwd"
+        )
+    raw_argv = normalised["argv"]
+    if not isinstance(raw_argv, list) or not 1 <= len(raw_argv) <= 32:
+        raise MemoryInputError("verification argv must be a non-empty argument array")
+    argv = [_require_text("verification argument", item, max_length=1024) for item in raw_argv]
+    if Path(argv[0]).name.casefold() in {
+        "sh", "bash", "zsh", "fish", "cmd", "cmd.exe", "powershell", "pwsh"
+    }:
+        raise MemoryInputError("verification argv must not invoke a shell interpreter")
+    cwd = _require_text("verification cwd", normalised["cwd"], max_length=1024)
+    if cwd != "." and (
+        cwd.startswith("/")
+        or "\\" in cwd
+        or any(part in {"", ".", ".."} for part in cwd.split("/"))
+        or re.match(r"^[A-Za-z]:", cwd)
+    ):
+        raise MemoryInputError("verification cwd must be repository-relative")
+    return {"kind": kind, "status": status, "argv": argv, "cwd": cwd}
 
 
 def _validate_pattern_value(pattern_type: str, value: Any, operation: str) -> Any:
@@ -610,6 +779,7 @@ class MemoryStore:
             triggers_json TEXT NOT NULL,
             operation TEXT NOT NULL,
             source TEXT NOT NULL,
+            signal TEXT NOT NULL DEFAULT 'legacy',
             eligible INTEGER NOT NULL CHECK (eligible IN (0, 1)),
             evidence_ref TEXT NOT NULL,
             observed_at TEXT NOT NULL
@@ -641,6 +811,38 @@ class MemoryStore:
             pattern_id TEXT NOT NULL REFERENCES patterns(pattern_id) ON DELETE CASCADE,
             observation_id TEXT NOT NULL REFERENCES observations(observation_id) ON DELETE CASCADE,
             PRIMARY KEY (pattern_id, observation_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS experience_hints (
+            hint_id TEXT PRIMARY KEY,
+            fingerprint TEXT NOT NULL UNIQUE,
+            namespace TEXT NOT NULL,
+            kind TEXT NOT NULL,
+            hint_key TEXT NOT NULL,
+            value_json TEXT NOT NULL,
+            scope_json TEXT NOT NULL,
+            tags_json TEXT NOT NULL,
+            anchors_json TEXT NOT NULL,
+            status TEXT NOT NULL,
+            support_episodes INTEGER NOT NULL,
+            revision INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            last_verified_at TEXT NOT NULL,
+            invalid_reason TEXT,
+            invalidated_at TEXT,
+            invalidation_source TEXT,
+            invalidation_ref TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS experience_evidence (
+            hint_id TEXT NOT NULL REFERENCES experience_hints(hint_id) ON DELETE CASCADE,
+            episode_id TEXT NOT NULL,
+            source TEXT NOT NULL,
+            evidence_ref TEXT NOT NULL,
+            verification_json TEXT NOT NULL,
+            observed_at TEXT NOT NULL,
+            PRIMARY KEY (hint_id, episode_id)
         );
 
         CREATE TABLE IF NOT EXISTS forgotten_patterns (
@@ -757,6 +959,8 @@ class MemoryStore:
             ON observations(namespace, eligible, pattern_type, pattern_key);
         CREATE INDEX IF NOT EXISTS patterns_lookup_idx
             ON patterns(namespace, status, pattern_type);
+        CREATE INDEX IF NOT EXISTS experience_hints_lookup_idx
+            ON experience_hints(namespace, status, kind, hint_key);
         CREATE INDEX IF NOT EXISTS proposals_episode_idx
             ON proposals(namespace, episode_id, status);
         CREATE INDEX IF NOT EXISTS denials_namespace_idx
@@ -840,6 +1044,34 @@ class MemoryStore:
                     "ALTER TABLE patterns ADD COLUMN split_id TEXT"
                 )
                 migrated = True
+            observation_columns = {
+                row["name"]
+                for row in self._connection.execute(
+                    "PRAGMA table_info(observations)"
+                ).fetchall()
+            }
+            if "signal" not in observation_columns:
+                self._connection.execute(
+                    "ALTER TABLE observations ADD COLUMN signal TEXT "
+                    "NOT NULL DEFAULT 'legacy'"
+                )
+                migrated = True
+            experience_columns = {
+                row["name"]
+                for row in self._connection.execute(
+                    "PRAGMA table_info(experience_hints)"
+                ).fetchall()
+            }
+            for column in (
+                "invalidated_at",
+                "invalidation_source",
+                "invalidation_ref",
+            ):
+                if column not in experience_columns:
+                    self._connection.execute(
+                        f"ALTER TABLE experience_hints ADD COLUMN {column} TEXT"
+                    )
+                    migrated = True
             if previous_version < 5:
                 for observation in self._connection.execute(
                     "SELECT observation_id, value_json, operation "
@@ -1278,6 +1510,11 @@ class MemoryStore:
             global_search_source=global_search_source,
             global_search_ref=global_search_ref,
         )
+        evidence_hints = self.find_experience(
+            namespace,
+            input_text=input_text,
+            context=context,
+        )
         return {
             "consent": {
                 "was_enabled": was_enabled,
@@ -1289,6 +1526,7 @@ class MemoryStore:
                 "enabled": True,
             },
             "proposal": proposal,
+            "evidence_hints": evidence_hints,
         }
 
     def settle(
@@ -1341,7 +1579,8 @@ class MemoryStore:
         scope: Mapping[str, Any] | None = None,
         triggers: Sequence[str] | None = None,
         operation: str = "fill",
-        min_episodes: int = DEFAULT_MIN_EPISODES,
+        signal: str | None = None,
+        min_episodes: int | None = None,
     ) -> dict[str, Any]:
         """Append one observation, then reconsolidate the namespace."""
         observation = self.observe(
@@ -1354,6 +1593,7 @@ class MemoryStore:
             triggers=triggers,
             operation=operation,
             source=source,
+            signal=signal,
             evidence_ref=evidence_ref,
         )
         consolidation = self.consolidate(namespace, min_episodes=min_episodes)
@@ -1371,6 +1611,7 @@ class MemoryStore:
         triggers: Sequence[str] | None = None,
         operation: str = "fill",
         source: str,
+        signal: str | None = None,
         evidence_ref: str,
     ) -> dict[str, Any]:
         namespace = _require_text("namespace", namespace, max_length=512)
@@ -1385,6 +1626,7 @@ class MemoryStore:
         source = _require_text("source", source, max_length=64).casefold()
         if source not in OBSERVATION_SOURCES:
             raise MemoryInputError("source is not eligible for memory ingestion")
+        signal_value = _normalise_behavior_signal(signal, source)
         evidence_ref = _require_text("evidence_ref", evidence_ref, max_length=2048)
         scope_value = _normalise_scope(scope)
         trigger_values = _normalise_triggers(triggers)
@@ -1404,6 +1646,7 @@ class MemoryStore:
             "triggers": trigger_values,
             "operation": operation,
             "source": source,
+            "signal": signal_value,
             "evidence_ref": evidence_ref,
         }
         observation_hash = canonical_hash(identity)
@@ -1431,8 +1674,9 @@ class MemoryStore:
                 INSERT OR IGNORE INTO observations(
                     observation_id, observation_hash, namespace, episode_id,
                     pattern_type, pattern_key, value_json, value_hash, scope_json,
-                    triggers_json, operation, source, eligible, evidence_ref, observed_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    triggers_json, operation, source, signal, eligible,
+                    evidence_ref, observed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     observation_id,
@@ -1447,6 +1691,7 @@ class MemoryStore:
                     canonical_json(trigger_values),
                     operation,
                     source,
+                    signal_value,
                     int(eligible),
                     evidence_ref,
                     observed_at,
@@ -1493,6 +1738,333 @@ class MemoryStore:
         assert row is not None
         return self._observation_dict(row)
 
+    def record_experience(
+        self,
+        *,
+        namespace: str,
+        episode_id: str,
+        kind: str,
+        hint_key: str,
+        value: Mapping[str, Any],
+        scope: Mapping[str, Any] | None,
+        tags: Sequence[str],
+        anchors: Sequence[Mapping[str, Any]],
+        verification: Mapping[str, Any],
+        source: str,
+        evidence_ref: str,
+    ) -> dict[str, Any]:
+        """Store verified navigation evidence without creating behavior authority."""
+        namespace = _require_text("namespace", namespace, max_length=512)
+        episode_id = _require_text("episode_id", episode_id, max_length=1024)
+        kind = _require_text("kind", kind, max_length=64).casefold()
+        if kind not in EXPERIENCE_KINDS:
+            raise MemoryInputError("kind must be workspace_fact or workflow_trace")
+        hint_key = _require_text("hint_key", hint_key, max_length=512)
+        source = _require_text("source", source, max_length=64).casefold()
+        if source not in EXPERIENCE_SOURCES:
+            raise MemoryInputError("source is not trusted for reusable evidence")
+        evidence_ref = _require_text("evidence_ref", evidence_ref, max_length=2048)
+        value_value = _normalise_experience_value(kind, value)
+        scope_value = _normalise_scope(scope)
+        tag_values = _normalise_triggers(tags)
+        if not tag_values:
+            raise MemoryInputError("experience tags must not be empty")
+        anchor_values = _normalise_experience_anchors(anchors)
+        verification_value = _normalise_experience_verification(verification)
+        if source == "verified_execution" and verification_value["kind"] == "user_attested":
+            raise MemoryInputError("verified_execution needs executable or anchor verification")
+        _reject_sensitive(
+            hint_key,
+            value_value,
+            scope_value,
+            tag_values,
+            anchor_values,
+            verification_value,
+            evidence_ref,
+        )
+        _reject_unsafe_experience_value(value_value)
+        material = {
+            "namespace": namespace,
+            "kind": kind,
+            "hint_key": hint_key,
+            "value": value_value,
+            "scope": scope_value,
+            "tags": tag_values,
+            "anchors": anchor_values,
+        }
+        fingerprint = canonical_hash(material)
+        hint_id = "hint_" + fingerprint[:32]
+        now = _utc_now(self._clock())
+        with self._transaction() as connection:
+            self._require_enabled(namespace, connection)
+            overlapping = connection.execute(
+                """
+                SELECT * FROM experience_hints
+                WHERE namespace = ? AND kind = ? AND hint_key = ?
+                  AND status = 'active' AND fingerprint != ?
+                """,
+                (namespace, kind, hint_key, fingerprint),
+            ).fetchall()
+            for previous in overlapping:
+                if _scopes_overlap(
+                    _decode_json(previous["scope_json"]), scope_value
+                ):
+                    connection.execute(
+                        """
+                        UPDATE experience_hints
+                        SET status = 'stale', revision = revision + 1,
+                            updated_at = ?, invalid_reason = 'verified_replacement',
+                            invalidated_at = ?, invalidation_source = ?,
+                            invalidation_ref = ?
+                        WHERE hint_id = ?
+                        """,
+                        (now, now, source, evidence_ref, previous["hint_id"]),
+                    )
+            existing = connection.execute(
+                "SELECT * FROM experience_hints WHERE fingerprint = ?",
+                (fingerprint,),
+            ).fetchone()
+            if existing is None:
+                connection.execute(
+                    """
+                    INSERT INTO experience_hints(
+                        hint_id, fingerprint, namespace, kind, hint_key,
+                        value_json, scope_json, tags_json, anchors_json, status,
+                        support_episodes, revision, created_at, updated_at,
+                        last_verified_at, invalid_reason, invalidated_at,
+                        invalidation_source, invalidation_ref
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 0, 1,
+                              ?, ?, ?, NULL, NULL, NULL, NULL)
+                    """,
+                    (
+                        hint_id,
+                        fingerprint,
+                        namespace,
+                        kind,
+                        hint_key,
+                        canonical_json(value_value),
+                        canonical_json(scope_value),
+                        canonical_json(tag_values),
+                        canonical_json(anchor_values),
+                        now,
+                        now,
+                        now,
+                    ),
+                )
+            else:
+                connection.execute(
+                    """
+                    UPDATE experience_hints
+                    SET status = 'active', revision = revision + CASE
+                            WHEN status = 'stale' THEN 1 ELSE 0 END,
+                        updated_at = ?, last_verified_at = ?, invalid_reason = NULL,
+                        invalidated_at = NULL, invalidation_source = NULL,
+                        invalidation_ref = NULL
+                    WHERE hint_id = ?
+                    """,
+                    (now, now, hint_id),
+                )
+            connection.execute(
+                """
+                INSERT OR IGNORE INTO experience_evidence(
+                    hint_id, episode_id, source, evidence_ref,
+                    verification_json, observed_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    hint_id,
+                    episode_id,
+                    source,
+                    evidence_ref,
+                    canonical_json(verification_value),
+                    now,
+                ),
+            )
+            support = connection.execute(
+                "SELECT COUNT(*) AS count FROM experience_evidence WHERE hint_id = ?",
+                (hint_id,),
+            ).fetchone()["count"]
+            connection.execute(
+                "UPDATE experience_hints SET support_episodes = ? WHERE hint_id = ?",
+                (support, hint_id),
+            )
+            row = connection.execute(
+                "SELECT * FROM experience_hints WHERE hint_id = ?", (hint_id,)
+            ).fetchone()
+            assert row is not None
+            return self._experience_dict(row, connection)
+
+    @staticmethod
+    def _experience_evidence(
+        connection: sqlite3.Connection,
+        hint_id: str,
+    ) -> list[dict[str, Any]]:
+        rows = connection.execute(
+            """
+            SELECT * FROM experience_evidence WHERE hint_id = ?
+            ORDER BY observed_at DESC, episode_id DESC LIMIT 10
+            """,
+            (hint_id,),
+        ).fetchall()
+        return [
+            {
+                "episode_id": row["episode_id"],
+                "source": row["source"],
+                "evidence_ref": row["evidence_ref"],
+                "verification": _decode_json(row["verification_json"]),
+                "observed_at": row["observed_at"],
+            }
+            for row in rows
+        ]
+
+    @classmethod
+    def _experience_dict(
+        cls,
+        row: sqlite3.Row,
+        connection: sqlite3.Connection,
+        *,
+        matched_tags: Sequence[str] | None = None,
+    ) -> dict[str, Any]:
+        evidence = cls._experience_evidence(connection, row["hint_id"])
+        return {
+            "hint_id": row["hint_id"],
+            "namespace": row["namespace"],
+            "kind": row["kind"],
+            "hint_key": row["hint_key"],
+            "value": _decode_json(row["value_json"]),
+            "scope": _decode_json(row["scope_json"]),
+            "tags": _decode_json(row["tags_json"]),
+            "anchors": _decode_json(row["anchors_json"]),
+            "status": row["status"],
+            "support_episodes": row["support_episodes"],
+            "support_episode_ids": sorted(item["episode_id"] for item in evidence),
+            "revision": row["revision"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "last_verified_at": row["last_verified_at"],
+            "invalid_reason": row["invalid_reason"],
+            "invalidated_at": row["invalidated_at"],
+            "invalidation_source": row["invalidation_source"],
+            "invalidation_ref": row["invalidation_ref"],
+            "evidence": evidence,
+            "matched_tags": list(matched_tags or []),
+            "authority": "untrusted_reusable_evidence",
+            "revalidation_required": True,
+        }
+
+    def list_experience(self, namespace: str) -> list[dict[str, Any]]:
+        namespace = _require_text("namespace", namespace, max_length=512)
+        self._ensure_open()
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT * FROM experience_hints WHERE namespace = ?
+                ORDER BY updated_at DESC, hint_id
+                """,
+                (namespace,),
+            ).fetchall()
+            return [self._experience_dict(row, self._connection) for row in rows]
+
+    def find_experience(
+        self,
+        namespace: str,
+        *,
+        input_text: str,
+        context: Mapping[str, Any],
+    ) -> list[dict[str, Any]]:
+        namespace = _require_text("namespace", namespace, max_length=512)
+        input_text = _require_text("input_text", input_text, max_length=100_000)
+        context_value = _normalise_scope(context)
+        task_key_value = context_value.get("task_key")
+        task_key = (
+            unicodedata.normalize("NFC", task_key_value).strip().casefold()
+            if isinstance(task_key_value, str)
+            else None
+        )
+        haystack = unicodedata.normalize("NFC", input_text).casefold()
+
+        def tag_matches(tag: str) -> bool:
+            return re.search(r"(?<!\w)" + re.escape(tag) + r"(?!\w)", haystack) is not None
+
+        self._ensure_open()
+        with self._lock:
+            self._require_enabled(namespace, self._connection)
+            rows = self._connection.execute(
+                """
+                SELECT * FROM experience_hints
+                WHERE namespace = ? AND status = 'active'
+                """,
+                (namespace,),
+            ).fetchall()
+            ranked: list[tuple[tuple[Any, ...], sqlite3.Row, list[str]]] = []
+            for row in rows:
+                scope = _decode_json(row["scope_json"])
+                if not _scope_matches(scope, context_value):
+                    continue
+                tags = _decode_json(row["tags_json"])
+                matched = [tag for tag in tags if tag_matches(tag)]
+                exact_key = task_key is not None and task_key == row["hint_key"].casefold()
+                phrase_match = any(" " in tag for tag in matched)
+                if not (exact_key or phrase_match or len(matched) >= 2):
+                    continue
+                specificity = len(canonical_json(scope))
+                score = (
+                    specificity,
+                    int(exact_key),
+                    len(matched),
+                    row["support_episodes"],
+                    row["last_verified_at"],
+                )
+                ranked.append((score, row, matched))
+            ranked.sort(key=lambda item: (item[0], item[1]["hint_id"]), reverse=True)
+            return [
+                self._experience_dict(row, self._connection, matched_tags=matched)
+                for _, row, matched in ranked[:MAX_EXPERIENCE_HINTS]
+            ]
+
+    def invalidate_experience(
+        self,
+        *,
+        namespace: str,
+        hint_id: str,
+        reason: str,
+        source: str,
+        evidence_ref: str,
+    ) -> dict[str, Any]:
+        namespace = _require_text("namespace", namespace, max_length=512)
+        hint_id = _require_text("hint_id", hint_id, max_length=128)
+        reason = _require_text("reason", reason, max_length=512)
+        source = _require_text("source", source, max_length=64).casefold()
+        if source not in EXPERIENCE_INVALIDATION_SOURCES:
+            raise MemoryInputError("source is not trusted to invalidate reusable evidence")
+        evidence_ref = _require_text("evidence_ref", evidence_ref, max_length=2048)
+        _reject_sensitive(reason, evidence_ref)
+        now = _utc_now(self._clock())
+        with self._transaction() as connection:
+            self._require_enabled(namespace, connection)
+            row = connection.execute(
+                "SELECT * FROM experience_hints WHERE hint_id = ? AND namespace = ?",
+                (hint_id, namespace),
+            ).fetchone()
+            if row is None:
+                raise MemoryNotFoundError("experience hint does not exist")
+            connection.execute(
+                """
+                UPDATE experience_hints
+                SET status = 'stale', revision = revision + CASE
+                        WHEN status = 'active' THEN 1 ELSE 0 END,
+                    updated_at = ?, invalid_reason = ?, invalidated_at = ?,
+                    invalidation_source = ?, invalidation_ref = ?
+                WHERE hint_id = ?
+                """,
+                (now, reason, now, source, evidence_ref, hint_id),
+            )
+            updated = connection.execute(
+                "SELECT * FROM experience_hints WHERE hint_id = ?", (hint_id,)
+            ).fetchone()
+            assert updated is not None
+            return self._experience_dict(updated, connection)
+
     @staticmethod
     def _observation_dict(row: sqlite3.Row) -> dict[str, Any]:
         return {
@@ -1506,6 +2078,7 @@ class MemoryStore:
             "triggers": _decode_json(row["triggers_json"]),
             "operation": row["operation"],
             "source": row["source"],
+            "signal": row["signal"],
             "eligible": bool(row["eligible"]),
             "evidence_ref": row["evidence_ref"],
             "observed_at": row["observed_at"],
@@ -1568,7 +2141,8 @@ class MemoryStore:
         rows = connection.execute(
             """
             SELECT observations.observation_id, observations.episode_id,
-                   observations.source, observations.evidence_ref,
+                   observations.source, observations.signal,
+                   observations.evidence_ref,
                    observations.observed_at
             FROM pattern_evidence
             JOIN observations USING(observation_id)
@@ -1582,6 +2156,7 @@ class MemoryStore:
                 "observation_id": item["observation_id"],
                 "episode_id": item["episode_id"],
                 "source": item["source"],
+                "signal": item["signal"],
                 "evidence_ref": item["evidence_ref"],
                 "observed_at": item["observed_at"],
             }
@@ -1646,6 +2221,7 @@ class MemoryStore:
     ) -> dict[str, Any]:
         evidence = cls._pattern_evidence(connection, row["pattern_id"])
         contradictions = cls._pattern_contradictions(connection, row)
+        signals = sorted({item["signal"] for item in evidence}) or ["legacy"]
         return {
             "pattern_id": row["pattern_id"],
             "namespace": row["namespace"],
@@ -1662,6 +2238,8 @@ class MemoryStore:
             "updated_at": row["updated_at"],
             "promoted_at": row["promoted_at"],
             "activation_reason": row["activation_reason"],
+            "signals": signals,
+            "effective_min_episodes": _effective_behavior_threshold(signals),
             "parent_pattern_id": row["parent_pattern_id"],
             "split_id": row["split_id"],
             "support_episode_ids": sorted(
@@ -1720,10 +2298,12 @@ class MemoryStore:
         self,
         namespace: str,
         *,
-        min_episodes: int = DEFAULT_MIN_EPISODES,
+        min_episodes: int | None = None,
     ) -> list[dict[str, Any]]:
         namespace = _require_text("namespace", namespace, max_length=512)
-        if not isinstance(min_episodes, int) or min_episodes < 1:
+        if min_episodes is not None and (
+            not isinstance(min_episodes, int) or min_episodes < 1
+        ):
             raise MemoryInputError("min_episodes must be a positive integer")
         now = _utc_now(self._clock())
         with self._transaction() as connection:
@@ -1786,17 +2366,30 @@ class MemoryStore:
                         "episodes": set(),
                         "observation_ids": [],
                         "sources": set(),
+                        "signals": set(),
                     },
                 )
                 group["episodes"].add(row["episode_id"])
                 group["observation_ids"].append(row["observation_id"])
                 group["sources"].add(row["source"])
+                group["signals"].add(row["signal"])
 
             touched_ids: list[str] = []
             for group in groups.values():
                 support = len(group["episodes"])
-                if support < min_episodes:
+                effective_min_episodes = _effective_behavior_threshold(
+                    sorted(group["signals"]), min_episodes
+                )
+                if support < effective_min_episodes:
                     continue
+                if "user_correction" in group["signals"]:
+                    activation_reason = "user_correction"
+                elif "durable_directive" in group["signals"]:
+                    activation_reason = "durable_directive"
+                elif "ordinary_choice" in group["signals"]:
+                    activation_reason = "ordinary_choice"
+                else:
+                    activation_reason = "consolidated"
                 pattern_id = "pat_" + group["fingerprint"][:32]
                 existing = connection.execute(
                     "SELECT * FROM patterns WHERE pattern_id = ?", (pattern_id,)
@@ -1808,8 +2401,9 @@ class MemoryStore:
                             pattern_id, fingerprint, namespace, pattern_type,
                             pattern_key, value_json, value_hash, scope_json,
                             triggers_json, operation, status, support_episodes,
-                            revision, created_at, updated_at, promoted_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, 1, ?, ?, NULL)
+                            revision, created_at, updated_at, promoted_at,
+                            activation_reason
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'candidate', ?, 1, ?, ?, NULL, ?)
                         """,
                         (
                             pattern_id,
@@ -1825,16 +2419,21 @@ class MemoryStore:
                             support,
                             now,
                             now,
+                            activation_reason,
                         ),
                     )
-                elif existing["support_episodes"] != support:
+                elif (
+                    existing["support_episodes"] != support
+                    or existing["activation_reason"] != activation_reason
+                ):
                     connection.execute(
                         """
                         UPDATE patterns
-                        SET support_episodes = ?, revision = revision + 1, updated_at = ?
+                        SET support_episodes = ?, activation_reason = ?,
+                            revision = revision + 1, updated_at = ?
                         WHERE pattern_id = ?
                         """,
-                        (support, now, pattern_id),
+                        (support, activation_reason, now, pattern_id),
                     )
                     self._invalidate_pattern_proposals(
                         connection, pattern_id, "pattern_revision_changed"
@@ -1872,7 +2471,10 @@ class MemoryStore:
                         continue
                     independent_support = len(group["episodes"])
                     correction = "user_correction" in group["sources"]
-                    if correction or independent_support >= min_episodes:
+                    conflict_threshold = _effective_behavior_threshold(
+                        sorted(group["signals"]), min_episodes
+                    )
+                    if correction or independent_support >= conflict_threshold:
                         conflict = True
                         break
                 if conflict:
@@ -1903,6 +2505,11 @@ class MemoryStore:
                 tuple(touched_ids),
             ).fetchall()
             result = [self._pattern_dict(row, connection) for row in rows]
+            if min_episodes is not None:
+                for item in result:
+                    item["effective_min_episodes"] = max(
+                        item["effective_min_episodes"], min_episodes
+                    )
         return result
 
     def list_patterns(self, namespace: str) -> list[dict[str, Any]]:
@@ -3878,6 +4485,7 @@ class MemoryStore:
                     "triggers": child["triggers"],
                     "operation": child["operation"],
                     "source": "user_correction",
+                    "signal": "user_correction",
                     "evidence_ref": confirmation_ref,
                 }
                 observation_hash = canonical_hash(observation_identity)
@@ -3887,10 +4495,10 @@ class MemoryStore:
                     INSERT INTO observations(
                         observation_id, observation_hash, namespace, episode_id,
                         pattern_type, pattern_key, value_json, value_hash, scope_json,
-                        triggers_json, operation, source, eligible, evidence_ref,
-                        observed_at
+                        triggers_json, operation, source, signal, eligible,
+                        evidence_ref, observed_at
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                              'user_correction', 1, ?, ?)
+                              'user_correction', 'user_correction', 1, ?, ?)
                     """,
                     (
                         observation_id,
@@ -4479,11 +5087,16 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=sorted(OBSERVATION_SOURCES),
         help="Declared trusted-event provenance class.",
     )
+    observe.add_argument(
+        "--signal",
+        choices=sorted(BEHAVIOR_SIGNAL_THRESHOLDS),
+        help="Typed strength signal; omission preserves legacy three-episode policy.",
+    )
     observe.add_argument("--evidence-ref", required=True)
 
     consolidate = commands.add_parser("consolidate")
     consolidate.add_argument("--namespace", required=True)
-    consolidate.add_argument("--min-episodes", type=int, default=DEFAULT_MIN_EPISODES)
+    consolidate.add_argument("--min-episodes", type=int)
 
     list_parser = commands.add_parser("list", aliases=["list-patterns"])
     list_parser.add_argument("--namespace", required=True)
@@ -4604,8 +5217,39 @@ def _build_parser() -> argparse.ArgumentParser:
     learn.add_argument("--triggers", default="[]", metavar="JSON_ARRAY")
     learn.add_argument("--operation", default="fill", choices=sorted(OPERATIONS))
     learn.add_argument("--source", required=True, choices=sorted(OBSERVATION_SOURCES))
+    learn.add_argument("--signal", choices=sorted(BEHAVIOR_SIGNAL_THRESHOLDS))
     learn.add_argument("--evidence-ref", required=True)
-    learn.add_argument("--min-episodes", type=int, default=DEFAULT_MIN_EPISODES)
+    learn.add_argument("--min-episodes", type=int)
+
+    record_experience = commands.add_parser(
+        "record-experience",
+        description="Store verified, non-authoritative workspace evidence.",
+    )
+    record_experience.add_argument("--namespace", required=True)
+    record_experience.add_argument("--episode-id", required=True)
+    record_experience.add_argument("--kind", required=True, choices=sorted(EXPERIENCE_KINDS))
+    record_experience.add_argument("--hint-key", required=True)
+    record_experience.add_argument("--value", required=True, metavar="JSON_OBJECT")
+    record_experience.add_argument("--scope", required=True, metavar="JSON_OBJECT")
+    record_experience.add_argument("--tags", required=True, metavar="JSON_ARRAY")
+    record_experience.add_argument("--anchors", required=True, metavar="JSON_ARRAY")
+    record_experience.add_argument("--verification", required=True, metavar="JSON_OBJECT")
+    record_experience.add_argument(
+        "--source", required=True, choices=sorted(EXPERIENCE_SOURCES)
+    )
+    record_experience.add_argument("--evidence-ref", required=True)
+
+    invalidate_experience = commands.add_parser("invalidate-experience")
+    invalidate_experience.add_argument("--namespace", required=True)
+    invalidate_experience.add_argument("--hint-id", required=True)
+    invalidate_experience.add_argument("--reason", required=True)
+    invalidate_experience.add_argument(
+        "--source", required=True, choices=sorted(EXPERIENCE_INVALIDATION_SOURCES)
+    )
+    invalidate_experience.add_argument("--evidence-ref", required=True)
+
+    list_experience = commands.add_parser("list-experience")
+    list_experience.add_argument("--namespace", required=True)
 
     deny = commands.add_parser(
         "deny",
@@ -4692,6 +5336,7 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
             triggers=_json_argument("--triggers", arguments.triggers),
             operation=arguments.operation,
             source=arguments.source,
+            signal=arguments.signal,
             evidence_ref=arguments.evidence_ref,
         )
     if command == "consolidate":
@@ -4762,9 +5407,34 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
             triggers=_json_argument("--triggers", arguments.triggers),
             operation=arguments.operation,
             source=arguments.source,
+            signal=arguments.signal,
             evidence_ref=arguments.evidence_ref,
             min_episodes=arguments.min_episodes,
         )
+    if command == "record-experience":
+        return store.record_experience(
+            namespace=arguments.namespace,
+            episode_id=arguments.episode_id,
+            kind=arguments.kind,
+            hint_key=arguments.hint_key,
+            value=_json_argument("--value", arguments.value),
+            scope=_json_argument("--scope", arguments.scope),
+            tags=_json_argument("--tags", arguments.tags),
+            anchors=_json_argument("--anchors", arguments.anchors),
+            verification=_json_argument("--verification", arguments.verification),
+            source=arguments.source,
+            evidence_ref=arguments.evidence_ref,
+        )
+    if command == "invalidate-experience":
+        return store.invalidate_experience(
+            namespace=arguments.namespace,
+            hint_id=arguments.hint_id,
+            reason=arguments.reason,
+            source=arguments.source,
+            evidence_ref=arguments.evidence_ref,
+        )
+    if command == "list-experience":
+        return store.list_experience(arguments.namespace)
     if command == "deny":
         return store.deny(
             arguments.proposal_id,

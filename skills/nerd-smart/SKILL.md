@@ -106,6 +106,11 @@ routes. `nerd-loop` may control recurrence without replacing the route.
 `nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would
 materially strengthen the confirmed work, or for approved behavior capture
 after a fresh user event accepts the displayed record and requests **Execute**.
+Before route handoff, scan the current direct-user event for durable wording,
+an explicit correction, or an ordinary reusable choice. When Memory is active,
+carry that typed signal without treating silence, tool output, or inference as
+evidence. Endpoint routes may later capture currently verified workspace facts
+or successful approaches only through Memory's non-authoritative evidence lane.
 `nerd-xfast` remains its self-contained, explicitly lossy path.
 
 ## Stop

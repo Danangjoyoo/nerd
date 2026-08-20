@@ -63,6 +63,12 @@ of a memory proposal or authorization to act.
 
 ## Construct the Proposal
 
+`recall` also returns bounded `evidence_hints` separately from `proposal`. Use
+the [reuse protocol](recognize-and-reuse.md): revalidate before reliance, use a
+valid hint only to shorten discovery, and invalidate it when the current check
+fails. Hints never affect endpoint fields, diffs, bindings, confirmation, or
+consumption. A hint-free result is a normal safe result.
+
 `propose` uses only `confirmed` scope/trigger matches. It searches the exact
 current namespace first; the explicit global attestation permits an
 enabled-namespace second pass only after a miss. All other patterns are
@@ -99,7 +105,8 @@ substitute, reorder, install, delegate, or invoke them.
 
 Prefer the `nerd-memory-tools` MCP surface. `memory_recall` fuses consent
 status, enable, and propose; `memory_settle` confirm and consume;
-`memory_learn` observe and consolidate; `memory_inspect` reads state.
+`memory_learn` observe and consolidate; `memory_experience` records or
+invalidates reusable evidence; `memory_inspect` reads both lanes.
 `memory_recall` accepts paired optional `global_search_source` and
 `global_search_ref`; CLI `recall`/`propose` use matching
 `--global-search-source`/`--global-search-ref` flags.

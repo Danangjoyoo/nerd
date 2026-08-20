@@ -98,6 +98,7 @@ class MemorySecurityTests(unittest.TestCase):
         triggers: list[str] | None = None,
         operation: str = "fill",
         source: str = "direct_user",
+        signal: str | None = None,
     ) -> object:
         return self.store.observe(
             namespace=namespace or self.namespace,
@@ -109,6 +110,7 @@ class MemorySecurityTests(unittest.TestCase):
             triggers=triggers or ["build"],
             operation=operation,
             source=source,
+            signal=signal,
             evidence_ref=f"evidence:{source}:{episode_id}",
         )
 
@@ -195,7 +197,10 @@ class MemorySecurityTests(unittest.TestCase):
 
     def test_repetition_inside_one_episode_is_one_independent_support(self):
         for _ in range(25):
-            self.observe(episode_id="one-task-repeated-25-times")
+            self.observe(
+                episode_id="one-task-repeated-25-times",
+                signal="ordinary_choice",
+            )
 
         self.assertEqual(
             self.store.consolidate(self.namespace, min_episodes=2),
@@ -203,7 +208,10 @@ class MemorySecurityTests(unittest.TestCase):
             "rephrasing or repeating guidance in one task must not create consensus",
         )
 
-        self.observe(episode_id="a-genuinely-independent-second-task")
+        self.observe(
+            episode_id="a-genuinely-independent-second-task",
+            signal="ordinary_choice",
+        )
         patterns = self.store.consolidate(self.namespace, min_episodes=2)
         self.assertEqual(len(patterns), 1)
         self.assertEqual(patterns[0]["support_episodes"], 2)
@@ -424,7 +432,7 @@ class MemorySecurityTests(unittest.TestCase):
             {"baseline_source", "baseline_ref", "baseline_collisions_json"}
             <= columns
         )
-        self.assertEqual(version, "10")
+        self.assertEqual(version, "11")
         self.assertEqual(
             self.store.get_proposal(old_proposal["proposal_id"])["status"],
             "invalidated",
@@ -460,10 +468,50 @@ class MemorySecurityTests(unittest.TestCase):
             "SELECT value FROM metadata WHERE key = 'schema_version'"
         ).fetchone()[0]
         self.assertTrue({"global_search_source", "global_search_ref"} <= columns)
-        self.assertEqual(version, "10")
+        self.assertEqual(version, "11")
         self.assertEqual(
             self.store.get_proposal(old_proposal["proposal_id"])["status"],
             "invalidated",
+        )
+
+    def test_v11_migration_marks_existing_observations_as_legacy(self):
+        confirmed = self.make_active_pattern(pattern_key="stable-before-migration")
+        confirmed_revision = confirmed["revision"]
+        self.observe(
+            episode_id="legacy-before-migration",
+            pattern_key="unconsolidated-before-migration",
+        )
+        self.store.close()
+        connection = sqlite3.connect(self.db)
+        try:
+            drop_version_fences(connection)
+            connection.execute("ALTER TABLE observations DROP COLUMN signal")
+            connection.execute(
+                "UPDATE metadata SET value = '10' WHERE key = 'schema_version'"
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        self.store = self.engine.MemoryStore(self.db)
+        row = self.store._connection.execute(
+            "SELECT signal FROM observations WHERE episode_id = ?",
+            ("legacy-before-migration",),
+        ).fetchone()
+        version = self.store._connection.execute(
+            "SELECT value FROM metadata WHERE key = 'schema_version'"
+        ).fetchone()[0]
+
+        self.assertEqual(row["signal"], "legacy")
+        self.assertEqual(version, "11")
+        migrated_pattern = self.store.get_pattern(confirmed["pattern_id"])
+        self.assertEqual(migrated_pattern["status"], "confirmed")
+        self.assertEqual(migrated_pattern["revision"], confirmed_revision)
+        self.assertFalse(
+            any(
+                pattern["pattern_key"] == "unconsolidated-before-migration"
+                for pattern in self.store.consolidate(self.namespace)
+            )
         )
 
     def test_database_version_fences_reject_already_open_stale_writers(self):
@@ -520,13 +568,13 @@ class MemorySecurityTests(unittest.TestCase):
         metadata_writer = sqlite3.connect(self.db)
         try:
             metadata_writer.execute(
-                "UPDATE metadata SET value = '11' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '12' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
             with self.assertRaises(self.engine.MemoryInvariantError):
                 self.propose(episode_id="runtime-version-changed")
             metadata_writer.execute(
-                "UPDATE metadata SET value = '10' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '11' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
         finally:

@@ -21,6 +21,7 @@ def memory_guidance_body() -> str:
     references = (
         "recall-and-apply.md",
         "learn-and-correct.md",
+        "recognize-and-reuse.md",
         "deny-split-forget.md",
     )
     return "\n".join(
@@ -1530,6 +1531,7 @@ class MemoryContractTests(unittest.TestCase):
             for name in (
                 "recall-and-apply.md",
                 "learn-and-correct.md",
+                "recognize-and-reuse.md",
                 "deny-split-forget.md",
             )
         }
@@ -1565,6 +1567,44 @@ class MemoryContractTests(unittest.TestCase):
                 "does not activate them",
             ),
         )
+
+    def test_capture_radar_and_reusable_evidence_stay_separate(self):
+        radar = normalized(memory_reference_body("recognize-and-reuse.md"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        smart = normalized(skill_body("nerd-smart"))
+        explore = normalized(skill_body("nerd-explore"))
+        execute = normalized(skill_body("nerd-execute"))
+        assert_terms(
+            self,
+            radar,
+            (
+                "`durable_directive`",
+                "`ordinary_choice`",
+                "`user_correction`",
+                "`workspace_fact`",
+                "`workflow_trace`",
+                "one exact phrase tag",
+                "at least two normalized tag matches",
+                "`authority=untrusted_reusable_evidence`",
+                "`revalidation_required=true`",
+                "Never insert a hint into `proposed_endpoint`",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "one episode for a durable directive or correction",
+                "two for an ordinary direct choice",
+                "three for legacy observations",
+                "caller-supplied `min_episodes` is only a stricter floor",
+                "## Reusable Evidence Contract",
+                "return at most five",
+            ),
+        )
+        self.assertIn("scan the current direct-user event", smart)
+        self.assertIn("before the first repository read", explore)
+        self.assertIn("Reusable evidence capture", execute)
 
     def test_memory_influence_always_stops_at_exact_confirmation(self):
         body = normalized(memory_guidance_body())
@@ -2000,7 +2040,7 @@ class MemoryTransportContractTests(unittest.TestCase):
         self.recall = memory_reference_body("recall-and-apply.md")
         self.guidance = memory_guidance_body()
 
-    def test_skill_names_the_mcp_server_and_all_four_tools(self):
+    def test_skill_names_the_mcp_server_and_all_five_tools(self):
         assert_terms(
             self,
             self.guidance,
@@ -2009,6 +2049,7 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "memory_recall",
                 "memory_settle",
                 "memory_learn",
+                "memory_experience",
                 "memory_inspect",
             ),
         )
@@ -2072,6 +2113,7 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "memory_recall",
                 "memory_settle",
                 "memory_learn",
+                "memory_experience",
                 "memory_inspect",
                 "registered but absent",
                 "restart-required",
