@@ -21,6 +21,7 @@ def memory_guidance_body() -> str:
     references = (
         "recall-and-apply.md",
         "learn-and-correct.md",
+        "recognize-and-reuse.md",
         "deny-split-forget.md",
     )
     return "\n".join(
@@ -1530,6 +1531,7 @@ class MemoryContractTests(unittest.TestCase):
             for name in (
                 "recall-and-apply.md",
                 "learn-and-correct.md",
+                "recognize-and-reuse.md",
                 "deny-split-forget.md",
             )
         }
@@ -1566,6 +1568,44 @@ class MemoryContractTests(unittest.TestCase):
             ),
         )
 
+    def test_capture_radar_and_reusable_evidence_stay_separate(self):
+        radar = normalized(memory_reference_body("recognize-and-reuse.md"))
+        contract = normalized(memory_reference_body("memory-contract.md"))
+        smart = normalized(skill_body("nerd-smart"))
+        explore = normalized(skill_body("nerd-explore"))
+        execute = normalized(skill_body("nerd-execute"))
+        assert_terms(
+            self,
+            radar,
+            (
+                "`durable_directive`",
+                "`ordinary_choice`",
+                "`user_correction`",
+                "`workspace_fact`",
+                "`workflow_trace`",
+                "one exact phrase tag",
+                "at least two normalized tag matches",
+                "`authority=untrusted_reusable_evidence`",
+                "`revalidation_required=true`",
+                "Never insert a hint into `proposed_endpoint`",
+            ),
+        )
+        assert_terms(
+            self,
+            contract,
+            (
+                "one episode for a durable directive or correction",
+                "two for an ordinary direct choice",
+                "three for legacy observations",
+                "caller-supplied `min_episodes` is only a stricter floor",
+                "## Reusable Evidence Contract",
+                "return at most five",
+            ),
+        )
+        self.assertIn("scan the current direct-user event", smart)
+        self.assertIn("before the first repository read", explore)
+        self.assertIn("Reusable evidence capture", execute)
+
     def test_memory_influence_always_stops_at_exact_confirmation(self):
         body = normalized(memory_guidance_body())
         assert_terms(
@@ -1597,7 +1637,8 @@ class MemoryContractTests(unittest.TestCase):
                 "pending memory proposal",
                 "`abstain`",
                 "Never force a nearest match",
-                "use only `confirmed` patterns matching the exact namespace, scope, and trigger context",
+                "searches the exact current namespace first",
+                "explicit global attestation",
                 "For `memory_conflict`",
             ),
         )
@@ -1783,9 +1824,12 @@ class MemoryContractTests(unittest.TestCase):
                 "start a fresh session when physical context removal is required",
                 "`enabled` records local persistence state only",
                 "the user-installed hook, not that flag, supplies standing activation",
-                "Never search another namespace",
+                "search the current namespace first",
+                "explicitly asks for global search",
+                "Never ask, offer, recommend, or suggest global search",
             ),
         )
+        self.assertNotIn("Never search another namespace", body)
         assert_terms(
             self,
             contract,
@@ -1802,6 +1846,9 @@ class MemoryContractTests(unittest.TestCase):
                 "The hook cannot confirm a Memory Proposal",
                 "Memory persists enablement per namespace",
                 "Namespace equality is exact",
+                "`None` searches every enabled namespace",
+                "global_search_source",
+                "global_search_ref",
                 "Every successful command writes one JSON value to stdout",
                 "A prompt-only simulation does not satisfy this contract",
             ),
@@ -1986,14 +2033,14 @@ class FamilyContractTests(unittest.TestCase):
 
 
 class MemoryTransportContractTests(unittest.TestCase):
-    """Memory must prefer MCP, fall back to the CLI, and never change behavior."""
+    """Memory must discover MCP first and use CLI only after rejection."""
 
     def setUp(self):
         self.skill = skill_body("nerd-memory")
         self.recall = memory_reference_body("recall-and-apply.md")
         self.guidance = memory_guidance_body()
 
-    def test_skill_names_the_mcp_server_and_all_four_tools(self):
+    def test_skill_names_the_mcp_server_and_all_five_tools(self):
         assert_terms(
             self,
             self.guidance,
@@ -2002,6 +2049,7 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "memory_recall",
                 "memory_settle",
                 "memory_learn",
+                "memory_experience",
                 "memory_inspect",
             ),
         )
@@ -2014,7 +2062,7 @@ class MemoryTransportContractTests(unittest.TestCase):
 
     def test_fallback_triggers_are_bounded_and_exclude_domain_errors(self):
         body = normalized(self.guidance)
-        assert_terms(self, body, ("restart_required", "once"))
+        assert_terms(self, body, ("restart_required", "only after rejection"))
         for domain_error in (
             "invalid_input",
             "consent_required",
@@ -2050,7 +2098,7 @@ class MemoryTransportContractTests(unittest.TestCase):
     def test_recall_reference_drops_the_help_discovery_step(self):
         self.assertNotIn("memory.py --help", self.recall)
 
-    def test_transport_preflight_requires_live_tools_and_authorized_mcp_setup(self):
+    def test_transport_preflight_searches_mcp_first_and_gates_fallback(self):
         preflight = normalized(memory_reference_body("transport-preflight.md"))
         contract = normalized(memory_reference_body("memory-contract.md"))
         self.assertIn("references/transport-preflight.md", self.skill)
@@ -2058,51 +2106,45 @@ class MemoryTransportContractTests(unittest.TestCase):
             self,
             preflight,
             (
-                "once per host session",
+                "At the start of every activation",
+                "before any Memory operation",
+                "Search the current host MCP state first",
                 "current callable tool registry",
                 "memory_recall",
                 "memory_settle",
                 "memory_learn",
+                "memory_experience",
                 "memory_inspect",
                 "registered but absent",
                 "restart-required",
                 "install-required",
                 "registration-required",
                 "enable-required",
-                "fresh direct-user approval",
+                "fresh direct-user confirmation",
+                "recommend",
+                "enable",
+                "turn on",
+                "install",
                 "Never launch a stdio server manually",
                 "CLI script is always approved",
-                "use the CLI automatically",
-                "Do not present it as a choice",
+                "Only after the user rejects",
+                "Do not use the CLI while confirmation or activation is pending",
                 "Do not persist the transport choice",
             ),
         )
-        # Activation (restart/enable) is always approved — no approval gate
-        assert_terms(
-            self,
-            preflight,
-            (
-                "always approved",
-            ),
-        )
-        # Rejected install/register must fall back to CLI for the session
-        assert_terms(
-            self,
-            preflight,
-            (
-                "cli-fallback",
-            ),
-        )
-        self.assertNotIn("Use CLI for this session", preflight)
+        self.assertNotIn("activation — always approved", preflight)
+        self.assertIn("cli-fallback", preflight)
         self.assertIn("transport choice", self.skill)
         assert_terms(
             self,
             contract,
             (
                 "That live surface is authoritative",
-                "requires fresh direct-user approval",
-                "keep that choice session-local",
-                "do not repeat the prompt",
+                "searches the current host MCP state first",
+                "requires fresh direct-user confirmation",
+                "Only rejection permits the CLI fallback",
+                "Keep that choice activation-local",
+                "run a new preflight on each",
             ),
         )
 

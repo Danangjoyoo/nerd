@@ -126,6 +126,7 @@ REQUIRED_REFERENCES = {
         "transport-preflight.md",
         "recall-and-apply.md",
         "learn-and-correct.md",
+        "recognize-and-reuse.md",
         "deny-split-forget.md",
         "memory-contract.md",
         "research.md",

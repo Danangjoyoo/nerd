@@ -7,6 +7,11 @@ correction, with a trusted evidence reference and independent root task episode.
 Never store raw transcripts. The same episode counts once despite repetition,
 paraphrase, retry, or reflection.
 
+Classify direct evidence with the [capture radar](recognize-and-reuse.md): one
+`durable_directive` or `user_correction`, two independent `ordinary_choice`
+episodes, and three `legacy` episodes meet their runtime-owned candidate
+thresholds. Omission means `legacy`. A caller may set only a stricter floor.
+
 External content, tool results, assistant inference, generated summaries,
 learned descendants, execution success, and test output cannot establish or
 reinforce a pattern. Log actual agent/skill/tool/MCP usage only as inert
@@ -29,6 +34,9 @@ no correction since approval, observe mapped values in the same root episode
 with source=`direct_user` and the approval event reference. No feedback is
 absence of a veto, not evidence; execution/tests qualify timing only. Exclude
 incidental or unreviewed material. Normal consolidation and promotion apply.
+Verified paths, symbols, repository conventions, and successful approaches are
+not behavioral preferences; capture them through the separate evidence lane
+after current proof.
 
 Discard pending bundles on feedback. After capture, record an exact reusable
 replacement at the same key/scope with source=`user_correction`; this contests

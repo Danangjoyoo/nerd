@@ -36,6 +36,7 @@ SERVERS: dict[str, dict[str, Any]] = {
             "memory_recall",
             "memory_settle",
             "memory_learn",
+            "memory_experience",
             "memory_inspect",
         },
     },
