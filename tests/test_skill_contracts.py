@@ -1986,7 +1986,7 @@ class FamilyContractTests(unittest.TestCase):
 
 
 class MemoryTransportContractTests(unittest.TestCase):
-    """Memory must prefer MCP, fall back to the CLI, and never change behavior."""
+    """Memory must discover MCP first and use CLI only after rejection."""
 
     def setUp(self):
         self.skill = skill_body("nerd-memory")
@@ -2014,7 +2014,7 @@ class MemoryTransportContractTests(unittest.TestCase):
 
     def test_fallback_triggers_are_bounded_and_exclude_domain_errors(self):
         body = normalized(self.guidance)
-        assert_terms(self, body, ("restart_required", "once"))
+        assert_terms(self, body, ("restart_required", "only after rejection"))
         for domain_error in (
             "invalid_input",
             "consent_required",
@@ -2050,7 +2050,7 @@ class MemoryTransportContractTests(unittest.TestCase):
     def test_recall_reference_drops_the_help_discovery_step(self):
         self.assertNotIn("memory.py --help", self.recall)
 
-    def test_transport_preflight_requires_live_tools_and_authorized_mcp_setup(self):
+    def test_transport_preflight_searches_mcp_first_and_gates_fallback(self):
         preflight = normalized(memory_reference_body("transport-preflight.md"))
         contract = normalized(memory_reference_body("memory-contract.md"))
         self.assertIn("references/transport-preflight.md", self.skill)
@@ -2058,7 +2058,9 @@ class MemoryTransportContractTests(unittest.TestCase):
             self,
             preflight,
             (
-                "once per host session",
+                "At the start of every activation",
+                "before any Memory operation",
+                "Search the current host MCP state first",
                 "current callable tool registry",
                 "memory_recall",
                 "memory_settle",
@@ -2069,40 +2071,31 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "install-required",
                 "registration-required",
                 "enable-required",
-                "fresh direct-user approval",
+                "fresh direct-user confirmation",
+                "recommend",
+                "enable",
+                "turn on",
+                "install",
                 "Never launch a stdio server manually",
                 "CLI script is always approved",
-                "use the CLI automatically",
-                "Do not present it as a choice",
+                "Only after the user rejects",
+                "Do not use the CLI while confirmation or activation is pending",
                 "Do not persist the transport choice",
             ),
         )
-        # Activation (restart/enable) is always approved — no approval gate
-        assert_terms(
-            self,
-            preflight,
-            (
-                "always approved",
-            ),
-        )
-        # Rejected install/register must fall back to CLI for the session
-        assert_terms(
-            self,
-            preflight,
-            (
-                "cli-fallback",
-            ),
-        )
-        self.assertNotIn("Use CLI for this session", preflight)
+        self.assertNotIn("activation — always approved", preflight)
+        self.assertIn("cli-fallback", preflight)
         self.assertIn("transport choice", self.skill)
         assert_terms(
             self,
             contract,
             (
                 "That live surface is authoritative",
-                "requires fresh direct-user approval",
-                "keep that choice session-local",
-                "do not repeat the prompt",
+                "searches the current host MCP state first",
+                "requires fresh direct-user confirmation",
+                "Only rejection permits the CLI fallback",
+                "Keep that choice activation-local",
+                "run a new preflight on each",
             ),
         )
 

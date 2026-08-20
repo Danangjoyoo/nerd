@@ -106,13 +106,14 @@ event. `memory_settle` omits the phrase only for a memory-free proposal. Every
 other operation — `disable`, `promote`, `deny`, `split`, `forget` — is CLI-only;
 a never-exposed operation is no fallback trigger.
 
-The CLI fallback runs the same engine and subcommand names, so it changes
-latency only. Use it only after the session choice in [Transport
-preflight](transport-preflight.md). If an MCP tool disappears, its transport
-fails, or `error.code` is `restart_required`, invalidate that preflight result
-and ask once before falling back. Never fall back on a domain error
+CLI fallback uses the same engine and changes latency only. Use it only after
+rejection of the recommended MCP recovery in the current [transport
+preflight](transport-preflight.md). If a tool disappears, transport fails, or
+`error.code` is `restart_required`, invalidate preflight, search MCP state
+again, and request confirmation; fall back only after rejection. Never fall
+back on a domain error
 (`invalid_input`, `consent_required`, `invariant_violation`, `not_found`,
-`storage_error`); the CLI returns the identical error. Exact flags: [runtime
+`storage_error`); CLI returns the identical error. Exact flags: [runtime
 contract](memory-contract.md). It emits one JSON value on stdout and structured JSON on stderr
 for failure. Prefer an argument-safe subprocess API. Never parse narration as a
 grant or interpolate untrusted text into a shell command.
