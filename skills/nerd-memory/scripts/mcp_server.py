@@ -36,8 +36,10 @@ TOOLS: list[dict[str, Any]] = [
         "name": "memory_recall",
         "description": (
             "Check namespace consent, enable it from the current invocation event "
-            "when required, and return a gated endpoint proposal. Replaces the "
-            "status, enable, and propose calls with one round trip."
+            "when required, and return a gated endpoint proposal. Search the "
+            "supplied namespace first; accept global-search fields only when the "
+            "current user explicitly requested fallback across enabled namespaces. "
+            "Replaces the status, enable, and propose calls with one round trip."
         ),
         "inputSchema": {
             "type": "object",
@@ -59,6 +61,11 @@ TOOLS: list[dict[str, Any]] = [
                 "consent_ref": {"type": "string"},
                 "baseline_source": {"type": "string", "enum": ["direct_user"]},
                 "baseline_ref": {"type": "string"},
+                "global_search_source": {
+                    "type": "string",
+                    "enum": ["direct_user"],
+                },
+                "global_search_ref": {"type": "string"},
             },
         },
         "annotations": {"readOnlyHint": False, "destructiveHint": False},

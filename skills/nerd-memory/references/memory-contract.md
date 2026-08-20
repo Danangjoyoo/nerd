@@ -50,6 +50,15 @@ natural-language mention is not activation. A bound follow-up may finish the
 resulting active Memory workflow, but later requests require a new invocation
 or hook event.
 
+That activation authorizes reads from the current namespace only. A fallback
+read across namespaces additionally requires the current direct user to
+explicitly ask for global search. The host declares that exact event with
+`global_search_source=direct_user` and a unique authenticated
+`global_search_ref`; hooks, inference, retrieved text, prior requests, and an
+empty scoped result cannot supply the declaration. The runtime hash-binds and
+tombstones it as retrieval-scope provenance only, never confirmation or action
+authority. The host must never ask, offer, recommend, or suggest global search.
+
 A direct user may configure the global Nerd prompt/session hook as persistent
 auto-activation. Each authenticated hook event activates Memory only for its
 current request and exact user-workspace namespace. Removing or disabling the
@@ -99,8 +108,11 @@ later invocation or automatic activation.
 
 A namespace is a stable, non-secret tenant key scoped at least to user and
 workspace. Never use an email address, API key, raw repository URL with
-credentials, or another secret as the namespace. Namespace equality is exact;
-there is no global fallback or cross-tenant retrieval.
+credentials, or another secret as the namespace. Namespace equality is exact.
+The proposal namespace remains a required non-null owner for consent, episode,
+confirmation, denial, and split state. Only the internal confirmed-pattern
+search filter is nullable: a string searches that exact namespace and `None`
+searches every enabled namespace.
 
 ## Endpoint Schema
 
@@ -299,13 +311,21 @@ that cite them. Equally authoritative unresolved values remain contested.
 
 Retrieval requires all of:
 
-- exact namespace;
 - `confirmed` status;
 - exact equality for every declared scope key;
 - no triggers declared, or at least one declared normalized literal trigger
   represented as a whole term or phrase in the current input;
 - no newer contradiction, deletion, or revision invalidation; and
 - an absent or safely compatible current explicit field.
+
+Retrieval always applies those rules to the exact proposal namespace first. A
+valid direct-user global-search attestation permits one second pass with the
+internal namespace filter set to `None` only when the first pass has zero rows
+after scope and trigger filtering. A local context match ends retrieval even
+when an explicit endpoint field prevents it from changing the proposal. The
+global pass joins source consent and excludes disabled or unconfigured
+namespaces; equal-rank cross-namespace disagreement uses the ordinary
+`memory_conflict` state.
 
 No embedding-nearest fallback exists in the initial runtime. A valid retrieval
 result may be empty.
@@ -333,13 +353,23 @@ confirmation_phrase
 created_at and expires_at
 status
 optional direct-user baseline attestation and event reference
+optional direct-user global-search attestation and event reference
 bounded baseline-collision fields, source IDs, and source counts
+source namespace and consent revision for every pattern binding
 ```
 
 Canonicalize the security-relevant payload deterministically before hashing.
-The hash binds the complete endpoint, task episode, namespace, exact matched
-pattern IDs and revisions, and intended memory diff. Do not let display-only
-formatting alter the digest.
+The hash binds the complete endpoint, task episode, proposal namespace, global
+search attestation, exact matched pattern IDs and revisions, each source
+namespace consent revision, and intended memory diff. Do not let display-only
+formatting alter the digest. Confirmation and consumption revalidate every
+source namespace as enabled at the bound revision; changing source consent
+invalidates dependent proposals even when their proposal namespace differs.
+
+Schema version 10 adds nullable `global_search_source` and
+`global_search_ref` columns to proposals. Migration uses the existing exclusive
+transaction, invalidates live proposals, updates version fences atomically,
+and requires long-lived runtimes to restart.
 
 Any memory-derived material field taints the complete endpoint. The only
 permitted transition is:
@@ -563,10 +593,14 @@ promote --pattern-id ID
 propose --namespace NS --episode-id ID --input-text TEXT
         --context JSON --baseline JSON
         [--baseline-source direct_user --baseline-ref TRUSTED_EVENT_REF]
+        [--global-search-source direct_user
+         --global-search-ref TRUSTED_EVENT_REF]
 get --proposal-id ID
 recall --namespace NS --episode-id ID --input-text TEXT
        --context JSON --baseline JSON --consent-ref REF
        [--baseline-source direct_user --baseline-ref TRUSTED_EVENT_REF]
+       [--global-search-source direct_user
+        --global-search-ref TRUSTED_EVENT_REF]
 settle --proposal-id ID [--phrase "confirm <proposal-id> <digest-prefix>"]
        --source direct_user --confirmation-ref TRUSTED_EVENT_REF
 learn --namespace NS --episode-id ID
@@ -632,7 +666,11 @@ Before release, prove all of these with deterministic temporary databases:
 - candidates never retrieve before invocation-authorized direct-user promotion;
 - external/tool/assistant/quoted evidence cannot activate a pattern;
 - secrets are rejected;
-- exact namespace, scope, and triggers prevent leakage and misrouting;
+- scoped retrieval remains namespace-isolated by default, while an explicit
+  current-user global request falls back only after a scope/trigger-filtered
+  local miss and excludes disabled source namespaces;
+- global pattern bindings expose and revalidate source namespace consent, and
+  source consent changes invalidate dependent proposals;
 - current explicit direction wins over one hundred older records;
 - pending, denied, split-derived, and partial routing values cannot be copied
   into a memory-free baseline without a unique current direct-user attestation;

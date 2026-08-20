@@ -73,7 +73,7 @@ DENIAL_RESOLUTIONS = frozenset({"agent_mistake", "human_forgot"})
 DEFAULT_MIN_EPISODES = 3
 DEFAULT_GRANT_TTL_SECONDS = 300
 MAX_JSON_BYTES = 1_000_000
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 # Both mean the live handle can no longer write safely and the runtime must be
 # restarted. Never retry an operation through a handle that raised either.
@@ -87,6 +87,9 @@ SCHEMA_RESTART_MESSAGES = (
 )
 BASELINE_ATTESTATION_EFFECT = (
     "provenance only; does not confirm memory or authorize action"
+)
+GLOBAL_SEARCH_ATTESTATION_EFFECT = (
+    "retrieval scope only; does not confirm memory or authorize action"
 )
 _VERSION_FENCED_TABLES = (
     "consents",
@@ -656,6 +659,8 @@ class MemoryStore:
             baseline_hash TEXT NOT NULL,
             baseline_source TEXT,
             baseline_ref TEXT,
+            global_search_source TEXT,
+            global_search_ref TEXT,
             baseline_collisions_json TEXT NOT NULL DEFAULT '[]',
             consent_revision INTEGER NOT NULL,
             endpoint_json TEXT NOT NULL,
@@ -795,6 +800,16 @@ class MemoryStore:
             if "baseline_ref" not in proposal_columns:
                 self._connection.execute(
                     "ALTER TABLE proposals ADD COLUMN baseline_ref TEXT"
+                )
+                migrated = True
+            if "global_search_source" not in proposal_columns:
+                self._connection.execute(
+                    "ALTER TABLE proposals ADD COLUMN global_search_source TEXT"
+                )
+                migrated = True
+            if "global_search_ref" not in proposal_columns:
+                self._connection.execute(
+                    "ALTER TABLE proposals ADD COLUMN global_search_ref TEXT"
                 )
                 migrated = True
             if "baseline_collisions_json" not in proposal_columns:
@@ -1024,6 +1039,32 @@ class MemoryStore:
         )
 
     @staticmethod
+    def _invalidate_namespace_proposals(
+        connection: sqlite3.Connection,
+        namespace: str,
+        reason: str,
+    ) -> None:
+        connection.execute(
+            """
+            UPDATE proposals
+            SET status = 'invalidated', grant_digest = NULL,
+                grant_expires_at = NULL, invalid_reason = ?
+            WHERE (
+                namespace = ? OR proposal_id IN (
+                    SELECT proposal_patterns.proposal_id
+                    FROM proposal_patterns
+                    JOIN patterns USING(pattern_id)
+                    WHERE patterns.namespace = ?
+                )
+            ) AND status IN (
+                'pending_confirmation', 'confirmed',
+                'memory_free', 'memory_conflict'
+            )
+            """,
+            (reason, namespace, namespace),
+        )
+
+    @staticmethod
     def _invalidate_namespace_routing_state(
         connection: sqlite3.Connection,
         namespace: str,
@@ -1062,17 +1103,10 @@ class MemoryStore:
             + split_filter,
             (reason, *parameters),
         )
-        connection.execute(
-            """
-            UPDATE proposals
-            SET status = 'invalidated', grant_digest = NULL,
-                grant_expires_at = NULL, invalid_reason = ?
-            WHERE namespace = ? AND status IN (
-                'pending_confirmation', 'confirmed',
-                'memory_free', 'memory_conflict'
-            )
-            """,
-            (reason, namespace),
+        MemoryStore._invalidate_namespace_proposals(
+            connection,
+            namespace,
+            reason,
         )
 
     def enable(self, namespace: str, *, consent_ref: str) -> dict[str, Any]:
@@ -1100,17 +1134,10 @@ class MemoryStore:
                 "INSERT INTO consent_events VALUES (?, ?, 1, ?, ?)",
                 (event_id, namespace, consent_ref, now),
             )
-            connection.execute(
-                """
-                UPDATE proposals
-                SET status = 'invalidated', grant_digest = NULL,
-                    grant_expires_at = NULL, invalid_reason = 'consent_revision_changed'
-                WHERE namespace = ? AND status IN (
-                    'pending_confirmation', 'confirmed',
-                    'memory_free', 'memory_conflict'
-                )
-                """,
-                (namespace,),
+            self._invalidate_namespace_proposals(
+                connection,
+                namespace,
+                "consent_revision_changed",
             )
             connection.execute(
                 """
@@ -1164,17 +1191,10 @@ class MemoryStore:
                 "INSERT INTO consent_events VALUES (?, ?, 0, ?, ?)",
                 (event_id, namespace, consent_ref, now),
             )
-            connection.execute(
-                """
-                UPDATE proposals
-                SET status = 'invalidated', grant_digest = NULL,
-                    grant_expires_at = NULL, invalid_reason = 'consent_disabled'
-                WHERE namespace = ? AND status IN (
-                    'pending_confirmation', 'confirmed',
-                    'memory_free', 'memory_conflict'
-                )
-                """,
-                (namespace,),
+            self._invalidate_namespace_proposals(
+                connection,
+                namespace,
+                "consent_disabled",
             )
             connection.execute(
                 """
@@ -1237,6 +1257,8 @@ class MemoryStore:
         consent_ref: str,
         baseline_source: str | None = None,
         baseline_ref: str | None = None,
+        global_search_source: str | None = None,
+        global_search_ref: str | None = None,
     ) -> dict[str, Any]:
         """Check consent, enable when required, then propose."""
         consent = self.consent_status(namespace)
@@ -1253,6 +1275,8 @@ class MemoryStore:
             baseline=baseline,
             baseline_source=baseline_source,
             baseline_ref=baseline_ref,
+            global_search_source=global_search_source,
+            global_search_ref=global_search_ref,
         )
         return {
             "consent": {
@@ -2094,15 +2118,19 @@ class MemoryStore:
         for binding in bindings:
             if binding.get("role") != "conflict_candidate":
                 continue
-            by_field.setdefault(str(binding["field"]), []).append(
-                {
-                    "pattern_id": binding["pattern_id"],
-                    "revision": binding["revision"],
-                    "candidate_effect": binding["candidate_effect"],
-                    "support_episodes": binding["support_episodes"],
-                    "evidence_sample": binding["evidence_sample"],
-                }
-            )
+            candidate = {
+                "pattern_id": binding["pattern_id"],
+                "revision": binding["revision"],
+                "candidate_effect": binding["candidate_effect"],
+                "support_episodes": binding["support_episodes"],
+                "evidence_sample": binding["evidence_sample"],
+            }
+            if "source_namespace" in binding:
+                candidate["source_namespace"] = binding["source_namespace"]
+                candidate["source_consent_revision"] = binding[
+                    "source_consent_revision"
+                ]
+            by_field.setdefault(str(binding["field"]), []).append(candidate)
         return [
             {
                 "field": field,
@@ -2295,6 +2323,80 @@ class MemoryStore:
             "effect": BASELINE_ATTESTATION_EFFECT,
         }
 
+    @staticmethod
+    def _global_search_attestation_payload(
+        source: str | None,
+        event_ref: str | None,
+    ) -> dict[str, str] | None:
+        if source is None and event_ref is None:
+            return None
+        if source != "direct_user" or not isinstance(event_ref, str) or not event_ref:
+            raise MemoryInvariantError(
+                "persisted global search attestation is incomplete or untrusted"
+            )
+        return {
+            "source": source,
+            "ref_digest": _confirmation_ref_digest(event_ref),
+            "effect": GLOBAL_SEARCH_ATTESTATION_EFFECT,
+        }
+
+    def _matching_confirmed_patterns(
+        self,
+        connection: sqlite3.Connection,
+        namespace: str | None,
+        context: Mapping[str, Any],
+        input_text: str,
+        now: str,
+    ) -> list[tuple[tuple[int, int], sqlite3.Row]]:
+        rows = connection.execute(
+            """
+            SELECT patterns.*, consents.revision AS source_consent_revision
+            FROM patterns
+            JOIN consents ON consents.namespace = patterns.namespace
+            WHERE (? IS NULL OR patterns.namespace = ?)
+              AND patterns.status = 'confirmed'
+              AND consents.enabled = 1
+            ORDER BY patterns.pattern_type, patterns.pattern_key,
+                     patterns.pattern_id
+            """,
+            (namespace, namespace),
+        ).fetchall()
+        matches: list[tuple[tuple[int, int], sqlite3.Row]] = []
+        for row in rows:
+            try:
+                _decode_stored_pattern_value(
+                    row["pattern_type"],
+                    row["value_json"],
+                    row["operation"],
+                )
+            except (MemoryEngineError, ValueError, TypeError, json.JSONDecodeError):
+                connection.execute(
+                    """
+                    UPDATE patterns
+                    SET status = 'contested', revision = revision + 1,
+                        updated_at = ?
+                    WHERE pattern_id = ?
+                    """,
+                    (now, row["pattern_id"]),
+                )
+                self._invalidate_pattern_proposals(
+                    connection,
+                    row["pattern_id"],
+                    "invalid_persisted_routing_profile",
+                )
+                continue
+            scope_value = _decode_json(row["scope_json"])
+            if not _scope_matches(scope_value, context):
+                continue
+            triggers_value = _decode_json(row["triggers_json"])
+            trigger_score = _trigger_score(triggers_value, input_text)
+            if trigger_score is None:
+                continue
+            matches.append(
+                ((_scope_specificity(scope_value), trigger_score), row)
+            )
+        return matches
+
     def propose(
         self,
         *,
@@ -2305,6 +2407,8 @@ class MemoryStore:
         baseline: Mapping[str, Any],
         baseline_source: str | None = None,
         baseline_ref: str | None = None,
+        global_search_source: str | None = None,
+        global_search_ref: str | None = None,
     ) -> dict[str, Any]:
         namespace = _require_text("namespace", namespace, max_length=512)
         episode_id = _require_text("episode_id", episode_id, max_length=1024)
@@ -2362,11 +2466,31 @@ class MemoryStore:
             baseline_source,
             baseline_ref,
         )
+        if (global_search_source is None) != (global_search_ref is None):
+            raise MemoryInputError(
+                "global_search_source and global_search_ref must be supplied together"
+            )
+        if global_search_source is not None:
+            global_search_source = _require_text(
+                "global_search_source", global_search_source, max_length=64
+            ).casefold()
+            if global_search_source != "direct_user":
+                raise MemoryInvariantError(
+                    "only a declared direct-user event may request global search"
+                )
+            global_search_ref = _require_text(
+                "global_search_ref", global_search_ref, max_length=2048
+            )
+        global_search_attestation = self._global_search_attestation_payload(
+            global_search_source,
+            global_search_ref,
+        )
         _reject_sensitive(
             input_text,
             context_value,
             baseline_value,
             baseline_ref,
+            global_search_ref,
         )
         proposed = copy.deepcopy(baseline_value)
         proposed.setdefault("endpoint", "abstain")
@@ -2395,54 +2519,35 @@ class MemoryStore:
                     "baseline attestation is required",
                     baseline_collisions,
                 )
-            if baseline_attestation is not None:
-                assert baseline_ref is not None
-                self._claim_trusted_event_ref(connection, baseline_ref, now)
-            rows = connection.execute(
-                """
-                SELECT * FROM patterns
-                WHERE namespace = ? AND status = 'confirmed'
-                ORDER BY pattern_type, pattern_key, pattern_id
-                """,
-                (namespace,),
-            ).fetchall()
+            trusted_refs = {
+                event_ref
+                for event_ref in (baseline_ref, global_search_ref)
+                if event_ref is not None
+            }
+            for event_ref in sorted(trusted_refs):
+                self._claim_trusted_event_ref(connection, event_ref, now)
+
+            matches = self._matching_confirmed_patterns(
+                connection,
+                namespace,
+                context_value,
+                input_text,
+                now,
+            )
+            if not matches and global_search_attestation is not None:
+                matches = self._matching_confirmed_patterns(
+                    connection,
+                    None,
+                    context_value,
+                    input_text,
+                    now,
+                )
 
             by_type: dict[str, list[tuple[tuple[int, int], sqlite3.Row]]] = {
                 item: [] for item in PATTERN_TYPES
             }
-            for row in rows:
-                try:
-                    _decode_stored_pattern_value(
-                        row["pattern_type"],
-                        row["value_json"],
-                        row["operation"],
-                    )
-                except (MemoryEngineError, ValueError, TypeError, json.JSONDecodeError):
-                    connection.execute(
-                        """
-                        UPDATE patterns
-                        SET status = 'contested', revision = revision + 1,
-                            updated_at = ?
-                        WHERE pattern_id = ?
-                        """,
-                        (now, row["pattern_id"]),
-                    )
-                    self._invalidate_pattern_proposals(
-                        connection,
-                        row["pattern_id"],
-                        "invalid_persisted_routing_profile",
-                    )
-                    continue
-                scope_value = _decode_json(row["scope_json"])
-                if not _scope_matches(scope_value, context_value):
-                    continue
-                triggers_value = _decode_json(row["triggers_json"])
-                trigger_score = _trigger_score(triggers_value, input_text)
-                if trigger_score is None:
-                    continue
-                by_type[row["pattern_type"]].append(
-                    ((_scope_specificity(scope_value), trigger_score), row)
-                )
+            for rank, row in matches:
+                by_type[row["pattern_type"]].append((rank, row))
 
             for pattern_type in PATTERN_TYPES:
                 # A current, explicit field is authoritative.  Even append/prepend
@@ -2506,6 +2611,8 @@ class MemoryStore:
                 bindings.append(
                     {
                         "pattern_id": row["pattern_id"],
+                        "source_namespace": row["namespace"],
+                        "source_consent_revision": row["source_consent_revision"],
                         "role": role,
                         "field": field,
                         "candidate_effect": copy.deepcopy(candidate_effect),
@@ -2535,6 +2642,7 @@ class MemoryStore:
                 "context_hash": canonical_hash(context_value),
                 "baseline_hash": canonical_hash(baseline_value),
                 "baseline_attestation": baseline_attestation,
+                "global_search_attestation": global_search_attestation,
                 "baseline_collisions": baseline_collisions,
                 "proposed_endpoint": proposed,
                 "memory_diff": memory_diff,
@@ -2568,6 +2676,7 @@ class MemoryStore:
                 INSERT INTO proposals(
                     proposal_id, namespace, episode_id, input_hash, context_hash,
                     baseline_hash, baseline_source, baseline_ref,
+                    global_search_source, global_search_ref,
                     baseline_collisions_json,
                     consent_revision, endpoint_json, diff_json,
                     pattern_bindings_json,
@@ -2575,7 +2684,7 @@ class MemoryStore:
                     expires_at, grant_digest, grant_expires_at, created_at, confirmed_at,
                     consumed_at, invalid_reason
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-                          NULL, NULL, ?, NULL, NULL, ?)
+                          ?, ?, NULL, NULL, ?, NULL, NULL, ?)
                 """,
                 (
                     proposal_id,
@@ -2586,6 +2695,8 @@ class MemoryStore:
                     hash_payload["baseline_hash"],
                     baseline_source,
                     baseline_ref,
+                    global_search_source,
+                    global_search_ref,
                     canonical_json(baseline_collisions),
                     consent["revision"],
                     canonical_json(proposed),
@@ -2642,6 +2753,11 @@ class MemoryStore:
                 "baseline_attestation": MemoryStore._baseline_attestation_payload(
                     row["baseline_source"], row["baseline_ref"]
                 ),
+                "global_search_attestation": (
+                    MemoryStore._global_search_attestation_payload(
+                        row["global_search_source"], row["global_search_ref"]
+                    )
+                ),
                 "baseline_collisions": _decode_json(
                     row["baseline_collisions_json"]
                 ),
@@ -2674,6 +2790,15 @@ class MemoryStore:
                     "effect": BASELINE_ATTESTATION_EFFECT,
                 }
                 if row["baseline_source"] is not None
+                else None
+            ),
+            "global_search_attestation": (
+                {
+                    "source": row["global_search_source"],
+                    "ref": row["global_search_ref"],
+                    "effect": GLOBAL_SEARCH_ATTESTATION_EFFECT,
+                }
+                if row["global_search_source"] is not None
                 else None
             ),
             "baseline_collisions": _decode_json(
@@ -2729,6 +2854,9 @@ class MemoryStore:
             "baseline_attestation": self._baseline_attestation_payload(
                 row["baseline_source"], row["baseline_ref"]
             ),
+            "global_search_attestation": self._global_search_attestation_payload(
+                row["global_search_source"], row["global_search_ref"]
+            ),
             "baseline_collisions": _decode_json(
                 row["baseline_collisions_json"]
             ),
@@ -2743,6 +2871,18 @@ class MemoryStore:
         if not hmac.compare_digest(actual_hash, row["proposal_hash"]):
             raise MemoryInvariantError("proposal integrity check failed")
         for binding in bindings:
+            source_consent = connection.execute(
+                "SELECT enabled, revision FROM consents WHERE namespace = ?",
+                (binding["source_namespace"],),
+            ).fetchone()
+            if source_consent is None or not bool(source_consent["enabled"]):
+                raise MemoryInvariantError(
+                    "a proposal source namespace is no longer enabled"
+                )
+            if source_consent["revision"] != binding["source_consent_revision"]:
+                raise MemoryInvariantError(
+                    "a proposal source namespace consent revision changed"
+                )
             pattern = connection.execute(
                 "SELECT * FROM patterns WHERE pattern_id = ?",
                 (binding["pattern_id"],),
@@ -4389,6 +4529,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "--baseline-ref",
         help="Unique direct-user event reference paired with --baseline-source.",
     )
+    propose.add_argument("--global-search-source", choices=("direct_user",))
+    propose.add_argument("--global-search-ref")
 
     get_parser = commands.add_parser("get", aliases=["get-proposal"])
     get_parser.add_argument("--proposal-id", required=True)
@@ -4428,6 +4570,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     recall.add_argument("--baseline-source", choices=("direct_user",))
     recall.add_argument("--baseline-ref")
+    recall.add_argument("--global-search-source", choices=("direct_user",))
+    recall.add_argument("--global-search-ref")
 
     settle = commands.add_parser(
         "settle",
@@ -4573,6 +4717,8 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
             baseline=_json_argument("--baseline", arguments.baseline),
             baseline_source=arguments.baseline_source,
             baseline_ref=arguments.baseline_ref,
+            global_search_source=arguments.global_search_source,
+            global_search_ref=arguments.global_search_ref,
         )
     if command in {"get", "get-proposal"}:
         return store.get_proposal(arguments.proposal_id)
@@ -4595,6 +4741,8 @@ def _run_command(store: MemoryStore, arguments: argparse.Namespace) -> Any:
             consent_ref=arguments.consent_ref,
             baseline_source=arguments.baseline_source,
             baseline_ref=arguments.baseline_ref,
+            global_search_source=arguments.global_search_source,
+            global_search_ref=arguments.global_search_ref,
         )
     if command == "settle":
         return store.settle(

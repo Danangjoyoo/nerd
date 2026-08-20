@@ -1597,7 +1597,8 @@ class MemoryContractTests(unittest.TestCase):
                 "pending memory proposal",
                 "`abstain`",
                 "Never force a nearest match",
-                "use only `confirmed` patterns matching the exact namespace, scope, and trigger context",
+                "searches the exact current namespace first",
+                "explicit global attestation",
                 "For `memory_conflict`",
             ),
         )
@@ -1783,9 +1784,12 @@ class MemoryContractTests(unittest.TestCase):
                 "start a fresh session when physical context removal is required",
                 "`enabled` records local persistence state only",
                 "the user-installed hook, not that flag, supplies standing activation",
-                "Never search another namespace",
+                "search the current namespace first",
+                "explicitly asks for global search",
+                "Never ask, offer, recommend, or suggest global search",
             ),
         )
+        self.assertNotIn("Never search another namespace", body)
         assert_terms(
             self,
             contract,
@@ -1802,6 +1806,9 @@ class MemoryContractTests(unittest.TestCase):
                 "The hook cannot confirm a Memory Proposal",
                 "Memory persists enablement per namespace",
                 "Namespace equality is exact",
+                "`None` searches every enabled namespace",
+                "global_search_source",
+                "global_search_ref",
                 "Every successful command writes one JSON value to stdout",
                 "A prompt-only simulation does not satisfy this contract",
             ),

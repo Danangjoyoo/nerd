@@ -143,6 +143,14 @@ class MemoryMcpServerTests(unittest.TestCase):
             self.assertIn("description", tool)
         inspect_tool = next(t for t in tools if t["name"] == "memory_inspect")
         self.assertTrue(inspect_tool["annotations"]["readOnlyHint"])
+        recall_tool = next(t for t in tools if t["name"] == "memory_recall")
+        self.assertEqual(
+            recall_tool["inputSchema"]["properties"]["global_search_source"]["enum"],
+            ["direct_user"],
+        )
+        self.assertIn(
+            "global_search_ref", recall_tool["inputSchema"]["properties"]
+        )
 
     def test_closed_stream_reports_server_stderr(self):
         session = ServerSession.__new__(ServerSession)
@@ -199,6 +207,21 @@ class MemoryMcpServerTests(unittest.TestCase):
         self.assertEqual(
             json.loads(result["content"][0]["text"]), result["structuredContent"]
         )
+
+    def test_recall_accepts_explicit_global_search_attestation(self):
+        result = self.session.call(
+            "memory_recall",
+            self.recall_arguments(
+                global_search_source="direct_user",
+                global_search_ref="thread-global:turn-1",
+            ),
+        )
+
+        self.assertFalse(result["isError"], result)
+        attestation = result["structuredContent"]["proposal"][
+            "global_search_attestation"
+        ]
+        self.assertEqual(attestation["source"], "direct_user")
 
     def seed_pattern(self, namespace: str, key: str) -> None:
         """Create a real consolidated pattern so isolation has something to leak."""
@@ -361,6 +384,25 @@ class MemoryMcpArgumentContractTests(unittest.TestCase):
             self.error_code("memory_inspect", {"namespace": "user:x", "bogus": 1}),
             "invalid_input",
         )
+
+    def test_global_search_attestation_requires_both_arguments(self):
+        base = {
+            "namespace": "user:x",
+            "episode_id": "episode-x",
+            "input_text": "plan this",
+            "context": {},
+            "baseline": empty_endpoint("plan"),
+            "consent_ref": "thread-x:turn-1",
+        }
+        for partial in (
+            {"global_search_source": "direct_user"},
+            {"global_search_ref": "thread-x:turn-1"},
+        ):
+            with self.subTest(partial=partial):
+                self.assertEqual(
+                    self.error_code("memory_recall", {**base, **partial}),
+                    "invalid_input",
+                )
 
     def test_argument_errors_match_the_cli_error_code(self):
         completed = subprocess.run(

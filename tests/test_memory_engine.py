@@ -596,23 +596,36 @@ class CompositeOperationTests(unittest.TestCase):
         arguments.update(overrides)
         return self.store.recall(**arguments)
 
-    def promote_goal(self):
+    def promote_goal(
+        self,
+        *,
+        namespace=None,
+        pattern_key="release-goal",
+        value="ship the release candidate",
+        scope=None,
+    ):
+        target_namespace = namespace or self.namespace
+        if not self.store.consent_status(target_namespace)["enabled"]:
+            self.store.enable(
+                target_namespace,
+                consent_ref=f"{pattern_key}:enable",
+            )
         for index in range(3):
             self.store.observe(
-                namespace=self.namespace,
-                episode_id=f"episode-seed-{index}",
+                namespace=target_namespace,
+                episode_id=f"{pattern_key}-seed-{index}",
                 pattern_type="goal",
-                pattern_key="release-goal",
-                value="ship the release candidate",
-                scope={"repo": "nerd"},
+                pattern_key=pattern_key,
+                value=value,
+                scope=scope or {"repo": "nerd"},
                 triggers=["release"],
                 operation="fill",
                 source="direct_user",
-                evidence_ref=f"thread-seed-{index}:turn-2",
+                evidence_ref=f"{pattern_key}-thread-{index}:turn-2",
             )
-        patterns = self.store.consolidate(self.namespace, min_episodes=3)
+        patterns = self.store.consolidate(target_namespace, min_episodes=3)
         pattern = next(
-            item for item in patterns if item["pattern_key"] == "release-goal"
+            item for item in patterns if item["pattern_key"] == pattern_key
         )
         return promote_pattern(self.store, pattern["pattern_id"])
 
@@ -640,6 +653,95 @@ class CompositeOperationTests(unittest.TestCase):
 
         self.assertFalse(result["proposal"]["memory_influenced"])
         self.assertEqual(result["proposal"]["status"], "memory_free")
+
+    def test_recall_uses_explicit_global_search_only_after_a_scoped_miss(self):
+        other_namespace = "user:global-source"
+        self.store.enable(other_namespace, consent_ref="global-source:enable")
+        pattern = self.promote_goal(
+            namespace=other_namespace,
+            pattern_key="global-release-goal",
+            value="ship the globally remembered release",
+        )
+
+        scoped = self.recall(episode_id="scoped-only")
+        global_result = self.recall(
+            episode_id="explicit-global",
+            global_search_source="direct_user",
+            global_search_ref="thread-global:turn-1",
+        )
+
+        self.assertEqual(scoped["proposal"]["status"], "memory_free")
+        proposal = global_result["proposal"]
+        self.assertEqual(proposal["status"], "pending_confirmation")
+        self.assertEqual(
+            proposal["proposed_endpoint"]["goal"],
+            "ship the globally remembered release",
+        )
+        self.assertEqual(
+            proposal["global_search_attestation"]["source"], "direct_user"
+        )
+        self.assertEqual(
+            proposal["pattern_bindings"][0]["pattern_id"], pattern["pattern_id"]
+        )
+        self.assertEqual(
+            proposal["pattern_bindings"][0]["source_namespace"], other_namespace
+        )
+
+    def test_recall_prefers_a_local_match_over_explicit_global_search(self):
+        other_namespace = "user:global-loses"
+        self.store.enable(other_namespace, consent_ref="global-loses:enable")
+        self.promote_goal(
+            namespace=other_namespace,
+            pattern_key="global-release-goal",
+            value="use the global release goal",
+            scope={"repo": "nerd", "surface": "release"},
+        )
+        local = self.promote_goal(
+            pattern_key="local-release-goal",
+            value="use the local release goal",
+        )
+
+        result = self.recall(
+            episode_id="local-wins",
+            global_search_source="direct_user",
+            global_search_ref="thread-local-wins:turn-1",
+        )
+
+        proposal = result["proposal"]
+        self.assertEqual(
+            proposal["proposed_endpoint"]["goal"], "use the local release goal"
+        )
+        self.assertEqual(
+            proposal["pattern_bindings"][0]["pattern_id"], local["pattern_id"]
+        )
+        self.assertEqual(
+            proposal["pattern_bindings"][0]["source_namespace"], self.namespace
+        )
+
+    def test_recall_global_search_follows_a_scope_filtered_local_miss(self):
+        other_namespace = "user:global-scope-source"
+        self.store.enable(other_namespace, consent_ref="global-scope:enable")
+        self.promote_goal(
+            pattern_key="wrong-scope-local",
+            value="use the frontend release goal",
+            scope={"repo": "frontend"},
+        )
+        self.promote_goal(
+            namespace=other_namespace,
+            pattern_key="matching-global",
+            value="use the matching global goal",
+        )
+
+        result = self.recall(
+            episode_id="scope-filtered-global",
+            global_search_source="direct_user",
+            global_search_ref="thread-scope-global:turn-1",
+        )
+
+        self.assertEqual(
+            result["proposal"]["proposed_endpoint"]["goal"],
+            "use the matching global goal",
+        )
 
     def test_recall_matches_the_single_step_sequence(self):
         composite = self.recall(episode_id="episode-composite")
@@ -785,6 +887,33 @@ class CompositeCommandLineTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertFalse(payload["consent"]["was_enabled"])
         self.assertIn("proposal_id", payload["proposal"])
+
+    def test_recall_subcommand_accepts_explicit_global_search_attestation(self):
+        completed = self.run_cli(
+            "recall",
+            "--namespace",
+            "user:cli-global",
+            "--episode-id",
+            "episode-cli-global",
+            "--input-text",
+            "plan the release",
+            "--context",
+            json.dumps({"repo": "nerd"}),
+            "--baseline",
+            json.dumps(empty_endpoint("plan")),
+            "--consent-ref",
+            "thread-cli-global:turn-1",
+            "--global-search-source",
+            "direct_user",
+            "--global-search-ref",
+            "thread-cli-global:turn-1",
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        proposal = json.loads(completed.stdout)["proposal"]
+        self.assertEqual(
+            proposal["global_search_attestation"]["source"], "direct_user"
+        )
 
     def test_learn_subcommand_observes_and_consolidates(self):
         enable = self.run_cli(

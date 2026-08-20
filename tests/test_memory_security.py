@@ -155,15 +155,24 @@ class MemorySecurityTests(unittest.TestCase):
         input_text: str = "Build this feature",
         baseline_source: str | None = None,
         baseline_ref: str | None = None,
+        global_search_source: str | None = None,
+        global_search_ref: str | None = None,
     ) -> dict[str, object]:
+        arguments = {
+            "namespace": namespace or self.namespace,
+            "episode_id": episode_id,
+            "input_text": input_text,
+            "context": context or {"repo": "nerd"},
+            "baseline": baseline or empty_endpoint(),
+            "baseline_source": baseline_source,
+            "baseline_ref": baseline_ref,
+        }
+        if global_search_source is not None:
+            arguments["global_search_source"] = global_search_source
+        if global_search_ref is not None:
+            arguments["global_search_ref"] = global_search_ref
         return self.store.propose(
-            namespace=namespace or self.namespace,
-            episode_id=episode_id,
-            input_text=input_text,
-            context=context or {"repo": "nerd"},
-            baseline=baseline or empty_endpoint(),
-            baseline_source=baseline_source,
-            baseline_ref=baseline_ref,
+            **arguments,
         )
 
     def confirm(
@@ -415,7 +424,43 @@ class MemorySecurityTests(unittest.TestCase):
             {"baseline_source", "baseline_ref", "baseline_collisions_json"}
             <= columns
         )
-        self.assertEqual(version, "9")
+        self.assertEqual(version, "10")
+        self.assertEqual(
+            self.store.get_proposal(old_proposal["proposal_id"])["status"],
+            "invalidated",
+        )
+
+    def test_v10_migration_adds_global_search_audit_columns(self):
+        old_proposal = self.propose(episode_id="pre-v10-proposal")
+        self.store.close()
+        connection = sqlite3.connect(self.db)
+        try:
+            drop_version_fences(connection)
+            connection.execute(
+                "ALTER TABLE proposals DROP COLUMN global_search_source"
+            )
+            connection.execute(
+                "ALTER TABLE proposals DROP COLUMN global_search_ref"
+            )
+            connection.execute(
+                "UPDATE metadata SET value = '9' WHERE key = 'schema_version'"
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        self.store = self.engine.MemoryStore(self.db)
+        columns = {
+            row[1]
+            for row in self.store._connection.execute(
+                "PRAGMA table_info(proposals)"
+            ).fetchall()
+        }
+        version = self.store._connection.execute(
+            "SELECT value FROM metadata WHERE key = 'schema_version'"
+        ).fetchone()[0]
+        self.assertTrue({"global_search_source", "global_search_ref"} <= columns)
+        self.assertEqual(version, "10")
         self.assertEqual(
             self.store.get_proposal(old_proposal["proposal_id"])["status"],
             "invalidated",
@@ -475,13 +520,13 @@ class MemorySecurityTests(unittest.TestCase):
         metadata_writer = sqlite3.connect(self.db)
         try:
             metadata_writer.execute(
-                "UPDATE metadata SET value = '10' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '11' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
             with self.assertRaises(self.engine.MemoryInvariantError):
                 self.propose(episode_id="runtime-version-changed")
             metadata_writer.execute(
-                "UPDATE metadata SET value = '9' WHERE key = 'schema_version'"
+                "UPDATE metadata SET value = '10' WHERE key = 'schema_version'"
             )
             metadata_writer.commit()
         finally:
@@ -818,6 +863,88 @@ class MemorySecurityTests(unittest.TestCase):
             self.assertEqual(proposal["status"], "memory_free")
             self.assertFalse(proposal["memory_influenced"])
             self.assertEqual(proposal["memory_diff"], [])
+
+    def test_global_search_requires_a_paired_direct_user_attestation(self):
+        incomplete = (
+            {"global_search_source": "direct_user"},
+            {"global_search_ref": "thread-global:turn-1"},
+        )
+        for index, arguments in enumerate(incomplete):
+            with self.subTest(index=index):
+                with self.assertRaises(self.engine.MemoryInputError):
+                    self.propose(episode_id=f"global-incomplete-{index}", **arguments)
+
+        with self.assertRaises(self.engine.MemoryInvariantError):
+            self.propose(
+                episode_id="global-untrusted",
+                global_search_source="agent_inference",
+                global_search_ref="thread-global:turn-2",
+            )
+
+        first = self.propose(
+            episode_id="global-first",
+            global_search_source="direct_user",
+            global_search_ref="thread-global:turn-3",
+        )
+        self.assertEqual(first["status"], "memory_free")
+        with self.assertRaises(self.engine.MemoryInvariantError):
+            self.propose(
+                episode_id="global-replay",
+                global_search_source="direct_user",
+                global_search_ref="thread-global:turn-3",
+            )
+
+    def test_global_source_consent_change_invalidates_a_bound_proposal(self):
+        source_namespace = "user:global-consent-source"
+        self.store.enable(source_namespace, consent_ref="global-source:enable")
+        self.make_active_pattern(
+            namespace=source_namespace,
+            pattern_key="global-consent-route",
+            value=["use the global consent route"],
+        )
+        proposal = self.propose(
+            episode_id="global-consent-proposal",
+            global_search_source="direct_user",
+            global_search_ref="thread-global-consent:turn-1",
+        )
+        self.assertEqual(proposal["status"], "pending_confirmation")
+
+        self.store.disable(
+            source_namespace,
+            consent_ref="thread-global-consent:turn-2",
+        )
+
+        self.assertEqual(
+            self.store.get_proposal(proposal["proposal_id"])["status"],
+            "invalidated",
+        )
+        with self.assertRaises(self.engine.MemoryInvariantError):
+            self.confirm(
+                proposal,
+                confirmation_ref="thread-global-consent:turn-3",
+            )
+
+    def test_global_search_excludes_disabled_source_namespaces(self):
+        source_namespace = "user:disabled-global-source"
+        self.store.enable(source_namespace, consent_ref="disabled-source:enable")
+        self.make_active_pattern(
+            namespace=source_namespace,
+            pattern_key="disabled-global-route",
+            value=["never retrieve while disabled"],
+        )
+        self.store.disable(
+            source_namespace,
+            consent_ref="disabled-source:disable",
+        )
+
+        proposal = self.propose(
+            episode_id="disabled-global-search",
+            global_search_source="direct_user",
+            global_search_ref="thread-disabled-global:turn-1",
+        )
+
+        self.assertEqual(proposal["status"], "memory_free")
+        self.assertEqual(proposal["pattern_bindings"], [])
 
     def test_list_valued_scope_requires_exact_value_not_a_superset(self):
         self.make_active_pattern(
