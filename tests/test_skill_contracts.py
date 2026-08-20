@@ -297,6 +297,7 @@ class EndpointRouteContractTests(unittest.TestCase):
             (
                 "## Evidence Prerequisites",
                 "Plan collaboratively",
+                "`nerd-brainstorm` owns material design choices",
                 "| Plan needs | Collaborate with | Bring back |",
                 "`nerd-brainstorm` through **Ideate**",
                 "`nerd-explore` through **Explore**",
@@ -305,6 +306,22 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "one resolved endpoint at a time",
                 "Reuse current handoffs",
                 "resume **Plan** through `nerd-smart`",
+            ),
+        )
+
+    def test_document_resolves_material_direction_through_brainstorm(self):
+        body = normalized(skill_body("nerd-document"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Content Prerequisites",
+                "Document collaboratively",
+                "`nerd-brainstorm` owns unresolved audience, message, and structural direction",
+                "`nerd-brainstorm` through **Ideate**",
+                "bring back the selected direction",
+                "resume **Document** through `nerd-smart` before writing",
+                "An explicit user format",
             ),
         )
 

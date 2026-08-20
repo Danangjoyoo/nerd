@@ -34,8 +34,8 @@ The helper preserves existing hook configuration and is safe to run again. Codex
 | `nerd-diagnose` | Establishes confirmed, probable, or unknown causes and stops before repair. |
 | `nerd-review` | Evaluates a named scope and reports prioritized findings without modification. |
 | `nerd-spec` | Defines behavior, requirements, boundaries, or system design before planning. |
-| `nerd-document` | Creates and validates only the requested static documentation artifact. |
-| `nerd-plan` | Produces actionable file-level implementation plans and stops before execution. |
+| `nerd-document` | Resolves material content direction through Brainstorm, then creates and validates only the requested static documentation artifact. |
+| `nerd-plan` | Resolves material design choices through Brainstorm, then produces actionable file-level implementation plans and stops before execution. |
 | `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
 | `nerd-monitor` | Rechecks state without mutation until the requested condition is met. |
 | `nerd-memory` | Manual-only memory (`$nerd-memory` in Codex, `/nerd-memory` in Claude/Cursor) for goal, task, action, result, boundary, verification, and atomic agent/skill/tool/MCP routing patterns; invocation authorizes reading and non-destructive saving, while applying remembered changes still needs exact approval. Runs through the `nerd-memory-tools` MCP server when registered, and falls back to its `python3` CLI otherwise; both surfaces run the same engine. |

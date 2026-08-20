@@ -23,8 +23,10 @@ different endpoint, return to Smart before continuing.
 
 ## Evidence Prerequisites
 
-Plan collaboratively. When another skill can resolve a missing input, use
-`nerd-smart` to hand off to that endpoint, then bring its result back into Plan.
+Plan collaboratively. `nerd-brainstorm` owns material design choices; do not
+turn unresolved alternatives into conditional implementation tasks. When
+another skill can resolve a missing input, use `nerd-smart` to hand off to that
+endpoint, then bring its result back into Plan.
 
 | Plan needs | Collaborate with | Bring back |
 | --- | --- | --- |
