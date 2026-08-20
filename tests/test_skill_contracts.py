@@ -2073,8 +2073,24 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "Never launch a stdio server manually",
                 "CLI script is always approved",
                 "use the CLI automatically",
-                "do not present it as a choice",
+                "Do not present it as a choice",
                 "Do not persist the transport choice",
+            ),
+        )
+        # Activation (restart/enable) is always approved — no approval gate
+        assert_terms(
+            self,
+            preflight,
+            (
+                "always approved",
+            ),
+        )
+        # Rejected install/register must fall back to CLI for the session
+        assert_terms(
+            self,
+            preflight,
+            (
+                "cli-fallback",
             ),
         )
         self.assertNotIn("Use CLI for this session", preflight)

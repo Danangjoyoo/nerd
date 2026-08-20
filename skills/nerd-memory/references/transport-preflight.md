@@ -1,39 +1,56 @@
 # Transport Preflight
 
-Run this once per host session before the first MCP-capable Memory operation.
+Run once per host session before the first MCP-capable Memory operation.
 Keep the result in current conversation state; recheck only after a reported
 restart or explicit request. Do not persist the transport choice as Memory data
 or evidence.
 
-1. Inspect the current callable tool registry for `nerd-memory-tools`:
-   `memory_recall`, `memory_settle`, `memory_learn`, and `memory_inspect`. All
-   four callable means `mcp-live`; configuration proves registration, not live
-   availability. Do not open the store.
-2. Otherwise use the host's read-only MCP status, get, or list command:
+## Step 1 — Check active
+
+Inspect the current callable tool registry for `nerd-memory-tools`: `memory_recall`,
+`memory_settle`, `memory_learn`, and `memory_inspect`. All four callable means
+`mcp-live`. Configuration proves registration, not live availability.
+
+**If `mcp-live` → transport resolved. Continue session.**
+
+## Step 2 — Detect sub-state
+
+Use the host's read-only MCP status, get, or list command:
 
 - `restart-required`: registered but absent from the callable registry.
+- `enable-required`: registration is disabled.
 - `install-required`: the MCP server package or command is missing.
 - `registration-required`: the MCP server is not registered with the host.
-- `enable-required`: registration disabled.
-- `setup-unknown`: no decisive probe.
+- `setup-unknown`: no decisive probe result.
 
-3. Resolve once:
-   - `restart-required`: ask the user to restart or reopen the host before claiming MCP is live.
-   - `install-required`, `registration-required`, or `enable-required`: obtain
-     fresh direct-user approval before installing the MCP server or changing
-     host registration or enablement. If approved, make only the approved
-     setup changes and require a new or restarted session before claiming MCP
-     is live.
-     Invocation, hooks, Memory consent, and prior installation grant no such
-     authority.
-   - `setup-unknown`: run read-only setup diagnosis. If it resolves to an
-     installation, registration, or enablement change, obtain fresh
-     direct-user approval before making that change.
+## Step 3 — Resolve by sub-state
+
+**`restart-required` or `enable-required` (activation — always approved):**
+Perform the activation automatically. Ask the user to restart or reopen the
+host, then wait for the new session before claiming `mcp-live`.
+No approval gate. Continue session using CLI fallback until MCP is live.
+
+**`install-required` or `registration-required` (install/register — ask approval):**
+Present the required action and obtain fresh direct-user approval before
+making any change. Invocation, hooks, Memory consent, and prior installation
+grant no such authority.
+
+- **Approved:** make only the approved changes. Require a new or restarted
+  session before claiming `mcp-live`. Continue session using CLI fallback.
+- **Rejected:** set session transport to `cli-fallback`. Continue session.
+  Do not recheck or re-prompt for this session.
+
+**`setup-unknown`:** Run read-only setup diagnosis. Re-classify the result as
+one of the sub-states above and apply its resolution.
+
+## CLI fallback
 
 Using the local Memory CLI script is always approved and requires no additional
-confirmation. When MCP is not live, use the CLI automatically for the current
-Memory operation; do not present it as a choice or ask permission to use it.
-Never launch a stdio server manually; the host starts it. On `mcp-live`
-transport failure or `restart_required`, invalidate the result, ask the user to
-restart or reopen the host, and use the CLI automatically until MCP is live.
-Domain errors are not transport failures.
+confirmation. When MCP is not live or approval was rejected, use the CLI
+automatically for every Memory operation in this session. Do not present it as
+a choice or ask permission to use it. Never launch a stdio server manually; the
+host starts it.
+
+On `mcp-live` transport failure mid-session, invalidate the result, ask the
+user to restart or reopen the host, and switch to CLI automatically until MCP
+is live again. Domain errors are not transport failures.
