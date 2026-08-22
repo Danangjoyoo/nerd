@@ -231,7 +231,6 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "document-reference-template.md",
             },
             "nerd-plan": {
-                "plan-template.md",
                 "principle-selection.md",
                 "comprehensive.md",
                 "dry.md",
@@ -267,26 +266,23 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             skill_body("nerd-plan"),
             (
-                "implementation plan template",
-                "self-review the finished artifact with `nerd-review` checkpoints",
-                "Stop before execution",
+                "## Plan Format",
+                "## Self-Check",
+                "Do not execute the plan",
             ),
         )
 
-    def test_plan_persistence_depends_on_invocation_source(self):
+    def test_plan_persistence_has_one_default_and_user_override(self):
         body = normalized(skill_body("nerd-plan"))
         assert_terms(
             self,
             body,
             (
-                "Always save Markdown",
-                "Smart route: runtime temp directory",
-                "`/tmp`",
-                "`~/.agent/tmp/`",
-                "Direct user invocation",
-                "`./docs/plans/`",
-                "Direct stays direct after Smart resolves Focus",
-                "show the path",
+                "Save plans to `docs/plans/YYYY-MM-DD-<feature-name>.md`",
+                "A user-requested location wins",
+                "Create the parent directory",
+                "save Markdown",
+                "report the path",
             ),
         )
 
@@ -296,19 +292,45 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             body,
             (
-                "## Evidence Prerequisites",
-                "Plan collaboratively",
-                "`nerd-brainstorm` owns material design choices",
-                "| Plan needs | Collaborate with | Bring back |",
-                "`nerd-brainstorm` through **Ideate**",
-                "`nerd-explore` through **Explore**",
-                "`nerd-diagnose` with `nerd-surgery` through **Diagnose**",
-                "Use every prerequisite skill the work genuinely needs",
+                "## Prerequisites",
+                "Plan from confirmed inputs",
+                "`nerd-brainstorm` owns material design choices through **Ideate**",
+                "`nerd-explore` owns repository evidence through **Explore**",
+                "`nerd-diagnose` with `nerd-surgery` owns root-cause work through **Diagnose**",
+                "Use only prerequisites the work genuinely needs",
                 "one resolved endpoint at a time",
                 "Reuse current handoffs",
                 "resume **Plan** through `nerd-smart`",
             ),
         )
+
+    def test_plan_is_self_contained_compact_and_execution_ready(self):
+        raw_body = skill_body("nerd-plan")
+        body = normalized(raw_body)
+        assert_terms(
+            self,
+            body,
+            (
+                "## Plan Format",
+                "Save plans to `docs/plans/YYYY-MM-DD-<feature-name>.md`",
+                "A user-requested location wins",
+                "one independently reviewable deliverable",
+                "exact file paths",
+                "exact commands and expected results",
+                "Do not duplicate",
+                "Do not execute the plan",
+            ),
+        )
+        self.assertLessEqual(len(raw_body.splitlines()), 140)
+        self.assertFalse(
+            (SKILLS / "nerd-plan" / "references" / "plan-template.md").exists()
+        )
+        for forbidden in (
+            "Task Dependency Graph (TDG)",
+            "one worktree and branch per node",
+            "Smart route: runtime temp directory",
+        ):
+            self.assertNotIn(forbidden, body)
 
     def test_document_resolves_material_direction_through_brainstorm(self):
         body = normalized(skill_body("nerd-document"))
@@ -326,89 +348,44 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
-    def test_plan_enforces_focus_tdd_tdg_and_safe_parallel_integration(self):
-        raw_body = skill_body("nerd-plan")
-        body = normalized(raw_body)
-        template = normalized(
-            (SKILLS / "nerd-plan" / "references" / "plan-template.md").read_text()
-        )
+    def test_plan_uses_ordered_tasks_and_proportionate_proof(self):
+        body = normalized(skill_body("nerd-plan"))
         assert_terms(
             self,
             body,
             (
-                "Copy the Focus Record",
-                "Goal Ledger",
-                "Testable work: red, green, refactor",
-                "Task Dependency Graph (TDG)",
-                "pair one compact task/dependency/wave table with a Mermaid `flowchart LR`",
-                "Show sequential edges, parallel fan-out, and synchronization fan-in",
-                "Omit the diagram only for a single task",
-                "Unless the user requires sequential work",
-                "Subagents need disjoint ownership",
-                "one worktree and branch per node",
-                "Push only with explicit authority",
-                "one branch at a time in TDG order",
-                "cannot guarantee conflict-free or correct integration",
-                "Do not execute them",
+                "Make each task one independently reviewable deliverable",
+                "State `Depends on` only when the order is not obvious",
+                "do not add execution topology or coordination machinery by default",
+                "For behavior changes, plan the failing test",
+                "For static work",
+                "# [Feature] Implementation Plan",
+                "## File Map",
+                "| Path | Action | Responsibility |",
+                "## Tasks",
+                "### Task N: [Deliverable]",
+                "**Outcome:**",
+                "**Files:**",
+                "**Depends on:**",
+                "Add the failing test or baseline check",
+                "Run `[exact command]`",
+                "Make `[specific code or artifact change]`",
+                "## Final Verification",
+                "Include commit, push, deployment, or other external-write steps only",
+                "planning those steps does not authorize their execution",
             ),
-        )
-        self.assertIn("| Discipline | Rule |", raw_body)
-        assert_terms(
-            self,
-            template,
-            (
-                "## Summary",
-                "## Task Dependency Graph (TDG)",
-                "| Task | Wave | Depends on | Produces |",
-                "```mermaid",
-                "flowchart LR",
-                'task1["Wave 1: T1 Contract"]',
-                'task2["Wave 2: T2 Runtime"]',
-                'task3["Wave 2: T3 Docs"]',
-                "task1 --> task2",
-                "task1 --> task3",
-                "task2 --> task4",
-                "task3 --> task4",
-                "Sibling nodes in one wave show parallel work",
-                "child waits for every parent",
-                "## Ordered Work",
-                "**Focus:**",
-                "**Interfaces:**",
-                "| Action | Path |",
-                "| Direction | Contract |",
-                "| Consumes |",
-                "| Produces |",
-                "Write the failing test",
-                "Run the test and confirm failure",
-                "Implement the minimum change",
-                "Run focused and regression proof",
-                "| Check | Command | Expected |",
-                "| ID | Criterion | Evidence |",
-                "## Self Review",
-                "| Checkpoint | Nerd Review lens | Evidence question | Status |",
-                "Level 1 — concrete defects",
-                "Level 2 — consistency and proof",
-                "Level 3 — harmful complexity",
-                "| Concern | Requirement |",
-                "Require explicit authorization before any planned remote push",
-            ),
-        )
-        self.assertLess(
-            template.index("## Self Review"), template.index("## Final Validation")
         )
 
-    def test_plan_delivery_is_a_compact_decision_table(self):
+    def test_plan_delivery_guidance_is_conditional_and_kiss_first(self):
         body = skill_body("nerd-plan")
         assert_terms(
             self,
             body,
             (
-                "| Principle | Use when | Action |",
-                "| **KISS** | Default |",
-                "| **Comprehensive** |",
-                "| **DRY** |",
-                "| **Selection** |",
-                "| **Rationale** |",
+                "Use KISS by default",
+                "[Comprehensive](references/comprehensive.md)",
+                "[DRY](references/dry.md)",
+                "[selection guide](references/principle-selection.md)",
             ),
         )
 

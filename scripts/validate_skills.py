@@ -114,7 +114,6 @@ REQUIRED_REFERENCES = {
     ),
     "nerd-plan": (
         "principle-selection.md",
-        "plan-template.md",
         "kiss.md",
         "dry.md",
         "yagni.md",
