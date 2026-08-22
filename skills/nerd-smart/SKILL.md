@@ -94,7 +94,7 @@ Endpoint routes may add one specialty only when it materially strengthens the co
 routes. 
 - `nerd-loop` may control recurrence without replacing the route.
 - `nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would materially strengthen the confirmed work, or for approved behavior capture after a fresh user event accepts the displayed record and requests **Execute**.
-- `nerd-xfast` remains its self-contained, explicitly lossy path.
+- when `nerd-xfast` composed, it takes precedence over `nerd-memory` and `nerd-loop` as user intentionally selects it, but it does not replace the confirmed endpoint or authorize action.
 
 ## Decide and Work
 
