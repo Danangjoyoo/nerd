@@ -105,6 +105,27 @@ class EndpointRouteContractTests(unittest.TestCase):
             body.index("## Explore Discipline"),
         )
 
+    def test_smart_structural_multi_goal_triggers_are_deterministic(self):
+        body = normalized(skill_body("nerd-smart"))
+        ledger = normalized(
+            (SKILLS / "nerd-smart" / "references" / "multi-goal-ledger.md")
+            .read_text()
+        )
+        for guidance in (body, ledger):
+            assert_terms(
+                self,
+                guidance,
+                (
+                    "Immediately use Multi-Goal Intake",
+                    "numbered or bulleted instruction items",
+                    "multiple instruction sentences",
+                    "multiple instruction paragraphs separated by whitespace",
+                    "without deciding whether the parts are independently completable",
+                ),
+            )
+            self.assertNotIn("signals, not proof", guidance)
+            self.assertNotIn("meaning—not formatting or punctuation", guidance)
+
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
         assert_terms(
@@ -2141,6 +2162,12 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "run a new preflight on each",
             ),
         )
+
+    def test_transport_fallback_gate_uses_short_user_facing_copy(self):
+        preflight = normalized(memory_reference_body("transport-preflight.md"))
+        self.assertIn("`Want to use fallback instead?`", preflight)
+        self.assertIn("no state or recovery explanation", preflight)
+        self.assertIn("Do not ask the user to restart, reopen, or resend", preflight)
 
 
 if __name__ == "__main__":
