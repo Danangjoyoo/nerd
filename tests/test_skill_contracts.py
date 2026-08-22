@@ -257,6 +257,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "comprehensive.md",
                 "dry.md",
                 "kiss.md",
+                "subagent-model-mapping.md",
                 "yagni.md",
             },
         }
@@ -395,6 +396,21 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "## Final Verification",
                 "Include commit, push, deployment, or other external-write steps only",
                 "planning those steps does not authorize their execution",
+            ),
+        )
+
+    def test_plan_records_subagent_choice_and_model_mapping(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "**Sub-Agent Driven**",
+                "by default its NO",
+                "always ask user",
+                "**Sub-agent Model**",
+                "ALWAYS USE INHERIT MODEL",
+                "[mapping](references/subagent-model-mapping.md)",
             ),
         )
 

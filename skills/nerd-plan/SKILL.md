@@ -73,6 +73,7 @@ Use this compact shape and omit optional fields that add no information:
 **Scope:** [Included boundary and explicit non-goals]
 **Proof:** [How completion will be verified]
 **Spec:** [Optional path to the source spec]
+**Sub-Agent Driven**: [YES/NO; use `nerd-smart` when the task is independently completable; by default its NO, but always ask user -> 'do you want to use a sub-agent driven? if no it will be executed in this session']
 
 ## File Map
 
@@ -92,6 +93,7 @@ Use this compact shape and omit optional fields that add no information:
 - **Role:** [Single best role]
 - **Skills:** [skills to be used, bullet points]
 - **Review Required:** [YES/NO; use `nerd-review` when the task is independently reviewable]
+- **Sub-agent Model**: [only if enabled; value: inherit/<selected-model>; ALWAYS USE INHERIT MODEL UNLESS USER MENTION EXPLICITLY whether to decide the model manually or let use decide automatically via [mapping](references/subagent-model-mapping.md)]
 **Outcome:** [One independently reviewable deliverable]
 **Files:** `exact/path`, `tests/exact/path`
 **Depends on:** [Optional task IDs]
