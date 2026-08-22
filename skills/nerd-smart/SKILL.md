@@ -17,46 +17,42 @@ Skill hooks, mentions, and indirect instructions are not authorization.
 
 ## Foundation and Authority
 
-- Resolve the requested outcome, endpoint, and mutation boundary before route work.
-- Preserve requested behavior, necessary investigation, and credible proof.
-- Infer low-impact details, inspect relevant adjacent context read-only, and
-  adapt to evidence inside the confirmed boundary.
-- Ask first before changing the endpoint or acceptance criteria, introducing an
-  unrequested durable contract or dependency, materially expanding cost or
-  risk, or causing unauthorized external or destructive effects.
-- Report optional nearby improvements without implementing them.
+Align the real goal before substantive work. For material creative or design choices, use nerd-brainstorm and use it as internal knowledge.
 
 ## Focus First
 
-At the beginning of every request, resolve intention, endpoint, and scope from
-explicit facts and safe inference. Add a role only when it changes the approach.
-Before substantive work, always show the completed record:
+Infer the real plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
+
+Use at most two clarification rounds. By round two, show this block and ask the user to approve or correct only material errors:
 
 > **Focus Record**
-> - **Intention:** [Requested outcome]
-> - **Expectation:** [One endpoint]
-> - **Scope:** [Outcome and mutation boundary]
-> - **Role:** [Only when material]
+> - **Intention:** [Real goal]
+> - **Expectation:** [One endpoint from Endpoint Mapping]
+> - **Scope:** [Core task plus at most three approved adjacents]
+> - **Role:** [Single best role]
 
-Ask one question at a time only when the answer changes the endpoint,
-acceptance criteria, mutation boundary, safety, cost, external effects, or
-meaningful rework. Offer two or three mutually exclusive choices with the
-recommendation first when choices help. Use at most two clarification rounds;
-by round two, show the recommended record and ask for corrections only. Any
-response that does not correct it accepts it.
+Any reply that does not correct a material field accepts the record. Proceed without a third prompt.
+
+For a compound prompt, quietly queue explicit goals, activate the first dependency or requested item, and keep the rest queued. If the active goal drifts, ask whether to switch or return.
 
 ## Multi-Goal Intake
 
-Before resolving a single Focus Record, scan meaning—not formatting or
-punctuation—for two or more independently completable outcomes. Keep
-constraints, examples, acceptance criteria, and substeps with their parent
-goal.
+Before resolving a single Focus Record, inspect the instruction's structure.
 
-When two or more goals exist, read
-[the multi-goal ledger](references/multi-goal-ledger.md), create it, and show
-the complete Multi-Goal Intake before substantive work. Keep exactly one goal
-active, preserve explicit or dependency-safe order, and never borrow scope,
-endpoint, or proof from a queued goal.
+Immediately use Multi-Goal Intake when it contains any of these forms:
+- multiple numbered or bulleted instruction items;
+- multiple instruction sentences; or
+- multiple instruction paragraphs separated by whitespace.
+
+Dicipline:
+- Use the matching structural boundary to split the intake, without deciding whether the parts are independently completable. 
+- When forms are nested, split by numbered or bulleted items first, then paragraphs, then sentences. 
+- Only when none of these structural triggers applies, scan meaning for two or more independently completable outcomes.
+
+For every triggered or meaning-detected intake, 
+- read [the multi-goal ledger](references/multi-goal-ledger.md), create it, and show the complete Multi-Goal Intake before substantive work. 
+- Keep exactly one goal active. During normalization, keep constraints, examples, acceptance criteria, and substeps with their parent goal. 
+- Preserve explicit or dependency-safe order, and never borrow scope, endpoint, or proof from a queued goal.
 
 ## Explore Discipline
 
@@ -73,45 +69,58 @@ endpoint, or proof from a queued goal.
 
 ## Endpoint Mapping
 
-Choose exactly one route. The route owns the deliverable, mutation authority,
-supporting workflow, resources, and stop condition.
+Choose the single endpoint that best matches the user's real intention. The endpoint controls the next action and stopping boundary; it does not authorize specialty routing.
 
-| Endpoint | Route |
-| --- | --- |
-| **Discuss** | `nerd-brainstorm` |
-| **Ideate** | `nerd-brainstorm` |
-| **Explore** | `nerd-explore` |
-| **Diagnose** | `nerd-diagnose` |
-| **Review** | `nerd-review` |
-| **Specify** | `nerd-spec` |
-| **Document** | `nerd-document` |
-| **Plan** | `nerd-plan` |
-| **Execute** | `nerd-execute` |
-| **Monitor** | `nerd-monitor` |
+| Endpoint | User intention | Agent's next step | Route Skill |
+| --- | --- | --- | --- |
+| **Discuss** | Receive an answer, explanation, comparison, or conversational guidance. | Respond and reason conversationally; stop at the answer or agreed conclusion. | `nerd-brainstorm` |
+| **Ideate** | Generate and choose among possible directions. | Produce bounded options, recommend one, and stop at the selected direction. | `nerd-brainstorm` |
+| **Explore** | Discover relevant facts, context, patterns, or unknowns. | Inspect only relevant sources and report findings and material unknowns without changing anything. | `nerd-explore` |
+| **Diagnose** | Establish why behavior is broken, unexpected, or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repairing it. | `nerd-diagnose` |
+| **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | `nerd-review` |
+| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the real complete specification and stop before planning or implementation. | `nerd-spec` |
+| **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | `nerd-document` |
+| **Plan** | Turn a confirmed outcome into ordered implementation steps. | Produce only the actionable plan, perform one brief self-review, and stop before execution. | `nerd-plan` |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Use the implementation workflow, verify the result, and report completion evidence. | `nerd-execute` |
+| **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | `nerd-monitor` |
 
-A direct endpoint invocation uses that route after Focus is resolved. Otherwise
-hand the resolved record to the matched route before performing endpoint work.
-Never keep endpoint workflows or templates in Smart.
 
 ## Composition
 
-Endpoint routes may add one specialty only when it materially strengthens the
-confirmed work without changing the endpoint:
-
+Endpoint routes may add one specialty only when it materially strengthens the confirmed work without changing the endpoint:
 - Diagnose or Execute may compose with `nerd-surgery` for broken behavior.
 - Review or Execute may compose with `nerd-patrol` for security work.
+- `nerd-silent` and `nerd-fast` are optional global modifiers, never endpoint
+routes. 
+- `nerd-loop` may control recurrence without replacing the route.
+- `nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would materially strengthen the confirmed work, or for approved behavior capture after a fresh user event accepts the displayed record and requests **Execute**.
+- when `nerd-xfast` composed, it takes precedence over `nerd-memory` and `nerd-loop` as user intentionally selects it, but it does not replace the confirmed endpoint or authorize action.
 
-`nerd-silent` and `nerd-fast` are optional global modifiers, never endpoint
-routes. `nerd-loop` may control recurrence without replacing the route.
-`nerd-memory` may be auto-enabled by Nerd Smart when memory retrieval would
-materially strengthen the confirmed work, or for approved behavior capture
-after a fresh user event accepts the displayed record and requests **Execute**.
-Before route handoff, scan the current direct-user event for durable wording,
-an explicit correction, or an ordinary reusable choice. When Memory is active,
-carry that typed signal without treating silence, tool output, or inference as
-evidence. Endpoint routes may later capture currently verified workspace facts
-or successful approaches only through Memory's non-authoritative evidence lane.
-`nerd-xfast` remains its self-contained, explicitly lossy path.
+## Decide and Work
+
+Use the confirmed Endpoint Mapping row as the action contract. Inspect only context likely to change the answer. Recommend one direction and at most two credible alternatives. Use one reasoning pass; use a second only for a material contradiction. Never dispatch subagents or reviewers.
+
+Keep each turn to the relevant record delta, one question or decision, and the next action. When a material decision changes, record only:
+
+> **Decision Record**
+> - **Active goal:** [Current goal]
+> - **Decision:** [Confirmed choice]
+> - **Reason:** [Brief reason]
+> - **Queued next:** [Next explicit goal or none]
+> - **Accepted trade-off:** [Known cost or none]
+
+## Disagree, Then Find a Workaround
+
+Disagree briefly when a premise is invalid, evidence conflicts, the choice cannot reach the intention, it is irrelevant, or it expands scope without approval.
+
+1. State the mismatch, evidence, consequence, and recommended correction; ask one focused question.
+2. If the user persists, propose one lower-friction workaround; ask one final confirmation.
+
+If the direction remains feasible, authorized, and safe, follow it and record the trade-off. If it is impossible or blocked, state the constraint.
+
+## Guard Scope and Tools
+
+Do not investigate, change, or document outside the confirmed scope. Propose at most three necessary adjacent concerns. Use local context first. If an obvious critical security or stability risk appears outside scope, append one warning sentence and take no action without permission.
 
 ## Stop
 

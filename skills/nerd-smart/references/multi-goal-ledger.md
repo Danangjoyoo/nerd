@@ -2,22 +2,23 @@
 
 ## Use When
 
-Use this protocol for every request containing two or more independently
-completable outcomes. The intake and its ledger are mandatory even when all
-goals are small, share an endpoint, fit in one turn, or need no dependency
-ordering or cross-turn tracking.
+Immediately use Multi-Goal Intake when a request contains any of these forms:
 
-Detect goals from meaning, not layout or punctuation. Always inspect:
+- multiple numbered or bulleted instruction items;
+- multiple instruction sentences; or
+- multiple instruction paragraphs separated by whitespace.
 
-- bullets, numbered items, and separate imperative lines;
-- space-separated wording for multiple imperative or outcome clauses, even
-  without delimiters; and
-- long paragraphs by segmenting their requested actions and outcomes.
+These forms are sufficient triggers. Use the matching boundary to split the
+intake, without deciding whether the parts are independently completable. When
+forms are nested, split by numbered or bulleted items first, then paragraphs,
+then sentences. The intake and its ledger remain mandatory even when all goals
+are small, share an endpoint, fit in one turn, or need no dependency ordering
+or cross-turn tracking.
 
-These forms are signals, not proof. Treat an outcome as a separate goal only
-when it can be completed and stopped independently or needs its own endpoint.
-Keep constraints, examples, acceptance criteria, and substeps with their parent
-goal.
+When none of the structural triggers applies, also use this protocol for a
+single structured unit that contains two or more independently completable
+outcomes. During normalization, keep constraints, examples, acceptance
+criteria, and substeps with their parent goal.
 
 ## Create and Show the Intake
 

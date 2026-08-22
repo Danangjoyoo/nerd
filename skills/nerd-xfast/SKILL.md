@@ -78,30 +78,29 @@ description: Use only when explicitly invoked for a concrete output or authorize
 | `head` / `tail` | Edges | `head -n 20 file_a && tail -n 20 file_b` |
 | `wc` | Counts | `wc -l file_a && wc -l file_b` |
 
+
+## Execution Rules
+- **No Narration:** Emit zero introductory text, internal thoughts, or progress updates. Output only final artifacts, tool calls, and the final Finish line.
+- **Single Pass Discovery:** Batch all read/search commands in a single execution block using `&&` (e.g., `rg -n 'foo' src && git status --short`). Stop reading the moment minimum viable context is acquired.
+- **Single Pass Write:** Apply code changes, static assets, and test files in one uninterrupted write sequence. Never inspect, test, or review between edits.
+- **No Subagents / Ledger:** Do not spawn review subagents, TODO lists, or status tracking files.
+
 ## End Proof
 
 - Never verify before every requested output is complete.
 - Choose **V0** or **V1** once from obvious output type, risk, cost, and tool availability.
 - Do not investigate merely to choose proof.
-- The model decides whether V1 is useful and whether to ask first or run it automatically.
+- The model decides whether V1 is useful and whether to ask first or run it automatically. 
 
 | Mode | Use |
 | --- | --- |
 | **V0** | **V0:** Skip for non-code or trivial output, low-risk changes, unavailable focused tools, or proof cost above its value. Report why. |
-| **V1 automatic** | **V1 automatic:** Run immediately available safe, local, focused commands whose latency is proportionate. |
+| **V1 automatic** | **V1 automatic:** Run immediately available safe, local, focused commands. Run a single, targeted verification command concurrently (e.g., exact test file or linters on changed files only). |
 | **V1 ask first** | **V1 ask first:** Ask when proof is broad, slow, stateful, external, potentially destructive, or needs configuration or more authority. Tool unavailability means skip, never install. |
 
-- V1 is one end-only proof wave with at most one dedicated command from each relevant category:
-
-| Category | Command |
-| --- | --- |
-| **Lint or syntax** | **Lint or syntax:** existing checker on changed files; skip if it cannot avoid a broad suite. |
-| **Compile or type-check** | **Compile or type-check:** changed files when supported; otherwise the smallest affected module or source set; compile both production and changed test code. |
-| **Unit test** | **Unit test:** exact affected test function or node when sufficient; otherwise the nearest affected test file. |
-
-- Run independent V1 commands concurrently.
-- Never manually inspect files or diffs afterward; command exit status and output are the evidence.
-- If V1 identifies one exact local correction, allow one repair patch and rerun only the failed command once.
+## Proof & Verification (Default: V0)
+- **V0 (Default):** Skip verification for non-code, low-risk, or simple edits.
+- **V1 (Code Changes Only):** Run a single, targeted verification command concurrently (e.g., exact test file or linters on changed files only). Maximum one repair attempt on failure.
 
 ## Finish
 

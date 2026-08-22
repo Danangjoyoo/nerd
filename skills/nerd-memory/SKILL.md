@@ -100,8 +100,8 @@ Preserve these invariants:
 - Search the current MCP state on every activation, even when an earlier
   activation selected a transport choice.
 - Prefer MCP `nerd-memory-tools`.
-- If MCP is not live, recommend enabling, turning on, registering, or installing
-  it as appropriate and ask for confirmation.
+- If MCP is not live, use the transport preflight's exact short fallback gate
+  before explaining or requesting MCP recovery.
 - Use `python3 <skill-root>/scripts/memory.py` as fallback only after the user
   rejects that MCP remediation. CLI-only operations are not transport fallback.
 - Read only the reference matching the active operation.

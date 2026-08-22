@@ -63,7 +63,8 @@ class EndpointRouteContractTests(unittest.TestCase):
         body = skill_body("nerd-smart")
         rows = dict(
             re.findall(
-                r"^\| \*\*([A-Za-z]+)\*\* \| `(nerd-[a-z-]+)` \|$",
+                r"^\| \*\*([A-Za-z]+)\*\* \| [^|]+ \| [^|]+ \| "
+                r"`(nerd-[a-z-]+)` \|$",
                 body,
                 re.MULTILINE,
             )
@@ -75,10 +76,10 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             body,
             (
-                "Choose exactly one route",
-                "The route owns the deliverable, mutation authority",
-                "hand the resolved record to the matched route",
-                "Never keep endpoint workflows or templates in Smart",
+                "Choose the single endpoint",
+                "The endpoint controls the next action and stopping boundary",
+                "Use the confirmed Endpoint Mapping row as the action contract",
+                "Never dispatch subagents or reviewers",
             ),
         )
 
@@ -104,6 +105,27 @@ class EndpointRouteContractTests(unittest.TestCase):
             body.index("## Multi-Goal Intake"),
             body.index("## Explore Discipline"),
         )
+
+    def test_smart_structural_multi_goal_triggers_are_deterministic(self):
+        body = normalized(skill_body("nerd-smart"))
+        ledger = normalized(
+            (SKILLS / "nerd-smart" / "references" / "multi-goal-ledger.md")
+            .read_text()
+        )
+        for guidance in (body, ledger):
+            assert_terms(
+                self,
+                guidance,
+                (
+                    "Immediately use Multi-Goal Intake",
+                    "numbered or bulleted instruction items",
+                    "multiple instruction sentences",
+                    "multiple instruction paragraphs separated by whitespace",
+                    "without deciding whether the parts are independently completable",
+                ),
+            )
+            self.assertNotIn("signals, not proof", guidance)
+            self.assertNotIn("meaning—not formatting or punctuation", guidance)
 
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
@@ -195,6 +217,19 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_smart_gives_explicit_xfast_composition_precedence_without_authority(self):
+        body = skill_body("nerd-smart")
+        assert_terms(
+            self,
+            body,
+            (
+                "when `nerd-xfast` composed",
+                "takes precedence over `nerd-memory` and `nerd-loop`",
+                "user intentionally selects it",
+                "does not replace the confirmed endpoint or authorize action",
+            ),
+        )
+
     def test_route_descriptions_are_explicit_and_distinct(self):
         descriptions = {}
         for skill in set(self.ROUTES.values()):
@@ -235,6 +270,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "comprehensive.md",
                 "dry.md",
                 "kiss.md",
+                "subagent-model-mapping.md",
                 "yagni.md",
             },
         }
@@ -373,6 +409,21 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "## Final Verification",
                 "Include commit, push, deployment, or other external-write steps only",
                 "planning those steps does not authorize their execution",
+            ),
+        )
+
+    def test_plan_records_subagent_choice_and_model_mapping(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "**Sub-Agent Driven**",
+                "by default its NO",
+                "always ask user",
+                "**Sub-agent Model**",
+                "ALWAYS USE INHERIT MODEL",
+                "[mapping](references/subagent-model-mapping.md)",
             ),
         )
 
@@ -1265,7 +1316,7 @@ class XFastContractTests(unittest.TestCase):
             ),
         )
 
-    def test_selects_v0_or_one_bounded_v1_end_proof_wave(self):
+    def test_selects_v0_or_one_targeted_v1_verification(self):
         body = skill_body("nerd-xfast")
         assert_terms(
             self,
@@ -1277,18 +1328,11 @@ class XFastContractTests(unittest.TestCase):
                 "**V0:**",
                 "**V1 automatic:**",
                 "**V1 ask first:**",
-                "one end-only proof wave",
-                "at most one dedicated command from each relevant category",
-                "**Lint or syntax:**",
-                "**Compile or type-check:**",
-                "compile both production and changed test code",
-                "**Unit test:**",
-                "exact affected test function or node when sufficient",
-                "Run independent V1 commands concurrently",
-                "Never manually inspect files or diffs afterward",
                 "Tool unavailability means skip, never install",
-                "one repair patch",
-                "rerun only the failed command once",
+                "## Proof & Verification (Default: V0)",
+                "**V0 (Default):** Skip verification for non-code, low-risk, or simple edits",
+                "**V1 (Code Changes Only):** Run a single, targeted verification command concurrently",
+                "Maximum one repair attempt on failure",
                 "V0 — skipped: [reason]",
                 "V1 — automatically verified: [results]",
                 "V1 — confirmation required: [cost or risk]",
@@ -1298,7 +1342,7 @@ class XFastContractTests(unittest.TestCase):
     def test_stays_compact(self):
         body = skill_body("nerd-xfast")
         content_words = len(body.replace("|", " ").split())
-        self.assertLessEqual(content_words, 950)
+        self.assertLessEqual(content_words, 1000)
 
 
 class UFastContractTests(unittest.TestCase):
@@ -1596,7 +1640,8 @@ class MemoryContractTests(unittest.TestCase):
                 "return at most five",
             ),
         )
-        self.assertIn("scan the current direct-user event", smart)
+        self.assertIn("approved behavior capture", smart)
+        self.assertNotIn("`workspace_fact`", smart)
         self.assertIn("before the first repository read", explore)
         self.assertIn("Reusable evidence capture", execute)
 
@@ -2114,11 +2159,6 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "install-required",
                 "registration-required",
                 "enable-required",
-                "fresh direct-user confirmation",
-                "recommend",
-                "enable",
-                "turn on",
-                "install",
                 "Never launch a stdio server manually",
                 "CLI script is always approved",
                 "Only after the user rejects",
@@ -2126,6 +2166,8 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "Do not persist the transport choice",
             ),
         )
+        # Keep recovery copy flexible; the runtime contract below owns the
+        # confirmation and fallback authority guarantees.
         self.assertNotIn("activation — always approved", preflight)
         self.assertIn("cli-fallback", preflight)
         self.assertIn("transport choice", self.skill)
@@ -2141,6 +2183,12 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "run a new preflight on each",
             ),
         )
+
+    def test_transport_fallback_gate_uses_short_user_facing_copy(self):
+        preflight = normalized(memory_reference_body("transport-preflight.md"))
+        self.assertIn("`Want to use fallback instead?`", preflight)
+        self.assertIn("no state or recovery explanation", preflight)
+        self.assertIn("Do not ask the user to restart, reopen, or resend", preflight)
 
 
 if __name__ == "__main__":

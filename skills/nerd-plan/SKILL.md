@@ -73,6 +73,7 @@ Use this compact shape and omit optional fields that add no information:
 **Scope:** [Included boundary and explicit non-goals]
 **Proof:** [How completion will be verified]
 **Spec:** [Optional path to the source spec]
+**Sub-Agent Driven**: [YES/NO; use `nerd-smart` when the task is independently completable; by default its NO, but always ask user -> 'do you want to use a sub-agent driven? if no it will be executed in this session']
 
 ## File Map
 
@@ -84,6 +85,15 @@ Use this compact shape and omit optional fields that add no information:
 
 ### Task N: [Deliverable]
 
+**Outcome:** [One independently reviewable deliverable]
+**Focus Record**
+- **Intention:** [Real goal]
+- **Expectation:** [One endpoint from Endpoint Mapping]
+- **Scope:** [Core task plus at most three approved adjacents]
+- **Role:** [Single best role]
+- **Skills:** [skills to be used, bullet points]
+- **Review Required:** [YES/NO; use `nerd-review` when the task is independently reviewable]
+- **Sub-agent Model**: [only if enabled; value: inherit/<selected-model>; ALWAYS USE INHERIT MODEL UNLESS USER MENTION EXPLICITLY whether to decide the model manually or let use decide automatically via [mapping](references/subagent-model-mapping.md)]
 **Outcome:** [One independently reviewable deliverable]
 **Files:** `exact/path`, `tests/exact/path`
 **Depends on:** [Optional task IDs]
@@ -101,22 +111,16 @@ Use this compact shape and omit optional fields that add no information:
 - `[exact command]` → `[expected result]`
 ````
 
-Use the file map only when multiple files make ownership unclear. Collapse or
-expand task steps to fit the work, but never omit the change, proof, or stopping
-condition. Include commit, push, deployment, or other external-write steps only
-when the user explicitly requested them; planning those steps does not authorize
-their execution.
+Use the file map only when multiple files make ownership unclear. Collapse or expand task steps to fit the work, but never omit the change, proof, or stopping condition. Include commit, push, deployment, or other external-write steps only when the user explicitly requested them; planning those steps does not authorize their execution.
 
 ## Self-Check
 
 Before saving, verify that:
-
 - every requirement is owned by a task;
 - paths, symbols, interfaces, and commands match repository evidence;
 - task outputs satisfy later dependencies;
 - testable behavior follows red-green proof;
-- no placeholder, duplicated fact, speculative abstraction, or unrelated work
-  remains.
+- no placeholder, duplicated fact, speculative abstraction, or unrelated work remains.
 
 Fix findings inline. Preserve genuine unknowns as blockers.
 
@@ -124,6 +128,4 @@ Fix findings inline. Preserve genuine unknowns as blockers.
 
 Stop before execution.
 
-Do not execute the plan, mutate the repository, commit, push, or perform an
-external write. After saving, report the path and stop. Execution requires a new
-**Execute** Focus Record through `nerd-smart`.
+Do not execute the plan, mutate the repository, commit, push, or perform an external write. After saving, report the path and stop. Execution requires a new **Execute** Focus Record through `nerd-smart`.

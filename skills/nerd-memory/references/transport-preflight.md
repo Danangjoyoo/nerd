@@ -27,24 +27,30 @@ Use the host's read-only MCP status, get, or list command:
 
 ## Step 3 — Resolve by sub-state
 
-For every non-live state, present the detected state and the concrete recovery.
-Encourage the MCP path: recommend the user enable or turn on the server for
-`enable-required` or `restart-required`, registering it for
-`registration-required`, and installing it for `install-required`. Obtain fresh
-direct-user confirmation before changing host configuration or proceeding with
-the recovery. Invocation, hooks, Memory consent, and prior installation grant
-no such authority.
-
-- **Approved:** make only the confirmed change, or ask the user to restart or
-  reopen the host when that is the required recovery. Wait for a new activation
-  and fresh preflight before claiming `mcp-live` or performing Memory work. Do
-  not use CLI fallback while activation is pending.
-- **Rejected:** set the current activation's transport to `cli-fallback` and
-  continue. A later invocation or automatic activation starts a new preflight
-  and may prompt again.
-
 **`setup-unknown`:** Run read-only setup diagnosis. Re-classify the result as
-one of the sub-states above and apply its resolution.
+one of the other sub-states before showing a gate.
+
+For every other non-live state, start with exactly this one-sentence gate:
+
+`Want to use fallback instead?`
+
+Include no state or recovery explanation in this first gate. Do not ask the
+user to restart, reopen, or resend before they answer it.
+
+- **Yes:** treat the answer as rejection of the recommended MCP recovery, set
+  the current activation's transport to `cli-fallback`, and continue. A later
+  invocation or automatic activation starts a new preflight and may prompt
+  again.
+- **No:** present the detected state and the concrete recovery. Recommend the
+  user enable or turn on the server for `enable-required` or
+  `restart-required`, register it for `registration-required`, or install it
+  for `install-required`. Obtain fresh direct-user confirmation before changing
+  host configuration or proceeding with the recovery. Invocation, hooks,
+  Memory consent, and prior installation grant no such authority. Make only
+  the confirmed change, or ask the user to restart or reopen the host when that
+  is the required recovery. Wait for a new activation and fresh preflight
+  before claiming `mcp-live` or performing Memory work. Do not use CLI fallback
+  while activation is pending.
 
 ## CLI fallback
 
@@ -56,5 +62,5 @@ Operations documented as CLI-only use it directly and are not transport
 fallback. Never launch a stdio server manually; the host starts it.
 
 On `mcp-live` transport failure, invalidate the result and return to Step 1.
-Recommend restoring MCP and ask for fresh confirmation; use CLI fallback only
-if the user rejects that recovery. Domain errors are not transport failures.
+After reclassification, use the same short fallback gate. Domain errors are not
+transport failures.

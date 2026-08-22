@@ -142,6 +142,7 @@ class SkillStructureTests(unittest.TestCase):
                     "dry.md",
                     "yagni.md",
                     "comprehensive.md",
+                    "subagent-model-mapping.md",
                 ),
                 "nerd-execute": (),
                 "nerd-monitor": (),
