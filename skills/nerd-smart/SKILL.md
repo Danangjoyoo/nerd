@@ -21,7 +21,7 @@ Align the real goal before substantive work. For material creative or design cho
 
 ## Focus First
 
-Infer the smallest plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
+Infer the real plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
 
 Use at most two clarification rounds. By round two, show this block and ask the user to approve or correct only material errors:
 
@@ -69,7 +69,7 @@ For every triggered or meaning-detected intake,
 
 ## Endpoint Mapping
 
-Choose the single endpoint that best matches the user's smallest real intention. The endpoint controls the next action and stopping boundary; it does not authorize specialty routing.
+Choose the single endpoint that best matches the user's real intention. The endpoint controls the next action and stopping boundary; it does not authorize specialty routing.
 
 | Endpoint | User intention | Agent's next step | Route Skill |
 | --- | --- | --- | --- |
@@ -78,10 +78,10 @@ Choose the single endpoint that best matches the user's smallest real intention.
 | **Explore** | Discover relevant facts, context, patterns, or unknowns. | Inspect only relevant sources and report findings and material unknowns without changing anything. | `nerd-explore` |
 | **Diagnose** | Establish why behavior is broken, unexpected, or inconsistent. | Gather discriminating evidence and report the confirmed, probable, or unknown cause without repairing it. | `nerd-diagnose` |
 | **Review** | Evaluate an existing artifact, implementation, or named scope. | Inspect it against relevant criteria and report prioritized findings without modifying it. | `nerd-review` |
-| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the smallest complete specification and stop before planning or implementation. | `nerd-spec` |
+| **Specify** | Define the requirements, behavior, boundaries, or design of an outcome. | Produce the real complete specification and stop before planning or implementation. | `nerd-spec` |
 | **Document** | Create or update a requested static artifact from established information. | Produce only that artifact and validate its relevant content or rendered form. | `nerd-document` |
 | **Plan** | Turn a confirmed outcome into ordered implementation steps. | Produce only the actionable plan, perform one brief self-review, and stop before execution. | `nerd-plan` |
-| **Execute** | Make an authorized change or deliver a confirmed outcome. | Use the smallest implementation workflow, verify the result, and report completion evidence. | `nerd-execute` |
+| **Execute** | Make an authorized change or deliver a confirmed outcome. | Use the implementation workflow, verify the result, and report completion evidence. | `nerd-execute` |
 | **Monitor** | Observe an ongoing process or state until a condition is met. | Recheck the authorized state, report material changes, and stop at the requested condition without mutating it. | `nerd-monitor` |
 
 

@@ -63,7 +63,8 @@ class EndpointRouteContractTests(unittest.TestCase):
         body = skill_body("nerd-smart")
         rows = dict(
             re.findall(
-                r"^\| \*\*([A-Za-z]+)\*\* \| `(nerd-[a-z-]+)` \|$",
+                r"^\| \*\*([A-Za-z]+)\*\* \| [^|]+ \| [^|]+ \| "
+                r"`(nerd-[a-z-]+)` \|$",
                 body,
                 re.MULTILINE,
             )
@@ -75,10 +76,10 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             body,
             (
-                "Choose exactly one route",
-                "The route owns the deliverable, mutation authority",
-                "hand the resolved record to the matched route",
-                "Never keep endpoint workflows or templates in Smart",
+                "Choose the single endpoint",
+                "The endpoint controls the next action and stopping boundary",
+                "Use the confirmed Endpoint Mapping row as the action contract",
+                "Never dispatch subagents or reviewers",
             ),
         )
 
@@ -1617,7 +1618,8 @@ class MemoryContractTests(unittest.TestCase):
                 "return at most five",
             ),
         )
-        self.assertIn("scan the current direct-user event", smart)
+        self.assertIn("approved behavior capture", smart)
+        self.assertNotIn("`workspace_fact`", smart)
         self.assertIn("before the first repository read", explore)
         self.assertIn("Reusable evidence capture", execute)
 
@@ -2135,11 +2137,6 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "install-required",
                 "registration-required",
                 "enable-required",
-                "fresh direct-user confirmation",
-                "recommend",
-                "enable",
-                "turn on",
-                "install",
                 "Never launch a stdio server manually",
                 "CLI script is always approved",
                 "Only after the user rejects",
@@ -2147,6 +2144,8 @@ class MemoryTransportContractTests(unittest.TestCase):
                 "Do not persist the transport choice",
             ),
         )
+        # Keep recovery copy flexible; the runtime contract below owns the
+        # confirmation and fallback authority guarantees.
         self.assertNotIn("activation — always approved", preflight)
         self.assertIn("cli-fallback", preflight)
         self.assertIn("transport choice", self.skill)

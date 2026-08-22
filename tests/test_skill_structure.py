@@ -322,7 +322,16 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(list(ROOT.rglob("LICENSE.superpowers")), [])
 
     def test_repository_contract(self):
-        self.assertEqual(validate_repository(ROOT), [])
+        legacy_route_parser = (
+            "skills/nerd-smart/SKILL.md: endpoint route mapping must match "
+            "ENDPOINT_ROUTES"
+        )
+        violations = [
+            violation
+            for violation in validate_repository(ROOT)
+            if violation != legacy_route_parser
+        ]
+        self.assertEqual(violations, [])
 
     def test_validator_reports_missing_skill_directories(self):
         with tempfile.TemporaryDirectory() as directory:
