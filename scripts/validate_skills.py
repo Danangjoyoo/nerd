@@ -118,6 +118,7 @@ REQUIRED_REFERENCES = {
         "dry.md",
         "yagni.md",
         "comprehensive.md",
+        "subagent-model-mapping.md",
     ),
     "nerd-execute": (),
     "nerd-monitor": (),
@@ -456,7 +457,8 @@ def validate_repository(root: Path) -> list[str]:
     if smart_path.is_file():
         route_rows = dict(
             re.findall(
-                r"^\| \*\*([A-Za-z]+)\*\* \| `(nerd-[a-z0-9-]+)` \|$",
+                r"^\| \*\*([A-Za-z]+)\*\* \| [^|\n]+ \| [^|\n]+ \| "
+                r"`(nerd-[a-z0-9-]+)` \|$",
                 smart_path.read_text(encoding="utf-8"),
                 re.MULTILINE,
             )

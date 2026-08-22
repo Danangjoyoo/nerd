@@ -142,6 +142,7 @@ class SkillStructureTests(unittest.TestCase):
                     "dry.md",
                     "yagni.md",
                     "comprehensive.md",
+                    "subagent-model-mapping.md",
                 ),
                 "nerd-execute": (),
                 "nerd-monitor": (),
@@ -237,9 +238,6 @@ class SkillStructureTests(unittest.TestCase):
         )
 
     def test_reference_files_match_registry(self):
-        draft_references = {
-            "nerd-plan": {"subagent-model-mapping.md"},
-        }
         for skill, expected in REQUIRED_REFERENCES.items():
             references = ROOT / "skills" / skill / "references"
             actual = (
@@ -251,10 +249,7 @@ class SkillStructureTests(unittest.TestCase):
                 else set()
             )
             with self.subTest(skill=skill):
-                self.assertEqual(
-                    actual,
-                    set(expected) | draft_references.get(skill, set()),
-                )
+                self.assertEqual(actual, set(expected))
 
     def test_reference_reachability_follows_lazy_links(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -328,15 +323,7 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(list(ROOT.rglob("LICENSE.superpowers")), [])
 
     def test_repository_contract(self):
-        self.assertEqual(
-            set(validate_repository(ROOT)),
-            {
-                "unregistered file: skills/nerd-plan/references/"
-                "subagent-model-mapping.md",
-                "skills/nerd-smart/SKILL.md: endpoint route mapping must match "
-                "ENDPOINT_ROUTES",
-            },
-        )
+        self.assertEqual(validate_repository(ROOT), [])
 
     def test_validator_reports_missing_skill_directories(self):
         with tempfile.TemporaryDirectory() as directory:
