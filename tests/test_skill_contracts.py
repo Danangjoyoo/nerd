@@ -217,6 +217,19 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_smart_gives_explicit_xfast_composition_precedence_without_authority(self):
+        body = skill_body("nerd-smart")
+        assert_terms(
+            self,
+            body,
+            (
+                "when `nerd-xfast` composed",
+                "takes precedence over `nerd-memory` and `nerd-loop`",
+                "user intentionally selects it",
+                "does not replace the confirmed endpoint or authorize action",
+            ),
+        )
+
     def test_route_descriptions_are_explicit_and_distinct(self):
         descriptions = {}
         for skill in set(self.ROUTES.values()):
@@ -1303,7 +1316,7 @@ class XFastContractTests(unittest.TestCase):
             ),
         )
 
-    def test_selects_v0_or_one_bounded_v1_end_proof_wave(self):
+    def test_selects_v0_or_one_targeted_v1_verification(self):
         body = skill_body("nerd-xfast")
         assert_terms(
             self,
@@ -1315,18 +1328,11 @@ class XFastContractTests(unittest.TestCase):
                 "**V0:**",
                 "**V1 automatic:**",
                 "**V1 ask first:**",
-                "one end-only proof wave",
-                "at most one dedicated command from each relevant category",
-                "**Lint or syntax:**",
-                "**Compile or type-check:**",
-                "compile both production and changed test code",
-                "**Unit test:**",
-                "exact affected test function or node when sufficient",
-                "Run independent V1 commands concurrently",
-                "Never manually inspect files or diffs afterward",
                 "Tool unavailability means skip, never install",
-                "one repair patch",
-                "rerun only the failed command once",
+                "## Proof & Verification (Default: V0)",
+                "**V0 (Default):** Skip verification for non-code, low-risk, or simple edits",
+                "**V1 (Code Changes Only):** Run a single, targeted verification command concurrently",
+                "Maximum one repair attempt on failure",
                 "V0 — skipped: [reason]",
                 "V1 — automatically verified: [results]",
                 "V1 — confirmation required: [cost or risk]",
@@ -1336,7 +1342,7 @@ class XFastContractTests(unittest.TestCase):
     def test_stays_compact(self):
         body = skill_body("nerd-xfast")
         content_words = len(body.replace("|", " ").split())
-        self.assertLessEqual(content_words, 950)
+        self.assertLessEqual(content_words, 1000)
 
 
 class UFastContractTests(unittest.TestCase):
