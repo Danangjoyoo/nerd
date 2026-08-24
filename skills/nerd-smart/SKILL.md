@@ -21,6 +21,8 @@ Align the real goal before substantive work. For material creative or design cho
 
 ## Focus First
 
+hard rule : always show the completed Focus Record before substantive work
+
 Infer the real plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
 
 Use at most two clarification rounds. By round two, show this block and ask the user to approve or correct only material errors:

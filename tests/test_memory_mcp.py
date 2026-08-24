@@ -163,6 +163,64 @@ class MemoryMcpServerTests(unittest.TestCase):
             ["record", "invalidate"],
         )
 
+    def test_recall_schema_exposes_the_atomic_baseline_routing_contract(self):
+        tools = self.session.request("tools/list")["result"]["tools"]
+        recall_tool = next(tool for tool in tools if tool["name"] == "memory_recall")
+        baseline = recall_tool["inputSchema"]["properties"]["baseline"]
+
+        self.assertFalse(baseline["additionalProperties"])
+        self.assertEqual(
+            set(baseline["properties"]),
+            {
+                "endpoint",
+                "goal",
+                "task",
+                "action",
+                "result",
+                "boundary",
+                "verification",
+                "routing",
+            },
+        )
+        routing = baseline["properties"]["routing"]
+        self.assertIn("never infer", routing["description"].casefold())
+        self.assertEqual(routing["maxItems"], 8)
+        profile = routing["items"]
+        self.assertFalse(profile["additionalProperties"])
+        self.assertEqual(
+            set(profile["required"]),
+            {"agent", "skills", "tools", "mcp_servers"},
+        )
+        self.assertEqual(
+            set(profile["properties"]),
+            {"agent", "skills", "tools", "mcp_servers"},
+        )
+        for field in ("skills", "tools", "mcp_servers"):
+            self.assertEqual(profile["properties"][field]["type"], "array")
+            self.assertEqual(profile["properties"][field]["maxItems"], 16)
+
+    def test_recall_accepts_the_documented_atomic_routing_profile(self):
+        baseline = empty_endpoint("execute")
+        baseline["routing"] = [
+            {
+                "agent": "codex",
+                "skills": ["nerd-smart"],
+                "tools": [],
+                "mcp_servers": [],
+            }
+        ]
+
+        result = self.session.call(
+            "memory_recall",
+            self.recall_arguments(baseline=baseline),
+        )
+
+        self.assertFalse(result["isError"], result)
+        self.assertEqual(
+            result["structuredContent"]["proposal"]["proposed_endpoint"]["routing"],
+            baseline["routing"],
+        )
+
     def test_closed_stream_reports_server_stderr(self):
         session = ServerSession.__new__(ServerSession)
         session.process = subprocess.Popen(

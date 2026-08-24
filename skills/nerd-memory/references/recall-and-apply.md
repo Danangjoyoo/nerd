@@ -49,6 +49,11 @@ Never copy remembered material or use unknown fields. Every input must yield
 one of: a memory-free endpoint, pending memory proposal, explicit conflict, or
 `abstain`. Never force a nearest match.
 
+`routing` stays `[]` unless the user explicitly supplied a complete route;
+never infer it from active skills/tools. A non-empty route uses exact profiles:
+`[{"agent":"codex","skills":["nerd-smart"],"tools":[],"mcp_servers":[]}]`.
+Use stable lowercase registry identifiers.
+
 Protect current-input authority from provenance laundering. For a collision
 with any stored observation (including inert telemetry), pattern, historical
 proposal, or pending, denied, or split-derived value, supply

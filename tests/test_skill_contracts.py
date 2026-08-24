@@ -1971,6 +1971,7 @@ class MemoryContractTests(unittest.TestCase):
     def test_agent_skill_tool_and_mcp_routing_is_atomic_and_fail_closed(self):
         body = normalized(memory_guidance_body())
         contract = normalized(memory_reference_body("memory-contract.md"))
+        recall = normalized(memory_reference_body("recall-and-apply.md"))
         smart = normalized(skill_body("nerd-smart"))
         assert_terms(
             self,
@@ -1997,6 +1998,19 @@ class MemoryContractTests(unittest.TestCase):
                 "must never be merged or cross-combined",
                 "current authenticated registry",
                 "Missing or disallowed components fail closed",
+            ),
+        )
+        assert_terms(
+            self,
+            recall,
+            (
+                "`routing` stays `[]` unless the user explicitly supplied a complete route",
+                "never infer it from active skills/tools",
+                '"agent":"codex"',
+                '"skills":["nerd-smart"]',
+                '"tools":[]',
+                '"mcp_servers":[]',
+                "stable lowercase registry identifiers",
             ),
         )
         self.assertIn("`nerd-memory` may be auto-enabled by Nerd Smart", smart)

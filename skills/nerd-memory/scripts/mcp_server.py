@@ -30,6 +30,74 @@ PROTOCOL_VERSION = "2025-06-18"
 SCHEMA_RESTART_MESSAGES = engine.SCHEMA_RESTART_MESSAGES
 
 _ENDPOINT_OBJECT = {"type": "object"}
+_ROUTE_IDENTIFIER = {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 128,
+    "pattern": r"^(?!.*\.\.)[A-Za-z0-9](?:[A-Za-z0-9._:+-]*[A-Za-z0-9])?$",
+}
+_SKILL_IDENTIFIER = {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 128,
+    "pattern": r"^\$?(?!.*\.\.)[A-Za-z0-9](?:[A-Za-z0-9._:+-]*[A-Za-z0-9])?$",
+}
+_ROUTE_PROFILE = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["agent", "skills", "tools", "mcp_servers"],
+    "properties": {
+        "agent": _ROUTE_IDENTIFIER,
+        "skills": {
+            "type": "array",
+            "items": _SKILL_IDENTIFIER,
+            "maxItems": 16,
+            "uniqueItems": True,
+        },
+        "tools": {
+            "type": "array",
+            "items": _ROUTE_IDENTIFIER,
+            "maxItems": 16,
+            "uniqueItems": True,
+        },
+        "mcp_servers": {
+            "type": "array",
+            "items": _ROUTE_IDENTIFIER,
+            "maxItems": 16,
+            "uniqueItems": True,
+        },
+    },
+    "anyOf": [
+        {"properties": {"skills": {"minItems": 1}}},
+        {"properties": {"tools": {"minItems": 1}}},
+        {"properties": {"mcp_servers": {"minItems": 1}}},
+    ],
+}
+_BASELINE_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "endpoint": {"type": "string", "enum": sorted(engine.ENDPOINT_TYPES)},
+        "goal": {},
+        "task": {"type": "array"},
+        "action": {"type": "array"},
+        "result": {},
+        "boundary": {"type": "array"},
+        "verification": {"type": "array"},
+        "routing": {
+            "type": "array",
+            "items": _ROUTE_PROFILE,
+            "maxItems": 8,
+            "description": (
+                "Use an empty array unless the current user explicitly supplied "
+                "the complete ordered route; never infer routing from active agents, "
+                "selected skills, available tools, or MCP state. Profiles require "
+                "exactly agent, skills, tools, and mcp_servers, with at least one "
+                "capability and no more than 24 total capabilities."
+            ),
+        },
+    },
+}
 
 TOOLS: list[dict[str, Any]] = [
     {
@@ -57,7 +125,7 @@ TOOLS: list[dict[str, Any]] = [
                 "episode_id": {"type": "string"},
                 "input_text": {"type": "string"},
                 "context": _ENDPOINT_OBJECT,
-                "baseline": _ENDPOINT_OBJECT,
+                "baseline": _BASELINE_SCHEMA,
                 "consent_ref": {"type": "string"},
                 "baseline_source": {"type": "string", "enum": ["direct_user"]},
                 "baseline_ref": {"type": "string"},
