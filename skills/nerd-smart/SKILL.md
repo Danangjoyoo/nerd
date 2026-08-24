@@ -39,10 +39,11 @@ For a compound prompt, quietly queue explicit goals, activate the first dependen
 
 Before resolving a single Focus Record, inspect the instruction's structure.
 
-Immediately use Multi-Goal Intake when it contains any of these forms:
+Prefer to use Multi-Goal Intake when it contains any of these forms:
 - multiple numbered or bulleted instruction items;
-- multiple instruction sentences; or
-- multiple instruction paragraphs separated by whitespace.
+- multiple instructions (verb + object) separated by whitespace.
+
+But validate the intake, sometimes 1 focus record is sufficient unless the user cleanly mention the steps.
 
 Dicipline:
 - Use the matching structural boundary to split the intake, without deciding whether the parts are independently completable. 
