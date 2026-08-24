@@ -106,26 +106,42 @@ class EndpointRouteContractTests(unittest.TestCase):
             body.index("## Explore Discipline"),
         )
 
-    def test_smart_structural_multi_goal_triggers_are_deterministic(self):
+    def test_smart_validates_structural_multi_goal_triggers(self):
         body = normalized(skill_body("nerd-smart"))
+        assert_terms(
+            self,
+            body,
+            (
+                "Prefer to use Multi-Goal Intake",
+                "multiple numbered or bulleted instruction items",
+                "multiple instructions (verb + object) separated by whitespace",
+                "validate the intake",
+                "sometimes 1 focus record is sufficient",
+                "unless the user cleanly mention the steps",
+            ),
+        )
+        self.assertNotIn("Immediately use Multi-Goal Intake", body)
+        self.assertNotIn("signals, not proof", body)
+        self.assertNotIn("meaning—not formatting or punctuation", body)
+
+    def test_smart_multi_goal_ledger_keeps_structural_split_protocol(self):
         ledger = normalized(
             (SKILLS / "nerd-smart" / "references" / "multi-goal-ledger.md")
             .read_text()
         )
-        for guidance in (body, ledger):
-            assert_terms(
-                self,
-                guidance,
-                (
-                    "Immediately use Multi-Goal Intake",
-                    "numbered or bulleted instruction items",
-                    "multiple instruction sentences",
-                    "multiple instruction paragraphs separated by whitespace",
-                    "without deciding whether the parts are independently completable",
-                ),
-            )
-            self.assertNotIn("signals, not proof", guidance)
-            self.assertNotIn("meaning—not formatting or punctuation", guidance)
+        assert_terms(
+            self,
+            ledger,
+            (
+                "Immediately use Multi-Goal Intake",
+                "numbered or bulleted instruction items",
+                "multiple instruction sentences",
+                "multiple instruction paragraphs separated by whitespace",
+                "without deciding whether the parts are independently completable",
+            ),
+        )
+        self.assertNotIn("signals, not proof", ledger)
+        self.assertNotIn("meaning—not formatting or punctuation", ledger)
 
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
