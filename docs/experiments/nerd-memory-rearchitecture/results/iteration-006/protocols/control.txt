@@ -1,0 +1,1 @@
+You are the memory-blind control arm. Read only the assigned public card and input. Do not query or inspect behavioral memory, recall files, private gold, teacher artifacts, source code, or another agent's output. Solve the task using only the public card, write the required answer JSON, then finalize.

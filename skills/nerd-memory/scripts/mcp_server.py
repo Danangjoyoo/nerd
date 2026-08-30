@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free stdio MCP server for the Nerd Memory runtime.
-
-Exposes the composite memory workflows over one warm process so a caller spends
-one round trip where the CLI needs several. Every tool is a thin adapter over
-`MemoryStore`; the engine owns all validation, policy, and gating.
-"""
+"""Dependency-free stdio MCP adapter for global behavioral memory."""
 
 from __future__ import annotations
 
@@ -21,161 +16,132 @@ import memory as engine  # noqa: E402
 
 
 SERVER_NAME = "nerd-memory-tools"
-SERVER_VERSION = "1.1.0"
+SERVER_VERSION = "2.0.0"
 PROTOCOL_VERSION = "2025-06-18"
 
-# Either message means this process can no longer write safely: the store moved
-# underneath a live handle, or this runtime copy is older than the store it
-# opened. SKILL.md forbids retrying through such a handle.
-SCHEMA_RESTART_MESSAGES = engine.SCHEMA_RESTART_MESSAGES
-
-_ENDPOINT_OBJECT = {"type": "object"}
+_STRING = {"type": "string"}
+_STRING_ARRAY = {"type": "array", "items": {"type": "string"}}
+_CURRENT = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "action": {"type": ["string", "null"]},
+        "tools": _STRING_ARRAY,
+        "steps": _STRING_ARRAY,
+        "skills": _STRING_ARRAY,
+    },
+}
 
 TOOLS: list[dict[str, Any]] = [
     {
         "name": "memory_recall",
         "description": (
-            "Check namespace consent, enable it from the current invocation event "
-            "when required, and return a gated endpoint proposal. Search the "
-            "supplied namespace first; accept global-search fields only when the "
-            "current user explicitly requested fallback across enabled namespaces. "
-            "Replaces the status, enable, and propose calls with one round trip."
+            "Return audited contextual behavioral advice. Current action, tools, "
+            "steps, and skills remain authoritative."
         ),
         "inputSchema": {
             "type": "object",
             "additionalProperties": False,
             "required": [
-                "namespace",
-                "episode_id",
-                "input_text",
-                "context",
-                "baseline",
-                "consent_ref",
+                "event_id",
+                "raw_input",
+                "repository",
+                "language",
+                "surface",
+                "project_kind",
+                "current",
+                "output_signals",
+                "consumer_agent",
             ],
             "properties": {
-                "namespace": {"type": "string"},
-                "episode_id": {"type": "string"},
-                "input_text": {"type": "string"},
-                "context": _ENDPOINT_OBJECT,
-                "baseline": _ENDPOINT_OBJECT,
-                "consent_ref": {"type": "string"},
-                "baseline_source": {"type": "string", "enum": ["direct_user"]},
-                "baseline_ref": {"type": "string"},
-                "global_search_source": {
-                    "type": "string",
-                    "enum": ["direct_user"],
-                },
-                "global_search_ref": {"type": "string"},
+                "event_id": _STRING,
+                "raw_input": _STRING,
+                "repository": _STRING,
+                "language": _STRING,
+                "surface": _STRING,
+                "project_kind": _STRING,
+                "current": _CURRENT,
+                "output_signals": _STRING_ARRAY,
+                "consumer_agent": _STRING,
             },
         },
         "annotations": {"readOnlyHint": False, "destructiveHint": False},
     },
     {
-        "name": "memory_settle",
+        "name": "memory_record",
         "description": (
-            "Consume one proposal, confirming first when memory influenced it. "
-            "Supply the exact phrase from a fresh direct-user confirmation event; "
-            "omit it only for a memory-free proposal, which has no gate."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "additionalProperties": False,
-            "required": ["proposal_id", "source", "confirmation_ref"],
-            "properties": {
-                "proposal_id": {"type": "string"},
-                "phrase": {
-                    "type": "string",
-                    "description": "Omit only for a memory-free proposal.",
-                },
-                "source": {"type": "string", "enum": ["direct_user"]},
-                "confirmation_ref": {"type": "string"},
-            },
-        },
-        "annotations": {"readOnlyHint": False, "destructiveHint": False},
-    },
-    {
-        "name": "memory_learn",
-        "description": (
-            "Append one typed observation and reconsolidate the namespace. "
-            "Replaces the observe and consolidate calls with one round trip."
+            "Record one verified behavioral episode. Raw input is transient and "
+            "only sanitized command cues are persisted."
         ),
         "inputSchema": {
             "type": "object",
             "additionalProperties": False,
             "required": [
-                "namespace",
                 "episode_id",
-                "pattern_type",
-                "pattern_key",
-                "value",
-                "source",
+                "repository",
+                "language",
+                "surface",
+                "project_kind",
+                "raw_input",
+                "action",
+                "tools",
+                "steps",
+                "skills",
+                "output_signals",
+                "output_valid",
+                "output_severity",
+                "verified",
+                "verifier",
+                "feedback",
+                "source_kind",
+                "source_agent",
                 "evidence_ref",
             ],
             "properties": {
-                "namespace": {"type": "string"},
-                "episode_id": {"type": "string"},
-                "pattern_type": {"type": "string", "enum": list(engine.PATTERN_TYPES)},
-                "pattern_key": {"type": "string"},
-                "value": {},
-                "scope": _ENDPOINT_OBJECT,
-                "triggers": {"type": "array", "items": {"type": "string"}},
-                "operation": {"type": "string", "enum": sorted(engine.OPERATIONS)},
-                "source": {
+                "episode_id": _STRING,
+                "repository": _STRING,
+                "language": _STRING,
+                "surface": _STRING,
+                "project_kind": _STRING,
+                "raw_input": _STRING,
+                "action": _STRING,
+                "tools": _STRING_ARRAY,
+                "steps": _STRING_ARRAY,
+                "skills": _STRING_ARRAY,
+                "output_signals": _STRING_ARRAY,
+                "output_valid": {"type": "boolean"},
+                "output_severity": {
                     "type": "string",
-                    "enum": sorted(engine.OBSERVATION_SOURCES),
+                    "enum": sorted(engine.SEVERITY_VALUES),
                 },
-                "signal": {
+                "verified": {"type": "boolean"},
+                "verifier": _STRING,
+                "feedback": {
                     "type": "string",
-                    "enum": sorted(engine.BEHAVIOR_SIGNAL_THRESHOLDS),
+                    "enum": sorted(engine.FEEDBACK_VALUES),
                 },
-                "evidence_ref": {"type": "string"},
-                "min_episodes": {"type": "integer", "minimum": 1},
-            },
-        },
-        "annotations": {"readOnlyHint": False, "destructiveHint": False},
-    },
-    {
-        "name": "memory_experience",
-        "description": (
-            "Record verified reusable workspace evidence or invalidate a stale hint. "
-            "Hints are untrusted navigation evidence and never endpoint authority."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "additionalProperties": False,
-            "required": ["action", "namespace"],
-            "properties": {
-                "action": {"type": "string", "enum": ["record", "invalidate"]},
-                "namespace": {"type": "string"},
-                "episode_id": {"type": "string"},
-                "kind": {"type": "string", "enum": sorted(engine.EXPERIENCE_KINDS)},
-                "hint_key": {"type": "string"},
-                "value": {"type": "object"},
-                "scope": _ENDPOINT_OBJECT,
-                "tags": {"type": "array", "items": {"type": "string"}},
-                "anchors": {"type": "array", "items": {"type": "object"}},
-                "verification": {"type": "object"},
-                "hint_id": {"type": "string"},
-                "reason": {"type": "string"},
-                "source": {
+                "corrected_tools": _STRING_ARRAY,
+                "corrected_steps": _STRING_ARRAY,
+                "corrected_skills": _STRING_ARRAY,
+                "source_kind": {
                     "type": "string",
-                    "enum": sorted(engine.EXPERIENCE_INVALIDATION_SOURCES),
+                    "enum": sorted(engine.SOURCE_KINDS),
                 },
-                "evidence_ref": {"type": "string"},
+                "source_agent": _STRING,
+                "evidence_ref": _STRING,
+                "observed_at": _STRING,
             },
         },
         "annotations": {"readOnlyHint": False, "destructiveHint": False},
     },
     {
         "name": "memory_inspect",
-        "description": (
-            "Read consent, patterns, and reusable evidence for exactly one namespace."
-        ),
+        "description": "Read bounded sanitized episode and audit summaries.",
         "inputSchema": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["namespace"],
-            "properties": {"namespace": {"type": "string"}},
+            "required": [],
+            "properties": {},
         },
         "annotations": {"readOnlyHint": True, "destructiveHint": False},
     },
@@ -201,32 +167,54 @@ def _error(request_id: Any, code: int, message: str) -> dict[str, Any]:
 def _error_code(error: BaseException) -> str:
     if isinstance(error, UnknownToolError):
         return "unknown_tool"
-    for error_type, code, _exit_code in engine._ERROR_CODES:
+    for error_type, code, _exit_code in engine.ERROR_CODES:
         if isinstance(error, error_type):
             return code
     return "internal_error"
 
 
 def _tool_result(payload: Any, *, is_error: bool = False) -> dict[str, Any]:
+    text = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
     return {
-        "content": [{"type": "text", "text": json.dumps(payload, sort_keys=True)}],
+        "content": [{"type": "text", "text": text}],
         "structuredContent": payload,
         "isError": is_error,
     }
 
 
+def _domain_payload(error: BaseException) -> dict[str, Any]:
+    code = _error_code(error)
+    return {
+        "ok": False,
+        "error": {
+            "code": code,
+            "type": type(error).__name__,
+            "message": (
+                "unexpected memory engine failure"
+                if code == "internal_error"
+                else str(error)
+            ),
+        },
+    }
+
+
 class Server:
-    """Owns one lazily opened MemoryStore for the lifetime of the process."""
+    """Own one lazy store and permanently fence schema-incompatible sessions."""
 
     def __init__(self, database: Path | None = None) -> None:
         self._database = database
-        self._store: Any = None
+        self._store: engine.BehaviorMemoryStore | None = None
         self._restart_required = False
 
-    def _open(self) -> Any:
+    def _open(self) -> engine.BehaviorMemoryStore:
         if self._store is None:
-            path = self._database or engine.default_store_path()
-            self._store = engine.MemoryStore(path)
+            path = self._database or engine.default_database_path()
+            self._store = engine.BehaviorMemoryStore(path)
         return self._store
 
     def _drop_store(self) -> None:
@@ -239,24 +227,22 @@ class Server:
                 pass
 
     @staticmethod
-    def _validated(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-        """Enforce the published schema here; never trust client-side validation.
+    def _schema(name: str) -> dict[str, Any]:
+        for tool in TOOLS:
+            if tool["name"] == name:
+                return tool["inputSchema"]
+        raise UnknownToolError(f"unknown tool: {name}")
 
-        Raises the engine's input error so an argument mistake reports the same
-        `invalid_input` code the CLI returns for a bad flag, keeping the two
-        surfaces interchangeable and keeping argument errors out of the
-        fallback triggers.
-        """
-        schema = next((tool["inputSchema"] for tool in TOOLS if tool["name"] == name), None)
-        if schema is None:
-            raise UnknownToolError(f"unknown tool: {name}")
-        allowed = set(schema.get("properties", {}))
+    @classmethod
+    def _validated(cls, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        schema = cls._schema(name)
+        allowed = set(schema["properties"])
         unknown = sorted(set(arguments) - allowed)
         if unknown:
             raise engine.MemoryInputError(
                 "unrecognized arguments: " + ", ".join(unknown)
             )
-        missing = sorted(set(schema.get("required", [])) - set(arguments))
+        missing = sorted(set(schema["required"]) - set(arguments))
         if missing:
             raise engine.MemoryInputError(
                 "the following arguments are required: " + ", ".join(missing)
@@ -264,103 +250,15 @@ class Server:
         return arguments
 
     def _dispatch(self, name: str, arguments: dict[str, Any]) -> Any:
-        arguments = self._validated(name, arguments)
+        validated = self._validated(name, arguments)
         store = self._open()
         if name == "memory_recall":
-            return store.recall(**arguments)
-        if name == "memory_settle":
-            result = store.settle(
-                arguments["proposal_id"],
-                arguments.get("phrase"),
-                source=arguments["source"],
-                confirmation_ref=arguments["confirmation_ref"],
-            )
-            confirmation = result.get("confirmation")
-            if isinstance(confirmation, dict) and "grant_token" in confirmation:
-                # The grant is already spent; never echo it into model context.
-                confirmation = dict(confirmation)
-                confirmation["grant_token"] = None
-                result = {**result, "confirmation": confirmation}
-            return result
-        if name == "memory_learn":
-            return store.learn(**arguments)
-        if name == "memory_experience":
-            action = arguments["action"]
-            payload = {key: value for key, value in arguments.items() if key != "action"}
-            if action == "record":
-                expected = {
-                    "namespace", "episode_id", "kind", "hint_key", "value",
-                    "scope", "tags", "anchors", "verification", "source",
-                    "evidence_ref",
-                }
-                if set(payload) != expected:
-                    raise engine.MemoryInputError(
-                        "record requires exactly: " + ", ".join(sorted(expected))
-                    )
-                return store.record_experience(**payload)
-            if action == "invalidate":
-                expected = {
-                    "namespace", "hint_id", "reason", "source", "evidence_ref"
-                }
-                if set(payload) != expected:
-                    raise engine.MemoryInputError(
-                        "invalidate requires exactly: " + ", ".join(sorted(expected))
-                    )
-                return store.invalidate_experience(**payload)
-            raise engine.MemoryInputError("action must be record or invalidate")
+            return store.recall(**validated)
+        if name == "memory_record":
+            return store.record(**validated)
         if name == "memory_inspect":
-            namespace = arguments["namespace"]
-            return {
-                "consent": store.consent_status(namespace),
-                "patterns": store.list_patterns(namespace),
-                "evidence_hints": store.list_experience(namespace),
-            }
+            return store.inspect()
         raise UnknownToolError(f"unknown tool: {name}")
-
-    def _call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-        if self._restart_required:
-            return _tool_result(self._restart_payload(), is_error=True)
-        try:
-            return _tool_result(self._dispatch(name, arguments))
-        except Exception as error:
-            if (
-                isinstance(error, engine.MemoryInvariantError)
-                and str(error) in SCHEMA_RESTART_MESSAGES
-            ):
-                # Fail closed and stay closed. Never reopen and never retry.
-                self._restart_required = True
-                self._drop_store()
-                return _tool_result(self._restart_payload(), is_error=True)
-            code = _error_code(error)
-            if code in ("storage_error", "internal_error"):
-                # Only a storage or unexpected failure may have left the handle
-                # unusable. Domain errors already rolled back, so keep the warm
-                # store rather than reopening the database on every refusal.
-                self._drop_store()
-            payload: dict[str, Any] = {
-                "code": code,
-                "type": type(error).__name__,
-                # The CLI never reports an unexpected exception's text, which can
-                # carry the database path. Match that exactly.
-                "message": (
-                    "unexpected memory engine failure"
-                    if code == "internal_error"
-                    else str(error)
-                ),
-            }
-            details = getattr(error, "collisions", None)
-            if details is not None:
-                # Preserve the structured detail the CLI emits, or the caller
-                # cannot satisfy the baseline attestation requirement.
-                payload["details"] = {
-                    "baseline_collisions": details,
-                    "required_attestation": {
-                        "source": "direct_user",
-                        "unique_event_ref": True,
-                        "effect": engine.BASELINE_ATTESTATION_EFFECT,
-                    },
-                }
-            return _tool_result({"ok": False, "error": payload}, is_error=True)
 
     @staticmethod
     def _restart_payload() -> dict[str, Any]:
@@ -368,13 +266,28 @@ class Server:
             "ok": False,
             "error": {
                 "code": "restart_required",
-                "type": "MemoryInvariantError",
+                "type": "MemorySchemaError",
                 "message": (
-                    "memory runtime schema changed; restart this MCP server "
+                    "behavioral memory schema changed; restart this MCP server "
                     "before retrying"
                 ),
             },
         }
+
+    def _call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        if self._restart_required:
+            return _tool_result(self._restart_payload(), is_error=True)
+        try:
+            return _tool_result(self._dispatch(name, arguments))
+        except Exception as error:
+            if isinstance(error, engine.MemorySchemaError):
+                self._restart_required = True
+                self._drop_store()
+            else:
+                code = _error_code(error)
+                if code in {"storage_error", "internal_error"}:
+                    self._drop_store()
+            return _tool_result(_domain_payload(error), is_error=True)
 
     def handle(self, request: dict[str, Any]) -> dict[str, Any] | None:
         request_id = request.get("id")
@@ -382,13 +295,15 @@ class Server:
         if request_id is None:
             return None
         if method == "initialize":
-            params = request.get("params") or {}
             return _response(
                 request_id,
                 {
-                    "protocolVersion": params.get("protocolVersion", PROTOCOL_VERSION),
+                    "protocolVersion": PROTOCOL_VERSION,
                     "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": SERVER_NAME, "version": SERVER_VERSION},
+                    "serverInfo": {
+                        "name": SERVER_NAME,
+                        "version": SERVER_VERSION,
+                    },
                 },
             )
         if method == "ping":
@@ -398,23 +313,16 @@ class Server:
         if method != "tools/call":
             return _error(request_id, -32601, f"method not found: {method}")
 
-        params = request.get("params") or {}
+        params = request.get("params", {})
+        if not isinstance(params, dict):
+            return _error(request_id, -32602, "params must be a JSON object")
         name = params.get("name")
-        arguments = params.get("arguments") or {}
+        arguments = params.get("arguments", {})
         if not isinstance(arguments, dict):
+            error = engine.MemoryInputError("arguments must be a JSON object")
             return _response(
                 request_id,
-                _tool_result(
-                    {
-                        "ok": False,
-                        "error": {
-                            "code": "invalid_input",
-                            "type": "MemoryInputError",
-                            "message": "arguments must be a JSON object",
-                        },
-                    },
-                    is_error=True,
-                ),
+                _tool_result(_domain_payload(error), is_error=True),
             )
         return _response(request_id, self._call_tool(name, arguments))
 
@@ -438,7 +346,10 @@ def main(argv: list[str] | None = None) -> int:
             except (json.JSONDecodeError, ValueError) as error:
                 response = _error(None, -32700, str(error))
             if response is not None:
-                print(json.dumps(response, separators=(",", ":")), flush=True)
+                print(
+                    json.dumps(response, ensure_ascii=False, separators=(",", ":")),
+                    flush=True,
+                )
     finally:
         server.close()
     return 0

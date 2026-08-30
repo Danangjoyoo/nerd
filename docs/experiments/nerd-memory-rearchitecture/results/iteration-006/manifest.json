@@ -1,0 +1,31 @@
+{
+  "canonical_digest": "sha256:7419a85732e355abd77b209cc494fd3bb81bfa55f65de2464481c5ac193d0cbd",
+  "private_procedure_digest": "sha256:4b5489071b480c5656271e948eb8c9a987005480fe4de0951cb7e6039dc80d7c",
+  "round_count": 5,
+  "round_input_digests": {
+    "round-01": "sha256:6467369496dacf7516630d7bcc55c96b00e294c0e97a49d670d920d9063ec9c7",
+    "round-02": "sha256:8986e10623d55c73f0c8a06e5b81431909c73a59b5abce4161c0bf34e1b19348",
+    "round-03": "sha256:d9b0afc565ff94236c89d8e438f750f7e301ce4ab21224ed58083319fedd93d5",
+    "round-04": "sha256:ca16975fe921963570bace59b5977d98e1f9682e55e75cf3c053ab950512129a",
+    "round-05": "sha256:e7c5f1ec27c73e50d85be39686ae11f61275c4d06f868dea4fac6a9cd9029d25"
+  },
+  "schema_version": "paired-agent-experiment/v1",
+  "seed": 606,
+  "teacher_input_digest": "sha256:dcd7df883fa86101f7401cd14149c5806f58c7cea336064901f9a57bf2eeee27",
+  "token_measure": {
+    "excludes": [
+      "system_and_developer_prompts",
+      "hidden_reasoning",
+      "tool_traffic",
+      "billed_model_tokens"
+    ],
+    "includes": [
+      "arm_protocol",
+      "public_card",
+      "recall_advice",
+      "submitted_answer"
+    ],
+    "name": "observable_lexical_tokens",
+    "pattern": "[A-Za-z0-9_]+|[^\\w\\s]"
+  }
+}

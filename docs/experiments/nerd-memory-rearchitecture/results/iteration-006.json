@@ -1,0 +1,218 @@
+{
+  "accuracy": {
+    "control": {
+      "exact_mean": 0.0,
+      "exact_median": 0.0,
+      "leaf_mean": 0.02482857598284466,
+      "leaf_median": 0.013157894736842105
+    },
+    "memory": {
+      "exact_mean": 1.0,
+      "exact_median": 1.0,
+      "leaf_mean": 1.0,
+      "leaf_median": 1.0
+    },
+    "paired_exact_gain_mean": 1.0,
+    "paired_leaf_gain_mean": 0.9751714240171554
+  },
+  "canonical_digest": "sha256:03fdc50d5eba5dd7b1b057517bfbb9d137e1b62d930bdf2892e04bc0f074de62",
+  "condition_audit": {
+    "control_recall_zero": true,
+    "memory_recall_once": true,
+    "recorded_recall_event_count": 5
+  },
+  "criteria": {
+    "F1_teacher_verification": "PASS",
+    "F2_replication_completeness": "PASS",
+    "F3_matched_inputs": "PASS",
+    "F4_recall_isolation": "PASS",
+    "F5_memory_accuracy": "PASS",
+    "F6_paired_advantage": "PASS",
+    "F7_cost_reporting": "PASS"
+  },
+  "observable_lexical_tokens": {
+    "control": {
+      "maximum": 894.0,
+      "mean": 745.6,
+      "median": 768.0,
+      "minimum": 602.0,
+      "population_stddev": 113.78330281724116
+    },
+    "memory": {
+      "maximum": 879.0,
+      "mean": 878.2,
+      "median": 878.0,
+      "minimum": 878.0,
+      "population_stddev": 0.4
+    },
+    "paired_memory_minus_control": {
+      "maximum": 276.0,
+      "mean": 132.6,
+      "median": 110.0,
+      "minimum": -16.0,
+      "population_stddev": 113.98877137683343
+    }
+  },
+  "passed": true,
+  "per_round": [
+    {
+      "arms": {
+        "control": {
+          "elapsed_seconds": 63.048493,
+          "exact_accuracy": 0.0,
+          "leaf_accuracy": 0.009615384615384616,
+          "observable_lexical_tokens": 894
+        },
+        "memory": {
+          "elapsed_seconds": 59.670286,
+          "exact_accuracy": 1.0,
+          "leaf_accuracy": 1.0,
+          "observable_lexical_tokens": 878
+        }
+      },
+      "paired_differences": {
+        "elapsed_seconds": -3.3782070000000033,
+        "exact_accuracy": 1.0,
+        "leaf_accuracy": 0.9903846153846154,
+        "observable_lexical_tokens": -16
+      },
+      "round": 1
+    },
+    {
+      "arms": {
+        "control": {
+          "elapsed_seconds": 69.223356,
+          "exact_accuracy": 0.0,
+          "leaf_accuracy": 0.014084507042253521,
+          "observable_lexical_tokens": 768
+        },
+        "memory": {
+          "elapsed_seconds": 71.173359,
+          "exact_accuracy": 1.0,
+          "leaf_accuracy": 1.0,
+          "observable_lexical_tokens": 878
+        }
+      },
+      "paired_differences": {
+        "elapsed_seconds": 1.9500030000000095,
+        "exact_accuracy": 1.0,
+        "leaf_accuracy": 0.9859154929577465,
+        "observable_lexical_tokens": 110
+      },
+      "round": 2
+    },
+    {
+      "arms": {
+        "control": {
+          "elapsed_seconds": 82.940825,
+          "exact_accuracy": 0.0,
+          "leaf_accuracy": 0.013157894736842105,
+          "observable_lexical_tokens": 629
+        },
+        "memory": {
+          "elapsed_seconds": 59.700462,
+          "exact_accuracy": 1.0,
+          "leaf_accuracy": 1.0,
+          "observable_lexical_tokens": 879
+        }
+      },
+      "paired_differences": {
+        "elapsed_seconds": -23.240363000000002,
+        "exact_accuracy": 1.0,
+        "leaf_accuracy": 0.9868421052631579,
+        "observable_lexical_tokens": 250
+      },
+      "round": 3
+    },
+    {
+      "arms": {
+        "control": {
+          "elapsed_seconds": 84.587581,
+          "exact_accuracy": 0.0,
+          "leaf_accuracy": 0.012658227848101266,
+          "observable_lexical_tokens": 835
+        },
+        "memory": {
+          "elapsed_seconds": 66.762509,
+          "exact_accuracy": 1.0,
+          "leaf_accuracy": 1.0,
+          "observable_lexical_tokens": 878
+        }
+      },
+      "paired_differences": {
+        "elapsed_seconds": -17.825072000000006,
+        "exact_accuracy": 1.0,
+        "leaf_accuracy": 0.9873417721518988,
+        "observable_lexical_tokens": 43
+      },
+      "round": 4
+    },
+    {
+      "arms": {
+        "control": {
+          "elapsed_seconds": 102.174315,
+          "exact_accuracy": 0.0,
+          "leaf_accuracy": 0.07462686567164178,
+          "observable_lexical_tokens": 602
+        },
+        "memory": {
+          "elapsed_seconds": 61.367966,
+          "exact_accuracy": 1.0,
+          "leaf_accuracy": 1.0,
+          "observable_lexical_tokens": 878
+        }
+      },
+      "paired_differences": {
+        "elapsed_seconds": -40.806349000000004,
+        "exact_accuracy": 1.0,
+        "leaf_accuracy": 0.9253731343283582,
+        "observable_lexical_tokens": 276
+      },
+      "round": 5
+    }
+  ],
+  "relative_comparison": {
+    "exact_accuracy_gain_percentage_points": 100.0,
+    "leaf_accuracy_gain_percentage_points": 97.51714240171555,
+    "memory_time_change_percent_vs_control": -20.72270094100729,
+    "memory_token_proxy_change_percent_vs_control": 17.784334763948493,
+    "rounds_memory_faster": 4,
+    "rounds_memory_lower_token_proxy": 1
+  },
+  "round_count": 5,
+  "schema_version": "paired-agent-experiment/v1",
+  "speed_seconds": {
+    "control": {
+      "maximum": 102.174315,
+      "mean": 80.394914,
+      "median": 82.940825,
+      "minimum": 63.048493,
+      "population_stddev": 13.594884751024676
+    },
+    "memory": {
+      "maximum": 71.173359,
+      "mean": 63.7349164,
+      "median": 61.367966,
+      "minimum": 59.670286,
+      "population_stddev": 4.53645769417975
+    },
+    "paired_memory_minus_control": {
+      "maximum": 1.9500030000000095,
+      "mean": -16.6599976,
+      "median": -17.825072000000006,
+      "minimum": -40.806349000000004,
+      "population_stddev": 15.168671510462502
+    }
+  },
+  "teacher": {
+    "behavior_id": "bhv-i006-ivory-kestrel",
+    "canonical_digest": "sha256:5a15d58bb1279ee0a58dc9880f588c07f4d7422a3dd883eb4c8022bc68353adc",
+    "input_digest": "sha256:dcd7df883fa86101f7401cd14149c5806f58c7cea336064901f9a57bf2eeee27",
+    "output_digest": "sha256:21d85ee3c8ae0c4533f49cd73489e74674448a5b86ba31013bf4e2d93f0cedae",
+    "passed": true,
+    "recorded_behavior_count": 1,
+    "schema_version": "paired-agent-experiment/v1",
+    "teacher_output_exact": true
+  },
+  "token_measure_limit": "Proxy excludes system/developer prompts, hidden reasoning, tool traffic, and billed model tokens."
+}

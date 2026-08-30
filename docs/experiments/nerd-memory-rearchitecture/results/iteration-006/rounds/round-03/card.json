@@ -1,0 +1,10 @@
+{
+  "command": "Apply ivory kestrel to this settlement batch",
+  "control_response_path": "responses/round-03-control.json",
+  "input_digest": "sha256:d9b0afc565ff94236c89d8e438f750f7e301ce4ab21224ed58083319fedd93d5",
+  "input_path": "rounds/round-03/input.json",
+  "memory_response_path": "responses/round-03-memory.json",
+  "required_answer_schema": "paired-agent-answer/v1",
+  "round": 3,
+  "schema_version": "paired-agent-experiment/v1"
+}

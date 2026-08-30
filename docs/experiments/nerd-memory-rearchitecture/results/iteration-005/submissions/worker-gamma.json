@@ -1,0 +1,118 @@
+{
+  "worker_id": "worker-gamma",
+  "trials": [
+    {
+      "trial_id": "worker-gamma-known-06",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-gamma-known-02",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-gamma-known-03",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "action": "reconcile_schema_drift",
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-gamma-known-01",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "action": "normalize_release_manifest",
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-gamma-known-04",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-gamma-known-05",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "action": "rotate_cache_generation",
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "reject_output": true,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-gamma-unknown-01",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    }
+  ]
+}

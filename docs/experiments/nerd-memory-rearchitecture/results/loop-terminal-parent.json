@@ -1,0 +1,54 @@
+{
+  "admission": {
+    "active_iteration_budget": 1,
+    "admission_hash": "sha256:cb56e2a32a9b9acfd7fb631a742a7121f952a35f753e9c2478004a1293527f1a",
+    "admission_ref": "nerd-memory-rearchitecture-poc-iteration-004",
+    "admitted": true,
+    "authenticated": true,
+    "budget_source": "direct_user_bounded_iteration_004",
+    "contract_revision": "nerd-loop/v1",
+    "endpoint": "execute",
+    "hard_floor_signals": [
+      "local_correction_cycle",
+      "local_experiment"
+    ],
+    "host_capabilities": [
+      "session_state"
+    ],
+    "profile": "L2",
+    "required_host_capabilities": [
+      "session_state"
+    ],
+    "route": "experiment",
+    "schema_version": "nerd-loop/v1",
+    "state_class": "S1",
+    "terminal": null,
+    "wake_admitted": false
+  },
+  "decision": {
+    "admission_hash": "sha256:cb56e2a32a9b9acfd7fb631a742a7121f952a35f753e9c2478004a1293527f1a",
+    "approval_refs": [],
+    "artifact_revision": "sha256:03a38af27ea576c4d6d03f309ed9978b92a38f532ba5101569921455440aed4b",
+    "dod_hash": "sha256:de60930f894557ef711f1d8f634096e95ad7b40435f27162391b4400ac0f0411",
+    "dod_revision": "behavioral-memory-poc-dod/v2",
+    "evidence_refs": [
+      "results/verification.json#C1",
+      "results/iteration-004.json#C10",
+      "results/verification.json#C11",
+      "results/verification.json#C12",
+      "results/verification.json#C2",
+      "results/verification.json#C3",
+      "results/verification.json#C4",
+      "results/verification.json#C5",
+      "results/verification.json#C6",
+      "results/verification.json#C7",
+      "results/iteration-004.json#C8",
+      "results/verification.json#C9"
+    ],
+    "kind": "terminal",
+    "outcome": "DONE",
+    "reason": "dod_completion_expression_passed",
+    "schema_version": "nerd-loop/v1"
+  },
+  "dod_hash": "sha256:de60930f894557ef711f1d8f634096e95ad7b40435f27162391b4400ac0f0411"
+}

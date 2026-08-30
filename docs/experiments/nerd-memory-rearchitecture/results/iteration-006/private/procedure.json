@@ -1,0 +1,62 @@
+{
+  "behavior_trace": {
+    "action": "reconcile_ivory_batch",
+    "behavior_id": "bhv-i006-ivory-kestrel",
+    "cue_phrases": [
+      "Apply ivory kestrel to this settlement batch",
+      "Process this reconciliation with ivory kestrel",
+      "Use ivory kestrel for ledger normalization"
+    ],
+    "invalid_signals": [
+      "The output fingerprint does not match the canonical records and summary"
+    ],
+    "skills": [
+      "data-normalization",
+      "deterministic-validation"
+    ],
+    "steps": [
+      "Normalize account with strip and uppercase; normalize region and status with strip and lowercase",
+      "Keep only records whose normalized status is approved",
+      "Deduplicate by normalized account using highest integer revision, then lexicographically smallest transaction_id on a tie",
+      "Convert amount to integer cents with Decimal times 100 and ROUND_HALF_EVEN",
+      "Set risk to review when cents are at least 100000 or region is xx or zz; otherwise set clear",
+      "Sort output records by region, account, then transaction_id",
+      "Summarize record_count, total_cents, and sorted region_totals",
+      "Emit exactly batch_id, records, summary, and batch_fingerprint; each record contains transaction_id, account, region, amount_cents, and risk only",
+      "Hash canonical compact sorted-key JSON of records and summary with SHA256 and keep the first 16 hexadecimal characters"
+    ],
+    "tools": [
+      "python",
+      "json",
+      "decimal",
+      "hashlib"
+    ]
+  },
+  "output_contract": {
+    "canonical_json": "UTF-8 JSON with sorted keys and separators comma/colon, no spaces",
+    "fingerprint_input": {
+      "records": "the final records array",
+      "summary": "the final summary object"
+    },
+    "record_fields": [
+      "transaction_id",
+      "account",
+      "region",
+      "amount_cents",
+      "risk"
+    ],
+    "summary_fields": [
+      "record_count",
+      "total_cents",
+      "region_totals"
+    ],
+    "top_level_fields": [
+      "batch_id",
+      "records",
+      "summary",
+      "batch_fingerprint"
+    ]
+  },
+  "required_answer_schema": "paired-agent-answer/v1",
+  "schema_version": "paired-agent-experiment/v1"
+}

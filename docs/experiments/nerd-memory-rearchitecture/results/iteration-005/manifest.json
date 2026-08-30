@@ -1,0 +1,10 @@
+{
+  "gold_digest": "sha256:7e943de5d89f5e7c625957a6ef1c857ac8fa5d1f89413b141a324a8aa6616a13",
+  "known_trial_count": 18,
+  "public_card_digest": "sha256:35fa9e46fb8abf57cd0e73010456931e3094b0fdf9f0b8d13b3abfa145e7a7b7",
+  "schema_version": "shared-agent-experiment/v1",
+  "seed": 505,
+  "teacher_behavior_count": 6,
+  "unknown_trial_count": 3,
+  "worker_count": 3
+}

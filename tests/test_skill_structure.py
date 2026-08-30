@@ -151,7 +151,7 @@ class SkillStructureTests(unittest.TestCase):
                     "recall-and-apply.md",
                     "learn-and-correct.md",
                     "recognize-and-reuse.md",
-                    "deny-split-forget.md",
+                    "correct-and-forget.md",
                     "memory-contract.md",
                     "research.md",
                 ),

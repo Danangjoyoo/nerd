@@ -1,0 +1,197 @@
+{
+  "behaviors": [
+    {
+      "action": "normalize_release_manifest",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "cue_phrases": [
+        "Apply velvet quorum before publishing the release candidate",
+        "When artifact metadata changes, use velvet quorum",
+        "Process this release bundle with velvet quorum"
+      ],
+      "invalid_signals": [
+        "A digest differs between the normalized manifest and the release index"
+      ],
+      "recorded_order": 1,
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "verification_id": "verify-i005-vq-71c9",
+      "verified": true
+    },
+    {
+      "action": "isolate_flaky_test",
+      "behavior_id": "bhv-i005-cobalt-thimble",
+      "cue_phrases": [
+        "Use cobalt thimble when the test fails only on some runs",
+        "Investigate this intermittent suite result with cobalt thimble",
+        "Run cobalt thimble before quarantining the unstable test"
+      ],
+      "invalid_signals": [
+        "The proposed reproducer completes without any observed intermittent failure"
+      ],
+      "recorded_order": 2,
+      "skills": [
+        "test-triage",
+        "statistical-debugging"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Repeat the smallest failing test under a fixed random seed",
+        "Partition shared fixtures and environmental dependencies",
+        "Run each partition enough times to identify the correlated condition",
+        "Report the minimal reproducer and its observed failure frequency"
+      ],
+      "tools": [
+        "pytest",
+        "rg",
+        "timeout"
+      ],
+      "verification_id": "verify-i005-ct-42a6",
+      "verified": true
+    },
+    {
+      "action": "reconcile_schema_drift",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "cue_phrases": [
+        "Apply amber lattice after importing the database snapshot",
+        "Use amber lattice when migration histories disagree",
+        "Check the staging schema with amber lattice before rollout"
+      ],
+      "invalid_signals": [
+        "An unmanaged table, constraint, or index difference remains after reconciliation"
+      ],
+      "recorded_order": 3,
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "verification_id": "verify-i005-al-8d34",
+      "verified": true
+    },
+    {
+      "action": "construct_accessibility_audit",
+      "behavior_id": "bhv-i005-silent-marzipan",
+      "cue_phrases": [
+        "Review the checkout flow with silent marzipan",
+        "Use silent marzipan before approving the interface change",
+        "Apply silent marzipan to the keyboard-only journey"
+      ],
+      "invalid_signals": [
+        "Any critical interaction lacks a keyboard path or accessible name"
+      ],
+      "recorded_order": 4,
+      "skills": [
+        "accessibility-testing",
+        "frontend-qa"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Map the critical journey and enumerate interactive states",
+        "Traverse every state by keyboard while recording focus order and names",
+        "Run automated rules at each stable state and inspect contrast manually",
+        "Produce severity-ranked findings with reproducible selectors and evidence"
+      ],
+      "tools": [
+        "playwright",
+        "axe-core",
+        "browser-devtools"
+      ],
+      "verification_id": "verify-i005-sm-56ef",
+      "verified": true
+    },
+    {
+      "action": "rotate_cache_generation",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "cue_phrases": [
+        "Use juniper orbit before warming the new deployment",
+        "Apply juniper orbit when stale responses survive a rollout",
+        "Run juniper orbit across the regional cache tier"
+      ],
+      "invalid_signals": [
+        "Post-switch cache hit rate falls below the recorded pre-rotation baseline"
+      ],
+      "recorded_order": 5,
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "verification_id": "verify-i005-jo-b903",
+      "verified": true
+    },
+    {
+      "action": "validate_invoice_batch",
+      "behavior_id": "bhv-i005-basalt-lantern",
+      "cue_phrases": [
+        "Process the month-end ledger with basalt lantern",
+        "Use basalt lantern before releasing the supplier payments",
+        "Apply basalt lantern to this imported billing batch"
+      ],
+      "invalid_signals": [
+        "The reconciled export contains a duplicate fingerprint or an unbalanced total"
+      ],
+      "recorded_order": 6,
+      "skills": [
+        "financial-data-validation",
+        "anomaly-detection"
+      ],
+      "source_agent": "iteration005-teacher",
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Load source invoices and the payment ledger into typed staging tables",
+        "Recalculate totals, taxes, currency rounding, and duplicate fingerprints",
+        "Reconcile recalculated values against payable entries and approval limits",
+        "Export only reconciled rows and a separate exception register"
+      ],
+      "tools": [
+        "duckdb",
+        "python",
+        "libreoffice"
+      ],
+      "verification_id": "verify-i005-bl-c27d",
+      "verified": true
+    }
+  ],
+  "schema_version": "shared-behavior-memory/v1"
+}

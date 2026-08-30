@@ -2,23 +2,19 @@
 
 ## Use When
 
-Immediately use Multi-Goal Intake when a request contains any of these forms:
+Use Multi-Goal Intake only when a request contains two or more independently
+completable outcomes. Structure is a scan boundary, not proof of multiple goals.
+Inspect likely boundaries such as:
 
 - multiple numbered or bulleted instruction items;
 - multiple instruction sentences; or
 - multiple instruction paragraphs separated by whitespace.
 
-These forms are sufficient triggers. Use the matching boundary to split the
-intake, without deciding whether the parts are independently completable. When
-forms are nested, split by numbered or bulleted items first, then paragraphs,
-then sentences. The intake and its ledger remain mandatory even when all goals
-are small, share an endpoint, fit in one turn, or need no dependency ordering
-or cross-turn tracking.
-
-When none of the structural triggers applies, also use this protocol for a
-single structured unit that contains two or more independently completable
-outcomes. During normalization, keep constraints, examples, acceptance
-criteria, and substeps with their parent goal.
+Split only boundaries that remain independently completable after reading their
+meaning. Constraints, examples, acceptance criteria, and substeps stay with
+their parent outcome even when they are bullets or separate paragraphs. A
+qualifying intake may queue endpoint work, but it must never replace the active
+endpoint's required deliverable.
 
 ## Create and Show the Intake
 

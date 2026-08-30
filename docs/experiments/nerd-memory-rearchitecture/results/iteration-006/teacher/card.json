@@ -1,0 +1,10 @@
+{
+  "arm": "teacher",
+  "command": "Apply ivory kestrel to this settlement batch",
+  "input_digest": "sha256:dcd7df883fa86101f7401cd14149c5806f58c7cea336064901f9a57bf2eeee27",
+  "input_path": "teacher/input.json",
+  "private_procedure_path": "private/procedure.json",
+  "response_path": "teacher/response.json",
+  "round": 0,
+  "schema_version": "paired-agent-experiment/v1"
+}

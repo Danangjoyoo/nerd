@@ -1,0 +1,139 @@
+{
+  "canonical_digest": "sha256:1e317c5e3dc4001bf2be322ea0c26b02ff27b30acb2904af8df2ab18b0c5357d",
+  "condition_audit": {
+    "memory_off_trials_not_queried": true,
+    "memory_trials_queried_once": true
+  },
+  "counts": {
+    "memory_off_known": 9,
+    "memory_on_invalid": 3,
+    "memory_on_known": 9,
+    "memory_on_valid": 6,
+    "recall_events": 12,
+    "unknown": 3,
+    "workers_with_cross_repository_recall": 3
+  },
+  "criteria": {
+    "E1_teacher_behaviors": "PASS",
+    "E2_three_independent_consumers": "PASS",
+    "E3_shared_availability": "PASS",
+    "E4_cross_repository_recall": "PASS",
+    "E5_usefulness_gain": "PASS",
+    "E6_unknown_abstention": "PASS",
+    "E7_condition_isolation": "PASS",
+    "E8_no_storage_partition_field": "PASS"
+  },
+  "metrics": {
+    "cross_repository_recall": 1.0,
+    "invalid_output_recall_memory_on": 1.0,
+    "memory_off_exact_success": 0.0,
+    "memory_on_exact_success": 1.0,
+    "shared_availability": 1.0,
+    "success_gain": 1.0,
+    "unknown_abstention": 1.0,
+    "valid_output_false_rejection_memory_on": 0.0
+  },
+  "passed": true,
+  "schema_version": "shared-agent-experiment/v1",
+  "trial_verdicts": {
+    "worker-alpha-known-01": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-alpha-known-02": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-alpha-known-03": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-alpha-known-04": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-alpha-known-05": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-alpha-known-06": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-alpha-unknown-01": {
+      "unknown_abstained": true
+    },
+    "worker-beta-known-01": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-beta-known-02": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-beta-known-03": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-beta-known-04": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-beta-known-05": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-beta-known-06": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-beta-unknown-01": {
+      "unknown_abstained": true
+    },
+    "worker-gamma-known-01": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-gamma-known-02": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-gamma-known-03": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-gamma-known-04": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-gamma-known-05": {
+      "availability_correct": true,
+      "condition": "memory_on",
+      "cross_repository": true,
+      "exact_task_success": true
+    },
+    "worker-gamma-known-06": {
+      "condition": "memory_off",
+      "exact_task_success": false
+    },
+    "worker-gamma-unknown-01": {
+      "unknown_abstained": true
+    }
+  }
+}

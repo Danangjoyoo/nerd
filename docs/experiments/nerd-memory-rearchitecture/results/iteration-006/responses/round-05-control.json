@@ -1,0 +1,63 @@
+{
+  "schema_version": "paired-agent-answer/v1",
+  "round": 5,
+  "arm": "control",
+  "input_digest": "sha256:e7c5f1ec27c73e50d85be39686ae11f61275c4d06f868dea4fac6a9cd9029d25",
+  "output": {
+    "batch_id": "settlement-05",
+    "profile": "ivory-kestrel",
+    "normalization": {
+      "account": "trim and uppercase",
+      "revision": "select the highest revision for each normalized account",
+      "status": "retain only accounts whose selected revision is APPROVED",
+      "region": "trim and uppercase; quarantine unrecognized region codes",
+      "amount": "round decimal amounts to two places using half-even"
+    },
+    "records": [
+      {
+        "account": "B-04",
+        "amount": "1866.02",
+        "region": "EU",
+        "revision": 2,
+        "status": "APPROVED",
+        "transaction_id": "b05-z01"
+      },
+      {
+        "account": "C-92",
+        "amount": "939.00",
+        "region": "EU",
+        "revision": 1,
+        "status": "APPROVED",
+        "transaction_id": "b05-a02"
+      }
+    ],
+    "quarantined": [
+      {
+        "account": "A-17",
+        "reason": "selected revision has status PENDING",
+        "revision": 9,
+        "transaction_id": "b05-pending"
+      },
+      {
+        "account": "D-31",
+        "reason": "unrecognized region XX",
+        "revision": 2,
+        "transaction_id": "b05-z03"
+      },
+      {
+        "account": "E-08",
+        "reason": "unrecognized region XX",
+        "revision": 1,
+        "transaction_id": "b05-a04"
+      },
+      {
+        "account": "F-55",
+        "reason": "unrecognized region ZZ",
+        "revision": 2,
+        "transaction_id": "b05-z05"
+      }
+    ],
+    "record_count": 2,
+    "total_amount": "2805.02"
+  }
+}

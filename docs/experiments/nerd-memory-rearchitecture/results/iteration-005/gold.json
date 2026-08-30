@@ -1,0 +1,475 @@
+{
+  "schema_version": "shared-agent-experiment/v1",
+  "seed": 505,
+  "teacher_behavior_count": 6,
+  "trials": {
+    "worker-alpha-known-01": {
+      "action": "normalize_release_manifest",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": true,
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-known-02": {
+      "action": "isolate_flaky_test",
+      "behavior_id": "bhv-i005-cobalt-thimble",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "test-triage",
+        "statistical-debugging"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Repeat the smallest failing test under a fixed random seed",
+        "Partition shared fixtures and environmental dependencies",
+        "Run each partition enough times to identify the correlated condition",
+        "Report the minimal reproducer and its observed failure frequency"
+      ],
+      "tools": [
+        "pytest",
+        "rg",
+        "timeout"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-known-03": {
+      "action": "reconcile_schema_drift",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-known-04": {
+      "action": "construct_accessibility_audit",
+      "behavior_id": "bhv-i005-silent-marzipan",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": true,
+      "skills": [
+        "accessibility-testing",
+        "frontend-qa"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Map the critical journey and enumerate interactive states",
+        "Traverse every state by keyboard while recording focus order and names",
+        "Run automated rules at each stable state and inspect contrast manually",
+        "Produce severity-ranked findings with reproducible selectors and evidence"
+      ],
+      "tools": [
+        "playwright",
+        "axe-core",
+        "browser-devtools"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-known-05": {
+      "action": "rotate_cache_generation",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-known-06": {
+      "action": "validate_invoice_batch",
+      "behavior_id": "bhv-i005-basalt-lantern",
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "financial-data-validation",
+        "anomaly-detection"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Load source invoices and the payment ledger into typed staging tables",
+        "Recalculate totals, taxes, currency rounding, and duplicate fingerprints",
+        "Reconcile recalculated values against payable entries and approval limits",
+        "Export only reconciled rows and a separate exception register"
+      ],
+      "tools": [
+        "duckdb",
+        "python",
+        "libreoffice"
+      ],
+      "worker_id": "worker-alpha"
+    },
+    "worker-alpha-unknown-01": {
+      "consumer_repository": "consumer-typescript-web",
+      "kind": "unknown",
+      "memory_enabled": true,
+      "worker_id": "worker-alpha"
+    },
+    "worker-beta-known-01": {
+      "action": "normalize_release_manifest",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-known-02": {
+      "action": "isolate_flaky_test",
+      "behavior_id": "bhv-i005-cobalt-thimble",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "test-triage",
+        "statistical-debugging"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Repeat the smallest failing test under a fixed random seed",
+        "Partition shared fixtures and environmental dependencies",
+        "Run each partition enough times to identify the correlated condition",
+        "Report the minimal reproducer and its observed failure frequency"
+      ],
+      "tools": [
+        "pytest",
+        "rg",
+        "timeout"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-known-03": {
+      "action": "reconcile_schema_drift",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": true,
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-known-04": {
+      "action": "construct_accessibility_audit",
+      "behavior_id": "bhv-i005-silent-marzipan",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "accessibility-testing",
+        "frontend-qa"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Map the critical journey and enumerate interactive states",
+        "Traverse every state by keyboard while recording focus order and names",
+        "Run automated rules at each stable state and inspect contrast manually",
+        "Produce severity-ranked findings with reproducible selectors and evidence"
+      ],
+      "tools": [
+        "playwright",
+        "axe-core",
+        "browser-devtools"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-known-05": {
+      "action": "rotate_cache_generation",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-known-06": {
+      "action": "validate_invoice_batch",
+      "behavior_id": "bhv-i005-basalt-lantern",
+      "consumer_repository": "consumer-python-cli",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": true,
+      "skills": [
+        "financial-data-validation",
+        "anomaly-detection"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Load source invoices and the payment ledger into typed staging tables",
+        "Recalculate totals, taxes, currency rounding, and duplicate fingerprints",
+        "Reconcile recalculated values against payable entries and approval limits",
+        "Export only reconciled rows and a separate exception register"
+      ],
+      "tools": [
+        "duckdb",
+        "python",
+        "libreoffice"
+      ],
+      "worker_id": "worker-beta"
+    },
+    "worker-beta-unknown-01": {
+      "consumer_repository": "consumer-python-cli",
+      "kind": "unknown",
+      "memory_enabled": true,
+      "worker_id": "worker-beta"
+    },
+    "worker-gamma-known-01": {
+      "action": "normalize_release_manifest",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-known-02": {
+      "action": "isolate_flaky_test",
+      "behavior_id": "bhv-i005-cobalt-thimble",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": true,
+      "skills": [
+        "test-triage",
+        "statistical-debugging"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Repeat the smallest failing test under a fixed random seed",
+        "Partition shared fixtures and environmental dependencies",
+        "Run each partition enough times to identify the correlated condition",
+        "Report the minimal reproducer and its observed failure frequency"
+      ],
+      "tools": [
+        "pytest",
+        "rg",
+        "timeout"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-known-03": {
+      "action": "reconcile_schema_drift",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": false,
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-known-04": {
+      "action": "construct_accessibility_audit",
+      "behavior_id": "bhv-i005-silent-marzipan",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "accessibility-testing",
+        "frontend-qa"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Map the critical journey and enumerate interactive states",
+        "Traverse every state by keyboard while recording focus order and names",
+        "Run automated rules at each stable state and inspect contrast manually",
+        "Produce severity-ranked findings with reproducible selectors and evidence"
+      ],
+      "tools": [
+        "playwright",
+        "axe-core",
+        "browser-devtools"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-known-05": {
+      "action": "rotate_cache_generation",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": true,
+      "reject_output": true,
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-known-06": {
+      "action": "validate_invoice_batch",
+      "behavior_id": "bhv-i005-basalt-lantern",
+      "consumer_repository": "consumer-documentation",
+      "kind": "known",
+      "memory_enabled": false,
+      "reject_output": false,
+      "skills": [
+        "financial-data-validation",
+        "anomaly-detection"
+      ],
+      "source_repository": "teacher-rust-service",
+      "steps": [
+        "Load source invoices and the payment ledger into typed staging tables",
+        "Recalculate totals, taxes, currency rounding, and duplicate fingerprints",
+        "Reconcile recalculated values against payable entries and approval limits",
+        "Export only reconciled rows and a separate exception register"
+      ],
+      "tools": [
+        "duckdb",
+        "python",
+        "libreoffice"
+      ],
+      "worker_id": "worker-gamma"
+    },
+    "worker-gamma-unknown-01": {
+      "consumer_repository": "consumer-documentation",
+      "kind": "unknown",
+      "memory_enabled": true,
+      "worker_id": "worker-gamma"
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "artifact_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533",
+  "criterion_vector": {
+    "C1": "PASS",
+    "C10": "PASS",
+    "C11": "PASS",
+    "C12": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "C4": "PASS",
+    "C5": "PASS",
+    "C6": "PASS",
+    "C7": "PASS",
+    "C8": "PASS",
+    "C9": "PASS"
+  },
+  "determinism": {
+    "comparisons": [
+      {
+        "equal": true,
+        "first_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f",
+        "iteration": 1,
+        "phase": "development",
+        "recorded_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f",
+        "second_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2",
+        "iteration": 2,
+        "phase": "development",
+        "recorded_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2",
+        "second_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e",
+        "iteration": 3,
+        "phase": "development",
+        "recorded_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e",
+        "second_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533",
+        "iteration": 3,
+        "phase": "holdout-post-freeze-rerun",
+        "recorded_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533",
+        "second_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533"
+      }
+    ],
+    "passed": true
+  },
+  "deterministic_evidence_digest": "sha256:f50be1bb7444961712a8fb7228dce161eb17798c94a88ef1ba5c58b32ddfced2",
+  "manifest": {
+    "README.md": true,
+    "architecture.md": true,
+    "experiment-plan.md": true,
+    "final-report.md": true,
+    "hypotheses.md": true,
+    "reports/iteration-001.md": true,
+    "reports/iteration-002.md": true,
+    "reports/iteration-003.md": true,
+    "reports/iteration-004.md": true,
+    "results/final-holdout.json": true,
+    "results/iteration-001.json": true,
+    "results/iteration-002.json": true,
+    "results/iteration-003.json": true,
+    "results/iteration-004.json": true,
+    "results/loop-terminal.json": true,
+    "results/verification-run-b.json": true
+  },
+  "runtime": {
+    "measurements": {
+      "median_prediction_ms": 0.016709,
+      "p95_prediction_ms": 0.016917,
+      "sample_count": 500.0
+    },
+    "policy": {
+      "bounds": {
+        "median_prediction_ms": {
+          "limit_ms": 5.0,
+          "operator": "<"
+        },
+        "p95_prediction_ms": {
+          "limit_ms": 10.0,
+          "operator": "<"
+        }
+      },
+      "repeat_tolerance": {
+        "absolute_ms": 0.05,
+        "relative_fraction": 0.25,
+        "rule": "delta <= max(absolute_ms, relative_fraction * slower_measurement)"
+      },
+      "sample_count": 500,
+      "schema_version": "runtime-evidence-policy/v1"
+    },
+    "within_bounds": true
+  },
+  "safety_probes": {
+    "authority_fields_absent": true,
+    "capture_reconstructs": true,
+    "context_provenance_clean": true,
+    "current_values_override": true,
+    "high_severity_invalid_rejected": true,
+    "seeded_secrets_redacted": true,
+    "three_corrections_retire": true,
+    "unknown_query_abstains": true
+  },
+  "schema_version": "behavioral-memory-verification/v2",
+  "terminal": "DONE",
+  "unit_tests": {
+    "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m unittest discover -s tests -v",
+    "exit_code": 0,
+    "passed": true,
+    "summary": "OK"
+  }
+}

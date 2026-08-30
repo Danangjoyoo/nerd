@@ -1,0 +1,67 @@
+{
+  "causal_variable": "reproducibility_semantics_for_noisy_timing",
+  "criterion_vector": {
+    "C10": "PASS",
+    "C8": "PASS"
+  },
+  "deterministic_evidence_digest": "sha256:4397fb54f7c3f14343e8275fe47f0e59858dfb8b6b265672fcfcb491c8773713",
+  "deterministic_evidence_exact": true,
+  "hypotheses": {
+    "H7": "UNTESTED",
+    "H8": "PASS",
+    "H9": "PASS"
+  },
+  "iteration": 4,
+  "passed": true,
+  "raw_outputs_equal": false,
+  "runtime_evidence": {
+    "both_runs_within_bounds": true,
+    "policies_equal": true,
+    "policy": {
+      "bounds": {
+        "median_prediction_ms": {
+          "limit_ms": 5.0,
+          "operator": "<"
+        },
+        "p95_prediction_ms": {
+          "limit_ms": 10.0,
+          "operator": "<"
+        }
+      },
+      "repeat_tolerance": {
+        "absolute_ms": 0.05,
+        "relative_fraction": 0.25,
+        "rule": "delta <= max(absolute_ms, relative_fraction * slower_measurement)"
+      },
+      "sample_count": 500,
+      "schema_version": "runtime-evidence-policy/v1"
+    },
+    "sample_counts_exact": true,
+    "statistics": {
+      "median_prediction_ms": {
+        "absolute_delta_ms": 0.001750999999999999,
+        "allowed_delta_ms": 0.05,
+        "first_ms": 0.016291,
+        "first_within_bound": true,
+        "second_ms": 0.018042,
+        "second_within_bound": true,
+        "within_tolerance": true
+      },
+      "p95_prediction_ms": {
+        "absolute_delta_ms": 0.0022910000000000014,
+        "allowed_delta_ms": 0.05,
+        "first_ms": 0.017584,
+        "first_within_bound": true,
+        "second_ms": 0.019875,
+        "second_within_bound": true,
+        "within_tolerance": true
+      }
+    },
+    "within_declared_policy": true,
+    "within_repeat_tolerance": true
+  },
+  "schema_version": "behavioral-memory-verification-comparison/v1",
+  "stored_digests_valid": true,
+  "terminal": "DONE",
+  "verification_contract_digest": "sha256:b393608d9410c7e0bddaaa35e667c50931bb7a54130e2eba78eaab8b0b74ba03"
+}

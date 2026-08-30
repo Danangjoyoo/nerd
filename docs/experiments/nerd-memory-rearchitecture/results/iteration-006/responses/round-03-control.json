@@ -1,0 +1,68 @@
+{
+  "schema_version": "paired-agent-answer/v1",
+  "round": 3,
+  "arm": "control",
+  "input_digest": "sha256:d9b0afc565ff94236c89d8e438f750f7e301ce4ab21224ed58083319fedd93d5",
+  "output": {
+    "batch_id": "settlement-03",
+    "policy": "ivory kestrel",
+    "assumptions": [
+      "Trim and uppercase account, region, and status values.",
+      "Discard non-approved records, then keep the highest approved revision per account.",
+      "Round monetary values to two decimal places using decimal half-even rounding."
+    ],
+    "settlements": [
+      {
+        "account": "A-17",
+        "amount": "771.00",
+        "region": "XX",
+        "revision": 1,
+        "transaction_id": "b03-a00"
+      },
+      {
+        "account": "B-04",
+        "amount": "158.00",
+        "region": "ZZ",
+        "revision": 2,
+        "transaction_id": "b03-z01"
+      },
+      {
+        "account": "C-92",
+        "amount": "251.02",
+        "region": "ZZ",
+        "revision": 1,
+        "transaction_id": "b03-a02"
+      },
+      {
+        "account": "D-31",
+        "amount": "1202.02",
+        "region": "EU",
+        "revision": 2,
+        "transaction_id": "b03-z03"
+      },
+      {
+        "account": "E-08",
+        "amount": "179.02",
+        "region": "EU",
+        "revision": 1,
+        "transaction_id": "b03-a04"
+      },
+      {
+        "account": "F-55",
+        "amount": "1490.02",
+        "region": "XX",
+        "revision": 2,
+        "transaction_id": "b03-z05"
+      }
+    ],
+    "summary": {
+      "settlement_count": 6,
+      "grand_total": "4051.08",
+      "totals_by_region": {
+        "EU": "1381.04",
+        "XX": "2261.02",
+        "ZZ": "409.02"
+      }
+    }
+  }
+}

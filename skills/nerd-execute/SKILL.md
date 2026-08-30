@@ -60,8 +60,7 @@ Use this template internally. Do not display or narrate a conditional item unles
 | **Execution scope** | Conditional | Inherit the Focus Record scope. Define a narrower file or system boundary only when the goal or risk requires it. |
 | **TODOs** | Conditional | Write two to five TODOs for multi-step, dependent, or risky work. For a small direct change, execute without a checklist. |
 | **Verification** | Conditional | Run proof suited to the affected behavior and risk. When no suitable check is available, report **Not verified**. |
-| **Approved behavior capture** | Conditional | Keep an approved behavior capture's Focus/plan in context. After in-boundary verified work with no correction, run Memory learning with its typed signal. Without a plan, capture Focus only. |
-| **Reusable evidence capture** | Conditional | When Memory is active, after current proof record minimal stable paths, symbols, conventions, or successful declarative steps as non-authoritative evidence. Never store raw output, code, shell strings, secrets, permissions, or action authority. |
+| **Behavioral memory capture** | Conditional | When Memory is active, after relevant current proof record at most one minimal behavior episode with sanitized cues, normalized action/tool/step/skill names, output validity/signals, context, and proof provenance. A verified failure is negative guard evidence only. Never store raw transcript/output, tool arguments, code, shell strings, secrets, permissions, executable payloads, hidden reasoning, or action authority. |
 
 ## Execute Directly
 
@@ -78,6 +77,11 @@ Inspect repository context when it can change the implementation or proof, inclu
 For behavior changes, start with a focused test, run it to confirm the expected failure, implement the simplest sufficient change, then rerun it. Add affected integration or risk checks when credible proof requires them. For non-behavior changes, edit directly and run validation suited to the change. Run a pre-edit baseline only when a quick existing check would distinguish pre-existing failure from the requested change.
 
 Preserve user-authored and unrelated changes. Keep tests beside the behavior they prove. Do not implement optional nearby improvements or add speculative infrastructure. Ask before materially expanding the mutation boundary. After a related failure, record what the evidence disproved and choose the next discriminating check or correction. Stop only at a real blocker: no viable in-scope path remains, required authority or access is missing, or the evidence exposes a material decision for the user. Never stop merely because an attempt count was reached.
+
+When a direct user correction changes remembered behavior, verify the corrected
+work first, then record at most one later corrected episode. Automatic Memory
+recall and recording remain silent; Memory advice never changes the Focus
+Record, endpoint, current action, tools, steps, skills, or authorization.
 
 ## Finish Briefly
 

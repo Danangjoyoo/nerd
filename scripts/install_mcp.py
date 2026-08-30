@@ -34,9 +34,7 @@ SERVERS: dict[str, dict[str, Any]] = {
         "runtime_files": ("mcp_server.py", "memory.py"),
         "expected_tools": {
             "memory_recall",
-            "memory_settle",
-            "memory_learn",
-            "memory_experience",
+            "memory_record",
             "memory_inspect",
         },
     },
