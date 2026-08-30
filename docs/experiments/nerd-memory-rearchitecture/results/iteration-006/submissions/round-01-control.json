@@ -1,0 +1,135 @@
+{
+  "arm": "control",
+  "input_digest": "sha256:6467369496dacf7516630d7bcc55c96b00e294c0e97a49d670d920d9063ec9c7",
+  "observable_lexical_tokens": {
+    "parts": {
+      "arm_protocol": 63,
+      "public_card": 106,
+      "recall_advice": 0,
+      "submitted_answer": 725
+    },
+    "total": 894
+  },
+  "output": {
+    "assumptions": {
+      "account_normalization": "trim and uppercase",
+      "amount_rounding": "decimal ROUND_HALF_UP to 2 places, per selected record",
+      "eligibility": "APPROVED records only",
+      "region_normalization": "trim and uppercase",
+      "selection": "highest approved revision per normalized account",
+      "status_normalization": "trim and uppercase"
+    },
+    "batch_id": "settlement-01",
+    "excluded_records": [
+      {
+        "account": "A-17",
+        "reason": "STATUS_PENDING",
+        "revision": 9,
+        "transaction_id": "b01-pending"
+      }
+    ],
+    "policy": "ivory kestrel",
+    "policy_status": "undefined_in_public_input",
+    "reconciled_records": [
+      {
+        "account": "A-17",
+        "amount": "1082.01",
+        "region": "EU",
+        "revision": 1,
+        "transaction_id": "b01-a00"
+      },
+      {
+        "account": "B-04",
+        "amount": "1480.00",
+        "flags": [
+          "UNRECOGNIZED_REGION"
+        ],
+        "region": "XX",
+        "revision": 2,
+        "transaction_id": "b01-z01"
+      },
+      {
+        "account": "C-92",
+        "amount": "27.03",
+        "flags": [
+          "UNRECOGNIZED_REGION"
+        ],
+        "region": "XX",
+        "revision": 1,
+        "transaction_id": "b01-a02"
+      },
+      {
+        "account": "D-31",
+        "amount": "1770.02",
+        "flags": [
+          "UNRECOGNIZED_REGION"
+        ],
+        "region": "ZZ",
+        "revision": 2,
+        "transaction_id": "b01-z03"
+      },
+      {
+        "account": "E-08",
+        "amount": "1590.02",
+        "flags": [
+          "UNRECOGNIZED_REGION"
+        ],
+        "region": "ZZ",
+        "revision": 1,
+        "transaction_id": "b01-a04"
+      },
+      {
+        "account": "F-55",
+        "amount": "888.02",
+        "region": "EU",
+        "revision": 2,
+        "transaction_id": "b01-z05"
+      }
+    ],
+    "summary": {
+      "approved_records": 9,
+      "excluded_nonapproved_records": 1,
+      "flagged_records": 4,
+      "input_records": 10,
+      "selected_records": 6,
+      "superseded_approved_records": 3,
+      "total_amount": "6837.10"
+    },
+    "superseded_records": [
+      {
+        "account": "B-04",
+        "reason": "LOWER_APPROVED_REVISION",
+        "revision": 1,
+        "transaction_id": "b01-a01"
+      },
+      {
+        "account": "D-31",
+        "reason": "LOWER_APPROVED_REVISION",
+        "revision": 1,
+        "transaction_id": "b01-a03"
+      },
+      {
+        "account": "F-55",
+        "reason": "LOWER_APPROVED_REVISION",
+        "revision": 1,
+        "transaction_id": "b01-a05"
+      }
+    ],
+    "warnings": [
+      "The public task does not define the ivory kestrel policy; reconciliation rules above are explicit assumptions.",
+      "Regions XX and ZZ were retained and flagged because no public mapping or rejection rule was supplied."
+    ]
+  },
+  "recall": null,
+  "round": 1,
+  "schema_version": "paired-agent-experiment/v1",
+  "timing": {
+    "elapsed_seconds": 63.048493,
+    "finalized_at_unix_ns": 1787984209044871000,
+    "spawn_order": [
+      "memory",
+      "control"
+    ],
+    "started_at_unix_ns": 1787984145996378000
+  }
+}

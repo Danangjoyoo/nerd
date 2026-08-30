@@ -1,0 +1,87 @@
+{
+  "schema_version": "paired-agent-answer/v1",
+  "round": 2,
+  "arm": "control",
+  "input_digest": "sha256:8986e10623d55c73f0c8a06e5b81431909c73a59b5abce4161c0bf34e1b19348",
+  "output": {
+    "batch_id": "settlement-02",
+    "normalization": {
+      "account": "trimmed and uppercased",
+      "status": "trimmed and compared case-insensitively; approved records retained",
+      "revision": "highest approved revision retained per normalized account",
+      "region": "trimmed and uppercased",
+      "amount": "rounded to two decimal places using round-half-even",
+      "ordering": "normalized account ascending"
+    },
+    "records": [
+      {
+        "account": "A-17",
+        "amount": "1163.00",
+        "region": "XX",
+        "revision": 2,
+        "status": "APPROVED",
+        "transaction_id": "b02-z00"
+      },
+      {
+        "account": "B-04",
+        "amount": "203.00",
+        "region": "XX",
+        "revision": 1,
+        "status": "APPROVED",
+        "transaction_id": "b02-a01"
+      },
+      {
+        "account": "C-92",
+        "amount": "412.00",
+        "region": "ZZ",
+        "revision": 2,
+        "status": "APPROVED",
+        "transaction_id": "b02-z02"
+      },
+      {
+        "account": "D-31",
+        "amount": "1395.00",
+        "region": "ZZ",
+        "revision": 1,
+        "status": "APPROVED",
+        "transaction_id": "b02-a03"
+      },
+      {
+        "account": "E-08",
+        "amount": "1865.02",
+        "region": "EU",
+        "revision": 2,
+        "status": "APPROVED",
+        "transaction_id": "b02-z04"
+      },
+      {
+        "account": "F-55",
+        "amount": "1377.02",
+        "region": "EU",
+        "revision": 1,
+        "status": "APPROVED",
+        "transaction_id": "b02-a05"
+      }
+    ],
+    "record_count": 6,
+    "total_amount": "6415.04",
+    "excluded": [
+      {
+        "transaction_id": "b02-pending",
+        "reason": "status is not approved"
+      },
+      {
+        "transaction_id": "b02-a00",
+        "reason": "superseded by approved revision 2 for A-17"
+      },
+      {
+        "transaction_id": "b02-a02",
+        "reason": "superseded by approved revision 2 for C-92"
+      },
+      {
+        "transaction_id": "b02-a04",
+        "reason": "superseded by approved revision 2 for E-08"
+      }
+    ]
+  }
+}

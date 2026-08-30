@@ -1,0 +1,57 @@
+{
+  "batch_fingerprint": "a775f371934ff3c4",
+  "batch_id": "settlement-03",
+  "records": [
+    {
+      "account": "D-31",
+      "amount_cents": 120202,
+      "region": "eu",
+      "risk": "review",
+      "transaction_id": "b03-z03"
+    },
+    {
+      "account": "E-08",
+      "amount_cents": 17902,
+      "region": "eu",
+      "risk": "clear",
+      "transaction_id": "b03-a04"
+    },
+    {
+      "account": "A-17",
+      "amount_cents": 77100,
+      "region": "xx",
+      "risk": "review",
+      "transaction_id": "b03-a00"
+    },
+    {
+      "account": "F-55",
+      "amount_cents": 149002,
+      "region": "xx",
+      "risk": "review",
+      "transaction_id": "b03-z05"
+    },
+    {
+      "account": "B-04",
+      "amount_cents": 15800,
+      "region": "zz",
+      "risk": "review",
+      "transaction_id": "b03-z01"
+    },
+    {
+      "account": "C-92",
+      "amount_cents": 25102,
+      "region": "zz",
+      "risk": "review",
+      "transaction_id": "b03-a02"
+    }
+  ],
+  "summary": {
+    "record_count": 6,
+    "region_totals": {
+      "eu": 138104,
+      "xx": 226102,
+      "zz": 40902
+    },
+    "total_cents": 405108
+  }
+}

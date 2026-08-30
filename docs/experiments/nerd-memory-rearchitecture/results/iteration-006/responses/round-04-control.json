@@ -1,0 +1,105 @@
+{
+  "schema_version": "paired-agent-answer/v1",
+  "round": 4,
+  "arm": "control",
+  "input_digest": "sha256:ca16975fe921963570bace59b5977d98e1f9682e55e75cf3c053ab950512129a",
+  "output": {
+    "batch_id": "settlement-04",
+    "profile": "ivory kestrel",
+    "status": "reconciled",
+    "policy_applied": {
+      "normalization": "trim surrounding whitespace and uppercase account, region, and status",
+      "eligibility": "APPROVED records only",
+      "deduplication": "highest approved revision per normalized account",
+      "amount_rounding": "round each selected amount to two decimal places using decimal half-up"
+    },
+    "summary": {
+      "input_record_count": 10,
+      "approved_record_count": 9,
+      "reconciled_account_count": 6,
+      "superseded_record_count": 3,
+      "excluded_non_approved_count": 1,
+      "raw_selected_amount": "4622.050",
+      "reconciled_amount": "4622.08"
+    },
+    "totals_by_region": [
+      {
+        "region": "EU",
+        "account_count": 2,
+        "amount": "2784.00"
+      },
+      {
+        "region": "XX",
+        "account_count": 2,
+        "amount": "1278.04"
+      },
+      {
+        "region": "ZZ",
+        "account_count": 2,
+        "amount": "560.04"
+      }
+    ],
+    "records": [
+      {
+        "account": "A-17",
+        "transaction_id": "b04-z00",
+        "revision": 2,
+        "region": "ZZ",
+        "amount": "333.01"
+      },
+      {
+        "account": "B-04",
+        "transaction_id": "b04-a01",
+        "revision": 1,
+        "region": "ZZ",
+        "amount": "227.03"
+      },
+      {
+        "account": "C-92",
+        "transaction_id": "b04-z02",
+        "revision": 2,
+        "region": "EU",
+        "amount": "1822.00"
+      },
+      {
+        "account": "D-31",
+        "transaction_id": "b04-a03",
+        "revision": 1,
+        "region": "EU",
+        "amount": "962.00"
+      },
+      {
+        "account": "E-08",
+        "transaction_id": "b04-z04",
+        "revision": 2,
+        "region": "XX",
+        "amount": "468.03"
+      },
+      {
+        "account": "F-55",
+        "transaction_id": "b04-a05",
+        "revision": 1,
+        "region": "XX",
+        "amount": "810.01"
+      }
+    ],
+    "excluded": [
+      {
+        "transaction_id": "b04-pending",
+        "reason": "status PENDING"
+      },
+      {
+        "transaction_id": "b04-a00",
+        "reason": "superseded approved revision for A-17"
+      },
+      {
+        "transaction_id": "b04-a02",
+        "reason": "superseded approved revision for C-92"
+      },
+      {
+        "transaction_id": "b04-a04",
+        "reason": "superseded approved revision for E-08"
+      }
+    ]
+  }
+}

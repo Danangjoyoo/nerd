@@ -1,0 +1,82 @@
+{
+  "arm": "control",
+  "input_digest": "sha256:e7c5f1ec27c73e50d85be39686ae11f61275c4d06f868dea4fac6a9cd9029d25",
+  "observable_lexical_tokens": {
+    "parts": {
+      "arm_protocol": 63,
+      "public_card": 106,
+      "recall_advice": 0,
+      "submitted_answer": 433
+    },
+    "total": 602
+  },
+  "output": {
+    "batch_id": "settlement-05",
+    "normalization": {
+      "account": "trim and uppercase",
+      "amount": "round decimal amounts to two places using half-even",
+      "region": "trim and uppercase; quarantine unrecognized region codes",
+      "revision": "select the highest revision for each normalized account",
+      "status": "retain only accounts whose selected revision is APPROVED"
+    },
+    "profile": "ivory-kestrel",
+    "quarantined": [
+      {
+        "account": "A-17",
+        "reason": "selected revision has status PENDING",
+        "revision": 9,
+        "transaction_id": "b05-pending"
+      },
+      {
+        "account": "D-31",
+        "reason": "unrecognized region XX",
+        "revision": 2,
+        "transaction_id": "b05-z03"
+      },
+      {
+        "account": "E-08",
+        "reason": "unrecognized region XX",
+        "revision": 1,
+        "transaction_id": "b05-a04"
+      },
+      {
+        "account": "F-55",
+        "reason": "unrecognized region ZZ",
+        "revision": 2,
+        "transaction_id": "b05-z05"
+      }
+    ],
+    "record_count": 2,
+    "records": [
+      {
+        "account": "B-04",
+        "amount": "1866.02",
+        "region": "EU",
+        "revision": 2,
+        "status": "APPROVED",
+        "transaction_id": "b05-z01"
+      },
+      {
+        "account": "C-92",
+        "amount": "939.00",
+        "region": "EU",
+        "revision": 1,
+        "status": "APPROVED",
+        "transaction_id": "b05-a02"
+      }
+    ],
+    "total_amount": "2805.02"
+  },
+  "recall": null,
+  "round": 5,
+  "schema_version": "paired-agent-experiment/v1",
+  "timing": {
+    "elapsed_seconds": 102.174315,
+    "finalized_at_unix_ns": 1787984577988712000,
+    "spawn_order": [
+      "memory",
+      "control"
+    ],
+    "started_at_unix_ns": 1787984475814397000
+  }
+}

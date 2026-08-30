@@ -1,0 +1,60 @@
+{
+  "consumer_repository": "consumer-typescript-web",
+  "instructions": {
+    "memory_off": "Do not query or inspect memory; solve from the task card alone and abstain when evidence is absent.",
+    "memory_on": "Query the shared-memory recall CLI, then follow its advisory prediction."
+  },
+  "schema_version": "shared-agent-experiment/v1",
+  "trials": [
+    {
+      "command": "Please handle Apply velvet quorum before publishing the release candidate for this task.",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": true,
+      "output_signal": "A digest differs between the normalized manifest and the release index",
+      "trial_id": "worker-alpha-known-01"
+    },
+    {
+      "command": "Please handle Review the checkout flow with silent marzipan for this task.",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": false,
+      "output_signal": "Any critical interaction lacks a keyboard path or accessible name",
+      "trial_id": "worker-alpha-known-04"
+    },
+    {
+      "command": "perform the cobalt zephyr migration",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-alpha-unknown-01"
+    },
+    {
+      "command": "The requested operation is Apply juniper orbit when stale responses survive a rollout; complete it now.",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-alpha-known-05"
+    },
+    {
+      "command": "Can you perform Apply basalt lantern to this imported billing batch and report the result?",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-alpha-known-06"
+    },
+    {
+      "command": "Can you perform Check the staging schema with amber lattice before rollout and report the result?",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-alpha-known-03"
+    },
+    {
+      "command": "The requested operation is Investigate this intermittent suite result with cobalt thimble; complete it now.",
+      "consumer_repository": "consumer-typescript-web",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-alpha-known-02"
+    }
+  ],
+  "worker_id": "worker-alpha"
+}

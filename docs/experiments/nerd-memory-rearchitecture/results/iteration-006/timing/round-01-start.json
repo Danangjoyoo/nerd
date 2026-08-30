@@ -1,0 +1,10 @@
+{
+  "input_digest": "sha256:6467369496dacf7516630d7bcc55c96b00e294c0e97a49d670d920d9063ec9c7",
+  "round": 1,
+  "schema_version": "paired-agent-experiment/v1",
+  "spawn_order": [
+    "memory",
+    "control"
+  ],
+  "started_at_unix_ns": 1787984145996378000
+}

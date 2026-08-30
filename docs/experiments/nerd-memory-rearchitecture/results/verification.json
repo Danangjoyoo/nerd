@@ -1,0 +1,310 @@
+{
+  "artifact_digest": "sha256:b2bbb6228a630b1e36b31b6ee4b8579f3205a55ce17309b8556e74027f75c44e",
+  "criterion_vector": {
+    "C1": "PASS",
+    "C10": "PASS",
+    "C11": "PASS",
+    "C12": "PASS",
+    "C13": "PASS",
+    "C14": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "C4": "PASS",
+    "C5": "PASS",
+    "C6": "PASS",
+    "C7": "PASS",
+    "C8": "PASS",
+    "C9": "PASS"
+  },
+  "cross_agent_evidence": {
+    "canonical_digest": "sha256:1e317c5e3dc4001bf2be322ea0c26b02ff27b30acb2904af8df2ab18b0c5357d",
+    "condition_audit": {
+      "memory_off_trials_not_queried": true,
+      "memory_trials_queried_once": true
+    },
+    "counts": {
+      "memory_off_known": 9,
+      "memory_on_invalid": 3,
+      "memory_on_known": 9,
+      "memory_on_valid": 6,
+      "recall_events": 12,
+      "unknown": 3,
+      "workers_with_cross_repository_recall": 3
+    },
+    "criteria": {
+      "E1_teacher_behaviors": "PASS",
+      "E2_three_independent_consumers": "PASS",
+      "E3_shared_availability": "PASS",
+      "E4_cross_repository_recall": "PASS",
+      "E5_usefulness_gain": "PASS",
+      "E6_unknown_abstention": "PASS",
+      "E7_condition_isolation": "PASS",
+      "E8_no_storage_partition_field": "PASS"
+    },
+    "metrics": {
+      "cross_repository_recall": 1.0,
+      "invalid_output_recall_memory_on": 1.0,
+      "memory_off_exact_success": 0.0,
+      "memory_on_exact_success": 1.0,
+      "shared_availability": 1.0,
+      "success_gain": 1.0,
+      "unknown_abstention": 1.0,
+      "valid_output_false_rejection_memory_on": 0.0
+    },
+    "passed": true
+  },
+  "determinism": {
+    "comparisons": [
+      {
+        "equal": true,
+        "first_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f",
+        "iteration": 1,
+        "phase": "development",
+        "recorded_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f",
+        "second_digest": "sha256:faa3bb765ca5ed52a59cebe70387262876a740ea1298c92504e452c385b1ef4f"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2",
+        "iteration": 2,
+        "phase": "development",
+        "recorded_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2",
+        "second_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e",
+        "iteration": 3,
+        "phase": "development",
+        "recorded_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e",
+        "second_digest": "sha256:eaadf6045a2179048124a21decdfa76099a396c89bf287b78f6fb1c5745fcb9e"
+      },
+      {
+        "equal": true,
+        "first_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533",
+        "iteration": 3,
+        "phase": "holdout-post-freeze-rerun",
+        "recorded_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533",
+        "second_digest": "sha256:015cdcf1279d08d0fc989b8c6cd8556d347556e97d5a75c1450b6ff34e10e533"
+      }
+    ],
+    "passed": true
+  },
+  "deterministic_evidence_digest": "sha256:4397fb54f7c3f14343e8275fe47f0e59858dfb8b6b265672fcfcb491c8773713",
+  "manifest": {
+    "README.md": true,
+    "architecture.md": true,
+    "experiment-plan.md": true,
+    "final-report.md": true,
+    "hypotheses.md": true,
+    "reports/iteration-001.md": true,
+    "reports/iteration-002.md": true,
+    "reports/iteration-003.md": true,
+    "reports/iteration-004.md": true,
+    "reports/iteration-005.md": true,
+    "reports/iteration-006.md": true,
+    "results/final-holdout.json": true,
+    "results/iteration-001.json": true,
+    "results/iteration-002.json": true,
+    "results/iteration-003.json": true,
+    "results/iteration-004.json": true,
+    "results/iteration-005.json": true,
+    "results/iteration-005/cards/worker-alpha.json": true,
+    "results/iteration-005/cards/worker-beta.json": true,
+    "results/iteration-005/cards/worker-gamma.json": true,
+    "results/iteration-005/gold.json": true,
+    "results/iteration-005/manifest.json": true,
+    "results/iteration-005/shared-memory.sqlite": true,
+    "results/iteration-005/submissions/worker-alpha.json": true,
+    "results/iteration-005/submissions/worker-beta.json": true,
+    "results/iteration-005/submissions/worker-gamma.json": true,
+    "results/iteration-005/teacher-export.json": true,
+    "results/iteration-006.json": true,
+    "results/iteration-006/manifest.json": true,
+    "results/iteration-006/private/gold/round-01.json": true,
+    "results/iteration-006/private/gold/round-02.json": true,
+    "results/iteration-006/private/gold/round-03.json": true,
+    "results/iteration-006/private/gold/round-04.json": true,
+    "results/iteration-006/private/gold/round-05.json": true,
+    "results/iteration-006/private/gold/teacher.json": true,
+    "results/iteration-006/private/procedure.json": true,
+    "results/iteration-006/protocols/control.txt": true,
+    "results/iteration-006/protocols/memory.txt": true,
+    "results/iteration-006/recalls/round-01-memory.json": true,
+    "results/iteration-006/recalls/round-02-memory.json": true,
+    "results/iteration-006/recalls/round-03-memory.json": true,
+    "results/iteration-006/recalls/round-04-memory.json": true,
+    "results/iteration-006/recalls/round-05-memory.json": true,
+    "results/iteration-006/responses/round-01-control.json": true,
+    "results/iteration-006/responses/round-01-memory.json": true,
+    "results/iteration-006/responses/round-02-control.json": true,
+    "results/iteration-006/responses/round-02-memory.json": true,
+    "results/iteration-006/responses/round-03-control.json": true,
+    "results/iteration-006/responses/round-03-memory.json": true,
+    "results/iteration-006/responses/round-04-control.json": true,
+    "results/iteration-006/responses/round-04-memory.json": true,
+    "results/iteration-006/responses/round-05-control.json": true,
+    "results/iteration-006/responses/round-05-memory.json": true,
+    "results/iteration-006/rounds/round-01/card.json": true,
+    "results/iteration-006/rounds/round-01/input.json": true,
+    "results/iteration-006/rounds/round-02/card.json": true,
+    "results/iteration-006/rounds/round-02/input.json": true,
+    "results/iteration-006/rounds/round-03/card.json": true,
+    "results/iteration-006/rounds/round-03/input.json": true,
+    "results/iteration-006/rounds/round-04/card.json": true,
+    "results/iteration-006/rounds/round-04/input.json": true,
+    "results/iteration-006/rounds/round-05/card.json": true,
+    "results/iteration-006/rounds/round-05/input.json": true,
+    "results/iteration-006/shared-memory.sqlite": true,
+    "results/iteration-006/submissions/round-01-control.json": true,
+    "results/iteration-006/submissions/round-01-memory.json": true,
+    "results/iteration-006/submissions/round-02-control.json": true,
+    "results/iteration-006/submissions/round-02-memory.json": true,
+    "results/iteration-006/submissions/round-03-control.json": true,
+    "results/iteration-006/submissions/round-03-memory.json": true,
+    "results/iteration-006/submissions/round-04-control.json": true,
+    "results/iteration-006/submissions/round-04-memory.json": true,
+    "results/iteration-006/submissions/round-05-control.json": true,
+    "results/iteration-006/submissions/round-05-memory.json": true,
+    "results/iteration-006/teacher-export.json": true,
+    "results/iteration-006/teacher/card.json": true,
+    "results/iteration-006/teacher/input.json": true,
+    "results/iteration-006/teacher/response.json": true,
+    "results/loop-terminal.json": true,
+    "results/verification-run-b.json": true
+  },
+  "paired_agent_evidence": {
+    "accuracy": {
+      "control": {
+        "exact_mean": 0.0,
+        "exact_median": 0.0,
+        "leaf_mean": 0.02482857598284466,
+        "leaf_median": 0.013157894736842105
+      },
+      "memory": {
+        "exact_mean": 1.0,
+        "exact_median": 1.0,
+        "leaf_mean": 1.0,
+        "leaf_median": 1.0
+      },
+      "paired_exact_gain_mean": 1.0,
+      "paired_leaf_gain_mean": 0.9751714240171554
+    },
+    "canonical_digest": "sha256:03fdc50d5eba5dd7b1b057517bfbb9d137e1b62d930bdf2892e04bc0f074de62",
+    "condition_audit": {
+      "control_recall_zero": true,
+      "memory_recall_once": true,
+      "recorded_recall_event_count": 5
+    },
+    "criteria": {
+      "F1_teacher_verification": "PASS",
+      "F2_replication_completeness": "PASS",
+      "F3_matched_inputs": "PASS",
+      "F4_recall_isolation": "PASS",
+      "F5_memory_accuracy": "PASS",
+      "F6_paired_advantage": "PASS",
+      "F7_cost_reporting": "PASS"
+    },
+    "observable_lexical_tokens": {
+      "control": {
+        "maximum": 894.0,
+        "mean": 745.6,
+        "median": 768.0,
+        "minimum": 602.0,
+        "population_stddev": 113.78330281724116
+      },
+      "memory": {
+        "maximum": 879.0,
+        "mean": 878.2,
+        "median": 878.0,
+        "minimum": 878.0,
+        "population_stddev": 0.4
+      },
+      "paired_memory_minus_control": {
+        "maximum": 276.0,
+        "mean": 132.6,
+        "median": 110.0,
+        "minimum": -16.0,
+        "population_stddev": 113.98877137683343
+      }
+    },
+    "passed": true,
+    "relative_comparison": {
+      "exact_accuracy_gain_percentage_points": 100.0,
+      "leaf_accuracy_gain_percentage_points": 97.51714240171555,
+      "memory_time_change_percent_vs_control": -20.72270094100729,
+      "memory_token_proxy_change_percent_vs_control": 17.784334763948493,
+      "rounds_memory_faster": 4,
+      "rounds_memory_lower_token_proxy": 1
+    },
+    "speed_seconds": {
+      "control": {
+        "maximum": 102.174315,
+        "mean": 80.394914,
+        "median": 82.940825,
+        "minimum": 63.048493,
+        "population_stddev": 13.594884751024676
+      },
+      "memory": {
+        "maximum": 71.173359,
+        "mean": 63.7349164,
+        "median": 61.367966,
+        "minimum": 59.670286,
+        "population_stddev": 4.53645769417975
+      },
+      "paired_memory_minus_control": {
+        "maximum": 1.9500030000000095,
+        "mean": -16.6599976,
+        "median": -17.825072000000006,
+        "minimum": -40.806349000000004,
+        "population_stddev": 15.168671510462502
+      }
+    },
+    "token_measure_limit": "Proxy excludes system/developer prompts, hidden reasoning, tool traffic, and billed model tokens."
+  },
+  "runtime": {
+    "measurements": {
+      "median_prediction_ms": 0.016291,
+      "p95_prediction_ms": 0.017584,
+      "sample_count": 500.0
+    },
+    "policy": {
+      "bounds": {
+        "median_prediction_ms": {
+          "limit_ms": 5.0,
+          "operator": "<"
+        },
+        "p95_prediction_ms": {
+          "limit_ms": 10.0,
+          "operator": "<"
+        }
+      },
+      "repeat_tolerance": {
+        "absolute_ms": 0.05,
+        "relative_fraction": 0.25,
+        "rule": "delta <= max(absolute_ms, relative_fraction * slower_measurement)"
+      },
+      "sample_count": 500,
+      "schema_version": "runtime-evidence-policy/v1"
+    },
+    "within_bounds": true
+  },
+  "safety_probes": {
+    "authority_fields_absent": true,
+    "capture_reconstructs": true,
+    "context_provenance_clean": true,
+    "current_values_override": true,
+    "high_severity_invalid_rejected": true,
+    "seeded_secrets_redacted": true,
+    "three_corrections_retire": true,
+    "unknown_query_abstains": true
+  },
+  "schema_version": "behavioral-memory-verification/v4",
+  "terminal": "DONE",
+  "unit_tests": {
+    "command": "/opt/homebrew/opt/python@3.14/bin/python3.14 -m unittest discover -s tests -v",
+    "exit_code": 0,
+    "passed": true,
+    "summary": "OK"
+  }
+}

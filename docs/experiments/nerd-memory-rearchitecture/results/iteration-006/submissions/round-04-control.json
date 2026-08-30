@@ -1,0 +1,124 @@
+{
+  "arm": "control",
+  "input_digest": "sha256:ca16975fe921963570bace59b5977d98e1f9682e55e75cf3c053ab950512129a",
+  "observable_lexical_tokens": {
+    "parts": {
+      "arm_protocol": 63,
+      "public_card": 106,
+      "recall_advice": 0,
+      "submitted_answer": 666
+    },
+    "total": 835
+  },
+  "output": {
+    "batch_id": "settlement-04",
+    "excluded": [
+      {
+        "reason": "status PENDING",
+        "transaction_id": "b04-pending"
+      },
+      {
+        "reason": "superseded approved revision for A-17",
+        "transaction_id": "b04-a00"
+      },
+      {
+        "reason": "superseded approved revision for C-92",
+        "transaction_id": "b04-a02"
+      },
+      {
+        "reason": "superseded approved revision for E-08",
+        "transaction_id": "b04-a04"
+      }
+    ],
+    "policy_applied": {
+      "amount_rounding": "round each selected amount to two decimal places using decimal half-up",
+      "deduplication": "highest approved revision per normalized account",
+      "eligibility": "APPROVED records only",
+      "normalization": "trim surrounding whitespace and uppercase account, region, and status"
+    },
+    "profile": "ivory kestrel",
+    "records": [
+      {
+        "account": "A-17",
+        "amount": "333.01",
+        "region": "ZZ",
+        "revision": 2,
+        "transaction_id": "b04-z00"
+      },
+      {
+        "account": "B-04",
+        "amount": "227.03",
+        "region": "ZZ",
+        "revision": 1,
+        "transaction_id": "b04-a01"
+      },
+      {
+        "account": "C-92",
+        "amount": "1822.00",
+        "region": "EU",
+        "revision": 2,
+        "transaction_id": "b04-z02"
+      },
+      {
+        "account": "D-31",
+        "amount": "962.00",
+        "region": "EU",
+        "revision": 1,
+        "transaction_id": "b04-a03"
+      },
+      {
+        "account": "E-08",
+        "amount": "468.03",
+        "region": "XX",
+        "revision": 2,
+        "transaction_id": "b04-z04"
+      },
+      {
+        "account": "F-55",
+        "amount": "810.01",
+        "region": "XX",
+        "revision": 1,
+        "transaction_id": "b04-a05"
+      }
+    ],
+    "status": "reconciled",
+    "summary": {
+      "approved_record_count": 9,
+      "excluded_non_approved_count": 1,
+      "input_record_count": 10,
+      "raw_selected_amount": "4622.050",
+      "reconciled_account_count": 6,
+      "reconciled_amount": "4622.08",
+      "superseded_record_count": 3
+    },
+    "totals_by_region": [
+      {
+        "account_count": 2,
+        "amount": "2784.00",
+        "region": "EU"
+      },
+      {
+        "account_count": 2,
+        "amount": "1278.04",
+        "region": "XX"
+      },
+      {
+        "account_count": 2,
+        "amount": "560.04",
+        "region": "ZZ"
+      }
+    ]
+  },
+  "recall": null,
+  "round": 4,
+  "schema_version": "paired-agent-experiment/v1",
+  "timing": {
+    "elapsed_seconds": 84.587581,
+    "finalized_at_unix_ns": 1787984468997663000,
+    "spawn_order": [
+      "control",
+      "memory"
+    ],
+    "started_at_unix_ns": 1787984384410082000
+  }
+}

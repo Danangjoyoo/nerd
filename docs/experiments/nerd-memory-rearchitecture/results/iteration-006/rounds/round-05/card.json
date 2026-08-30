@@ -1,0 +1,10 @@
+{
+  "command": "Use ivory kestrel for ledger normalization",
+  "control_response_path": "responses/round-05-control.json",
+  "input_digest": "sha256:e7c5f1ec27c73e50d85be39686ae11f61275c4d06f868dea4fac6a9cd9029d25",
+  "input_path": "rounds/round-05/input.json",
+  "memory_response_path": "responses/round-05-memory.json",
+  "required_answer_schema": "paired-agent-answer/v1",
+  "round": 5,
+  "schema_version": "paired-agent-experiment/v1"
+}

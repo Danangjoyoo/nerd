@@ -1,0 +1,60 @@
+{
+  "consumer_repository": "consumer-documentation",
+  "instructions": {
+    "memory_off": "Do not query or inspect memory; solve from the task card alone and abstain when evidence is absent.",
+    "memory_on": "Query the shared-memory recall CLI, then follow its advisory prediction."
+  },
+  "schema_version": "shared-agent-experiment/v1",
+  "trials": [
+    {
+      "command": "Please handle Use basalt lantern before releasing the supplier payments for this task.",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-gamma-known-06"
+    },
+    {
+      "command": "Can you perform Use cobalt thimble when the test fails only on some runs and report the result?",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": false,
+      "output_signal": "The proposed reproducer completes without any observed intermittent failure",
+      "trial_id": "worker-gamma-known-02"
+    },
+    {
+      "command": "Please handle Use amber lattice when migration histories disagree for this task.",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-gamma-known-03"
+    },
+    {
+      "command": "The requested operation is Process this release bundle with velvet quorum; complete it now.",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-gamma-known-01"
+    },
+    {
+      "command": "The requested operation is Apply silent marzipan to the keyboard-only journey; complete it now.",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-gamma-known-04"
+    },
+    {
+      "command": "Can you perform Use juniper orbit before warming the new deployment and report the result?",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": true,
+      "output_signal": "Post-switch cache hit rate falls below the recorded pre-rotation baseline",
+      "trial_id": "worker-gamma-known-05"
+    },
+    {
+      "command": "prepare the winter quartz relay",
+      "consumer_repository": "consumer-documentation",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-gamma-unknown-01"
+    }
+  ],
+  "worker_id": "worker-gamma"
+}

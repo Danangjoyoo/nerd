@@ -1,0 +1,118 @@
+{
+  "worker_id": "worker-beta",
+  "trials": [
+    {
+      "trial_id": "worker-beta-known-04",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-silent-marzipan",
+      "action": "construct_accessibility_audit",
+      "tools": [
+        "playwright",
+        "axe-core",
+        "browser-devtools"
+      ],
+      "steps": [
+        "Map the critical journey and enumerate interactive states",
+        "Traverse every state by keyboard while recording focus order and names",
+        "Run automated rules at each stable state and inspect contrast manually",
+        "Produce severity-ranked findings with reproducible selectors and evidence"
+      ],
+      "skills": [
+        "accessibility-testing",
+        "frontend-qa"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-beta-known-02",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-cobalt-thimble",
+      "action": "isolate_flaky_test",
+      "tools": [
+        "pytest",
+        "rg",
+        "timeout"
+      ],
+      "steps": [
+        "Repeat the smallest failing test under a fixed random seed",
+        "Partition shared fixtures and environmental dependencies",
+        "Run each partition enough times to identify the correlated condition",
+        "Report the minimal reproducer and its observed failure frequency"
+      ],
+      "skills": [
+        "test-triage",
+        "statistical-debugging"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-beta-known-01",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-beta-unknown-01",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-beta-known-06",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-basalt-lantern",
+      "action": "validate_invoice_batch",
+      "tools": [
+        "duckdb",
+        "python",
+        "libreoffice"
+      ],
+      "steps": [
+        "Load source invoices and the payment ledger into typed staging tables",
+        "Recalculate totals, taxes, currency rounding, and duplicate fingerprints",
+        "Reconcile recalculated values against payable entries and approval limits",
+        "Export only reconciled rows and a separate exception register"
+      ],
+      "skills": [
+        "financial-data-validation",
+        "anomaly-detection"
+      ],
+      "reject_output": true,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-beta-known-05",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-beta-known-03",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    }
+  ]
+}

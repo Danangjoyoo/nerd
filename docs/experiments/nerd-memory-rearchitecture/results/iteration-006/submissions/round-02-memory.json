@@ -1,0 +1,115 @@
+{
+  "arm": "memory",
+  "input_digest": "sha256:8986e10623d55c73f0c8a06e5b81431909c73a59b5abce4161c0bf34e1b19348",
+  "observable_lexical_tokens": {
+    "parts": {
+      "arm_protocol": 74,
+      "public_card": 106,
+      "recall_advice": 323,
+      "submitted_answer": 375
+    },
+    "total": 878
+  },
+  "output": {
+    "batch_fingerprint": "ce6f70dc15413117",
+    "batch_id": "settlement-02",
+    "records": [
+      {
+        "account": "E-08",
+        "amount_cents": 186502,
+        "region": "eu",
+        "risk": "review",
+        "transaction_id": "b02-z04"
+      },
+      {
+        "account": "F-55",
+        "amount_cents": 137702,
+        "region": "eu",
+        "risk": "review",
+        "transaction_id": "b02-a05"
+      },
+      {
+        "account": "A-17",
+        "amount_cents": 116300,
+        "region": "xx",
+        "risk": "review",
+        "transaction_id": "b02-z00"
+      },
+      {
+        "account": "B-04",
+        "amount_cents": 20300,
+        "region": "xx",
+        "risk": "review",
+        "transaction_id": "b02-a01"
+      },
+      {
+        "account": "C-92",
+        "amount_cents": 41200,
+        "region": "zz",
+        "risk": "review",
+        "transaction_id": "b02-z02"
+      },
+      {
+        "account": "D-31",
+        "amount_cents": 139500,
+        "region": "zz",
+        "risk": "review",
+        "transaction_id": "b02-a03"
+      }
+    ],
+    "summary": {
+      "record_count": 6,
+      "region_totals": {
+        "eu": 324204,
+        "xx": 136600,
+        "zz": 180700
+      },
+      "total_cents": 641504
+    }
+  },
+  "recall": {
+    "action": "reconcile_ivory_batch",
+    "behavior_id": "bhv-i006-ivory-kestrel",
+    "consumer_agent": "iteration006-round-02-memory",
+    "consumer_repository": "iteration006-memory-repository-round-02",
+    "matched_invalid_signal": null,
+    "reject_output": false,
+    "schema_version": "shared-behavior-memory/v1",
+    "score": 1.0,
+    "skills": [
+      "data-normalization",
+      "deterministic-validation"
+    ],
+    "source_agent": "iteration006-teacher",
+    "source_repository": "teacher-finance-repository",
+    "status": "recalled",
+    "steps": [
+      "Normalize account with strip and uppercase; normalize region and status with strip and lowercase",
+      "Keep only records whose normalized status is approved",
+      "Deduplicate by normalized account using highest integer revision, then lexicographically smallest transaction_id on a tie",
+      "Convert amount to integer cents with Decimal times 100 and ROUND_HALF_EVEN",
+      "Set risk to review when cents are at least 100000 or region is xx or zz; otherwise set clear",
+      "Sort output records by region, account, then transaction_id",
+      "Summarize record_count, total_cents, and sorted region_totals",
+      "Emit exactly batch_id, records, summary, and batch_fingerprint; each record contains transaction_id, account, region, amount_cents, and risk only",
+      "Hash canonical compact sorted-key JSON of records and summary with SHA256 and keep the first 16 hexadecimal characters"
+    ],
+    "tools": [
+      "python",
+      "json",
+      "decimal",
+      "hashlib"
+    ]
+  },
+  "round": 2,
+  "schema_version": "paired-agent-experiment/v1",
+  "timing": {
+    "elapsed_seconds": 71.173359,
+    "finalized_at_unix_ns": 1787984288910968000,
+    "spawn_order": [
+      "control",
+      "memory"
+    ],
+    "started_at_unix_ns": 1787984217737609000
+  }
+}

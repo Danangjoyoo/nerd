@@ -106,25 +106,26 @@ class EndpointRouteContractTests(unittest.TestCase):
             body.index("## Explore Discipline"),
         )
 
-    def test_smart_validates_structural_multi_goal_triggers(self):
+    def test_smart_explicit_endpoint_ownership_precedes_multi_goal_intake(self):
         body = normalized(skill_body("nerd-smart"))
         assert_terms(
             self,
             body,
             (
-                "Prefer to use Multi-Goal Intake",
-                "multiple numbered or bulleted instruction items",
-                "multiple instructions (verb + object) separated by whitespace",
-                "validate the intake",
-                "sometimes 1 focus record is sufficient",
-                "unless the user cleanly mention the steps",
+                "## Explicit Route Ownership",
+                "An explicitly invoked endpoint route owns the endpoint",
+                "before Focus inference or Multi-Goal Intake",
+                "Follow-up requests about that route's active artifact stay on the same endpoint",
+                "for **Plan**, execution requires a direct user request",
             ),
         )
+        self.assertLess(
+            body.index("## Explicit Route Ownership"),
+            body.index("## Multi-Goal Intake"),
+        )
         self.assertNotIn("Immediately use Multi-Goal Intake", body)
-        self.assertNotIn("signals, not proof", body)
-        self.assertNotIn("meaning—not formatting or punctuation", body)
 
-    def test_smart_multi_goal_ledger_keeps_structural_split_protocol(self):
+    def test_smart_multi_goal_intake_requires_independent_outcomes(self):
         ledger = normalized(
             (SKILLS / "nerd-smart" / "references" / "multi-goal-ledger.md")
             .read_text()
@@ -133,15 +134,16 @@ class EndpointRouteContractTests(unittest.TestCase):
             self,
             ledger,
             (
-                "Immediately use Multi-Goal Intake",
+                "Use Multi-Goal Intake only when",
+                "two or more independently completable outcomes",
+                "Structure is a scan boundary, not proof of multiple goals",
                 "numbered or bulleted instruction items",
-                "multiple instruction sentences",
-                "multiple instruction paragraphs separated by whitespace",
-                "without deciding whether the parts are independently completable",
+                "Constraints, examples, acceptance criteria, and substeps stay with their parent outcome",
+                "never replace the active endpoint's required deliverable",
             ),
         )
-        self.assertNotIn("signals, not proof", ledger)
-        self.assertNotIn("meaning—not formatting or punctuation", ledger)
+        self.assertNotIn("These forms are sufficient triggers", ledger)
+        self.assertNotIn("remain mandatory even when all goals", ledger)
 
     def test_brainstorm_owns_discuss_and_ideate_without_mutation(self):
         body = normalized(skill_body("nerd-brainstorm"))
@@ -338,6 +340,23 @@ class EndpointRouteContractTests(unittest.TestCase):
             ),
         )
 
+    def test_plan_explicit_invocation_creates_and_retains_the_artifact(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "## Explicit Plan Contract",
+                "Explicitly invoking `nerd-plan` is sufficient instruction to create and save the plan artifact",
+                "Do not ask whether the user wants a plan file",
+                "Fill the Plan Format template below",
+                "Follow-up questions, feedback, and revisions about the plan remain on the **Plan** endpoint",
+                "update the same plan artifact",
+                "Leave **Plan** only when the user explicitly requests another endpoint",
+                "Mentioning execution inside the plan never authorizes it",
+            ),
+        )
+
     def test_plan_requires_direction_and_evidence_before_planning(self):
         body = normalized(skill_body("nerd-plan"))
         assert_terms(
@@ -435,13 +454,14 @@ class EndpointRouteContractTests(unittest.TestCase):
             body,
             (
                 "**Sub-Agent Driven**",
-                "by default its NO",
-                "always ask user",
+                "default to NO and continue without asking",
+                "unless the user explicitly requests sub-agent-driven planning",
                 "**Sub-agent Model**",
                 "ALWAYS USE INHERIT MODEL",
                 "[mapping](references/subagent-model-mapping.md)",
             ),
         )
+        self.assertNotIn("always ask user", body)
 
     def test_plan_delivery_guidance_is_conditional_and_kiss_first(self):
         body = skill_body("nerd-plan")

@@ -1,0 +1,85 @@
+{
+  "batch_id": "settlement-02",
+  "records": [
+    {
+      "account": "a-17",
+      "amount": "9999.995",
+      "region": "zz",
+      "revision": 9,
+      "status": "pending",
+      "transaction_id": "b02-pending"
+    },
+    {
+      "account": "A-17",
+      "amount": "1162.995",
+      "region": "xx",
+      "revision": 2,
+      "status": "approved",
+      "transaction_id": "b02-z00"
+    },
+    {
+      "account": " c-92 ",
+      "amount": "312.005",
+      "region": "ca",
+      "revision": 1,
+      "status": " approved ",
+      "transaction_id": "b02-a02"
+    },
+    {
+      "account": " e-08 ",
+      "amount": "1765.015",
+      "region": "us",
+      "revision": 1,
+      "status": " approved ",
+      "transaction_id": "b02-a04"
+    },
+    {
+      "account": " a-17 ",
+      "amount": "1062.995",
+      "region": "apac",
+      "revision": 1,
+      "status": " approved ",
+      "transaction_id": "b02-a00"
+    },
+    {
+      "account": "E-08",
+      "amount": "1865.015",
+      "region": "eu",
+      "revision": 2,
+      "status": "approved",
+      "transaction_id": "b02-z04"
+    },
+    {
+      "account": "B-04",
+      "amount": "202.995",
+      "region": "XX",
+      "revision": 1,
+      "status": "APPROVED",
+      "transaction_id": "b02-a01"
+    },
+    {
+      "account": "C-92",
+      "amount": "412.005",
+      "region": "zz",
+      "revision": 2,
+      "status": "approved",
+      "transaction_id": "b02-z02"
+    },
+    {
+      "account": "F-55",
+      "amount": "1377.015",
+      "region": "EU",
+      "revision": 1,
+      "status": "APPROVED",
+      "transaction_id": "b02-a05"
+    },
+    {
+      "account": "D-31",
+      "amount": "1395.005",
+      "region": "ZZ",
+      "revision": 1,
+      "status": "APPROVED",
+      "transaction_id": "b02-a03"
+    }
+  ]
+}

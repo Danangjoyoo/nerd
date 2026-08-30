@@ -1,0 +1,60 @@
+{
+  "consumer_repository": "consumer-python-cli",
+  "instructions": {
+    "memory_off": "Do not query or inspect memory; solve from the task card alone and abstain when evidence is absent.",
+    "memory_on": "Query the shared-memory recall CLI, then follow its advisory prediction."
+  },
+  "schema_version": "shared-agent-experiment/v1",
+  "trials": [
+    {
+      "command": "Can you perform Use silent marzipan before approving the interface change and report the result?",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-beta-known-04"
+    },
+    {
+      "command": "Please handle Run cobalt thimble before quarantining the unstable test for this task.",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-beta-known-02"
+    },
+    {
+      "command": "Can you perform When artifact metadata changes, use velvet quorum and report the result?",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-beta-known-01"
+    },
+    {
+      "command": "inspect the silent topaz constellation",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": true,
+      "output_signal": "verified_output",
+      "trial_id": "worker-beta-unknown-01"
+    },
+    {
+      "command": "The requested operation is Process the month-end ledger with basalt lantern; complete it now.",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": true,
+      "output_signal": "The reconciled export contains a duplicate fingerprint or an unbalanced total",
+      "trial_id": "worker-beta-known-06"
+    },
+    {
+      "command": "Please handle Run juniper orbit across the regional cache tier for this task.",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": false,
+      "output_signal": "verified_output",
+      "trial_id": "worker-beta-known-05"
+    },
+    {
+      "command": "The requested operation is Apply amber lattice after importing the database snapshot; complete it now.",
+      "consumer_repository": "consumer-python-cli",
+      "memory_enabled": false,
+      "output_signal": "An unmanaged table, constraint, or index difference remains after reconciliation",
+      "trial_id": "worker-beta-known-03"
+    }
+  ],
+  "worker_id": "worker-beta"
+}

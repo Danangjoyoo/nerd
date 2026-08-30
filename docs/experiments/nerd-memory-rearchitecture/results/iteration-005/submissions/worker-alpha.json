@@ -1,0 +1,140 @@
+{
+  "worker_id": "worker-alpha",
+  "trials": [
+    {
+      "trial_id": "worker-alpha-known-01",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-velvet-quorum",
+      "action": "normalize_release_manifest",
+      "tools": [
+        "jq",
+        "git",
+        "sha256sum"
+      ],
+      "steps": [
+        "Collect tracked manifest fragments and canonical artifact paths",
+        "Sort keys and normalize version metadata without altering payload values",
+        "Recompute digests and compare the canonical manifest to the release index",
+        "Emit the normalized manifest only when every digest matches"
+      ],
+      "skills": [
+        "release-engineering",
+        "supply-chain-integrity"
+      ],
+      "reject_output": true,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-alpha-known-04",
+      "status": "inferred",
+      "behavior_id": null,
+      "action": "audit_checkout_accessibility",
+      "tools": [
+        "Playwright",
+        "axe-core"
+      ],
+      "steps": [
+        "Inventory the critical interactions in the checkout flow",
+        "Verify that each interaction has an accessible name and a complete keyboard path",
+        "Exercise focus order, visible focus, validation, and error recovery with keyboard-only input",
+        "Reject the review if any critical interaction lacks a keyboard path or accessible name"
+      ],
+      "skills": [
+        "accessibility-review",
+        "checkout-testing"
+      ],
+      "reject_output": true,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-alpha-unknown-01",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-alpha-known-05",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-juniper-orbit",
+      "action": "rotate_cache_generation",
+      "tools": [
+        "redis-cli",
+        "curl",
+        "k6"
+      ],
+      "steps": [
+        "Allocate a new generation token without deleting the active generation",
+        "Prime representative keys through the application boundary",
+        "Switch readers atomically to the primed generation",
+        "Load-test hit rate and latency before expiring the prior generation"
+      ],
+      "skills": [
+        "cache-operations",
+        "load-testing"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-alpha-known-06",
+      "status": "abstained",
+      "behavior_id": null,
+      "action": null,
+      "tools": [],
+      "steps": [],
+      "skills": [],
+      "reject_output": false,
+      "source_repository": null
+    },
+    {
+      "trial_id": "worker-alpha-known-03",
+      "status": "recalled",
+      "behavior_id": "bhv-i005-amber-lattice",
+      "action": "reconcile_schema_drift",
+      "tools": [
+        "pg_dump",
+        "psql",
+        "migra"
+      ],
+      "steps": [
+        "Capture schema-only definitions from the declared and observed databases",
+        "Classify differences as expected migrations, unmanaged drift, or ordering noise",
+        "Generate the smallest forward-only reconciliation for unmanaged drift",
+        "Recompare schemas and require an empty unmanaged difference set"
+      ],
+      "skills": [
+        "postgres-schema",
+        "migration-review"
+      ],
+      "reject_output": false,
+      "source_repository": "teacher-rust-service"
+    },
+    {
+      "trial_id": "worker-alpha-known-02",
+      "status": "inferred",
+      "behavior_id": null,
+      "action": "investigate_flaky_test",
+      "tools": [
+        "npm",
+        "git"
+      ],
+      "steps": [
+        "Capture the intermittent failure, test command, environment, and available timing or seed data",
+        "Repeat the affected test in isolation and within its suite to measure reproducibility",
+        "Vary ordering, concurrency, and relevant environment differences to isolate the trigger",
+        "Report the smallest reproducible cause and the evidence that distinguishes it from noise"
+      ],
+      "skills": [
+        "test-debugging",
+        "flaky-test-analysis"
+      ],
+      "reject_output": false,
+      "source_repository": null
+    }
+  ]
+}

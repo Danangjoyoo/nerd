@@ -1,0 +1,10 @@
+{
+  "command": "Process this reconciliation with ivory kestrel",
+  "control_response_path": "responses/round-04-control.json",
+  "input_digest": "sha256:ca16975fe921963570bace59b5977d98e1f9682e55e75cf3c053ab950512129a",
+  "input_path": "rounds/round-04/input.json",
+  "memory_response_path": "responses/round-04-memory.json",
+  "required_answer_schema": "paired-agent-answer/v1",
+  "round": 4,
+  "schema_version": "paired-agent-experiment/v1"
+}

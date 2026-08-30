@@ -1,0 +1,282 @@
+{
+  "baselines": {
+    "B0": {
+      "action_accuracy": 0.0,
+      "cross_context_contamination": 0.0,
+      "false_rejection_rate": 0.0,
+      "invalid_output_recall": 0.0,
+      "known_abstention_rate": 1.0,
+      "macro_set_f1": 0.0,
+      "mandatory_edge_violation_rate": 1.0,
+      "selection_count": 14.666666666666666,
+      "severe_false_acceptance_count": 5.0,
+      "skill_set_f1": 0.0,
+      "tool_set_f1": 0.0,
+      "unseen_repository_action_accuracy": 0.0,
+      "workflow_edge_f1": 0.0
+    },
+    "B1": {
+      "action_accuracy": 0.36752136752136755,
+      "cross_context_contamination": 0.0,
+      "false_rejection_rate": 0.0,
+      "invalid_output_recall": 0.0,
+      "known_abstention_rate": 0.0,
+      "macro_set_f1": 0.3701329534662868,
+      "mandatory_edge_violation_rate": 0.8418803418803419,
+      "selection_count": 14.666666666666666,
+      "severe_false_acceptance_count": 5.0,
+      "skill_set_f1": 0.23836657169990502,
+      "tool_set_f1": 0.5018993352326685,
+      "unseen_repository_action_accuracy": 0.25,
+      "workflow_edge_f1": 0.1581196581196581
+    },
+    "B2": {
+      "action_accuracy": 1.0,
+      "cross_context_contamination": 0.0,
+      "false_rejection_rate": 0.0,
+      "invalid_output_recall": 0.0,
+      "known_abstention_rate": 0.0,
+      "macro_set_f1": 0.7663817663817665,
+      "mandatory_edge_violation_rate": 0.301994301994302,
+      "selection_count": 14.666666666666666,
+      "severe_false_acceptance_count": 5.0,
+      "skill_set_f1": 0.7905982905982907,
+      "tool_set_f1": 0.7421652421652422,
+      "unseen_repository_action_accuracy": 0.0,
+      "workflow_edge_f1": 0.698005698005698
+    },
+    "B3": {
+      "action_accuracy": 1.0,
+      "cross_context_contamination": 0.0,
+      "false_rejection_rate": 0.0,
+      "invalid_output_recall": 0.0,
+      "known_abstention_rate": 0.0,
+      "macro_set_f1": 1.0,
+      "mandatory_edge_violation_rate": 0.0,
+      "selection_count": 14.666666666666666,
+      "severe_false_acceptance_count": 5.0,
+      "skill_set_f1": 1.0,
+      "tool_set_f1": 1.0,
+      "unseen_repository_action_accuracy": 1.0,
+      "workflow_edge_f1": 1.0
+    }
+  },
+  "canonical_digest": "sha256:d9331e58ebf17994b6aa892d4418084228c19814970437951f26afec057eb8c2",
+  "dataset_digest": "sha256:01a95c2dc297faa3c9f4827e0bcbfa0aec418a8f6dac6ada0a52f1b1259faa98",
+  "dataset_revision": "synthetic-chronological-v1",
+  "hypotheses": {
+    "H1": "PASS",
+    "H2": "PASS",
+    "H3": "PASS",
+    "H4": "FAIL",
+    "H5": "PASS",
+    "H6": "FAIL",
+    "H7": "UNTESTED"
+  },
+  "improvements": {
+    "selection_macro_set_f1": 0.23361823361823353,
+    "unseen_repository_action_accuracy": 1.0,
+    "workflow_edge_f1": 0.301994301994302
+  },
+  "iteration": 2,
+  "metrics": {
+    "action_accuracy": 1.0,
+    "capture_reconstruction_rate": 1.0,
+    "cross_context_contamination": 0.0,
+    "false_rejection_rate": 0.0,
+    "invalid_output_recall": 0.0,
+    "known_abstention_rate": 0.0,
+    "mandatory_edge_violation_rate": 0.0,
+    "obsolete_usage_share_after_one": 0.5666666666666667,
+    "obsolete_usage_share_after_three": 0.47222222222222227,
+    "obsolete_usage_share_after_two": 0.5151515151515151,
+    "persisted_authority_field_count": 0.0,
+    "persisted_secret_leak_count": 0.0,
+    "selection_macro_set_f1": 1.0,
+    "severe_false_acceptance_count": 15,
+    "skill_set_f1": 1.0,
+    "tool_set_f1": 1.0,
+    "unknown_abstention_rate": 1.0,
+    "unseen_repository_action_accuracy": 1.0,
+    "workflow_edge_f1": 1.0
+  },
+  "model_revision": "M2",
+  "per_seed": [
+    {
+      "capture": {
+        "episode_count": 120.0,
+        "persisted_authority_field_count": 0.0,
+        "persisted_secret_leak_count": 0.0,
+        "reconstruction_rate": 1.0,
+        "seeded_secret_count": 8.0
+      },
+      "drift_obsolete_usage_share": [
+        0.5,
+        0.45454545454545453,
+        0.4166666666666667
+      ],
+      "seed": 11,
+      "split": {
+        "calibration": 24,
+        "calibration_max_sequence": 95,
+        "calibration_min_sequence": 72,
+        "test": 24,
+        "test_min_sequence": 96,
+        "train": 72,
+        "train_max_sequence": 71
+      },
+      "test": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 0.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 13,
+        "severe_false_acceptance_count": 5,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "transfer": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 1.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 24,
+        "severe_false_acceptance_count": 0,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "unknown_abstention_rate": 1.0
+    },
+    {
+      "capture": {
+        "episode_count": 120.0,
+        "persisted_authority_field_count": 0.0,
+        "persisted_secret_leak_count": 0.0,
+        "reconstruction_rate": 1.0,
+        "seeded_secret_count": 8.0
+      },
+      "drift_obsolete_usage_share": [
+        0.7,
+        0.6363636363636364,
+        0.5833333333333334
+      ],
+      "seed": 17,
+      "split": {
+        "calibration": 24,
+        "calibration_max_sequence": 95,
+        "calibration_min_sequence": 72,
+        "test": 24,
+        "test_min_sequence": 96,
+        "train": 72,
+        "train_max_sequence": 71
+      },
+      "test": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 0.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 18,
+        "severe_false_acceptance_count": 5,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "transfer": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 1.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 24,
+        "severe_false_acceptance_count": 0,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "unknown_abstention_rate": 1.0
+    },
+    {
+      "capture": {
+        "episode_count": 120.0,
+        "persisted_authority_field_count": 0.0,
+        "persisted_secret_leak_count": 0.0,
+        "reconstruction_rate": 1.0,
+        "seeded_secret_count": 8.0
+      },
+      "drift_obsolete_usage_share": [
+        0.5,
+        0.45454545454545453,
+        0.4166666666666667
+      ],
+      "seed": 23,
+      "split": {
+        "calibration": 24,
+        "calibration_max_sequence": 95,
+        "calibration_min_sequence": 72,
+        "test": 24,
+        "test_min_sequence": 96,
+        "train": 72,
+        "train_max_sequence": 71
+      },
+      "test": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 0.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 13,
+        "severe_false_acceptance_count": 5,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "transfer": {
+        "action_accuracy": 1.0,
+        "cross_context_contamination": 0.0,
+        "false_rejection_rate": 0.0,
+        "invalid_output_recall": 1.0,
+        "known_abstention_rate": 0.0,
+        "macro_set_f1": 1.0,
+        "mandatory_edge_violation_rate": 0.0,
+        "selection_count": 24,
+        "severe_false_acceptance_count": 0,
+        "skill_set_f1": 1.0,
+        "tool_set_f1": 1.0,
+        "workflow_edge_f1": 1.0
+      },
+      "unknown_abstention_rate": 1.0
+    }
+  ],
+  "phase": "development",
+  "runtime": {
+    "median_prediction_ms": 0.024084,
+    "p95_prediction_ms": 0.025959,
+    "sample_count": 500.0
+  },
+  "schema_version": "behavioral-memory-poc/v1",
+  "seeds": [
+    11,
+    17,
+    23
+  ],
+  "split_policy": {
+    "calibration": 0.2,
+    "test": 0.2,
+    "train": 0.6
+  }
+}

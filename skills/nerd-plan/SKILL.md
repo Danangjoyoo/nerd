@@ -21,6 +21,13 @@ Use `nerd-smart` first and consume its resolved Focus Record. This route accepts
 only the **Plan** endpoint. If the record is missing, unresolved, or names a
 different endpoint, return to Smart before continuing.
 
+## Explicit Plan Contract
+
+Explicitly invoking `nerd-plan` is sufficient instruction to create and save the plan artifact. Do not ask whether the user wants a plan file or require a separate write or save command.
+Fill the Plan Format template below; neither a Focus Record nor Multi-Goal Intake may replace the persisted plan.
+Follow-up questions, feedback, and revisions about the plan remain on the **Plan** endpoint; update the same plan artifact whenever its content changes.
+Leave **Plan** only when the user explicitly requests another endpoint. Execution requires a direct request to execute, implement, apply, or start work on the plan. Mentioning execution inside the plan never authorizes it.
+
 ## Prerequisites
 
 Plan from confirmed inputs. When a required input is missing, route through
@@ -73,7 +80,7 @@ Use this compact shape and omit optional fields that add no information:
 **Scope:** [Included boundary and explicit non-goals]
 **Proof:** [How completion will be verified]
 **Spec:** [Optional path to the source spec]
-**Sub-Agent Driven**: [YES/NO; use `nerd-smart` when the task is independently completable; by default its NO, but always ask user -> 'do you want to use a sub-agent driven? if no it will be executed in this session']
+**Sub-Agent Driven**: [YES/NO; default to NO and continue asking unless the user explicitly requests sub-agent-driven planning]
 
 ## File Map
 
@@ -86,6 +93,9 @@ Use this compact shape and omit optional fields that add no information:
 ### Task N: [Deliverable]
 
 **Outcome:** [One independently reviewable deliverable]
+**Files:** `exact/path`, `tests/exact/path`
+**Depends on:** [Optional task IDs]
+
 **Focus Record**
 - **Intention:** [Real goal]
 - **Expectation:** [One endpoint from Endpoint Mapping]
@@ -94,9 +104,7 @@ Use this compact shape and omit optional fields that add no information:
 - **Skills:** [skills to be used, bullet points]
 - **Review Required:** [YES/NO; use `nerd-review` when the task is independently reviewable]
 - **Sub-agent Model**: [only if enabled; value: inherit/<selected-model>; ALWAYS USE INHERIT MODEL UNLESS USER MENTION EXPLICITLY whether to decide the model manually or let use decide automatically via [mapping](references/subagent-model-mapping.md)]
-**Outcome:** [One independently reviewable deliverable]
-**Files:** `exact/path`, `tests/exact/path`
-**Depends on:** [Optional task IDs]
+
 
 1. Add the failing test or baseline check.
 2. Run `[exact command]`; expect `[specific failure or baseline]`.

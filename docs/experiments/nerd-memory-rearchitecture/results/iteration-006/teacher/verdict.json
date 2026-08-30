@@ -1,0 +1,10 @@
+{
+  "behavior_id": "bhv-i006-ivory-kestrel",
+  "canonical_digest": "sha256:5a15d58bb1279ee0a58dc9880f588c07f4d7422a3dd883eb4c8022bc68353adc",
+  "input_digest": "sha256:dcd7df883fa86101f7401cd14149c5806f58c7cea336064901f9a57bf2eeee27",
+  "output_digest": "sha256:21d85ee3c8ae0c4533f49cd73489e74674448a5b86ba31013bf4e2d93f0cedae",
+  "passed": true,
+  "recorded_behavior_count": 1,
+  "schema_version": "paired-agent-experiment/v1",
+  "teacher_output_exact": true
+}

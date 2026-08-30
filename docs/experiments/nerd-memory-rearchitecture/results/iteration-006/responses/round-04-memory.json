@@ -1,0 +1,63 @@
+{
+  "schema_version": "paired-agent-answer/v1",
+  "round": 4,
+  "arm": "memory",
+  "input_digest": "sha256:ca16975fe921963570bace59b5977d98e1f9682e55e75cf3c053ab950512129a",
+  "output": {
+    "batch_id": "settlement-04",
+    "records": [
+      {
+        "transaction_id": "b04-z02",
+        "account": "C-92",
+        "region": "eu",
+        "amount_cents": 182200,
+        "risk": "review"
+      },
+      {
+        "transaction_id": "b04-a03",
+        "account": "D-31",
+        "region": "eu",
+        "amount_cents": 96200,
+        "risk": "clear"
+      },
+      {
+        "transaction_id": "b04-z04",
+        "account": "E-08",
+        "region": "xx",
+        "amount_cents": 46802,
+        "risk": "review"
+      },
+      {
+        "transaction_id": "b04-a05",
+        "account": "F-55",
+        "region": "xx",
+        "amount_cents": 81000,
+        "risk": "review"
+      },
+      {
+        "transaction_id": "b04-z00",
+        "account": "A-17",
+        "region": "zz",
+        "amount_cents": 33300,
+        "risk": "review"
+      },
+      {
+        "transaction_id": "b04-a01",
+        "account": "B-04",
+        "region": "zz",
+        "amount_cents": 22702,
+        "risk": "review"
+      }
+    ],
+    "summary": {
+      "record_count": 6,
+      "total_cents": 462204,
+      "region_totals": {
+        "eu": 278400,
+        "xx": 127802,
+        "zz": 56002
+      }
+    },
+    "batch_fingerprint": "7d1d2bec31d501e2"
+  }
+}
