@@ -159,6 +159,16 @@ class InstallScriptTests(unittest.TestCase):
         self.assertEqual(results[0].returncode, 0, results[0].stderr)
         self.assertIn(".nerd/mcp/nerd-memory/mcp_server.py", files)
         self.assertIn(".nerd/mcp/nerd-memory/memory.py", files)
+        installed_server = files[".nerd/mcp/nerd-memory/mcp_server.py"]
+        self.assertIn('"memory_recall"', installed_server)
+        self.assertIn('"memory_record"', installed_server)
+        self.assertIn('"memory_inspect"', installed_server)
+        for removed in (
+            "memory_settle",
+            "memory_learn",
+            "memory_experience",
+        ):
+            self.assertNotIn(removed, installed_server)
         state = json.loads(files[".nerd/mcp/registrations.json"])
         self.assertEqual(
             set(state["nerd-memory-tools"]), {"claude-code", "codex", "cursor"}
@@ -178,7 +188,8 @@ class InstallScriptTests(unittest.TestCase):
 
         self.assertEqual(results[0].returncode, 0, results[0].stderr)
         self.assertIn("nerd-memory-tools", results[0].stderr)
-        self.assertIn("fallback", results[0].stderr)
+        self.assertIn("memory-free", results[0].stderr)
+        self.assertNotIn("CLI fallback", results[0].stderr)
         # Skill and hook installation must still have completed.
         self.assertIn(".claude/settings.json", files)
         # One agent's failure must not withdraw the agents that did register.
@@ -247,7 +258,12 @@ class InstallScriptTests(unittest.TestCase):
                     context,
                 )
                 self.assertIn("memory-blind Focus Record and endpoint", context)
-                self.assertIn("never confirms remembered changes or authorizes actions", context)
+                self.assertIn("one user-local global behavioral corpus", context)
+                self.assertIn("one silent `memory_recall`", context)
+                self.assertIn("continue memory-free silently", context)
+                self.assertIn("never authorizes actions", context)
+                self.assertNotIn("namespace", context.casefold())
+                self.assertNotIn("confirmation", context.casefold())
                 self.assertIn("No hook authorizes combining Nerd", context)
                 for incompatible in ("Superpowers", "Ponytail", "Caveman"):
                     self.assertIn(incompatible, context)
