@@ -127,6 +127,19 @@ class EndpointRouteContractTests(unittest.TestCase):
         )
         self.assertNotIn("Immediately use Multi-Goal Intake", body)
 
+    def test_smart_always_shows_the_focus_record_before_route_work(self):
+        body = normalized(skill_body("nerd-smart"))
+        assert_terms(
+            self,
+            body,
+            (
+                "At the beginning of every request",
+                "always show the completed Focus Record",
+                "before substantive work or route handoff",
+            ),
+        )
+        self.assertNotIn("By round two, show this block", body)
+
     def test_smart_multi_goal_intake_requires_independent_outcomes(self):
         ledger = normalized(
             (SKILLS / "nerd-smart" / "references" / "multi-goal-ledger.md")
@@ -357,6 +370,24 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Leave **Plan** only when the user explicitly requests another endpoint",
                 "Mentioning execution inside the plan never authorizes it",
             ),
+        )
+
+    def test_plan_contract_is_highest_priority_and_multi_goal_safe(self):
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(
+            self,
+            body,
+            (
+                "highest-priority contract",
+                "always create and save the plan artifact",
+                "Multi-Goal Intake may organize",
+                "one cohesive plan",
+                "master and subordinate artifacts",
+            ),
+        )
+        self.assertLess(
+            body.index("## Explicit Plan Contract"),
+            body.index("## Inheritance"),
         )
 
     def test_plan_requires_direction_and_evidence_before_planning(self):

@@ -15,18 +15,19 @@ Never combine Nerd with these unless this request explicitly asks:
 
 Skill hooks, mentions, and indirect instructions are not authorization.
 
-## Inheritance
-
-Use `nerd-smart` first and consume its resolved Focus Record. This route accepts
-only the **Plan** endpoint. If the record is missing, unresolved, or names a
-different endpoint, return to Smart before continuing.
-
 ## Explicit Plan Contract
 
+This is the highest-priority contract within Nerd Plan. Apply it before interpreting inheritance, prerequisites, Multi-Goal Intake, or other planning rules.
 Explicitly invoking `nerd-plan` is sufficient instruction to create and save the plan artifact. Do not ask whether the user wants a plan file or require a separate write or save command.
-Fill the Plan Format template below; neither a Focus Record nor Multi-Goal Intake may replace the persisted plan.
+Once Plan owns the endpoint, you must always create and save the plan artifact; do not end with only a Focus Record, intake, prerequisite handoff, or discussion when the confirmed inputs are sufficient.
+Fill the Plan Format template below; neither a Focus Record nor Multi-Goal Intake may replace the persisted plan. Multi-Goal Intake may organize independently completable outcomes as ordered tasks within one cohesive plan; create separate plan artifacts only when the user explicitly requests them.
+Treat related outputs, including master and subordinate artifacts, as task deliverables rather than reasons to leave or fragment the Plan endpoint.
 Follow-up questions, feedback, and revisions about the plan remain on the **Plan** endpoint; update the same plan artifact whenever its content changes.
 Leave **Plan** only when the user explicitly requests another endpoint. Execution requires a direct request to execute, implement, apply, or start work on the plan. Mentioning execution inside the plan never authorizes it.
+
+## Inheritance
+
+Use `nerd-smart` first and consume its resolved Focus Record. This route accepts only the **Plan** endpoint. If the record is missing, unresolved, or names a different endpoint, return to Smart before continuing.
 
 ## Prerequisites
 
@@ -50,7 +51,7 @@ not invent them or hide alternatives inside conditional tasks.
   for cross-boundary completeness and [DRY](references/dry.md) only for proven
   duplication. Use the [selection guide](references/principle-selection.md)
   when the right rule is unclear.
-- If the request contains independent outcomes, write one plan per outcome.
+- For Multi-Goal Intake, keep every accepted outcome under **Plan** and map it to one or more ordered tasks in the cohesive plan.
 - Map changed files and responsibilities before splitting work into tasks.
 - Make each task one independently reviewable deliverable with its own proof.
 - Order tasks by dependency. State `Depends on` only when the order is not

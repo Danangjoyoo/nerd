@@ -27,9 +27,9 @@ Follow-up requests about that route's active artifact stay on the same endpoint.
 
 ## Focus First
 
-Infer the real plausible goal and finalize four fields. Reuse explicit facts. Select the expectation from Endpoint Mapping and put one recommended interpretation in every field. Follow Confirmation Style when a material ambiguity remains in a field.
+At the beginning of every request, infer the real plausible goal and finalize four fields. Reuse explicit facts, select the expectation from Endpoint Mapping, put one recommended interpretation in every field, and always show the completed Focus Record before substantive work or route handoff.
 
-Use at most two clarification rounds. By round two, show this block and ask the user to approve or correct only material errors:
+Use at most two clarification rounds. When a material ambiguity remains, show the recommended record and ask the user to approve or correct only material errors:
 
 > **Focus Record**
 > - **Intention:** [Real goal]
