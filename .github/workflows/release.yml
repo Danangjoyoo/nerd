@@ -91,7 +91,7 @@ jobs:
           MEMORY_SKILLS="$(find "$HOME" -path '*/nerd-memory/SKILL.md' -type f)"
           test -n "$MEMORY_SKILLS"
           while IFS= read -r skill_file; do
-            grep -F 'or when Nerd Smart auto-enables it' "$skill_file"
+            grep -F 'authenticated user hook.' "$skill_file"
             ! grep -Fq 'disable-model-invocation' "$skill_file"
           done <<EOF
           $MEMORY_SKILLS
