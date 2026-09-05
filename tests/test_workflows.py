@@ -73,7 +73,7 @@ class WorkflowContractTests(unittest.TestCase):
             "--agent claude-code",
             "--agent cursor",
             "*/nerd-memory/SKILL.md",
-            "or when Nerd Smart auto-enables it",
+            "authenticated user hook.",
             "! grep -Fq 'disable-model-invocation'",
             "*/nerd-memory/agents/openai.yaml",
             "allow_implicit_invocation: true",
@@ -82,6 +82,7 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertIn(fragment, body)
         for skill in SKILLS:
             self.assertIn(skill, body)
+        self.assertNotIn("or when Nerd Smart auto-enables it", body)
 
     def test_release_counts_exactly_seventeen_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
