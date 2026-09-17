@@ -188,7 +188,54 @@ punctuated identifier terms alongside existing unigrams, keep BM25/novelty
 parameters unchanged, test unrelated confusable scopes and genuinely requested
 history, then evaluate the frozen cases once. Do not use evaluator labels,
 filter archives, tune repeatedly to the fixtures, or claim this resolves the
-broader query/rubric mismatch. The candidate was not implemented at handover.
+broader query/rubric mismatch.
+
+### Bounded lexical candidate — investigation result (2026-09-18)
+
+Implemented as a separate module,
+[structured_candidate.py](../experiments/nerd-context/structured_candidate.py),
+that wraps `StructuredLedger` without modifying baseline source. `structured.py`
+is byte-identical and the tracked verdict still passes `valid-evidence` and
+remains blocked on `typed-ledger-pass`. Driver:
+[lexical_candidate_audit.py](../experiments/nerd-context/lexical_candidate_audit.py).
+
+Only two things change versus baseline: `_terms` returns whole
+`[a-z0-9]+([-_][a-z0-9]+)+` identifiers alongside the existing unigrams, and
+the FTS5 tokenizer treats `-` and `_` as token characters. BM25 exponents,
+novelty (Jaccard) discount, byte budget, mandatory ordering, and the
+stop-word/single-digit filter on plain unigrams are preserved.
+
+Single-run offline result on the frozen 48 gold cases (both index modes, mode
+parity holds):
+
+| Arm | Required recall mean | Required recall min | Complete cases | Mandatory min |
+| --- | --- | --- | --- | --- |
+| Baseline | 0.8660714285714285 | 0.7142857142857143 | 12/48 | 1.0 |
+| Candidate | 1.0 | 1.0 | 48/48 | 1.0 |
+
+Generic regressions (source-bound, single evaluation each): four confusable
+subjects (`service-2`, `package-5`, `configuration-7`, `tenant-3`) — candidate
+≥ baseline on every probe, all reach 1.0 without dropping required facts;
+requested-history probe on `service-1-archive-3` — baseline misses the target
+record, candidate hits it.
+
+Archive path (ignored root): `benchmarks/results/nerd-context/lexical-candidate-20260917T192437/`
+containing `summary.json`, `rows.json`, `regressions.json`, and `source.json`.
+Source SHA-256 recorded in that run:
+
+- `structured.py`: `bbbb7ed3ddd57e446a622d799d3c2d78d1d834cc2541c14be199428d3b52ce12`
+- `structured_candidate.py`: `69276082ac6b27acafb2825e80419967d3920578c50b798e72f222199c1cbb9a`
+- `budgeted_response.py`: `d11176936358ae15d5489ebbb836292ad54cc4373bf056205b65b7faa6e0a684`
+- `fixtures.py`: `4af0269553dfb9e492787abad736ac944d29f7665e462b9a48e3cf85a05c4820`
+- `cases.json`: `236aed9251844406643768a5f1f5fcc791a7651e48f8143ac0e6957c1417af6f`
+- `lexical_candidate_audit.py`: `ec07a60dd5672bc868d72fa8cdcddd4017568489bdd08b8a1bc667b9788700e9`
+
+Honesty limits: single evaluation on the same 48 cases used to name the
+candidate — no held-out data. Model-free, offline; no measured tokens,
+latency, quality delta, adversarial safety, break-even, or generated-capture
+evidence. Required-recall is a prerequisite only; the token-savings, quality,
+safety, latency, and preregistration gates remain unmet. This result does
+**not** unlock Tasks 2–7.
 
 ### Native mechanism probes
 
