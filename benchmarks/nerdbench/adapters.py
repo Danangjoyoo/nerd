@@ -127,6 +127,9 @@ class CodexAdapter(AgentAdapter):
             "xfast-baseline",
             "nerd-xfast",
             "nerd-ufast",
+            "context-full-history",
+            "context-summary",
+            "context-structured",
         }:
             command.extend(["--ignore-user-config", "--ignore-rules"])
         if spec.condition == "nerd-ufast":

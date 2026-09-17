@@ -87,6 +87,19 @@ class AdapterCommandTests(unittest.TestCase):
         xfast_command = get_adapter("codex").build_command(xfast, "prompt")
         self.assertFalse(any("mcp_servers.nerd-ufast-tools" in item for item in xfast_command))
 
+    def test_codex_context_conditions_are_isolated_without_unrelated_mcp(self):
+        for condition in (
+            "context-full-history",
+            "context-summary",
+            "context-structured",
+        ):
+            run = replace(spec("codex"), condition=condition)
+            command = get_adapter("codex").build_command(run, "prompt")
+            self.assertIn("--ephemeral", command)
+            self.assertIn("--ignore-user-config", command)
+            self.assertIn("--ignore-rules", command)
+            self.assertFalse(any("mcp_servers." in item for item in command))
+
     def test_claude_command_is_noninteractive_and_persistent_state_is_disabled(self):
         command = get_adapter("claude").build_command(
             spec("claude", "claude-test"), "prompt"

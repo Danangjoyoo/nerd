@@ -1,0 +1,418 @@
+{
+  "ablation_continuations_status": "not_run",
+  "ablation_metrics": [
+    "required_fact_recall",
+    "exact_source_quality",
+    "stale_influence_per_resumption"
+  ],
+  "cases": [
+    {
+      "case_id": "resumption-01",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-02",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1901
+    },
+    {
+      "case_id": "resumption-03",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-04",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-05",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-06",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1901
+    },
+    {
+      "case_id": "resumption-07",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-08",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-09",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1899
+    },
+    {
+      "case_id": "resumption-10",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1911
+    },
+    {
+      "case_id": "resumption-11",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1909
+    },
+    {
+      "case_id": "resumption-12",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1909
+    },
+    {
+      "case_id": "cross_session-01",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-02",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1937
+    },
+    {
+      "case_id": "cross_session-03",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-04",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-05",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-06",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1937
+    },
+    {
+      "case_id": "cross_session-07",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-08",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-09",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1935
+    },
+    {
+      "case_id": "cross_session-10",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1947
+    },
+    {
+      "case_id": "cross_session-11",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1945
+    },
+    {
+      "case_id": "cross_session-12",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.42857142857142855,
+      "required_recall": 1.0,
+      "serialized_bytes": 1945
+    },
+    {
+      "case_id": "supersession-01",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-02",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1964
+    },
+    {
+      "case_id": "supersession-03",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-04",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-05",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-06",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1964
+    },
+    {
+      "case_id": "supersession-07",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-08",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-09",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1962
+    },
+    {
+      "case_id": "supersession-10",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1974
+    },
+    {
+      "case_id": "supersession-11",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1972
+    },
+    {
+      "case_id": "supersession-12",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5,
+      "required_recall": 1.0,
+      "serialized_bytes": 1972
+    },
+    {
+      "case_id": "distractor-01",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-02",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1842
+    },
+    {
+      "case_id": "distractor-03",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-04",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-05",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-06",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1842
+    },
+    {
+      "case_id": "distractor-07",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-08",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-09",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1840
+    },
+    {
+      "case_id": "distractor-10",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1853
+    },
+    {
+      "case_id": "distractor-11",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1851
+    },
+    {
+      "case_id": "distractor-12",
+      "index_parity": true,
+      "mandatory_recall": 1.0,
+      "recency_recall": 0.5714285714285714,
+      "required_recall": 1.0,
+      "serialized_bytes": 1851
+    }
+  ],
+  "deterministic_gate_pass": true,
+  "empirical_status": "unknown",
+  "evidence_kind": "preflight",
+  "evidence_sha256": "e8b39f61824c7bbcf3b2c756237cbe6196e208f36d9bb68f9b75468203053cc4",
+  "gold_mandatory_recall": 1.0,
+  "gold_required_recall": 1.0,
+  "live_status": "not_run",
+  "production_unlocked": false,
+  "reason": "full live evidence is absent",
+  "retrieval_design": "unselected",
+  "schema_version": 4,
+  "source_fingerprints": {
+    "benchmarks/nerdbench/adapters.py": "0f3fbd8f9cc34f8559774854529f21e4f367fc2a71a74184afd7dc571d511a3c",
+    "benchmarks/nerdbench/models.py": "a31326856cf4f760c514e7f9cc8bcc3824003c38a5eb421441cfeb373bd51aa3",
+    "docs/experiments/nerd-context/adversarial.py": "bc71f490e08dc56ef9f20c98f4924eb1a83e73a6ee8a22d5ad5075e761080264",
+    "docs/experiments/nerd-context/baselines.py": "77100cfdbc92df3ecf6a0a5130c41b8386749876e83b2fc32ee3320ad3be146f",
+    "docs/experiments/nerd-context/bench.py": "0f9268f116749459c2b8dba00bd11b4839c9768dc9bc94a5dc8a49e584969f89",
+    "docs/experiments/nerd-context/cases.json": "236aed9251844406643768a5f1f5fcc791a7651e48f8143ac0e6957c1417af6f",
+    "docs/experiments/nerd-context/fixtures.py": "4af0269553dfb9e492787abad736ac944d29f7665e462b9a48e3cf85a05c4820",
+    "docs/experiments/nerd-context/structured.py": "bbbb7ed3ddd57e446a622d799d3c2d78d1d834cc2541c14be199428d3b52ce12",
+    "docs/experiments/nerd-context/test_adversarial.py": "c36e4b537bf4b83324689af8c32acb024c18f25c4c19109b09ea1a837095496e"
+  },
+  "status": "complete",
+  "verdict": "inconclusive"
+}

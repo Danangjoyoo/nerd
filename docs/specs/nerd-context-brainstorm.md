@@ -165,10 +165,10 @@ idempotent so the same event cannot append duplicate records.
 ## Retrieval Model
 
 Retrieval considers only active records belonging to the exact supplied ID.
-The proposed deterministic order is:
+The deterministic order is:
 
 1. active boundaries, current decisions, and the current goal;
-2. normalized lexical matches for the current query;
+2. normalized lexical relevance for the current query;
 3. recent active evidence, questions, and checkpoints.
 
 The serialized pack has a hard production ceiling of 2,048 UTF-8 bytes and must
@@ -181,6 +181,36 @@ SQLite FTS5 is the preferred lexical index. A deterministic normalized-term
 scan is the fallback when FTS5 is unavailable. Both modes must produce the same
 pack for the same records and query, and both must satisfy the latency gate.
 
+The revised lexical scorer uses binary-term BM25 with fixed `k1=1.2` and
+`b=0.75`. For each active record in the exact requested Context, `L` is its
+number of distinct normalized value terms, `N` is the number of active records,
+`avgL` is their mean length, and `df(t)` counts active records containing term
+`t`. Sum the following contribution over matching query terms in sorted order:
+
+```text
+idf(t) = ln(1 + (N - df(t) + 0.5) / (df(t) + 0.5))
+contribution(t, record) = idf(t) * (k1 + 1)
+                        / (1 + k1 * (1 - b + b * L / avgL))
+```
+
+Select optional records greedily by `BM25 * (1 - maximum Jaccard similarity)`
+to any previously selected optional record's normalized term set; the maximum
+is zero before the first optional selection. Mandatory records do not reduce
+novelty. This fixed diversity adjustment prevents repeated near-identical notes
+from exhausting the budget; it must pass an independent generic duplication
+regression and uses no corpus-specific rule. Recompute after each selection;
+records that do not fit are skipped whole. Recency and record ID resolve ties.
+
+An empty query or term corpus has score zero. The scorer uses value text and
+the current query only; required-fact labels, case categories, record IDs,
+source references, source classes, and corpus-specific vocabulary are not
+relevance features. Mandatory ordering,
+whole-record byte packing, and mandatory overflow behavior remain unchanged.
+FTS5 supplies matches, while both modes use these same Context-local statistics
+and scorer rather than FTS5's global ranking statistics. The fixed constants
+follow [SQLite's BM25 defaults](https://www.sqlite.org/fts5.html#the_bm25_function);
+this binary-term, positive-IDF variant is explicitly defined above.
+
 The returned pack is always untrusted evidence. Current explicit input wins,
 anchored facts are revalidated before reliance, and normal authorization checks
 still apply.
@@ -191,9 +221,9 @@ still apply.
 
 | Concern | Nerd Context | Nerd Memory |
 | --- | --- | --- |
-| Identity | Explicit opaque `context_id` | Stable user/workspace namespace |
+| Identity | Explicit opaque `context_id` | One user-local global behavioral corpus; repository is provenance |
 | Main content | Current goals, decisions, evidence, questions, checkpoints | Reusable behavior, workflow patterns, and longitudinal evidence |
-| Lifetime | Durable until explicit Context deletion | Durable according to Memory’s confirmation and correction workflow |
+| Lifetime | Durable until explicit Context deletion | Durable until explicit preview-bound deletion |
 | Retrieval role | Reconstruct one explicitly named working Context | Propose reusable endpoint behavior or verified navigation hints |
 | Authority | Never grants action authority | Never grants action authority |
 
@@ -213,6 +243,61 @@ Smart resolves current intent and endpoint
 An ambiguous request such as only “continue” plus an ID must be clarified before
 Context hydration. Stored state may inform a resolved request; it may not decide
 what the user currently wants.
+
+### Prospective empty-allocation hook experiment
+
+A private Codex experiment may allocate an **empty** Context in a trusted
+`UserPromptSubmit` hook before Smart's Focus Record. This is an explicitly
+authorized mechanism revision, not a production implementation or passing gate.
+It reads no stored observations, captures nothing, and supplies only the actual
+committed ID receipt. Smart still derives Intention, Expectation, Scope, and
+Role from the current request; the receipt cannot change routing or authority.
+An already completed allocation must not be repeated through MCP.
+
+The experimental adapter defines the current selector surface as the native
+prompt text, including a delegated handoff delivered in that text. `Context
+ID:`, `Nerd-context created:`, `Nerd-context resumed:`, any `ctx_` candidate, and
+malformed or multiple possible selectors all defer to the normal post-Focus
+route before any database access. Unknown payload fields also defer until that
+input surface is specified. There is no lookup from prior turns, hidden state,
+attachments, or inferred IDs; an unknown explicit ID still gets `not_found`
+without replacement.
+
+Allocation and its private retry mapping commit atomically in the actual POC
+SQLite store. The mapping binds the client adapter, native session and turn
+identity, and payload digest: the same callback replays its receipt, a new turn
+creates a fresh ID even for identical text, and conflicting payloads fail.
+This mapping is callback idempotency, not a public locator or active Context
+slot. Authorized subagents are permitted; native distinct activation identity
+and handoff delivery remain unproved, so unsupported adapter paths retain
+post-Focus MCP handling. No main-thread-only requirement is introduced.
+
+The corrected observational probe established native Prompt/Stop hook firing
+and Prompt receipt delivery in Codex 0.153.4. It did not prove Context allocation,
+Focus compliance, retries, delegated activation, full billable accounting, or
+the 192-token/200-ms short-task gates. All numerical gates remain unchanged;
+component latency and future allocation smoke observations cannot unlock
+production on their own.
+
+The subsequent independently reviewed two-process allocation smoke did commit
+one fresh empty Context and one retry mapping, preserve zero records/captures,
+and deliver the actual ID in the normal answer without a model tool call.
+Its archive is `empty-allocation-smoke-20260906T063513-1bf3e9a0b0` under the
+ignored results root (manifest SHA-256
+`ae144e2ba7538a887cf112c3d6fdd13754b0fbe8d4a6b5427c077bc86202c490`).
+Both answers displayed the four Focus labels but misplaced the endpoint;
+the treatment echoed the entire undelimited receipt/instruction paragraph.
+Neither correct Smart semantics nor a compact display contract was proved.
+The CLI-reported difference was 139 tokens; full billing and incremental
+native activation latency remain unknown. Separately, 36 native Python
+allocation processes had 52.50-ms p95 startup-through-exit component time;
+that excludes Codex dispatch and receipt delivery and is not the latency gate.
+The prospective formatter now separates a data-only display line from trusted
+hook instructions with explicit receipt delimiters. Its parser and formatter
+are tested offline; the preserved native smoke used the earlier undelimited
+format. Future integrated proof must load the actual Smart contract, including
+Expectation as an endpoint and Role as the single best role. These repairs have
+not received another native smoke run.
 
 ## Persistence and Deletion
 
@@ -234,15 +319,15 @@ confirmations fail closed.
 | Field | Value |
 | --- | --- |
 | Record type | Conceptual POC and preregistered experiment design |
-| POC execution status | **Not run** |
-| Empirical result | **Unknown** |
-| Recommended candidate | Typed append-only ledger with bounded deterministic lexical retrieval |
+| POC execution status | Current deterministic preflight passes; corrected protocol unrun; full live run held |
+| Empirical result | Gold required/mandatory recall 100%; archived 40-call diagnostic generated savings 4.30%, break-even 4 |
+| Studied candidate | Typed append-only ledger with bounded deterministic lexical retrieval; production blocked |
 | Implementation authority | Blocked until the experiment passes |
-| Smallest choice-changing unknown | Can exact-ID active records preserve at least 95% of required facts inside the 2,048-byte pack? |
+| Smallest choice-changing unknown | Can a faithful capture lifecycle meet the unchanged cost, quality, and lexical-value gates? |
 
-This record documents the hypothesis and experiment designed during the
-brainstorming work. It does not claim that a runtime, corpus, benchmark, or live
-result currently exists.
+This record documents the hypothesis and experiment, including the authorized
+2026-09-06 design revision. The disposable POC exists; neither deterministic
+preflight nor unit-test success establishes live quality or token savings.
 
 The earliest sketch considered namespace, workspace, and task scoping. The user
 subsequently replaced that model with one opaque `context_id`. That correction
@@ -295,23 +380,45 @@ Run every scenario three times with the same model, system prompt, explicit tool
 surface, temperature, and checkpoint schedule. Randomize arm order with a fixed
 seed and evaluate outputs without exposing arm labels.
 
+Each independent case/repetition/phase lifecycle has two chronological capture
+checkpoints and exactly four actual fresh continuation sessions after the final
+checkpoint. The four sessions repeat the same resolved current request and
+source history. Full history replays that history in every session; the bounded
+arms reuse their persisted state without capture when no new observation
+arrives. Captures are never shared across independent repetitions or phases.
+This measures four-session reuse of a resolved factual request; it does not
+establish savings for one-shot work or changing future questions.
+
 ### Experimental Arms
 
 | Arm | Input supplied to the continuation | Purpose |
 | --- | --- | --- |
 | A — Full history | Complete source history | Quality ceiling and token baseline |
-| B — Free-form summary | Latest equal-budget persisted summary | Simpler compression baseline |
+| B — Free-form summary | Latest source-only, model-created persisted summary | Simpler compression baseline |
 | C — Structured Context | Bounded pack from the typed ledger | Candidate design |
 
 Summary and structured packs use the same canonical envelope and must each fit
 within both 2,048 UTF-8 bytes and 2,048 measured model tokens.
 
+In both phases, the summary receives the same available chronological source
+prefix/delta, current request, and capture checkpoints as generated structured
+capture. Each update sees its own previous persisted state. The summary prompt
+must support competent compression, current corrections, and needed source
+references, and may use the full remaining budget inside the canonical
+envelope. Do not impose the earlier arbitrary 1,400-byte prose limit. Neither
+model receives evaluator-only required/active labels or future observations.
+Count all actual summary creation and update calls. The original concatenation
+of every labelled required fact is an oracle diagnostic only, outside the three
+gate arms; preserve it as a ceiling without using it to choose candidate rules.
+
 ### Experimental Phases
 
 Run the complete gate independently in two phases:
 
-1. **Gold-record phase:** Human-labelled records isolate identity, ranking,
-   supersession, and retrieval quality.
+1. **Gold-record phase:** Human-labelled candidate records isolate candidate
+   identity, ranking, supersession, and retrieval quality. The summary remains
+   model-created from source history, so this phase alone does not isolate a
+   causal effect of representation or establish end-to-end capture quality.
 2. **Generated-capture phase:** Model-created records test capture plus retrieval
    end to end.
 
@@ -329,6 +436,17 @@ billable_tokens = input_tokens + output_tokens
 token_savings = 1 - (structured_tokens / full_history_tokens)
 ```
 
+Calculate savings from one complete four-session lifecycle: charge its actual
+capture/update calls once and sum its four actual continuation calls. Never
+divide capture cost across the three independent repetitions, extrapolate
+unexecuted sessions, or include paired measurement calls in production cost.
+Break-even is the earliest observed session where cumulative structured cost,
+including the full capture cost, is no greater than cumulative full-history
+cost. If that has not happened by session four, record it as not reached rather
+than inferring a passing value. Every session contributes to quality and stale
+measurements; preserve case-level paired bootstrap clustering across sessions
+and repetitions, and inspect safety failures even in ineligible groups.
+
 Cached input and reasoning output are diagnostic subsets and are not added a
 second time. Runs with missing input or output usage are ineligible.
 
@@ -343,9 +461,23 @@ The experiment records:
 - serialized pack bytes and measured pack tokens;
 - resumption break-even point;
 - retrieval p50 and p95 latency;
-- capture precision, recall, duplication, and supersession correctness.
+- capture fidelity precision, required-fact recall, query relevance precision,
+  duplication, and supersession correctness.
+
+Generated-capture fidelity precision counts faithful active same-Context source
+facts, including nonrequired facts, divided by all captures. Required-fact recall
+counts distinct faithful required active facts divided by all required active
+facts. Both retain the 95% gate. Query relevance precision is a separate
+diagnostic: faithful required captures divided by all captures. Do not force
+irrelevant capture to manufacture lexical value; a naturally compact ledger
+without material lexical benefit remains a capsule candidate.
 
 Use paired scenario bootstrapping to report 95% confidence intervals.
+The current exact-quotation rubric measures weighted exact-source reconstruction
+and provenance. Meaning-preserving paraphrases may fail this explicit quotation
+task; general semantic, implementation, and reasoning quality remain
+unestablished. Keep the scoring rule identical across arms and disclose its
+scope in any result.
 
 ### Pack Measurement
 
@@ -358,7 +490,10 @@ pack_tokens = input_tokens(with_segment) - input_tokens(empty_segment)
 ```
 
 The control calls validate pack size but are excluded from production economics.
-Negative, missing, or inconsistent deltas invalidate the run. The canonical POC
+The control's segment is the empty string between the same external sentinels,
+not a serialized empty Context pack: the measured segment includes the complete
+canonical header, authority label, record body, and footer. Negative, missing,
+or inconsistent deltas invalidate the run. The canonical POC
 serializer must be the same serializer proposed for production; changing it
 invalidates the result.
 
@@ -409,6 +544,15 @@ Run the structured arm both with and without lexical ranking. Exercise the
 SQLite FTS5 implementation and the deterministic normalized-term fallback with
 byte-identical expected packs.
 
+The mandatory-plus-recency control, C0, uses the same actually persisted ledger
+and capture as lexical C. Run four fresh C0 continuations paired with the four
+existing C continuations, plus C0's own two-call measurement of its complete
+serialized pack. Report separate case-clustered paired 95% intervals for recall,
+answer quality, and stale influence; recall alone cannot decide the original
+three-metric gate. Retain all C0 raw evidence, usage, and safety outcomes. Report
+these additional experiment calls separately from primary A/B/C lifecycle
+economics, without recharging or sharing capture across independent lifecycles.
+
 Select `retrieval_design=typed_lexical` only when lexical ranking materially
 improves active-fact recall, answer quality, or stale-incident rate with a paired
 95% interval excluding zero, introduces no safety regression, and both index
@@ -448,10 +592,64 @@ but does not rerun live model benchmarks.
 
 ### Current POC Result
 
-**Not executed. There are currently no empirical token, quality, recall,
-latency, or safety results.** The experiment above is the record that must be
-implemented and run before the proposed runtime can claim value or proceed to
-production implementation.
+**Current deterministic gold retrieval passes; the complete live experiment and
+production are held.** All 48 long cases retain 100% of required facts and
+mandatory boundaries/decisions in 1,840–1,974 UTF-8 bytes, with byte-identical
+FTS5/scan packs. The earlier 64.2857% overlap-plus-recency result is historical.
+See the [current POC evidence report](../experiments/nerd-context/results/report.md)
+for source hashes, measurements, and archived diagnostic evidence.
+
+The completed 40-call diagnostic used `gpt-5.6-terra`, low reasoning effort,
+and `codex-cli 0.153.4`. Generated structured capture cost 40,236 billable tokens;
+four continuations cost 57,242, totaling 97,478 versus full history's 101,855:
+**4.30% savings and break-even at four resumptions**. Gold structured cost 58,937
+versus 101,857, saving 42.14%, but oracle capture cannot pass the generated gate.
+The diagnostic's task wording and full-observation rubric were inconsistent;
+its recorded quality scores do not establish semantic information loss. The
+current symmetric protocol requests all active current-scope facts and complete
+observation text, and **has not run live**. Dedicated adversarial controls and a
+complete phase comparison also remain unrun.
+
+Retaining the diagnostic's measured input shells while granting zero structured
+output cost and removing the measured pack gives an optimistic 96,309-token
+cost, or at most 5.45% savings against its observed full-history total. More
+generally, for fixed shell `S`, history `H`, two capture calls consuming that
+history once in total, four resumptions, and zero pack/output cost:
+
+```text
+full_history_cost = 4(S + H)
+structured_cost = 6S + H
+40% savings requires H >= 18S / 7
+break-even within two resumptions requires H >= 2S
+```
+
+At the observed roughly 14,000-token shell, those conditions require about
+36,000 and 28,000 history tokens, outside this design's 8,000–24,000 range.
+This conditional frozen-pipeline bound justifies holding the planned 7,359-call
+run, including the previously omitted quality/stale ablation controls. It does
+not establish impossibility for another faithful architecture.
+Fixed overhead, cached input, and capture work cannot be excluded to obtain a
+passing result. All user thresholds and independent phase requirements remain
+unchanged; the current tracked preflight is `inconclusive`, not a complete live
+pass or rejection.
+
+Competent generated capture may retain only the few relevant facts, leaving
+recall equal under lexical ranking and recency. This does not settle the
+unmeasured answer-quality or stale-influence ablation. The corrected task and
+complete three-metric control protocol remain unrun. Do not force irrelevant
+capture or weaken a strong summary. A simpler checkpoint or capture integrated
+into genuinely required task turns is an **unproven direction**, not an approved
+replacement or passing result. Any new design requires faithful matched work,
+complete billable accounting, fresh preregistration, and independent review.
+
+Before future evidence, resolve the production hydration contract: the tested
+serializer contains only `kind`, `value`, `source`, and `source_ref`, while
+production also needs IDs, anchors, and response metadata. Define and measure
+the complete model-visible response without treating metadata as free. Changing
+the tested serializer requires fresh evidence under the unchanged pack ceiling.
+The production plan still limits capture to **20 records**; the POC permits 30.
+That discrepancy must be reconciled before future evidence, without silently
+expanding production's limit. Neither serializer nor capture limit changes here.
 
 ## Risks and Open Questions
 
@@ -472,12 +670,11 @@ production implementation.
 
 ## Current Recommendation
 
-Proceed only with the falsifiable typed-ledger POC. Preserve the single-ID
-contract, the three-method MCP surface, the six-kind taxonomy, explicit
-supersession, bounded deterministic recall, and strict separation from Nerd
-Memory. Treat every additional capability—ID discovery, semantic retrieval,
-remote synchronization, or automatic promotion—as a new idea requiring its own
-evidence.
+Hold further live benchmarking and production under the current design. Preserve
+the evidence, unchanged gates, single-ID boundary, and separation from Nerd
+Memory. A future feasible POC needs its own reviewed preregistration; neither
+the deterministic retrieval pass nor an unproven simpler alternative authorizes
+the queued production plan.
 
 ## Related Material
 
