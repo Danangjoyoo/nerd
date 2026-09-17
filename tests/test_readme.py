@@ -26,6 +26,7 @@ SKILLS = (
     "nerd-execute",
     "nerd-monitor",
     "nerd-memory",
+    "nerd-context",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",

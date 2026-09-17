@@ -61,6 +61,16 @@ agent; evidence reference; and timestamps. Exclude raw transcript, raw output,
 tool arguments, secrets, permissions, executable payloads, hidden reasoning,
 and quoted, external, assistant-only, or subagent-only material.
 
+## Separation from Nerd Context
+
+Nerd Memory and Nerd Context are separate stores and separate workflows.
+Memory holds reusable longitudinal behavior and verified workflows; Context
+holds current ID-bound evidence, checkpoints, and open questions. Never
+store a current `context_id`, a hydrated pack, or Context record values in
+Memory. Never promote records from one store to the other automatically; a
+promotion requires the destination workflow's own valid authority and
+evidence.
+
 ## Explicit Operations
 
 `memory_inspect` is only for an explicit inspect request. Forgetting is CLI-only

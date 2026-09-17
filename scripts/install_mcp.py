@@ -38,6 +38,16 @@ SERVERS: dict[str, dict[str, Any]] = {
             "memory_inspect",
         },
     },
+    "nerd-context-tools": {
+        "runtime_directory": Path(".nerd/mcp/nerd-context"),
+        "source_directory": REPOSITORY_ROOT / "skills" / "nerd-context" / "scripts",
+        "runtime_files": ("mcp_server.py", "context.py"),
+        "expected_tools": {
+            "context_recall",
+            "context_capture",
+            "context_inspect",
+        },
+    },
 }
 
 
