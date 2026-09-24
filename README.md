@@ -38,6 +38,20 @@ Recorded benchmark results across eight models:
 
 Speed compares the averages of each model's median time: (baseline ÷ Nerd − 1) × 100%. Token savings average each model's median reduction. Accuracy is the mean rubric score across 16 case pairs. These results describe this benchmark sample. [Benchmark details](docs/benchmark/nerd-cost-accuracy.html).
 
+### Smart + Memory + Context pilot — Claude 5 family (2026-09-18)
+
+Three deterministic Nerd cases that each require `/nerd-smart`, `/nerd-memory`, and `/nerd-context` in that order, three repetitions per case, three models = 27 real `claude -p` sessions. Runner: [benchmarks/nerd_pilot/](benchmarks/nerd_pilot/). Duration and tokens are read from the `claude` CLI `--output-format json` payload (not self-reported); accuracy is a six-point rubric ([benchmarks/nerd_pilot/rubric.py](benchmarks/nerd_pilot/rubric.py)) covering visible Focus Record, endpoint choice, memory-blind pass, unknown-ID `not_found` without substitution, fresh `Nerd-context created:` receipt from a real runtime-generated ID, and naming one smallest-choice-changing unknown. Sub-sessions ran with `--allowedTools` restricted to Skill/Read plus the six Nerd MCP tools; no repo mutation.
+
+Baseline (100%) is a non-Nerd Opus 5 run of the same three cases (1 rep each, no `/nerd-smart`, `/nerd-memory`, `/nerd-context`). Each Nerd row shows the median across 3 cases × 3 reps as a percentage of that baseline. Accuracy above 100% is better; duration and tokens below 100% are better.
+
+| Model | Accuracy | Duration | Output tokens |
+| --- | ---: | ---: | ---: |
+| `claude-opus-5` | **300.0%** | 94.8% | 153.4% |
+| `claude-sonnet-5` | **250.0%** | **34.1%** | **78.0%** |
+| `claude-haiku-4-5` | 100.0% | **38.3%** | 94.4% |
+
+Overall: 27/27 Nerd sessions completed successfully; the six-point rubric ([benchmarks/nerd_pilot/rubric.py](benchmarks/nerd_pilot/rubric.py)) covers visible Focus Record, endpoint choice, memory-blind pass, unknown-ID `not_found` without substitution, fresh `Nerd-context created:` receipt from a real runtime-generated ID, and naming one smallest-choice-changing unknown. Sub-sessions ran with `--allowedTools` restricted to Skill/Read plus the six Nerd MCP tools; no repo mutation. Reasoning tier was each sub-agent's harness-configured default (no explicit `low`/`medium`/`high` knob exposed). Rubric fails on smaller models cluster on Focus Record surfacing and receipt phrasing rather than on Context correctness. This pilot is a single sample on three cases; it does not replace the held live empirical protocol for Nerd Context's own gates and does not unlock Task 7 of [the plan](docs/plans/2026-08-27-nerd-context.md). Raw run artifacts live under the ignored `benchmarks/results/nerd-pilot/` root; runner and cases in [benchmarks/nerd_pilot/](benchmarks/nerd_pilot/).
+
 ## Install
 
 Install the skills and automatic Smart hook together:
