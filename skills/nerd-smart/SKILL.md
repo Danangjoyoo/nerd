@@ -57,6 +57,9 @@ For a qualifying intake:
 - Keep alignment reads minimal: only the exact paths, symbols, artifacts, or
   commands the request names.
 - Record what stays unknown instead of widening intake into a folder inventory or project sweep.
+- Resolve the endpoint as **Explore** and hand the record to `nerd-explore`
+  when a goal needs discovery or alignment stalls on unresolved facts,
+  patterns, or constraints.
 
 ## Endpoint Mapping
 
