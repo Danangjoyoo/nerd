@@ -53,6 +53,7 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute",
                 "nerd-monitor",
                 "nerd-memory",
+                "nerd-context",
                 "nerd-loop",
                 "nerd-surgery",
                 "nerd-patrol",
@@ -155,6 +156,12 @@ class SkillStructureTests(unittest.TestCase):
                     "memory-contract.md",
                     "research.md",
                 ),
+                "nerd-context": (
+                    "context-contract.md",
+                    "recall-and-capture.md",
+                    "transport-preflight.md",
+                    "research.md",
+                ),
                 "nerd-loop": (
                     "runtime-contract.md",
                     "durable-runtime.md",
@@ -226,6 +233,9 @@ class SkillStructureTests(unittest.TestCase):
                 self.assertEqual(REQUIRED_SCRIPTS[skill], ())
         self.assertEqual(
             REQUIRED_SCRIPTS["nerd-memory"], ("memory.py", "mcp_server.py")
+        )
+        self.assertEqual(
+            REQUIRED_SCRIPTS["nerd-context"], ("context.py", "mcp_server.py")
         )
         self.assertEqual(REQUIRED_SCRIPTS["nerd-loop"], ("loop.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))

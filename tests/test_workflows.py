@@ -17,6 +17,7 @@ SKILLS = (
     "nerd-execute",
     "nerd-monitor",
     "nerd-memory",
+    "nerd-context",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
@@ -34,7 +35,7 @@ class WorkflowContractTests(unittest.TestCase):
     def test_ci_runs_deterministic_checks(self):
         body = CI.read_text(encoding="utf-8")
         for command in (
-            "python3 -m compileall -q scripts benchmarks tests",
+            "python3 -m compileall -q scripts skills benchmarks tests",
             "python3 -m unittest discover -s tests -v",
             "python3 scripts/validate_skills.py",
             "npx skills add . --list",
@@ -84,9 +85,9 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertIn(skill, body)
         self.assertNotIn("or when Nerd Smart auto-enables it", body)
 
-    def test_release_counts_exactly_seventeen_public_skills(self):
+    def test_release_counts_exactly_eighteen_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_SKILL_COUNT=17", body)
+        self.assertIn("EXPECTED_SKILL_COUNT=18", body)
         self.assertIn("grep -E", body)
         self.assertIn("wc -l", body)
 

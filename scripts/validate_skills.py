@@ -34,6 +34,7 @@ PUBLIC_SKILLS = (
     "nerd-execute",
     "nerd-monitor",
     "nerd-memory",
+    "nerd-context",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
@@ -131,6 +132,12 @@ REQUIRED_REFERENCES = {
         "memory-contract.md",
         "research.md",
     ),
+    "nerd-context": (
+        "context-contract.md",
+        "recall-and-capture.md",
+        "transport-preflight.md",
+        "research.md",
+    ),
     "nerd-loop": (
         "runtime-contract.md",
         "durable-runtime.md",
@@ -202,6 +209,7 @@ REQUIRED_SCRIPTS = {
     "nerd-execute": (),
     "nerd-monitor": (),
     "nerd-memory": ("memory.py", "mcp_server.py"),
+    "nerd-context": ("context.py", "mcp_server.py"),
     "nerd-loop": ("loop.py",),
     "nerd-surgery": (),
     "nerd-patrol": (),

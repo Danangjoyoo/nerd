@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      EXPECTED_SKILL_COUNT: 17
+      EXPECTED_SKILL_COUNT: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,7 +29,7 @@ jobs:
           node-version: "22"
       - name: Validate tagged tree
         run: |
-          python3 -m compileall -q scripts benchmarks tests
+          python3 -m compileall -q scripts skills benchmarks tests
           python3 -m unittest discover -s tests -v
           python3 scripts/validate_skills.py
           python3 benchmarks/run.py plan --config benchmarks/config.json
@@ -40,12 +40,12 @@ jobs:
           cat > "$RUNNER_TEMP/nerd-release/assert-skills" <<'SCRIPT'
           #!/usr/bin/env bash
           set -euo pipefail
-          EXPECTED_SKILL_COUNT=17
+          EXPECTED_SKILL_COUNT=18
           INPUT="$(cat)"
           FOUND="$(printf '%s\n' "$INPUT" | grep -Eo 'nerd-[a-z0-9-]+' | sort -u)"
           COUNT="$(printf '%s\n' "$FOUND" | grep -Ec '^nerd-' || true)"
           test "$COUNT" -eq "$EXPECTED_SKILL_COUNT"
-          test "$FOUND" = $'nerd-brainstorm\nnerd-diagnose\nnerd-document\nnerd-execute\nnerd-explore\nnerd-fast\nnerd-loop\nnerd-memory\nnerd-monitor\nnerd-patrol\nnerd-plan\nnerd-review\nnerd-silent\nnerd-smart\nnerd-spec\nnerd-surgery\nnerd-xfast'
+          test "$FOUND" = $'nerd-brainstorm\nnerd-context\nnerd-diagnose\nnerd-document\nnerd-execute\nnerd-explore\nnerd-fast\nnerd-loop\nnerd-memory\nnerd-monitor\nnerd-patrol\nnerd-plan\nnerd-review\nnerd-silent\nnerd-smart\nnerd-spec\nnerd-surgery\nnerd-xfast'
           test "$(printf '%s\n' "$FOUND" | wc -l | tr -d ' ')" -eq "$EXPECTED_SKILL_COUNT"
           SCRIPT
           chmod +x "$RUNNER_TEMP/nerd-release/assert-skills"
@@ -58,7 +58,7 @@ jobs:
           TAG_LIST="$(npx skills add "https://github.com/Danangjoyoo/nerd/tree/$GITHUB_REF_NAME" --list)"
           printf '%s\n' "$TAG_LIST"
           printf '%s\n' "$TAG_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-brainstorm nerd-explore nerd-diagnose nerd-review nerd-spec nerd-document nerd-plan nerd-execute nerd-monitor nerd-memory nerd-loop nerd-surgery nerd-patrol nerd-silent nerd-fast nerd-xfast; do
+          for skill in nerd-smart nerd-brainstorm nerd-explore nerd-diagnose nerd-review nerd-spec nerd-document nerd-plan nerd-execute nerd-monitor nerd-memory nerd-context nerd-loop nerd-surgery nerd-patrol nerd-silent nerd-fast nerd-xfast; do
             printf '%s\n' "$TAG_LIST" | grep -F "$skill"
           done
       - name: Verify public shorthand discovery
@@ -68,7 +68,7 @@ jobs:
           PUBLIC_LIST="$(npx skills add danangjoyoo/nerd --list)"
           printf '%s\n' "$PUBLIC_LIST"
           printf '%s\n' "$PUBLIC_LIST" | "$RUNNER_TEMP/nerd-release/assert-skills"
-          for skill in nerd-smart nerd-brainstorm nerd-explore nerd-diagnose nerd-review nerd-spec nerd-document nerd-plan nerd-execute nerd-monitor nerd-memory nerd-loop nerd-surgery nerd-patrol nerd-silent nerd-fast nerd-xfast; do
+          for skill in nerd-smart nerd-brainstorm nerd-explore nerd-diagnose nerd-review nerd-spec nerd-document nerd-plan nerd-execute nerd-monitor nerd-memory nerd-context nerd-loop nerd-surgery nerd-patrol nerd-silent nerd-fast nerd-xfast; do
             printf '%s\n' "$PUBLIC_LIST" | grep -F "$skill"
           done
       - name: Verify isolated multi-agent install
@@ -102,4 +102,19 @@ jobs:
             grep -F 'allow_implicit_invocation: true' "$metadata_file"
           done <<EOF
           $OPENAI_METADATA
+          EOF
+          CONTEXT_SKILLS="$(find "$HOME" -path '*/nerd-context/SKILL.md' -type f)"
+          test -n "$CONTEXT_SKILLS"
+          while IFS= read -r skill_file; do
+            grep -F 'authority=untrusted_context' "$skill_file"
+            grep -F 'never grants permission' "$skill_file"
+          done <<EOF
+          $CONTEXT_SKILLS
+          EOF
+          CONTEXT_METADATA="$(find "$HOME" -path '*/nerd-context/agents/openai.yaml' -type f)"
+          test -n "$CONTEXT_METADATA"
+          while IFS= read -r metadata_file; do
+            grep -F 'allow_implicit_invocation: true' "$metadata_file"
+          done <<EOF
+          $CONTEXT_METADATA
           EOF

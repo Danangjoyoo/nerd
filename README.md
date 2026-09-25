@@ -4,11 +4,57 @@
 
 [![CI](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml/badge.svg)](https://github.com/Danangjoyoo/nerd/actions/workflows/ci.yml) [![skills.sh](https://skills.sh/b/danangjoyoo/nerd)](https://skills.sh/danangjoyoo/nerd)
 
-Focused operating skills for coding agents: think clearly, diagnose before fixing, audit with evidence, build against repository reality, minimize critical-path latency, and stay silent when narration adds no value.
+**Nerd is a skill ecosystem for coding agents with a quietly revolutionary idea: make focus, context discipline, and memory part of how work gets done.**
+
+Nerd's strength is making each token count. Focused workflows narrow what the agent reads, concise output preserves room for useful context, and memory reuses verified lessons from earlier work. Together, they reduce repeated explanation and rediscovery while keeping the current request in charge. The payoff: less overhead, more attention on the task, and verification matched to the work.
+
+Works with **Codex, Claude Code, and Cursor**. [Browse the skills](skills/).
+
+## Three core powers
+
+### Gentle Intelligence
+
+Good work starts with understanding what you actually need. [nerd-smart](skills/nerd-smart/SKILL.md) turns a broad request into a clear goal, a defined scope, and the right workflow, giving the agent a steady direction before it begins. It keeps exploration, planning, and execution tied to your intended outcome, and challenges assumptions when they would send the task off course. The result is collaboration that is easier to follow, with a shared understanding of what matters, what belongs in the task, and when the work is complete.
+
+### Golden Brain
+
+Useful memory should make the next task easier. [nerd-memory](skills/nerd-memory/SKILL.md) carries verified lessons from earlier work into later requests, helping the agent reuse approaches that worked and learn from corrections. Alongside it, [nerd-context](skills/nerd-context/SKILL.md) preserves a task's goals, boundaries, decisions, evidence, checkpoints, and open questions in a local SQLite store, addressed only by an opaque `context_id` you supply on resume — omitting it always creates a fresh Context, and unknown IDs never search or substitute. Records are bounded, source-linked, and treated as untrusted advisory evidence (not authority). Nerd Context and Nerd Memory are separate stores and separate workflows; MCP registration is preferred and CLI fallback is guarded. Production release is not yet declared — the measured lexical POC ([evidence](docs/specs/nerd-context-handover.md)) still has token-savings, quality-delta, adversarial, latency, break-even, and generated-capture gates unmet, and its Codex-only measurements may drift with hosted model versions. Together, the vision is continuity: less time rebuilding shared understanding, less repeated explanation, and more useful context for the work ahead, with your current instructions always taking priority.
+
+### Eye's Blink in Fast Mode
+
+Speed comes from spending effort where it matters. [nerd-fast](skills/nerd-fast/SKILL.md) reduces waiting by reusing trustworthy evidence, batching independent operations, and narrowing reads and checks to the task while keeping required verification intact. [nerd-xfast](skills/nerd-xfast/SKILL.md) pushes further toward immediate output with a smaller action path and limited exploration and verification. That extra speed accepts trade-offs in accuracy and completeness, making it an explicit choice for concrete requests where those limits are acceptable. The two modes let you match the pace of the agent to the demands of the work.
+
+## Nerd performance
+
+**49.2% faster. 38.6% fewer output tokens. Higher measured accuracy.**
+
+Recorded benchmark results across eight models:
+
+| Metric | Nerd |
+| --- | ---: |
+| Speed | **49.2% faster** |
+| Token saving (output) | **38.6% less token** |
+| Accuracy | **100%** |
+
+Speed compares the averages of each model's median time: (baseline ÷ Nerd − 1) × 100%. Token savings average each model's median reduction. Accuracy is the mean rubric score across 16 case pairs. These results describe this benchmark sample. [Benchmark details](docs/benchmark/nerd-cost-accuracy.html).
+
+### Smart + Memory + Context pilot — Claude 5 family (2026-09-18)
+
+Three deterministic Nerd cases that each require `/nerd-smart`, `/nerd-memory`, and `/nerd-context` in that order, three repetitions per case, three models = 27 real `claude -p` sessions. Runner: [benchmarks/nerd_pilot/](benchmarks/nerd_pilot/). Duration and tokens are read from the `claude` CLI `--output-format json` payload (not self-reported); accuracy is a six-point rubric ([benchmarks/nerd_pilot/rubric.py](benchmarks/nerd_pilot/rubric.py)) covering visible Focus Record, endpoint choice, memory-blind pass, unknown-ID `not_found` without substitution, fresh `Nerd-context created:` receipt from a real runtime-generated ID, and naming one smallest-choice-changing unknown. Sub-sessions ran with `--allowedTools` restricted to Skill/Read plus the six Nerd MCP tools; no repo mutation.
+
+Baseline (100%) is a non-Nerd Opus 5 run of the same three cases (1 rep each, no `/nerd-smart`, `/nerd-memory`, `/nerd-context`). Each Nerd row shows the median across 3 cases × 3 reps as a percentage of that baseline. Accuracy above 100% is better; duration and tokens below 100% are better.
+
+| Model | Accuracy | Duration | Output tokens |
+| --- | ---: | ---: | ---: |
+| `claude-opus-5` | **300.0%** | 94.8% | 153.4% |
+| `claude-sonnet-5` | **250.0%** | **34.1%** | **78.0%** |
+| `claude-haiku-4-5` | 100.0% | **38.3%** | 94.4% |
+
+Overall: 27/27 Nerd sessions completed successfully; the six-point rubric ([benchmarks/nerd_pilot/rubric.py](benchmarks/nerd_pilot/rubric.py)) covers visible Focus Record, endpoint choice, memory-blind pass, unknown-ID `not_found` without substitution, fresh `Nerd-context created:` receipt from a real runtime-generated ID, and naming one smallest-choice-changing unknown. Sub-sessions ran with `--allowedTools` restricted to Skill/Read plus the six Nerd MCP tools; no repo mutation. Reasoning tier was each sub-agent's harness-configured default (no explicit `low`/`medium`/`high` knob exposed). Rubric fails on smaller models cluster on Focus Record surfacing and receipt phrasing rather than on Context correctness. This pilot is a single sample on three cases; it does not replace the held live empirical protocol for Nerd Context's own gates and does not unlock Task 7 of [the plan](docs/plans/2026-08-27-nerd-context.md). Raw run artifacts live under the ignored `benchmarks/results/nerd-pilot/` root; runner and cases in [benchmarks/nerd_pilot/](benchmarks/nerd_pilot/).
 
 ## Install
 
-Clone once, then use the helper so skill installation and the automatic Smart hook are configured together:
+Install the skills and automatic Smart hook together:
 
 ```bash
 git clone --depth 1 https://github.com/Danangjoyoo/nerd.git
@@ -24,71 +70,6 @@ cd nerd
 
 The helper preserves existing hook configuration and is safe to run again. Codex asks you to review and trust newly installed command hooks once through `/hooks` before they execute.
 
-## Skills
-
-| Skill | Description |
-| --- | --- |
-| `nerd-smart` | Aligns outcome, endpoint, and authorization, then hands the Focus Record to exactly one endpoint route. |
-| `nerd-brainstorm` | Answers and compares conversationally or generates bounded directions, stopping before artifacts or mutation. |
-| `nerd-explore` | Discovers facts, patterns, constraints, and unknowns through read-only investigation. |
-| `nerd-diagnose` | Establishes confirmed, probable, or unknown causes and stops before repair. |
-| `nerd-review` | Evaluates a named scope and reports prioritized findings without modification. |
-| `nerd-spec` | Defines behavior, requirements, boundaries, or system design before planning. |
-| `nerd-document` | Resolves material content direction through Brainstorm, then creates and validates only the requested static documentation artifact. |
-| `nerd-plan` | Resolves material design choices through Brainstorm, then produces actionable file-level implementation plans and stops before execution. |
-| `nerd-execute` | Implements approved plans or confirmed outcomes using simple repository-native designs and proportionate proof. |
-| `nerd-monitor` | Rechecks state without mutation until the requested condition is met. |
-| `nerd-memory` | Activated memory (`$nerd-memory`, Nerd Smart, or an installed session hook) for seven gated behavior fields plus revalidated workspace-fact/workflow hints. Strong direct signals form candidates sooner; reusable evidence shortens rediscovery but never changes or authorizes an endpoint. Runs through the five-tool `nerd-memory-tools` MCP server when live, with an equivalent local CLI fallback after rejected recovery. |
-| `nerd-loop` | Drives code and non-code tasks through the cheapest adequate focused loop, automatic verification, an explicit Definition of Done, and honest bounded stopping. |
-| `nerd-surgery` | Diagnoses broken behavior from evidence and repairs only at an authorized execute endpoint. |
-| `nerd-patrol` | Examines a confirmed security scope and reports only reachable, evidence-backed findings. |
-| `nerd-silent` | Suppresses optional narration and effort while preserving correctness and the complete result. |
-| `nerd-fast` | Minimizes critical-path latency through reuse, batching, narrow exploration, and proportionate proof. |
-| `nerd-xfast` | Produces the smallest sufficient answer or authorized edit through one immutable action chain, immediate output, and bounded end proof. |
-
-Smart resolves one of ten endpoints and hands work to one of nine endpoint route skills; Brainstorm owns both Discuss and Ideate. Memory composes before routing only after direct invocation, Smart auto-enable, or an installed current-event hook; a natural-language mention does not load it. Activation grants request-scoped access and non-destructive memory-write permission without a second save confirmation; persisted enablement never auto-loads Memory or grants later access. Memory never authorizes remembered guidance, and every memory-influenced endpoint requires explicit confirmation. Revalidated fact/workflow hints stay outside that endpoint gate and serve only as untrusted navigation evidence. A copied or partial remembered value cannot masquerade as current guidance without a unique direct-user baseline attestation. Remembered execution profiles bind an agent to its skills, tools, and MCP servers as one ordered route, then fail closed unless the current host registry and authority still support the whole profile. Surgery and Patrol compose as optional specialties without owning endpoints. Loop may control cost-proportional recurrence. Fast and Silent compose as global modifiers. XFast is a self-contained, explicitly lossy execution path and is mutually exclusive with Loop. The Agent Skills layout supports Codex, Claude Code, and Cursor.
-
-Nerd includes shortened internal knowledge derived from MIT-licensed Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). Users do not need a separate Superpowers installation.
-
-## Benchmarks
-
-Representative rubric score per model. Higher is better; each block is 5 percentage points.
-
-```text
-================= Sol     =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [█████████░░░░░░░░░░░]  82.9s | Tokens Saved [███████████████████░] 55.9%
-Superpowers | Acc [████████████████████] 100.0% | Lty [██████████░░░░░░░░░░]  89.9s | N/A
-
-================= Terra   =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [█████████░░░░░░░░░░░]  78.8s | Tokens Saved [██░░░░░░░░░░░░░░░░░░]  6.9%
-Superpowers | Acc [██████░░░░░░░░░░░░░░]  30.0% | Lty [██████████░░░░░░░░░░]  88.7s | N/A
-
-================= Luna    =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [███████░░░░░░░░░░░░░]  65.3s | Tokens Saved [███████████░░░░░░░░░] 33.3%
-Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [█████████░░░░░░░░░░░]  84.4s | N/A
-
-================= GPT 5.5 =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [█████░░░░░░░░░░░░░░░]  46.9s | GPT 5.Tokens Saved [████████████████████] 59.9%
-Superpowers | Acc [████████████████████] 100.0% | Lty [████████░░░░░░░░░░░░]  72.1s | N/A
-
-================= Opus    =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [████░░░░░░░░░░░░░░░░]  35.6s | Tokens Saved [██████████████░░░░░░] 43.4%
-Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [█████████████░░░░░░░] 114.4s | N/A
-
-================= Fable   =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [████████████░░░░░░░░] 109.9s | Tokens Saved [███████████████░░░░░] 44.5%
-Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [███████████░░░░░░░░░] 103.1s | N/A
-
-================= Sonnet  =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [████░░░░░░░░░░░░░░░░]  32.5s | Tokens Saved [███████████████████░] 58.4%
-Superpowers | Acc [█████████████░░░░░░░]  65.0% | Lty [███████████████████░] 169.6s | N/A
-
-================= Haiku   =================
-Nerd        | Acc [████████████████████] 100.0% | Lty [███░░░░░░░░░░░░░░░░░]  30.6s | Tokens Saved [██░░░░░░░░░░░░░░░░░░]  6.5%
-Superpowers | Acc [██████░░░░░░░░░░░░░░]  30.0% | Lty [███░░░░░░░░░░░░░░░░░]  28.4s | N/A
-```
-
-
 ## Verify locally
 
 ```bash
@@ -103,38 +84,4 @@ Live release benchmarks invoke configured coding-agent CLIs and are not run in C
 python3 benchmarks/run.py run --config benchmarks/config.json --release
 ```
 
-MIT licensed. See [LICENSE](LICENSE).
-
-<!-- XFAST_BENCHMARK:START -->
-## Now available xfast!
-
-Nerd XFast is the self-contained, KISS-first throughput path. It intentionally trades exploration, accuracy, completeness, and verification breadth in pursuit of lower latency through one immutable action chain, immediate output, and at most one model-selected end-proof wave.
-
-In this pilot, XFast was 55.39% faster and used 58.50% fewer output tokens.
-
-| Model | Fast accuracy | XFast accuracy | Accuracy delta | Fast latency | XFast latency | Speed | Output tokens |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Luna | 98.00% | 100.00% | +2.00 points | 95.60s | 28.93s | +69.12% | 69.07% saved |
-| Terra | 100.00% | 100.00% | +0.00 points | 41.71s | 30.28s | +36.40% | 39.14% saved |
-| Sol | 96.00% | 100.00% | +4.00 points | 81.45s | 39.35s | +52.15% | 55.83% saved |
-| Combined | 98.00% | 100.00% | +2.00 points | 75.13s | 30.28s | +55.39% | 58.50% saved |
-
-[Cases](benchmarks/pilots/xfast-v3-five-cases/cases.json) · [Pilot configs](benchmarks/pilots/xfast-v3-five-cases/) · [Result summary](benchmarks/pilots/xfast-v3-five-cases/result.json)
-<!-- XFAST_BENCHMARK:END -->
-
-<!-- UFAST_BENCHMARK:START -->
-## UFast directional pilot
-
-UFast is archived under [docs/experiments/nerd-ufast](docs/experiments/nerd-ufast/) and is not included in Nerd installs.
-
-Across 2 cases, 1 repetition, and 1 model at Luna-high, both XFast and UFast scored 100.00%. The paired result put UFast 27.71% slower with 44.70% more output tokens.
-
-| Mode | Accuracy | Median latency | Median output tokens |
-| --- | ---: | ---: | ---: |
-| XFast | 100.00% | 43.77s | 1,769.5 |
-| UFast | 100.00% | 54.93s | 2,324.0 |
-
-This is directional evidence only. The isolated run exercised UFast's skill-only fallback path, not its registered `inspect` and `apply_verify` MCP tools.
-
-[Cases](benchmarks/pilots/ufast-v1-two-cases/cases.json) · [Config](benchmarks/pilots/ufast-v1-two-cases/gpt-5.6-luna-high.json) · [Fresh result](benchmarks/pilots/ufast-v1-two-cases/runs/20260803T164208Z-24e573e-gpt-5.6-luna-high/result.json)
-<!-- UFAST_BENCHMARK:END -->
+MIT licensed. See [LICENSE](LICENSE). Includes condensed knowledge derived from Superpowers; see [third-party notices](THIRD_PARTY_NOTICES.md). No separate Superpowers installation is required.

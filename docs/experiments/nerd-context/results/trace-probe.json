@@ -1,0 +1,61 @@
+{
+  "protocol": "native-rollout-trace-offline-v1",
+  "run_id": "offline-trace-probe-20260905T215505",
+  "manifest_sha256": "dc0774c61c4323bebc938442ac0e30b7cb328b6a4442c4dcce729f294ef8b9d8",
+  "source_set_sha256": "b739e3307a5d1b90ee1acd35ad4f27f7061ef5ed9766cd09dbb4503afc18021d",
+  "independent_archive_audit": "passed",
+  "live_model_requests": 0,
+  "runs": [
+    {
+      "arm": "off",
+      "elapsed_seconds": 0.856127792,
+      "exit_code": 0,
+      "request_count": 3,
+      "native_calls": [
+        "memory_recall",
+        "context_recall"
+      ],
+      "memory_audits": 1,
+      "server_errors": []
+    },
+    {
+      "arm": "on",
+      "elapsed_seconds": 0.505042625,
+      "exit_code": 0,
+      "request_count": 3,
+      "native_calls": [
+        "memory_recall",
+        "context_recall"
+      ],
+      "memory_audits": 1,
+      "server_errors": []
+    }
+  ],
+  "strict_request_difference_count": 52,
+  "full_model_visible_input_equality": false,
+  "scripted_same_response_call_group_observed": true,
+  "grouped_native_calls": [
+    "memory_recall",
+    "context_recall"
+  ],
+  "trace_files": 23,
+  "trace_bytes": 179232,
+  "trace_events": 28,
+  "synthetic_auth_canary_occurrences": 0,
+  "interpretation": [
+    "The native trace binds both scripted recall call IDs to one inference response and preserves their actual separate native results.",
+    "Model instructions, tool schemas, native arguments/results, command, and configuration match exactly; only the trace-root environment variable differs.",
+    "The strict comparison retains 52 differences: runtime identifiers/metadata and two actual model-visible elapsed-time strings. No unchanged-input or semantic-equivalence pass is claimed.",
+    "One off/on pair cannot estimate instrumentation overhead. Synthetic responses provide no model quality, token economics, billing, or warmup-coverage evidence.",
+    "The narrow private approval configuration preserves real Memory audit writes and the sandbox. It is not a user-installation change.",
+    "No synthetic auth canary or credential-related key path appeared in the 23 native trace files; this is not a general redaction guarantee."
+  ],
+  "limitations": [
+    "Internal version-matched experimental trace facility; not a documented production setting.",
+    "HTTP synthetic provider differs from authenticated ChatGPT websocket transport.",
+    "Scripted outputs establish instrumentation behavior, not model quality or task economics.",
+    "No inference charge or complete warmup/billing coverage is established.",
+    "Canary inspection is fixture-specific; no general trace redaction guarantee."
+  ],
+  "production_pass": false
+}

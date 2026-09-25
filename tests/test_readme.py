@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import re
 import unittest
 
@@ -25,6 +26,7 @@ SKILLS = (
     "nerd-execute",
     "nerd-monitor",
     "nerd-memory",
+    "nerd-context",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
@@ -103,31 +105,33 @@ class ReadmeContractTests(unittest.TestCase):
         self.assertNotIn("--agent codex | claude-code | cursor", body)
         self.assertNotIn("danangjoyoo/mensa", body.casefold())
 
-    def test_ufast_directional_benchmark_is_current(self):
-        body = README.read_text(encoding="utf-8")
-        self.assertEqual(body.count("<!-- UFAST_BENCHMARK:START -->"), 1)
-        self.assertEqual(body.count("<!-- UFAST_BENCHMARK:END -->"), 1)
-        region = body.split("<!-- UFAST_BENCHMARK:START -->", 1)[1].split(
-            "<!-- UFAST_BENCHMARK:END -->", 1
-        )[0]
-        for expected in (
-            "UFast is archived",
-            "is not included in Nerd installs",
-            "2 cases, 1 repetition, and 1 model",
-            "100.00%",
-            "27.71% slower",
-            "44.70% more output tokens",
-            "54.93s",
-            "43.77s",
-            "20260803T164208Z-24e573e-gpt-5.6-luna-high/result.json",
-            "directional evidence only",
-        ):
-            self.assertIn(expected, region)
+    def test_archived_ufast_evidence_preserves_directional_scope(self):
+        # Archived research remains verifiable without requiring a homepage section.
+        result = json.loads((ROOT / "benchmarks" / "pilots" / "ufast-v1-two-cases" / "runs"
+                             / "20260803T164208Z-24e573e-gpt-5.6-luna-high" / "result.json").read_text(encoding="utf-8"))
+        self.assertEqual({key: result["controls"][key] for key in ("cases", "repetitions", "models")},
+                         {"cases": 2, "repetitions": 1, "models": 1})
+        self.assertIn("directional evidence only", result["limitations"])
+        self.assertEqual(result["provenance"]["model"], "gpt-5.6-luna")
+        aggregate = result["aggregate"]
+        self.assertEqual(aggregate["delta"]["accuracy_points"], 0.0)
+        self.assertEqual(round(aggregate["delta"]["speed_percent"], 2), -27.71)
+        self.assertEqual(round(aggregate["delta"]["token_saved_percent"], 2), -44.70)
+        for arm, latency in (("ufast", 54.93), ("xfast", 43.77)):
+            self.assertEqual(aggregate[arm]["mean_score"], 100.0)
+            self.assertEqual(round(aggregate[arm]["median_latency_seconds"], 2), latency)
 
-    def test_every_public_skill_is_listed_once(self):
+    def test_public_skills_are_discoverable_from_readme_links(self):
         body = README.read_text(encoding="utf-8")
+        destinations = re.findall(r"\[[^\]]+\]\((skills/[^)]*)\)", body)
+        self.assertIn("skills/", destinations)
+        self.assertTrue((ROOT / "skills").is_dir())
         for name in SKILLS:
-            self.assertEqual(body.count(f"`{name}`"), 1)
+            with self.subTest(skill=name):
+                self.assertTrue((ROOT / "skills" / name / "SKILL.md").is_file())
+        for destination in destinations:
+            with self.subTest(link=destination):
+                self.assertTrue((ROOT / destination).exists())
 
     # def test_benchmark_markers_are_unique(self):
     #     body = README.read_text(encoding="utf-8")

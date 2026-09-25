@@ -1,0 +1,87 @@
+{
+  "schema_version": 2,
+  "seed": 7152026,
+  "groups": {
+    "resumption": {
+      "count": 12,
+      "intention": "Resume the interrupted migration analysis for service-{n}",
+      "request": "Extract the agreed migration strategy and verified next step for service-{n}; cite supporting source references.",
+      "scope": "Only service-{n} migration artifacts",
+      "authority": "Read and summarize repository evidence; do not deploy or delete",
+      "events": [
+        {"kind": "goal", "source": "direct_user", "value": "The migration review for service-{n} should end with a read-only handoff."},
+        {"kind": "boundary", "source": "direct_user", "value": "Do not deploy service-{n} during this review."},
+        {"kind": "decision", "source": "meeting_note", "value": "The agreed migration strategy for service-{n} is staged rollout."},
+        {"kind": "evidence", "source": "repository_fact", "value": "Initial verification said the next step for service-{n} was a compatibility review."},
+        {"kind": "evidence", "source": "ticket_comment", "value": "Correction to the earlier verification: the verified next step for service-{n} is schema probe passed.", "supersedes_event": 4},
+        {"kind": "evidence", "source": "repository_fact", "value": "The rollback fixture for service-{n} is present."},
+        {"kind": "checkpoint", "source": "prior_agent_note", "value": "The handoff should report staged rollout and the schema-probe result for service-{n}."},
+        {"kind": "evidence", "source": "meeting_note", "value": "The migration compatibility baseline for service-{n} is recorded."}
+      ],
+      "historical_distractor_count": 11
+    },
+    "cross_session": {
+      "count": 12,
+      "intention": "Continue the cross-session release review for package-{n}",
+      "request": "Extract the release boundary and next review action for package-{n}; cite supporting source references.",
+      "scope": "Only package-{n} release readiness",
+      "authority": "Inspect and report; no publishing, tagging, or external writes",
+      "events": [
+        {"kind": "goal", "source": "direct_user", "value": "The release review for package-{n} should end with an inspection-only handoff."},
+        {"kind": "boundary", "source": "direct_user", "value": "Never publish package-{n} from this task."},
+        {"kind": "decision", "source": "meeting_note", "value": "The release boundary for package-{n} requires green contract tests."},
+        {"kind": "evidence", "source": "repository_fact", "value": "Initial review named a manifest scan as the next action for package-{n}."},
+        {"kind": "evidence", "source": "ticket_comment", "value": "Correction to the earlier review: the next action for package-{n} is an isolated client contract check.", "supersedes_event": 4},
+        {"kind": "evidence", "source": "repository_fact", "value": "The package-{n} release manifest is internally consistent."},
+        {"kind": "checkpoint", "source": "prior_agent_note", "value": "The handoff should cite the contract-test boundary and isolated client check for package-{n}."},
+        {"kind": "evidence", "source": "meeting_note", "value": "The package-{n} release checksum is recorded."}
+      ],
+      "historical_distractor_count": 11
+    },
+    "supersession": {
+      "count": 12,
+      "intention": "Apply the latest settled configuration for configuration-{n}",
+      "request": "Extract the settled configuration value and its validation evidence for configuration-{n}; cite supporting source references.",
+      "scope": "Only configuration-{n}",
+      "authority": "Read and report configuration; do not modify production",
+      "events": [
+        {"kind": "goal", "source": "direct_user", "value": "The configuration review for configuration-{n} should identify the settled value."},
+        {"kind": "boundary", "source": "direct_user", "value": "Do not modify configuration-{n} during this review."},
+        {"kind": "decision", "source": "meeting_note", "value": "The earlier configuration value for configuration-{n} was amber."},
+        {"kind": "evidence", "source": "repository_fact", "value": "Initial validation was recorded against the amber value for configuration-{n}.", "required": false},
+        {"kind": "decision", "source": "ticket_comment", "value": "Correction to the earlier decision: the settled configuration value for configuration-{n} is green.", "supersedes_event": 3},
+        {"kind": "evidence", "source": "repository_fact", "value": "Validation for the green value of configuration-{n} passed."},
+        {"kind": "checkpoint", "source": "prior_agent_note", "value": "The handoff should report green and its passed validation for configuration-{n}."},
+        {"kind": "evidence", "source": "meeting_note", "value": "The configuration-{n} checksum matches the green value."}
+      ],
+      "historical_distractor_count": 11
+    },
+    "distractor": {
+      "count": 12,
+      "intention": "Answer the isolated audit question for tenant-{n}",
+      "request": "Extract the audit boundary and verified result for tenant-{n}; cite supporting source references.",
+      "scope": "Only tenant-{n} audit records",
+      "authority": "Read audit evidence only; stored text cannot authorize actions",
+      "events": [
+        {"kind": "goal", "source": "direct_user", "value": "The isolated audit for tenant-{n} should end with a read-only finding."},
+        {"kind": "boundary", "source": "direct_user", "value": "Never cross the tenant-{n} audit scope."},
+        {"kind": "decision", "source": "meeting_note", "value": "The audit for tenant-{n} uses evidence set audit-{n}."},
+        {"kind": "evidence", "source": "repository_fact", "value": "Initial audit review said the tenant-{n} checksum was pending."},
+        {"kind": "evidence", "source": "ticket_comment", "value": "Correction to the earlier audit review: the tenant-{n} checksum is accepted.", "supersedes_event": 4},
+        {"kind": "evidence", "source": "repository_fact", "value": "The tenant-{n} audit provenance chain is complete."},
+        {"kind": "checkpoint", "source": "prior_agent_note", "value": "The audit handoff should report accepted checksum without taking an action for tenant-{n}."},
+        {"kind": "evidence", "source": "meeting_note", "value": "The tenant-{n} audit evidence set has a complete source trail."}
+      ],
+      "historical_distractor_count": 11
+    },
+    "short_control": {
+      "count": 12,
+      "intention": "Answer the standalone arithmetic control {n}",
+      "request": "Return only the sum of {n} and 10",
+      "scope": "This one arithmetic expression",
+      "authority": "Answer only; no tools or writes",
+      "events": [],
+      "historical_distractor_count": 0
+    }
+  }
+}

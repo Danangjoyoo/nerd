@@ -262,6 +262,16 @@ class InstallScriptTests(unittest.TestCase):
                 self.assertIn("one silent `memory_recall`", context)
                 self.assertIn("continue memory-free silently", context)
                 self.assertIn("never authorizes actions", context)
+                self.assertIn("nerd-context", context)
+                self.assertIn(
+                    "Automatically activate the installed `nerd-context` skill",
+                    context,
+                )
+                self.assertIn("exact `context_id`", context)
+                self.assertIn("Nerd-context created: <context_id>", context)
+                self.assertIn("authority=untrusted_context", context)
+                self.assertIn("continue Context-free silently", context)
+                self.assertIn("Memory and Context are separate stores", context)
                 self.assertNotIn("namespace", context.casefold())
                 self.assertNotIn("confirmation", context.casefold())
                 self.assertIn("No hook authorizes combining Nerd", context)

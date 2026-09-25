@@ -1,0 +1,40 @@
+{
+  "protocol": "native-smart-memory-context-batching-v1",
+  "run_id": "batching-probe-20260905T214605",
+  "manifest_sha256": "10c3b33202e0597535b7fcaa4252aba86933c6d45db35be8fe4a68c08600c8ce",
+  "source_set_sha256": "16c9b99df3e6ba322120e194234d654fb8504b2f493e38705173f37f3e60248b",
+  "independent_archive_audit": "passed",
+  "results": [
+    {
+      "arm": "baseline",
+      "elapsed_seconds": 20.542345791,
+      "cli_reported_tokens": 45702,
+      "observed_transport_tokens": 54295,
+      "answer_pass": true,
+      "frozen_workflow_contract_pass": false,
+      "actual_hook_delivery": true,
+      "full_billable_tokens": null,
+      "same_model_response": null
+    },
+    {
+      "arm": "context",
+      "elapsed_seconds": 65.0033155,
+      "cli_reported_tokens": 150510,
+      "observed_transport_tokens": 159103,
+      "answer_pass": true,
+      "frozen_workflow_contract_pass": false,
+      "actual_hook_delivery": true,
+      "full_billable_tokens": null,
+      "same_model_response": null
+    }
+  ],
+  "interpretation": [
+    "Baseline made no Memory recall; installed at-most-one recall is optional, so the proposed baseline path was not witnessed.",
+    "Context returned exact current facts and ID; Memory attempt was denied by native approval policy and its proposed arguments also violated the actual schema.",
+    "Context Focus appeared after retrieval; query included the full prompt, and extra repository/configuration exploration occurred.",
+    "Frozen RPC mismatch is caused by legitimate native _meta; actual Context name, arguments, and returned payload independently match.",
+    "A conservative bootstrap parser rejected compound skill-only reads. Separate root/config searches were scope deviations. The empty native web_search item does not prove an external fetch.",
+    "Both correct answers and actual hook delivery are observed; neither successful batching nor comparable workflow economics is established."
+  ],
+  "production_pass": false
+}

@@ -1,0 +1,395 @@
+{
+  "cases": {
+    "resume": {
+      "activation_contract_pass": true,
+      "added_billable_tokens": null,
+      "added_reported_cli_tokens": 30765,
+      "arms": {
+        "baseline": {
+          "activation_contract_pass": true,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "failures": [
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "observed_discovery_completions": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "accounting_limit": "CLI aggregate is reported usage; transport observations are not added to or subtracted from it. Full billing and exact model request count remain unproven because request coverage and startup/prefill billing are not established.",
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 4352,
+              "input_tokens": 11590,
+              "output_tokens": 305,
+              "reasoning_output_tokens": 130
+            },
+            "complete": false,
+            "correlation": [
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643404919552000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643410480709000,
+                "span_sha256": null,
+                "trace_sha256": null
+              }
+            ],
+            "counter_reconciled": false,
+            "full_billable_tokens": null,
+            "known_response_billable_tokens": 19985,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "request_coverage": "unknown",
+            "response_usage": [
+              {
+                "input_tokens": 8090,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 11590,
+                "output_tokens": 305
+              }
+            ],
+            "total_billable_tokens": 11895,
+            "transport_request_events": 4
+          }
+        },
+        "context": {
+          "activation_contract_pass": true,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "failures": [
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list",
+            "tools/call"
+          ],
+          "native_mcp_completed_count": 1,
+          "observed_discovery_completions": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": 3.582792,
+          "receipt_sha256": "52f235efa8aeb1a69d28a7678cf02a6ed2afb201f20df0a4ac8d58d9be4bed72",
+          "returned_context_id_sha256": "a336c55f67615371e7c188e25cf6b96a1ac4160652baa571b08eaf414c5b60a7",
+          "tool_calls": [
+            "context_recall"
+          ],
+          "usage": {
+            "accounting_limit": "CLI aggregate is reported usage; transport observations are not added to or subtracted from it. Full billing and exact model request count remain unproven because request coverage and startup/prefill billing are not established.",
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 29952,
+              "input_tokens": 42178,
+              "output_tokens": 482,
+              "reasoning_output_tokens": 136
+            },
+            "complete": false,
+            "correlation": [
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643391795321000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643396219589000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643399677803000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643402808060000,
+                "span_sha256": null,
+                "trace_sha256": null
+              }
+            ],
+            "counter_reconciled": false,
+            "full_billable_tokens": null,
+            "known_response_billable_tokens": 50750,
+            "minimum_model_responses": 2,
+            "model_response_count": null,
+            "observed_response_completions": 4,
+            "request_coverage": "unknown",
+            "response_usage": [
+              {
+                "input_tokens": 8090,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 11608,
+                "output_tokens": 179
+              },
+              {
+                "input_tokens": 15093,
+                "output_tokens": 156
+              },
+              {
+                "input_tokens": 15477,
+                "output_tokens": 147
+              }
+            ],
+            "total_billable_tokens": 42660,
+            "transport_request_events": 6
+          }
+        }
+      },
+      "paired_accounting_complete": false,
+      "short_192_token_bound_met": null
+    },
+    "short": {
+      "activation_contract_pass": true,
+      "added_billable_tokens": null,
+      "added_reported_cli_tokens": 31017,
+      "arms": {
+        "baseline": {
+          "activation_contract_pass": false,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "failures": [
+            "current-request Focus Record missing",
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "observed_discovery_completions": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "accounting_limit": "CLI aggregate is reported usage; transport observations are not added to or subtracted from it. Full billing and exact model request count remain unproven because request coverage and startup/prefill billing are not established.",
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 4352,
+              "input_tokens": 11516,
+              "output_tokens": 64,
+              "reasoning_output_tokens": 54
+            },
+            "complete": false,
+            "correlation": [
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643373759977000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643375904621000,
+                "span_sha256": null,
+                "trace_sha256": null
+              }
+            ],
+            "counter_reconciled": false,
+            "full_billable_tokens": null,
+            "known_response_billable_tokens": 19670,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "request_coverage": "unknown",
+            "response_usage": [
+              {
+                "input_tokens": 8090,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 11516,
+                "output_tokens": 64
+              }
+            ],
+            "total_billable_tokens": 11580,
+            "transport_request_events": 4
+          }
+        },
+        "context": {
+          "activation_contract_pass": true,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 0
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "failures": [
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list",
+            "tools/call"
+          ],
+          "native_mcp_completed_count": 1,
+          "observed_discovery_completions": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": 2.688375,
+          "receipt_sha256": "ab1c35701238832af10935e57c278b001d3a9d4ebeb4ff4674e39dbf3faa4c31",
+          "returned_context_id_sha256": "57cfa992cfdf2b23b00a036bc4be4feff9ad81b8a394aa6d90cd5e7d95a976b2",
+          "tool_calls": [
+            "context_recall"
+          ],
+          "usage": {
+            "accounting_limit": "CLI aggregate is reported usage; transport observations are not added to or subtracted from it. Full billing and exact model request count remain unproven because request coverage and startup/prefill billing are not established.",
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 29952,
+              "input_tokens": 42039,
+              "output_tokens": 558,
+              "reasoning_output_tokens": 293
+            },
+            "complete": false,
+            "correlation": [
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643377937604000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643382201404000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643385242363000,
+                "span_sha256": null,
+                "trace_sha256": null
+              },
+              {
+                "identifiers": {},
+                "source_timestamp_ns": 1788643389361078000,
+                "span_sha256": null,
+                "trace_sha256": null
+              }
+            ],
+            "counter_reconciled": false,
+            "full_billable_tokens": null,
+            "known_response_billable_tokens": 50687,
+            "minimum_model_responses": 2,
+            "model_response_count": null,
+            "observed_response_completions": 4,
+            "request_coverage": "unknown",
+            "response_usage": [
+              {
+                "input_tokens": 8090,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 11579,
+                "output_tokens": 209
+              },
+              {
+                "input_tokens": 15094,
+                "output_tokens": 131
+              },
+              {
+                "input_tokens": 15366,
+                "output_tokens": 218
+              }
+            ],
+            "total_billable_tokens": 42597,
+            "transport_request_events": 6
+          }
+        }
+      },
+      "paired_accounting_complete": false,
+      "short_192_token_bound_met": null
+    }
+  },
+  "codex_exec_processes": 4,
+  "codex_version": "codex-cli 0.153.4",
+  "limitations": [
+    "Four diagnostic processes; no population estimate or production gate.",
+    "Both arms configure the same three-tool MCP inventory; this does not estimate installation cost versus a client without Context tools. Any model-visible discovery/schema expansion during activation remains in CLI usage.",
+    "Exact-ID fixture seeding is off-model setup, not generated capture or full lifecycle evidence.",
+    "CLI turn.completed is canonical token usage; transport completions independently test model roundtrip count.",
+    "No Stop hook, output schema, preinjected pack, or Python-created short Context substitutes for actual MCP activation."
+  ],
+  "manifest_sha256": "ecdebafbb041aee69e8cad7b2c46332bd5700999ea84418a0437e4a0a28f31b0",
+  "model": "gpt-5.4-mini",
+  "production_unlocked": false,
+  "protocol": "real-mcp-activation-v2",
+  "reasoning_effort": "low",
+  "run_id": "activation-probe-v2-20260905T212240",
+  "source_fingerprints": {
+    "benchmarks/nerdbench/adapters.py": "0f3fbd8f9cc34f8559774854529f21e4f367fc2a71a74184afd7dc571d511a3c",
+    "benchmarks/nerdbench/models.py": "a31326856cf4f760c514e7f9cc8bcc3824003c38a5eb421441cfeb373bd51aa3",
+    "docs/experiments/nerd-context/activation_probe.py": "d16ba3b4811e71636b9ee37e74cf789d6b66d066db462709b34aee69ef2a86cd",
+    "docs/experiments/nerd-context/structured.py": "bbbb7ed3ddd57e446a622d799d3c2d78d1d834cc2541c14be199428d3b52ce12",
+    "docs/experiments/nerd-context/test_activation_probe.py": "a81ec4772451c59a30addef33336522231090311bb19f64b63aebff0548a2dd1"
+  }
+}

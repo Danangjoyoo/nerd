@@ -1,0 +1,277 @@
+{
+  "cases": {
+    "resume": {
+      "activation_contract_pass": false,
+      "added_billable_tokens": 154,
+      "arms": {
+        "baseline": {
+          "activation_contract_pass": false,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "failures": [
+            "current-request Focus Record missing",
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 9984,
+              "input_tokens": 14207,
+              "output_tokens": 164,
+              "reasoning_output_tokens": 43
+            },
+            "complete": false,
+            "known_response_billable_tokens": 25129,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "response_usage": [
+              {
+                "input_tokens": 10758,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 14207,
+                "output_tokens": 164
+              }
+            ],
+            "total_billable_tokens": 14371,
+            "transport_request_events": 4
+          }
+        },
+        "context": {
+          "activation_contract_pass": false,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "answer_pass": false,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 1,
+            "record_count": 2
+          },
+          "failures": [
+            "current-request Focus Record missing",
+            "required answer or source reference missing",
+            "exactly one actual context_recall required",
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 9984,
+              "input_tokens": 14231,
+              "output_tokens": 294,
+              "reasoning_output_tokens": 180
+            },
+            "complete": false,
+            "known_response_billable_tokens": 25283,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "response_usage": [
+              {
+                "input_tokens": 10758,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 14231,
+                "output_tokens": 294
+              }
+            ],
+            "total_billable_tokens": 14525,
+            "transport_request_events": 4
+          }
+        }
+      },
+      "paired_accounting_complete": false,
+      "short_192_token_bound_met": null
+    },
+    "short": {
+      "activation_contract_pass": false,
+      "added_billable_tokens": 109,
+      "arms": {
+        "baseline": {
+          "activation_contract_pass": false,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "failures": [
+            "current-request Focus Record missing",
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 9984,
+              "input_tokens": 14143,
+              "output_tokens": 112,
+              "reasoning_output_tokens": 56
+            },
+            "complete": false,
+            "known_response_billable_tokens": 25013,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "response_usage": [
+              {
+                "input_tokens": 10758,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 14143,
+                "output_tokens": 112
+              }
+            ],
+            "total_billable_tokens": 14255,
+            "transport_request_events": 4
+          }
+        },
+        "context": {
+          "activation_contract_pass": false,
+          "after_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "answer_pass": true,
+          "before_counts": {
+            "capture_count": 0,
+            "context_count": 0,
+            "record_count": 0
+          },
+          "failures": [
+            "current-request Focus Record missing",
+            "exactly one actual context_recall required",
+            "model request accounting incomplete or inconsistent"
+          ],
+          "mcp_methods": [
+            "initialize",
+            "notifications/initialized",
+            "tools/list"
+          ],
+          "native_mcp_completed_count": 0,
+          "ordinary_actions": [],
+          "pass": false,
+          "recall_elapsed_ms": null,
+          "receipt_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+          "returned_context_id_sha256": null,
+          "tool_calls": [],
+          "usage": {
+            "canonical_source": "CLI turn.completed",
+            "cli_turn_count": 1,
+            "cli_usage": {
+              "cache_write_input_tokens": 0,
+              "cached_input_tokens": 9984,
+              "input_tokens": 14206,
+              "output_tokens": 158,
+              "reasoning_output_tokens": 148
+            },
+            "complete": false,
+            "known_response_billable_tokens": 25122,
+            "minimum_model_responses": 1,
+            "model_response_count": null,
+            "observed_response_completions": 2,
+            "response_usage": [
+              {
+                "input_tokens": 10758,
+                "output_tokens": 0
+              },
+              {
+                "input_tokens": 14206,
+                "output_tokens": 158
+              }
+            ],
+            "total_billable_tokens": 14364,
+            "transport_request_events": 4
+          }
+        }
+      },
+      "paired_accounting_complete": false,
+      "short_192_token_bound_met": null
+    }
+  },
+  "codex_exec_processes": 4,
+  "codex_version": "codex-cli 0.153.4",
+  "limitations": [
+    "Four diagnostic processes; no population estimate or production gate.",
+    "Both arms configure the same three-tool MCP inventory; this does not estimate installation cost versus a client without Context tools. Any model-visible discovery/schema expansion during activation remains in CLI usage.",
+    "Exact-ID fixture seeding is off-model setup, not generated capture or full lifecycle evidence.",
+    "CLI turn.completed is canonical token usage; transport completions independently test model roundtrip count.",
+    "No Stop hook, output schema, preinjected pack, or Python-created short Context substitutes for actual MCP activation."
+  ],
+  "manifest_sha256": "f13965451cafe4ddabfaefdb122e0be3af3eea186319bdbc22f9f0c6e41559aa",
+  "model": "gpt-5.6-terra",
+  "production_unlocked": false,
+  "protocol": "real-mcp-activation-v1",
+  "reasoning_effort": "low",
+  "run_id": "activation-probe-20260905T210748",
+  "source_fingerprints": {
+    "benchmarks/nerdbench/adapters.py": "0f3fbd8f9cc34f8559774854529f21e4f367fc2a71a74184afd7dc571d511a3c",
+    "benchmarks/nerdbench/models.py": "a31326856cf4f760c514e7f9cc8bcc3824003c38a5eb421441cfeb373bd51aa3",
+    "docs/experiments/nerd-context/activation_probe.py": "870a569e44026d36de19f1aea99b9b46a5567665343cfbdc9a5cdb496b6e3b04",
+    "docs/experiments/nerd-context/structured.py": "bbbb7ed3ddd57e446a622d799d3c2d78d1d834cc2541c14be199428d3b52ce12",
+    "docs/experiments/nerd-context/test_activation_probe.py": "5da51d3aa5bf0dd2cf5d8f2a9e5fc3c030ec9cc5370dd67d7be18f43a531ce83"
+  }
+}
