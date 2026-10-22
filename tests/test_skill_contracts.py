@@ -304,6 +304,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "dry.md",
                 "kiss.md",
                 "subagent-model-mapping.md",
+                "artifact-layout.md",
                 "yagni.md",
             },
         }
@@ -425,7 +426,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Do not execute the plan",
             ),
         )
-        self.assertLessEqual(len(raw_body.splitlines()), 140)
+        self.assertLessEqual(len(raw_body.splitlines()), 180)
         self.assertFalse(
             (SKILLS / "nerd-plan" / "references" / "plan-template.md").exists()
         )

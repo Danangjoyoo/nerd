@@ -53,7 +53,6 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute",
                 "nerd-monitor",
                 "nerd-memory",
-                "nerd-context",
                 "nerd-loop",
                 "nerd-surgery",
                 "nerd-patrol",
@@ -144,6 +143,7 @@ class SkillStructureTests(unittest.TestCase):
                     "yagni.md",
                     "comprehensive.md",
                     "subagent-model-mapping.md",
+                    "artifact-layout.md",
                 ),
                 "nerd-execute": (),
                 "nerd-monitor": (),
@@ -154,12 +154,6 @@ class SkillStructureTests(unittest.TestCase):
                     "recognize-and-reuse.md",
                     "correct-and-forget.md",
                     "memory-contract.md",
-                    "research.md",
-                ),
-                "nerd-context": (
-                    "context-contract.md",
-                    "recall-and-capture.md",
-                    "transport-preflight.md",
                     "research.md",
                 ),
                 "nerd-loop": (
@@ -234,9 +228,9 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(
             REQUIRED_SCRIPTS["nerd-memory"], ("memory.py", "mcp_server.py")
         )
-        self.assertEqual(
-            REQUIRED_SCRIPTS["nerd-context"], ("context.py", "mcp_server.py")
-        )
+        self.assertNotIn("nerd-context", REQUIRED_SCRIPTS)
+        self.assertFalse((ROOT / "skills/nerd-context").exists())
+        self.assertTrue((ROOT / "archived-skill/nerd-context/SKILL.md").is_file())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-loop"], ("loop.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())

@@ -42,18 +42,16 @@ fi
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 npx skills add danangjoyoo/nerd \
-  --global --agent "$@" --skill '*' --yes
+  --global --agent "$@" --skill \
+  nerd-smart nerd-brainstorm nerd-explore nerd-diagnose nerd-review \
+  nerd-spec nerd-document nerd-plan nerd-execute nerd-monitor nerd-memory \
+  nerd-loop nerd-surgery nerd-patrol nerd-silent nerd-fast nerd-xfast --yes
 
 python3 "$script_dir/install_hooks.py" "$@"
 
 # MCP registration is optional. Never fail installation for it; routine Nerd work
-# continues memory-free / context-free when the transport is unavailable.
+# continues memory-free when the transport is unavailable.
 if ! python3 "$script_dir/install_mcp.py" --server nerd-memory-tools "$@"; then
   echo "warning: could not register nerd-memory-tools MCP server;" \
        "routine Nerd work will continue memory-free silently" >&2
-fi
-
-if ! python3 "$script_dir/install_mcp.py" --server nerd-context-tools "$@"; then
-  echo "warning: could not register nerd-context-tools MCP server;" \
-       "Nerd Context transport will remain unavailable this session" >&2
 fi
