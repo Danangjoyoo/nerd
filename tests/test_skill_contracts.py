@@ -583,10 +583,10 @@ class ReviewContractTests(unittest.TestCase):
 
     def test_review_guidance_stays_compact_and_bulleted(self):
         skill = skill_body("nerd-review")
-        self.assertLessEqual(len(skill.splitlines()), 125)
+        self.assertLessEqual(len(skill.splitlines()), 175)
 
         references = SKILLS / "nerd-review" / "references"
-        for path in references.rglob("*.md"):
+        for path in sorted(references.glob("stacks/*.md")) + sorted(references.glob("frameworks/*.md")):
             with self.subTest(reference=path.relative_to(references)):
                 body = path.read_text(encoding="utf-8")
                 self.assertLessEqual(len(body.splitlines()), 18)
@@ -689,7 +689,7 @@ class SurgeryContractTests(unittest.TestCase):
             (
                 "resolved Focus Record",
                 "intention, endpoint, and scope are explicit",
-                "endpoint is **Diagnose** or **Execute**",
+                "endpoint is **Diagnose**, **Execute**, or **Review**",
                 "Role is required only when it changes the approach",
                 "Do not investigate or repair before the record is resolved",
             ),

@@ -84,6 +84,12 @@ REQUIRED_REFERENCES = {
         "types/visual-ui-mismatch.md",
     ),
     "nerd-review": (
+        "collaboration/orchestration.md",
+        "collaboration/document.md",
+        "collaboration/product.md",
+        "collaboration/test.md",
+        "collaboration/hotfix.md",
+        "collaboration/code.md",
         "frameworks/fastapi.md",
         "frameworks/grpc.md",
         "frameworks/jooq.md",
@@ -205,6 +211,16 @@ REQUIRED_REFERENCES = {
     "nerd-xfast": (),
 }
 
+REQUIRED_TOOL_GUIDES = {
+    "nerd-review": (
+        "google-docs.md",
+        "google-sheets.md",
+        "notion.md",
+        "github.md",
+        "gitlab.md",
+    ),
+}
+
 REQUIRED_SCRIPTS = {
     "nerd-smart": ("prompt_hook.py",),
     "nerd-brainstorm": (),
@@ -271,7 +287,7 @@ def _discovered_skill_dirs(skills_root: Path) -> set[str]:
 _MARKDOWN_LINK = re.compile(r"\]\(\s*<?([^\s)>]+\.md(?:#[^\s)>]*)?)>?")
 
 
-def _reference_links(text: str) -> set[str]:
+def _reference_links(text: str, link_prefix: str = "references/") -> set[str]:
     """Return local Markdown reference targets, preserving relative paths."""
     links: set[str] = set()
     for match in _MARKDOWN_LINK.finditer(text):
@@ -279,8 +295,10 @@ def _reference_links(text: str) -> set[str]:
         parsed = urlsplit(raw)
         if parsed.scheme or parsed.netloc:
             continue
-        if raw.startswith("references/"):
-            raw = raw.removeprefix("references/")
+        if raw.startswith(("references/", "tools/")):
+            if not raw.startswith(link_prefix):
+                continue
+            raw = raw.removeprefix(link_prefix)
         links.add(raw)
     return links
 
@@ -313,12 +331,13 @@ def _resolve_reference_name(source: str | None, target: str) -> str | None:
 def _reference_graph(
     body: str,
     references_root: Path,
+    link_prefix: str = "references/",
 ) -> tuple[set[str], list[str]]:
     """Traverse local reference links and report unsafe or dangling edges."""
     root = references_root.resolve()
     reachable: set[str] = set()
     violations: list[str] = []
-    pending = [(None, target) for target in _reference_links(body)]
+    pending = [(None, target) for target in _reference_links(body, link_prefix)]
     while pending:
         source, target = pending.pop()
         reference = _resolve_reference_name(source, target)
@@ -340,7 +359,7 @@ def _reference_graph(
         reachable.add(reference)
         pending.extend(
             (reference, child)
-            for child in _reference_links(path.read_text(encoding="utf-8"))
+            for child in _reference_links(path.read_text(encoding="utf-8"), link_prefix)
         )
     return reachable, violations
 
@@ -462,6 +481,26 @@ def validate_repository(root: Path) -> list[str]:
             for nested_skill in references_root.rglob("SKILL.md"):
                 relative = nested_skill.relative_to(root)
                 violations.append(f"nested skill is forbidden: {relative}")
+
+        if name in REQUIRED_TOOL_GUIDES:
+            tools_root = skill_dir / "tools"
+            expected_tools = set(REQUIRED_TOOL_GUIDES[name])
+            reachable_tools, tool_violations = _reference_graph(
+                body, tools_root, link_prefix="tools/"
+            )
+            for violation in tool_violations:
+                violations.append(f"skills/{name}/tools/{violation}")
+            for guide in sorted(expected_tools):
+                path = tools_root / guide
+                if not path.is_file():
+                    violations.append(f"missing file: skills/{name}/tools/{guide}")
+                elif path.read_text(encoding="utf-8").startswith("---"):
+                    violations.append(f"skills/{name}/tools/{guide}: frontmatter is forbidden")
+                if guide not in reachable_tools:
+                    violations.append(f"skills/{name}/SKILL.md: missing reachable link tools/{guide}")
+            actual_tools = {path.relative_to(tools_root).as_posix() for path in tools_root.rglob("*.md")}
+            for guide in sorted(actual_tools - expected_tools):
+                violations.append(f"unregistered file: skills/{name}/tools/{guide}")
 
         for script in REQUIRED_SCRIPTS[name]:
             path = skill_dir / "scripts" / script

@@ -82,7 +82,8 @@ Choose the single endpoint that best matches the user's real intention. The endp
 ## Composition
 
 Endpoint routes may add one specialty only when it materially strengthens the confirmed work without changing the endpoint:
-- `nerd-surgery` composes with Diagnose or Execute for broken behavior.
+- `nerd-surgery` composes with Diagnose or Execute for broken behavior, or Review for read-only hotfix evaluation.
+- Review may use `nerd-document` with `nerd-explore` for documents, or `nerd-brainstorm` with `nerd-document` for products and tests. These are bounded advisory support; Review retains endpoint ownership and forbids artifact edits. This support may combine companions beyond the one-specialty limit.
 - `nerd-patrol` composes with Review or Execute for security work.
 - `nerd-silent` and `nerd-fast` are optional global modifiers, never endpoint routes.
 - `nerd-loop` may control recurrence without replacing the route.

@@ -105,6 +105,12 @@ class SkillStructureTests(unittest.TestCase):
                     "types/visual-ui-mismatch.md",
                 ),
                 "nerd-review": (
+                    "collaboration/orchestration.md",
+                    "collaboration/document.md",
+                    "collaboration/product.md",
+                    "collaboration/test.md",
+                    "collaboration/hotfix.md",
+                    "collaboration/code.md",
                     "frameworks/fastapi.md",
                     "frameworks/grpc.md",
                     "frameworks/jooq.md",
@@ -342,6 +348,36 @@ class SkillStructureTests(unittest.TestCase):
 
     def test_repository_contract(self):
         self.assertEqual(validate_repository(ROOT), [])
+
+    def test_tool_links_are_separate_from_review_references(self):
+        with tempfile.TemporaryDirectory() as directory:
+            skill = Path(directory)
+            references = skill / "references"
+            tools = skill / "tools"
+            references.mkdir()
+            tools.mkdir()
+            (references / "criteria.md").write_text("Criteria")
+            (tools / "platform.md").write_text("Platform comment instructions")
+            body = "[Criteria](references/criteria.md) [Delivery](tools/platform.md)"
+            self.assertEqual(_reference_graph(body, references), ({"criteria.md"}, []))
+            self.assertEqual(
+                _reference_graph(body, tools, link_prefix="tools/"),
+                ({"platform.md"}, []),
+            )
+            (tools / "platform.md").unlink()
+            _, violations = _reference_graph(body, tools, link_prefix="tools/")
+            self.assertTrue(any("dangling reference link platform.md" in item for item in violations))
+
+    def test_tool_links_cannot_escape_the_tool_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tools = root / "tools"
+            tools.mkdir()
+            (root / "private.md").write_text("Outside tool boundary")
+            body = "[Outside](tools/../private.md)"
+            reachable, violations = _reference_graph(body, tools, link_prefix="tools/")
+            self.assertEqual(reachable, set())
+            self.assertTrue(any("unsafe reference link" in item for item in violations))
 
     def test_validator_reports_missing_skill_directories(self):
         with tempfile.TemporaryDirectory() as directory:
