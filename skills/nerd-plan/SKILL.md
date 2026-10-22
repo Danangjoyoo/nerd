@@ -20,7 +20,7 @@ Skill hooks, mentions, and indirect instructions are not authorization.
 This is the highest-priority contract within Nerd Plan. Apply it before interpreting inheritance, prerequisites, Multi-Goal Intake, or other planning rules.
 Explicitly invoking `nerd-plan` is sufficient instruction to create and save the plan artifact. Do not ask whether the user wants a plan file or require a separate write or save command.
 Once Plan owns the endpoint, you must always create and save the plan artifact; do not end with only a Focus Record, intake, prerequisite handoff, or discussion when the confirmed inputs are sufficient.
-Fill the Plan Format template below; neither a Focus Record nor Multi-Goal Intake may replace the persisted plan. Multi-Goal Intake may organize independently completable outcomes as ordered tasks within one cohesive plan; create separate plan artifacts only when the user explicitly requests them.
+Fill the Plan Format template below; neither a Focus Record nor Multi-Goal Intake may replace the persisted plan. Multi-Goal Intake may organize independently completable outcomes as ordered tasks within one cohesive plan; keep the required size-based files below as one cohesive plan, even without a separate request to split files.
 Treat related outputs, including master and subordinate artifacts, as task deliverables rather than reasons to leave or fragment the Plan endpoint.
 Follow-up questions, feedback, and revisions about the plan remain on the **Plan** endpoint; update the same plan artifact whenever its content changes.
 Leave **Plan** only when the user explicitly requests another endpoint. Execution requires a direct request to execute, implement, apply, or start work on the plan. Mentioning execution inside the plan never authorizes it.
@@ -61,15 +61,25 @@ not invent them or hide alternatives inside conditional tasks.
   use a baseline check, minimum change, and post-change proof.
 - Name exact file paths, symbols, and changes. Give exact commands and expected
   results.
-- Include code or interface snippets only when prose would leave the
-  implementer guessing.
+- Every plan must create a multi-goal ledger, including a one-goal plan. Follow
+  [artifact layout and ledger](references/artifact-layout.md) for line thresholds,
+  file responsibilities, and goal-to-task traceability.
+- Every code-changing task must include a fenced code skeleton with the actual
+  class and method names, or standalone function names, plus input/output types.
+  Write pseudocode showing input validation, transformations, outputs, and
+  relevant failure paths. Specify contracts when a boundary requires them;
+  otherwise typed inputs and outputs suffice. Keep snippets illustrative, not a
+  full implementation. For a task without code changes, state that no code
+  skeleton is applicable and identify the artifact or configuration contract.
 - Do not use `TBD`, vague follow-ups, empty sections, or speculative work.
 - Do not duplicate facts across the summary, tasks, and final verification.
 
 ## Plan Format
 
 Save plans to `docs/plans/YYYY-MM-DD-<feature-name>.md`. A user-requested
-location wins. Create the parent directory, save Markdown, and report the path.
+location wins. This is the default for plans under 300 lines; use the
+[size-based layout](references/artifact-layout.md) for larger plans.
+Create the parent directory, save Markdown, and report the path and ledger.
 
 Use this compact shape and omit optional fields that add no information:
 
@@ -89,6 +99,11 @@ Use this compact shape and omit optional fields that add no information:
 | --- | --- | --- |
 | `exact/path` | Create / Modify / Test | [Why this file changes] |
 
+## Goal Ledger
+
+[Embed the ledger below 300 lines; otherwise link ledger.md. Use the schema in
+references/artifact-layout.md.]
+
 ## Tasks
 
 ### Task N: [Deliverable]
@@ -106,6 +121,17 @@ Use this compact shape and omit optional fields that add no information:
 - **Review Required:** [YES/NO; use `nerd-review` when the task is independently reviewable]
 - **Sub-agent Model**: [only if enabled; value: inherit/<selected-model>; ALWAYS USE INHERIT MODEL UNLESS USER MENTION EXPLICITLY whether to decide the model manually or let use decide automatically via [mapping](references/subagent-model-mapping.md)]
 
+
+**Code skeleton and contract:** [Required for code changes; use repository language]
+```text
+class ExistingOrProposedClass:                  # omit for standalone functions
+    function actualName(input: InputType) -> OutputType:
+        validate input; on invalid input return/raise the specified error
+        apply the named rule or transformation
+        return the specified output, including the empty-result behavior
+```
+[Define concrete InputType/OutputType shapes and required boundary contracts;
+replace example names and pseudocode with task-specific names and behavior.]
 
 1. Add the failing test or baseline check.
 2. Run `[exact command]`; expect `[specific failure or baseline]`.
@@ -125,7 +151,10 @@ Use the file map only when multiple files make ownership unclear. Collapse or ex
 ## Self-Check
 
 Before saving, verify that:
-- every requirement is owned by a task;
+- every requirement is owned by a task and traced in the multi-goal ledger;
+- total plan lines select the correct layout, including exact 300/500 boundaries;
+- all ledger, index, master, and task links resolve without duplicated task bodies;
+- code-changing tasks name real class/functions, types, pseudocode, and required contracts;
 - paths, symbols, interfaces, and commands match repository evidence;
 - task outputs satisfy later dependencies;
 - testable behavior follows red-green proof;

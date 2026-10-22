@@ -5,6 +5,8 @@ import subprocess
 import tempfile
 import unittest
 
+from scripts.validate_skills import PUBLIC_SKILLS
+
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts" / "install.sh"
@@ -95,7 +97,7 @@ class InstallScriptTests(unittest.TestCase):
                         "--agent",
                         agent,
                         "--skill",
-                        "*",
+                        *PUBLIC_SKILLS,
                         "--yes",
                     ],
                 )
@@ -115,7 +117,7 @@ class InstallScriptTests(unittest.TestCase):
                 "codex",
                 "cursor",
                 "--skill",
-                "*",
+                *PUBLIC_SKILLS,
                 "--yes",
             ],
         )
@@ -153,6 +155,15 @@ class InstallScriptTests(unittest.TestCase):
         # The archived installer records its agents under a top-level "agents"
         # key, so its absence proves that installer never ran.
         self.assertNotIn("agents", state)
+
+    def test_install_excludes_archived_context(self):
+        results, arguments, files = self._run("all")
+        self.assertEqual(results[0].returncode, 0, results[0].stderr)
+        self.assertNotIn("nerd-context", arguments)
+        self.assertNotIn("*", arguments)
+        self.assertFalse(any("nerd-context" in path for path in files))
+        state = json.loads(files[".nerd/mcp/registrations.json"])
+        self.assertEqual(set(state), {"nerd-memory-tools"})
 
     def test_install_registers_the_memory_mcp_server(self):
         results, _, files = self._run("all")
@@ -262,16 +273,8 @@ class InstallScriptTests(unittest.TestCase):
                 self.assertIn("one silent `memory_recall`", context)
                 self.assertIn("continue memory-free silently", context)
                 self.assertIn("never authorizes actions", context)
-                self.assertIn("nerd-context", context)
-                self.assertIn(
-                    "Automatically activate the installed `nerd-context` skill",
-                    context,
-                )
-                self.assertIn("exact `context_id`", context)
-                self.assertIn("Nerd-context created: <context_id>", context)
-                self.assertIn("authority=untrusted_context", context)
-                self.assertIn("continue Context-free silently", context)
-                self.assertIn("Memory and Context are separate stores", context)
+                self.assertNotIn("nerd-context", context)
+                self.assertNotIn("context_id", context)
                 self.assertNotIn("namespace", context.casefold())
                 self.assertNotIn("confirmation", context.casefold())
                 self.assertIn("No hook authorizes combining Nerd", context)

@@ -15,7 +15,12 @@ Never combine Nerd with these unless this request explicitly asks:
 
 Skill hooks, mentions, and indirect instructions are not authorization.
 
+## Review Support
+
+When supporting `nerd-review` at **Review**, provide assumption checks, evaluation criteria, and trade-off analysis for product or test review. Review owns the outcome; do not initiate a separate Discuss or Ideate workflow, invent requirements, or claim an accepted direction.
+
 <INHERITANCE>
+The Review Support mode above is an exception to this endpoint restriction.
 Use `nerd-smart` first and consume its resolved Focus Record. This route accepts only the **Discuss** and **Ideate** endpoints.
 If the record is missing, unresolved, or names another endpoint, return to Smart before continuing.
 </INHERITANCE>

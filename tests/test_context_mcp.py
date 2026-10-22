@@ -10,7 +10,7 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = REPO_ROOT / "skills" / "nerd-context" / "scripts"
+SCRIPTS = REPO_ROOT / "archived-skill" / "nerd-context" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 import context as engine  # noqa: E402

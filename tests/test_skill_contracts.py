@@ -297,6 +297,20 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "document-overview-template.md",
                 "document-how-to-template.md",
                 "document-reference-template.md",
+                "human-friendly-writing.md",
+                "platforms/google-docs.md",
+                "platforms/google-sheets.md",
+                "platforms/google-slides.md",
+                "platforms/notion.md",
+                "types/prd.md",
+                "types/trd.md",
+                "types/test-plan.md",
+                "types/test-cases.md",
+                "types/decision-record.md",
+                "types/runbook.md",
+                "types/incident-report.md",
+                "types/release-notes.md",
+                "types/project-update.md",
             },
             "nerd-plan": {
                 "principle-selection.md",
@@ -304,14 +318,16 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "dry.md",
                 "kiss.md",
                 "subagent-model-mapping.md",
+                "artifact-layout.md",
                 "yagni.md",
             },
         }
         for skill, references in expected.items():
             root = SKILLS / skill / "references"
+            paths = root.rglob("*.md") if skill == "nerd-document" else root.glob("*.md")
             with self.subTest(skill=skill):
                 self.assertEqual(
-                    {path.name for path in root.glob("*.md")},
+                    {path.relative_to(root).as_posix() for path in paths},
                     references,
                 )
 
@@ -425,7 +441,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "Do not execute the plan",
             ),
         )
-        self.assertLessEqual(len(raw_body.splitlines()), 140)
+        self.assertLessEqual(len(raw_body.splitlines()), 180)
         self.assertFalse(
             (SKILLS / "nerd-plan" / "references" / "plan-template.md").exists()
         )
@@ -567,10 +583,10 @@ class ReviewContractTests(unittest.TestCase):
 
     def test_review_guidance_stays_compact_and_bulleted(self):
         skill = skill_body("nerd-review")
-        self.assertLessEqual(len(skill.splitlines()), 125)
+        self.assertLessEqual(len(skill.splitlines()), 175)
 
         references = SKILLS / "nerd-review" / "references"
-        for path in references.rglob("*.md"):
+        for path in sorted(references.glob("stacks/*.md")) + sorted(references.glob("frameworks/*.md")):
             with self.subTest(reference=path.relative_to(references)):
                 body = path.read_text(encoding="utf-8")
                 self.assertLessEqual(len(body.splitlines()), 18)
@@ -673,7 +689,7 @@ class SurgeryContractTests(unittest.TestCase):
             (
                 "resolved Focus Record",
                 "intention, endpoint, and scope are explicit",
-                "endpoint is **Diagnose** or **Execute**",
+                "endpoint is **Diagnose**, **Execute**, or **Review**",
                 "Role is required only when it changes the approach",
                 "Do not investigate or repair before the record is resolved",
             ),

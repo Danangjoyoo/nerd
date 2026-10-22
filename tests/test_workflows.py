@@ -17,7 +17,6 @@ SKILLS = (
     "nerd-execute",
     "nerd-monitor",
     "nerd-memory",
-    "nerd-context",
     "nerd-loop",
     "nerd-surgery",
     "nerd-patrol",
@@ -85,9 +84,9 @@ class WorkflowContractTests(unittest.TestCase):
             self.assertIn(skill, body)
         self.assertNotIn("or when Nerd Smart auto-enables it", body)
 
-    def test_release_counts_exactly_eighteen_public_skills(self):
+    def test_release_counts_exactly_seventeen_public_skills(self):
         body = RELEASE.read_text(encoding="utf-8")
-        self.assertIn("EXPECTED_SKILL_COUNT=18", body)
+        self.assertIn("EXPECTED_SKILL_COUNT=17", body)
         self.assertIn("grep -E", body)
         self.assertIn("wc -l", body)
 

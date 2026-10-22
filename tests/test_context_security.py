@@ -11,7 +11,7 @@ import unittest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ENGINE_DIR = REPO_ROOT / "skills" / "nerd-context" / "scripts"
+ENGINE_DIR = REPO_ROOT / "archived-skill" / "nerd-context" / "scripts"
 sys.path.insert(0, str(ENGINE_DIR))
 
 import context as engine  # noqa: E402

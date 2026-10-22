@@ -53,7 +53,6 @@ class SkillStructureTests(unittest.TestCase):
                 "nerd-execute",
                 "nerd-monitor",
                 "nerd-memory",
-                "nerd-context",
                 "nerd-loop",
                 "nerd-surgery",
                 "nerd-patrol",
@@ -106,6 +105,12 @@ class SkillStructureTests(unittest.TestCase):
                     "types/visual-ui-mismatch.md",
                 ),
                 "nerd-review": (
+                    "collaboration/orchestration.md",
+                    "collaboration/document.md",
+                    "collaboration/product.md",
+                    "collaboration/test.md",
+                    "collaboration/hotfix.md",
+                    "collaboration/code.md",
                     "frameworks/fastapi.md",
                     "frameworks/grpc.md",
                     "frameworks/jooq.md",
@@ -136,6 +141,20 @@ class SkillStructureTests(unittest.TestCase):
                     "document-overview-template.md",
                     "document-how-to-template.md",
                     "document-reference-template.md",
+                    "human-friendly-writing.md",
+                    "platforms/google-docs.md",
+                    "platforms/google-sheets.md",
+                    "platforms/google-slides.md",
+                    "platforms/notion.md",
+                    "types/prd.md",
+                    "types/trd.md",
+                    "types/test-plan.md",
+                    "types/test-cases.md",
+                    "types/decision-record.md",
+                    "types/runbook.md",
+                    "types/incident-report.md",
+                    "types/release-notes.md",
+                    "types/project-update.md",
                 ),
                 "nerd-plan": (
                     "principle-selection.md",
@@ -144,6 +163,7 @@ class SkillStructureTests(unittest.TestCase):
                     "yagni.md",
                     "comprehensive.md",
                     "subagent-model-mapping.md",
+                    "artifact-layout.md",
                 ),
                 "nerd-execute": (),
                 "nerd-monitor": (),
@@ -154,12 +174,6 @@ class SkillStructureTests(unittest.TestCase):
                     "recognize-and-reuse.md",
                     "correct-and-forget.md",
                     "memory-contract.md",
-                    "research.md",
-                ),
-                "nerd-context": (
-                    "context-contract.md",
-                    "recall-and-capture.md",
-                    "transport-preflight.md",
                     "research.md",
                 ),
                 "nerd-loop": (
@@ -234,9 +248,9 @@ class SkillStructureTests(unittest.TestCase):
         self.assertEqual(
             REQUIRED_SCRIPTS["nerd-memory"], ("memory.py", "mcp_server.py")
         )
-        self.assertEqual(
-            REQUIRED_SCRIPTS["nerd-context"], ("context.py", "mcp_server.py")
-        )
+        self.assertNotIn("nerd-context", REQUIRED_SCRIPTS)
+        self.assertFalse((ROOT / "skills/nerd-context").exists())
+        self.assertTrue((ROOT / "archived-skill/nerd-context/SKILL.md").is_file())
         self.assertEqual(REQUIRED_SCRIPTS["nerd-loop"], ("loop.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-fast"], ("symbol_index.py",))
         self.assertEqual(REQUIRED_SCRIPTS["nerd-xfast"], ())
@@ -334,6 +348,36 @@ class SkillStructureTests(unittest.TestCase):
 
     def test_repository_contract(self):
         self.assertEqual(validate_repository(ROOT), [])
+
+    def test_tool_links_are_separate_from_review_references(self):
+        with tempfile.TemporaryDirectory() as directory:
+            skill = Path(directory)
+            references = skill / "references"
+            tools = skill / "tools"
+            references.mkdir()
+            tools.mkdir()
+            (references / "criteria.md").write_text("Criteria")
+            (tools / "platform.md").write_text("Platform comment instructions")
+            body = "[Criteria](references/criteria.md) [Delivery](tools/platform.md)"
+            self.assertEqual(_reference_graph(body, references), ({"criteria.md"}, []))
+            self.assertEqual(
+                _reference_graph(body, tools, link_prefix="tools/"),
+                ({"platform.md"}, []),
+            )
+            (tools / "platform.md").unlink()
+            _, violations = _reference_graph(body, tools, link_prefix="tools/")
+            self.assertTrue(any("dangling reference link platform.md" in item for item in violations))
+
+    def test_tool_links_cannot_escape_the_tool_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            tools = root / "tools"
+            tools.mkdir()
+            (root / "private.md").write_text("Outside tool boundary")
+            body = "[Outside](tools/../private.md)"
+            reachable, violations = _reference_graph(body, tools, link_prefix="tools/")
+            self.assertEqual(reachable, set())
+            self.assertTrue(any("unsafe reference link" in item for item in violations))
 
     def test_validator_reports_missing_skill_directories(self):
         with tempfile.TemporaryDirectory() as directory:
