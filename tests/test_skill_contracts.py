@@ -297,6 +297,20 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "document-overview-template.md",
                 "document-how-to-template.md",
                 "document-reference-template.md",
+                "human-friendly-writing.md",
+                "platforms/google-docs.md",
+                "platforms/google-sheets.md",
+                "platforms/google-slides.md",
+                "platforms/notion.md",
+                "types/prd.md",
+                "types/trd.md",
+                "types/test-plan.md",
+                "types/test-cases.md",
+                "types/decision-record.md",
+                "types/runbook.md",
+                "types/incident-report.md",
+                "types/release-notes.md",
+                "types/project-update.md",
             },
             "nerd-plan": {
                 "principle-selection.md",
@@ -310,9 +324,10 @@ class EndpointRouteContractTests(unittest.TestCase):
         }
         for skill, references in expected.items():
             root = SKILLS / skill / "references"
+            paths = root.rglob("*.md") if skill == "nerd-document" else root.glob("*.md")
             with self.subTest(skill=skill):
                 self.assertEqual(
-                    {path.name for path in root.glob("*.md")},
+                    {path.relative_to(root).as_posix() for path in paths},
                     references,
                 )
 

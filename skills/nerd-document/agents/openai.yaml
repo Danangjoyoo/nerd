@@ -1,4 +1,4 @@
 interface:
   display_name: "Nerd Document"
-  short_description: "Create validated static documentation artifacts"
-  default_prompt: "Use $nerd-document to create and validate only the requested static artifact."
+  short_description: "Write clear, human-friendly documentation"
+  default_prompt: "Use $nerd-document to write and validate human-friendly documentation, focusing on what matters and adapting it to the requested document type and platform."
