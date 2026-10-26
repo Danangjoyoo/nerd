@@ -141,6 +141,7 @@ class SkillStructureTests(unittest.TestCase):
                     "document-overview-template.md",
                     "document-how-to-template.md",
                     "document-reference-template.md",
+                    "document-revision.md",
                     "human-friendly-writing.md",
                     "platforms/google-docs.md",
                     "platforms/google-sheets.md",
@@ -367,6 +368,28 @@ class SkillStructureTests(unittest.TestCase):
             (tools / "platform.md").unlink()
             _, violations = _reference_graph(body, tools, link_prefix="tools/")
             self.assertTrue(any("dangling reference link platform.md" in item for item in violations))
+
+    def test_template_links_are_isolated_and_missing_targets_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            references, templates = root / "references", root / "templates"
+            references.mkdir()
+            templates.mkdir()
+            (references / "criteria.md").write_text("Criteria")
+            (templates / "templates.md").write_text("# Plan template")
+            body = "[Criteria](references/criteria.md) [Plan](templates/templates.md#example)"
+            self.assertEqual(_reference_graph(body, references), ({"criteria.md"}, []))
+            self.assertEqual(
+                _reference_graph(body, templates, link_prefix="templates/"),
+                ({"templates.md"}, []),
+            )
+            (templates / "templates.md").unlink()
+            _, errors = _reference_graph(body, templates, link_prefix="templates/")
+            self.assertTrue(any("dangling reference link templates.md" in e for e in errors))
+            _, errors = _reference_graph(
+                "[Escape](templates/../private.md)", templates, link_prefix="templates/"
+            )
+            self.assertTrue(any("unsafe reference link" in e for e in errors))
 
     def test_tool_links_cannot_escape_the_tool_directory(self):
         with tempfile.TemporaryDirectory() as directory:

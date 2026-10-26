@@ -1,6 +1,6 @@
 ---
 name: nerd-document
-description: Create or update human-friendly documentation from established information, including product, technical, testing, and operational documents adapted for the requested platform without changing product behavior.
+description: Create, simplify, compact, expand, split, or coordinate human-friendly documentation from established information without changing product behavior.
 ---
 
 # Nerd Document
@@ -69,6 +69,25 @@ matching document-type guide, plus a platform guide when a destination is named.
 Do not load the whole reference library. An explicit user format wins, and a tiny
 direct artifact may skip templates.
 
+### Revision Mode
+
+For existing documents, select the requested mode before editing. Read the
+matching section of [document revision guidance](references/document-revision.md).
+Combine modes only when requested or necessary for the same outcome; preserve
+the document's established meaning and the user's format.
+
+| Request | Mode and result |
+| --- | --- |
+| Simplify | Reduce reading difficulty; preserve necessary meaning and detail |
+| Compact | Reduce length and repetition; preserve requirements and useful distinctions |
+| Make comprehensive / detail | Add supported coverage, explanations, examples, and exceptions |
+| Split | Divide into coherent documents with a clear entry point and working links |
+| Orchestrate | Coordinate document roles, sources, dependencies, reading order, and updates |
+
+Orchestration here concerns documents; it does not authorize agent delegation,
+implementation, or publishing. If another meaning materially changes the work,
+resolve it through Smart. Document type and destination still govern format.
+
 ### Document Type
 
 | Type | Read when the reader needs |
@@ -112,7 +131,8 @@ Markdown outline is a native document, spreadsheet, or slide deck.
 Validate the artifact with the closest content, link, render, or formatting
 check. Check that a reader can find the purpose, key facts, and next action from
 the opening and headings; requirements, examples, and tables agree; unknowns are
-visible; and no unused placeholders or invented facts remain. For native files,
+visible; and no unused placeholders or invented facts remain. For revisions,
+also apply the selected mode's completion check in the revision guide. For native files,
 check the rendered result when tooling supports it. Do not change application
 behavior or unrelated documentation.
 

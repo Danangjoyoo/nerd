@@ -117,6 +117,7 @@ REQUIRED_REFERENCES = {
         "document-overview-template.md",
         "document-how-to-template.md",
         "document-reference-template.md",
+        "document-revision.md",
         "human-friendly-writing.md",
         "platforms/google-docs.md",
         "platforms/google-sheets.md",
@@ -221,6 +222,8 @@ REQUIRED_TOOL_GUIDES = {
     ),
 }
 
+REQUIRED_TEMPLATES = {"nerd-plan": ("templates.md",)}
+
 REQUIRED_SCRIPTS = {
     "nerd-smart": ("prompt_hook.py",),
     "nerd-brainstorm": (),
@@ -295,7 +298,7 @@ def _reference_links(text: str, link_prefix: str = "references/") -> set[str]:
         parsed = urlsplit(raw)
         if parsed.scheme or parsed.netloc:
             continue
-        if raw.startswith(("references/", "tools/")):
+        if raw.startswith(("references/", "tools/", "templates/")):
             if not raw.startswith(link_prefix):
                 continue
             raw = raw.removeprefix(link_prefix)
@@ -501,6 +504,21 @@ def validate_repository(root: Path) -> list[str]:
             actual_tools = {path.relative_to(tools_root).as_posix() for path in tools_root.rglob("*.md")}
             for guide in sorted(actual_tools - expected_tools):
                 violations.append(f"unregistered file: skills/{name}/tools/{guide}")
+
+        if name in REQUIRED_TEMPLATES:
+            templates_root = skill_dir / "templates"
+            reachable_templates, template_violations = _reference_graph(
+                body, templates_root, link_prefix="templates/"
+            )
+            for violation in template_violations:
+                violations.append(f"skills/{name}/templates/{violation}")
+            for template in REQUIRED_TEMPLATES[name]:
+                if not (templates_root / template).is_file():
+                    violations.append(f"missing file: skills/{name}/templates/{template}")
+                if template not in reachable_templates:
+                    violations.append(
+                        f"skills/{name}/SKILL.md: missing reachable link templates/{template}"
+                    )
 
         for script in REQUIRED_SCRIPTS[name]:
             path = skill_dir / "scripts" / script
