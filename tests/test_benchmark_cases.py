@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -165,6 +166,40 @@ class BenchmarkCorpusTests(unittest.TestCase):
 
 
 class MaterializationTests(unittest.TestCase):
+    def test_baseline_commit_does_not_spawn_automatic_maintenance(self):
+        from benchmarks.nerdbench.materialize import _initialize_repository
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workspace = root / "workspace"
+            workspace.mkdir()
+            (workspace / "input.txt").write_text("benchmark input")
+            trace = root / "git-trace.json"
+            config = root / "gitconfig"
+            config.write_text("[maintenance]\n\tauto = true\n[gc]\n\tauto = 1\n")
+            with patch.dict(os.environ, {
+                "GIT_TRACE2_EVENT": str(trace),
+                "GIT_CONFIG_GLOBAL": str(config),
+            }):
+                _initialize_repository(workspace)
+            children = [
+                event["argv"]
+                for line in trace.read_text().splitlines()
+                if (event := json.loads(line)).get("event") == "child_start"
+            ]
+            self.assertFalse(
+                any("maintenance" in argv or "gc" in argv for argv in children),
+                children,
+            )
+            result = subprocess.run(
+                ["git", "log", "-1", "--format=%s"], cwd=workspace,
+                check=True, capture_output=True, text=True,
+            )
+            self.assertEqual(result.stdout.strip(), "benchmark baseline")
+            self.assertEqual(subprocess.check_output(
+                ["git", "status", "--porcelain"], cwd=workspace, text=True,
+            ), "")
+
     def test_materialization_is_fresh_and_hides_rubrics(self):
         from benchmarks.nerdbench.materialize import materialize_run
 
