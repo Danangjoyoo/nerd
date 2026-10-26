@@ -1,67 +1,61 @@
-# Plan Artifacts and Multi-Goal Ledger
+# Plan Artifacts and Ledgers
 
-Every saved plan includes a durable multi-goal ledger. Preserve each accepted
-outcome as a goal; a one-goal plan has one row. Do not invent independent goals
-from constraints, examples, or substeps. Smart's temporary intake is an input,
-not a substitute for the plan's ledger.
+Every plan has **one goal ledger table plus exactly one task ledger table per
+goal**, including single-goal plans. Preserve accepted outcomes; constraints,
+examples, and substeps do not create independent goals. Smart's temporary intake
+cannot replace these durable ledgers. Use the canonical tables and full example in `templates/templates.md`
+(relative to the skill root), linked from Plan Format in `SKILL.md`.
 
-## Choose by Complete Plan Length
+## Size-Based Layout
 
-Count the complete plan's logical Markdown lines, including blank lines, code
-fences, skeletons, and task bodies, before splitting. Exclude the ledger and
-navigation-only wrappers from this count. Record the count and chosen layout in
-the entry document. Never pad or omit content to influence a threshold.
+Count logical Markdown lines across the complete substantive plan, including
+blanks, code fences, skeletons, and task bodies. Exclude ledgers and navigation
+wrappers. Record the count and layout in the entry document; never pad or omit
+content to alter thresholds. Estimate while drafting, then verify once before saving.
 
-| Complete plan length | Required artifacts |
+| Complete plan length | Required artifacts under `docs/plans/` |
 | --- | --- |
-| Under 300 lines | `docs/plans/YYYY-MM-DD-<feature-name>.md`, with an embedded goal ledger |
-| 300–500 lines inclusive | `docs/plans/YYYY-MM-DD-<feature-name>/plan.md` and `ledger.md` |
-| Over 500 lines | Same directory with `master.md`, `ledger.md`, `index.md`, and one Markdown file per task |
+| Under 300 | `YYYY-MM-DD-<feature>.md`, with embedded ledgers |
+| 300–500 inclusive | `YYYY-MM-DD-<feature>/plan.md` and `ledger.md` |
+| Over 500 | Same directory: `master.md`, `ledger.md`, `index.md`, one file per task |
 
-A user-requested location wins; preserve the required file roles beside that
-location. At exactly 300 lines use two files; at exactly 500 retain two files;
-at 501 split by task. Estimate while drafting, then verify the actual complete
-content once before saving. The split does not make the plan smaller: count
-its substantive content across master and task files without navigation copies.
+Exactly 300 uses two files; exactly 500 still uses two; 501 splits by task.
+A requested location wins, preserving these file roles beside it. Splitting
+does not reduce the count: count substantive master/task content without copies.
+On revision, retain the artifact set unless a threshold requires migration;
+update inbound links, remove superseded copies, and report new entry/ledger paths.
 
-For follow-up revisions, update the same artifact set. If the complete content
-crosses a threshold, migrate it to the required layout, update inbound links,
-and remove superseded copies. Report the new entry and ledger paths.
+## File Roles
 
-## File Responsibilities
+- `plan.md`: complete plan and task bodies; links to `ledger.md`.
+- `master.md`: goal, approach, scope, shared types/contracts, file map, dependency
+  order, final verification, and task links; no repeated task bodies.
+- `task-NN-<name>.md`: exactly one task in Plan Format, including Focus Record,
+  outcome, goal, files, dependencies, skeleton, typed pseudocode, contracts,
+  steps, and proof. Link shared contracts from master instead of copying.
+- `index.md`: entry point linking master, ledger, and tasks in dependency order;
+  concise labels, no second plan copy.
+- `ledger.md`: goal ledger followed by one task ledger section/table per goal;
+  sole durable status source in split layouts. No separate per-goal files needed.
 
-- `plan.md`: the complete plan and task bodies; link to `ledger.md`.
-- `master.md`: goal, approach, scope, shared types/contracts, file map,
-  dependency order, and final verification. Link to each task; do not repeat
-  task bodies here.
-- `task-NN-<name>.md`: exactly one task, using the task portion of Plan Format,
-  including its Focus Record, outcome, files, dependencies, code skeleton,
-  input/output pseudocode, required contracts, steps, and proof. Link shared
-  contracts from master rather than copying them.
-- `index.md`: entry point linking master, ledger, and every task in dependency
-  order, with concise labels. It contains no second copy of the plan.
-- `ledger.md`: the only durable source of goal/task status for split layouts.
+## Traceability and Status
 
-## Ledger Schema and Lifecycle
+- Use stable goal/task IDs and relative links to task files or anchors. Link each
+  goal row to its task ledger. Store goal dependencies/status/proof in the goal
+  ledger and task dependencies/status/proof in its task ledger.
+- Every goal maps to tasks; each task appears once in its owning goal's table
+  and names that goal in its body. Reference shared work through dependencies,
+  not duplicated rows or bodies. Preserve source order unless dependencies differ.
+- Always list dependencies in ledgers, even if order is obvious: goal IDs for
+  goal dependencies, task IDs for task dependencies, including cross-goal tasks.
+- New goal/task statuses start `queued`; drafting or self-review never means
+  implementation is `active` or `done`. Preserve verified status on revision.
+- The later executor uses `queued`, `active`, `blocked`, `done`, or `cancelled`,
+  with at most one active goal. Record blockers beside blocked rows. Replace
+  planned proof with actual evidence before marking a task or goal done.
+  A goal is done only when all required tasks are done and goal proof is verified.
+  Ledgers never authorize execution.
 
-Use the same schema for embedded and separate ledgers:
-
-| Goal ID | Source requirement / outcome | Task IDs and links | Depends on | Status | Completion proof |
-| --- | --- | --- | --- | --- | --- |
-| G1 | [Accepted outcome] | [T1](relative-task-link) | none | queued | [Planned command and expected result] |
-
-Use stable goal and task IDs and relative links to task files or task anchors.
-Every accepted goal maps to tasks; every task maps back to a goal. Preserve
-source order unless a dependency requires a different order. Keep dependencies
-explicit in the ledger, even when task order makes them obvious.
-
-On a new plan, execution status starts `queued`; writing or self-reviewing a
-plan never marks implementation `active` or `done`. Preserve already verified
-execution status when revising an existing plan. The later executor updates
-`queued`, `active`, `blocked`, `done`, or `cancelled`, keeps at most one goal
-active, records blockers, and replaces planned proof with actual evidence before
-marking done. This ledger does not authorize execution.
-
-Before finishing, check goal/task coverage, dependency order, all relative
-links, correct file count/roles, and code skeleton completeness. Report the entry
-file and the embedded ledger anchor or separate `ledger.md`, then stop at Plan.
+Before finishing, check goal/task coverage, one task table per goal, agreement
+with task bodies, dependencies, links, file roles/count, and complete skeletons.
+Report the entry plus embedded ledger anchors or `ledger.md`; stop at Plan.

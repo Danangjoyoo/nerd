@@ -1,69 +1,61 @@
-# Sub-Agent Model Mapping Framework
+# Sub-Agent Model Mapping
 
-This framework governs model selection and execution parameters for delegated sub-agents. 
+## Selection Rules
 
-### Fundamental Delegation Rules
+- Choose the least expensive current model likely to finish without rework.
+  Model choice never changes Focus, skills, tools, permissions, proof, or scope.
+- Keep work with the parent when it is not independently completable; a stronger
+  model does not fix the boundary. Full-history `inherit` carries conversation
+  overhead; prefer a fresh bounded fork with an explicit tier when selection is authorized.
+- Never guess model slugs. Validate names and effort against the active runtime;
+  never silently substitute or downgrade without the fallback rules below.
 
-1. **Least-Cost Execution:** Choose the least expensive current model that can complete the task without likely rework.
-2. **Invariance:** A model choice **never** changes the task's Focus Record, skills, tools, permissions, proof requirements, or mutation boundary.
-3. **No Over-Compensating:** When a task is not independently completable, keep it with the parent agent rather than compensating with a stronger sub-agent model.
-4. **Context Overhead Awareness:** A full-history `inherit` carries the parent conversation's prompt token overhead. For bounded sub-tasks, prefer a fresh context fork with an explicit tier over an unnecessary `inherit`.
-5. **No Hallucinated Slugs:** Never write a guessed model slug into a task plan. Model names and effort levels must be validated against the runtime registry prior to delegation. Do not silently degrade or substitute models without explicit fallback rules.
+## Codex
 
----
+Overrides require an override-capable context fork; full-history forks inherit.
+Resolve these model/effort targets against the active Codex registry first.
 
-# Codex
+| Task | Model | Effort | Use |
+| --- | --- | --- | --- |
+| Context-bound / ambiguous | Inherit; omit model and effort | Inherit | Full context needed, parent fits, or availability uncertain |
+| Narrow / mechanical | `gpt-5.6-luna` | low / medium | Lookup, formatting, mechanical edits, deterministic checks; cheap failure |
+| Routine implementation | `gpt-5.6-terra` | medium | Docs, tests, focused reviews/features |
+| Complex / architecture | `gpt-5.6-sol` | high | Multi-file work, ambiguous diagnosis, systemic design/review |
+| Critical / high risk | `gpt-5.6-sol` | xhigh / max | Security, migration, repeatedly failed complex work |
 
-A model override requires a context fork that permits overrides; full-history forks inherit the parent configuration. Resolve model and effort names against the active Codex registry before delegation.
+## Claude
 
-| Task Signal / Scope | Model | Reasoning Effort | Recommended Use Case |
-| :--- | :--- | :--- | :--- |
-| **Context-bound / Ambiguous state** | Inherit (omit `model` & `reasoning_effort`) | Inherit | Parent fits, full conversation is required, or sub-agent model availability is uncertain. |
-| **Narrow / Mechanical** | `gpt-5.6-luna` | `low` or `medium` | Lookup, formatting, mechanical edits, or deterministic checks. Small scope, explicit acceptance, cheap failure. |
-| **Routine Implementation** | `gpt-5.6-terra` | `medium` | Balanced default for normal delegated repository work: documentation, unit tests, code review, or focused features. |
-| **Complex / Architecture** | `gpt-5.6-sol` | `high` | Multi-file implementation, ambiguous diagnosis, systemic architecture, or difficult code reviews requiring synthesis. |
-| **Critical / High-Risk** | `gpt-5.6-sol` | `xhigh` or `max` | Security-critical, migration-critical, or repeatedly failed complex work. Quality and precision outweigh cost and latency. |
+Prefer rolling family aliases; pin full IDs only for explicitly requested
+reproducibility. Accepted targets: `inherit`, `haiku`, `sonnet`, `opus`, `fable`,
+or an explicitly allowed ID. Verify thinking/effort support in the active runtime.
 
-*Note: Verify that the target model variant supports extended reasoning effort parameters before dispatching.*
+| Task | Model | Effort | Use |
+| --- | --- | --- | --- |
+| Context-dependent / default | inherit or omit | Inherit | Parent fits, shared context needed, availability unverified |
+| Bounded / high volume | haiku | low / medium | Search, classification, formatting, straightforward bulk work |
+| Balanced engineering | sonnet | medium / high | Repository work, coding, analysis, docs, tests, focused review |
+| Complex / autonomous | opus | high / xhigh | Multi-file refactors, difficult diagnosis, high correctness pressure |
+| Long horizon / research | fable | Host-supported default | Deep research/quality-first work; registry-exposed and justified by ROI |
 
----
+## Cursor
 
-# Claude
+Inherit parent configuration or use exact active runtime IDs. These are capability
+tiers, not durable pins; resolve through the picker or `GET /v1/models`.
 
-Prefer family aliases for rolling capability tiers. Specify a full model ID only when exact execution reproducibility is an explicit requirement. Claude Code accepts `inherit`, `haiku`, `sonnet`, `opus`, `fable`, or an explicit allowed model ID.
+| Task | Tier | Example targets | Use |
+| --- | --- | --- | --- |
+| Context-bound / default | inherit or omit | Parent selection | Preserve context; avoid stale/disallowed pins |
+| Fast feedback | Efficient | GPT-5.6 Luna, Gemini Flash, active fast model | Narrow/mechanical work; cheap detectable failure |
+| General | Balanced | Composer, GPT-5.6 Terra, Claude Sonnet, active standard model | Routine code, tests, docs, focused reviews |
+| High reasoning | Frontier | GPT-5.6 Sol, Claude Opus, Gemini Pro, active frontier model | Complex diagnosis, refactors, architecture, high-risk review |
+| Peak / autonomous | Highest available | Active workspace apex model | Long-running work with explicit proof; accuracy over cost/latency |
 
-| Task Signal / Scope | Model | Extended Thinking / Effort | Recommended Use Case |
-| :--- | :--- | :--- | :--- |
-| **Context-dependent / Default** | `inherit` (or omit `model`) | Inherit | Parent model fits, task requires shared context, or sub-agent status is unverified. Safest default. |
-| **Bounded / High-Volume** | `haiku` | `low` or `medium` | Bounded search, classification, formatting, and high-volume straightforward tasks where speed matters. |
-| **Balanced Engineering** | `sonnet` | `medium` or `high` | General delegated repository tasks: routine coding, data analysis, docs, unit tests, and focused reviews. |
-| **Complex / Autonomous** | `opus` | `high` or `xhigh` | Complex agentic coding, multi-file refactoring, difficult diagnosis, or high correctness pressure. |
-| **Long-Horizon / Research** | `fable` | Host-supported default | Deep research or quality-first tasks. Use only when exposed by the active registry and justified by ROI. |
+## Runtime Validation and Fallback
 
-*Note: Verify that the selected model supports the requested thinking/effort parameter in the active runtime environment.*
+Before explicit model/effort dispatch:
 
----
-
-# Cursor
-
-Cursor sub-agents can inherit parent models or accept exact runtime model IDs. Treat model names in this section as capability tiers rather than durable hardcoded strings—resolve allowed IDs via the current environment picker or `GET /v1/models`.
-
-| Task Signal / Scope | Model Tier | Example Registry Targets | Recommended Use Case |
-| :--- | :--- | :--- | :--- |
-| **Context-bound / Default** | `inherit` (or omit `model`) | Parent Selection | Avoids stale/disallowed pins; preserves parent context and behavior. |
-| **Fast / Fast-Feedback** | Fast / Efficient | GPT-5.6 Luna, Gemini Flash, or active fast model | Narrow lookup, mechanical edit, formatting, or deterministic check. Failure is cheap to detect. |
-| **Balanced / General** | Balanced | Composer, GPT-5.6 Terra, Claude Sonnet, or active standard model | Routine implementation, tests, documentation, or focused review requiring reliable tool use. |
-| **Frontier / High-Reasoning**| Frontier | GPT-5.6 Sol, Claude Opus, Gemini Pro, or active frontier model | Complex diagnosis, multi-file refactoring, systemic architecture, or high-risk review. |
-| **Peak / Autonomous** | Highest Available | Active apex model exposed by workspace | Long-running, maximum-capability work with explicit proof criteria. Accuracy outweighs usage and latency. |
-
----
-
-# Runtime Resolution & Fallback Protocol
-
-When invoking a sub-agent with explicit model or effort parameters, executors must execute the following validation chain:
-
-1. **Registry Check:** Query the active model catalog (`GET /v1/models`, runtime CLI, or local environment picker).
-2. **Capability Validation:** Confirm the selected model supports the requested reasoning effort or thinking budget parameters.
-3. **Fallback Handling:**
-   - **Non-Critical Tasks (Format, Docs, Low-risk Tests):** If the specified model or effort tier is unavailable or rate-limited, fall back to `inherit` and log a warning.
-   - **Critical Tasks (Security, Architecture, Multi-file Refactor):** If the requested model/effort tier is unavailable, **fail fast** and return execution to the parent agent rather than running high-risk work on an unverified or downgraded model.
+1. Query the active catalog via `GET /v1/models`, runtime CLI, or environment picker.
+2. Confirm support for the selected reasoning effort/thinking budget.
+3. If unavailable or rate-limited: for non-critical formatting, docs, or low-risk
+   tests, fall back to `inherit` and log a warning; for security, architecture,
+   or multi-file refactors, fail fast and return work to the parent.
