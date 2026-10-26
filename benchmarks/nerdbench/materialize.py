@@ -193,6 +193,9 @@ def _install_condition(condition: str, agent: str, destination: Path) -> None:
 
 def _initialize_repository(destination: Path) -> None:
     _run(["git", "init", "-q"], destination)
+    # Temporary workspaces must not leave maintenance writing during cleanup.
+    _run(["git", "config", "maintenance.auto", "false"], destination)
+    _run(["git", "config", "gc.auto", "0"], destination)
     _run(["git", "config", "user.email", "benchmark@nerd.invalid"], destination)
     _run(["git", "config", "user.name", "Nerd Benchmark"], destination)
     _run(["git", "add", "."], destination)
