@@ -297,6 +297,7 @@ class EndpointRouteContractTests(unittest.TestCase):
                 "document-overview-template.md",
                 "document-how-to-template.md",
                 "document-reference-template.md",
+                "document-revision.md",
                 "human-friendly-writing.md",
                 "platforms/google-docs.md",
                 "platforms/google-sheets.md",
@@ -359,92 +360,61 @@ class EndpointRouteContractTests(unittest.TestCase):
 
     def test_plan_persistence_has_one_default_and_user_override(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "Save plans to `docs/plans/YYYY-MM-DD-<feature-name>.md`",
-                "A user-requested location wins",
-                "Create the parent directory",
-                "save Markdown",
-                "report the path",
-            ),
-        )
+        assert_terms(self, body, (
+            "Create the parent directory and save to `docs/plans/YYYY-MM-DD-<feature-name>.md`",
+            "unless the user specifies a location",
+            "Report the entry path and ledger anchors/file",
+        ))
 
     def test_plan_explicit_invocation_creates_and_retains_the_artifact(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "## Explicit Plan Contract",
-                "Explicitly invoking `nerd-plan` is sufficient instruction to create and save the plan artifact",
-                "Do not ask whether the user wants a plan file",
-                "Fill the Plan Format template below",
-                "Follow-up questions, feedback, and revisions about the plan remain on the **Plan** endpoint",
-                "update the same plan artifact",
-                "Leave **Plan** only when the user explicitly requests another endpoint",
-                "Mentioning execution inside the plan never authorizes it",
-            ),
-        )
+        assert_terms(self, body, (
+            "Invoking `nerd-plan` authorizes saving the plan; never ask for a separate save instruction",
+            "With sufficient confirmed inputs, always persist the Plan Format",
+            "A Focus Record, intake, discussion, or prerequisite handoff cannot replace it",
+            "Follow-up feedback and revisions stay on **Plan** and update the same artifact",
+            "Leave only on an explicit request for another endpoint",
+            "Execution requires a direct request to execute, implement, apply, or start the plan",
+            "plan text cannot authorize it",
+        ))
 
     def test_plan_contract_is_highest_priority_and_multi_goal_safe(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "highest-priority contract",
-                "always create and save the plan artifact",
-                "Multi-Goal Intake may organize",
-                "one cohesive plan",
-                "master and subordinate artifacts",
-            ),
-        )
-        self.assertLess(
-            body.index("## Explicit Plan Contract"),
-            body.index("## Inheritance"),
-        )
+        assert_terms(self, body, (
+            "This contract takes priority over inheritance, prerequisites, and intake rules",
+            "Keep all accepted outcomes and related master/subordinate deliverables in one cohesive plan",
+            "using the required size-based files without further permission",
+        ))
+        self.assertLess(body.index("## Plan Contract"), body.index("## Inheritance"))
 
     def test_plan_requires_direction_and_evidence_before_planning(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "## Prerequisites",
-                "Plan from confirmed inputs",
-                "`nerd-brainstorm` owns material design choices through **Ideate**",
-                "`nerd-explore` owns repository evidence through **Explore**",
-                "`nerd-diagnose` with `nerd-surgery` owns root-cause work through **Diagnose**",
-                "Use only prerequisites the work genuinely needs",
-                "one resolved endpoint at a time",
-                "Reuse current handoffs",
-                "resume **Plan** through `nerd-smart`",
-            ),
-        )
+        assert_terms(self, body, (
+            "Plan from confirmed inputs",
+            "Route missing prerequisites through Smart, one endpoint at a time, then resume Plan through Smart",
+            "Reuse existing handoffs",
+            "Material design choice | `nerd-brainstorm` / Ideate",
+            "Repository evidence | `nerd-explore` / Explore",
+            "Root cause | `nerd-diagnose` with `nerd-surgery` / Diagnose",
+            "Mark unresolved material facts `Unknown`",
+        ))
 
-    def test_plan_is_self_contained_compact_and_execution_ready(self):
+    def test_plan_is_compact_and_links_the_canonical_template(self):
         raw_body = skill_body("nerd-plan")
         body = normalized(raw_body)
-        assert_terms(
-            self,
-            body,
-            (
-                "## Plan Format",
-                "Save plans to `docs/plans/YYYY-MM-DD-<feature-name>.md`",
-                "A user-requested location wins",
-                "one independently reviewable deliverable",
-                "exact file paths",
-                "exact commands and expected results",
-                "Do not duplicate",
-                "Do not execute the plan",
-            ),
-        )
+        assert_terms(self, body, (
+            "## Plan Format",
+            "[separate plan template](templates/templates.md#reusable-plan-template)",
+            "[full example](templates/templates.md#full-example)",
+            "before drafting",
+            "Adapt example facts to confirmed evidence",
+            "keep the template body only in that file",
+            "Do not execute the plan",
+        ))
         self.assertLessEqual(len(raw_body.splitlines()), 180)
-        self.assertFalse(
-            (SKILLS / "nerd-plan" / "references" / "plan-template.md").exists()
-        )
+        template = (SKILLS / "nerd-plan/templates/templates.md").read_text()
+        self.assertIn("# [Feature] Implementation Plan", template)
+        self.assertNotIn("# [Feature] Implementation Plan", raw_body)
         for forbidden in (
             "Task Dependency Graph (TDG)",
             "one worktree and branch per node",
@@ -470,60 +440,69 @@ class EndpointRouteContractTests(unittest.TestCase):
 
     def test_plan_uses_ordered_tasks_and_proportionate_proof(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "Make each task one independently reviewable deliverable",
-                "State `Depends on` only when the order is not obvious",
-                "do not add execution topology or coordination machinery by default",
-                "For behavior changes, plan the failing test",
-                "For static work",
-                "# [Feature] Implementation Plan",
-                "## File Map",
-                "| Path | Action | Responsibility |",
-                "## Tasks",
-                "### Task N: [Deliverable]",
-                "**Outcome:**",
-                "**Files:**",
-                "**Depends on:**",
-                "Add the failing test or baseline check",
-                "Run `[exact command]`",
-                "Make `[specific code or artifact change]`",
-                "## Final Verification",
-                "Include commit, push, deployment, or other external-write steps only",
-                "planning those steps does not authorize their execution",
-            ),
-        )
+        template = normalized((SKILLS / "nerd-plan/templates/templates.md").read_text())
+        assert_terms(self, body, (
+            "independently reviewable tasks with their own proof",
+            "Order by dependency",
+            "add task-body `Depends on` only when order is unclear",
+            "Avoid coordination machinery by default",
+            "failing test → observed failure → minimum change → focused pass → relevant regression proof",
+            "Static work uses baseline → change → post-change proof",
+            "Name exact paths, symbols, changes, commands, and expected results",
+            "Code-changing tasks require fenced, illustrative pseudocode",
+            "concrete input/output types, validation, transformations, outputs, empty results, and failure paths",
+            "Plan commits, pushes, deployments, or other external writes only when explicitly requested",
+            "listing them never authorizes execution",
+        ))
+        assert_terms(self, template, (
+            "# [Feature] Implementation Plan", "## File Map",
+            "| Path | Action | Responsibility |", "## Tasks",
+            "### Task 1: [Deliverable]", "**Outcome:**", "**Goal:**",
+            "**Files:**", "**Depends on:**", "**Focus Record**",
+            "**Code skeleton and contract:**",
+            "Add the failing test or baseline check",
+            "Run `[command]`", "Make `[specific code or artifact change]`",
+            "## Final Verification",
+        ))
 
     def test_plan_records_subagent_choice_and_model_mapping(self):
         body = normalized(skill_body("nerd-plan"))
-        assert_terms(
-            self,
-            body,
-            (
-                "**Sub-Agent Driven**",
-                "default to NO and continue asking",
-                "unless the user explicitly requests sub-agent-driven planning",
-                "**Sub-agent Model**",
-                "ALWAYS USE INHERIT MODEL",
-                "[mapping](references/subagent-model-mapping.md)",
-            ),
-        )
+        template = normalized((SKILLS / "nerd-plan/templates/templates.md").read_text())
+        assert_terms(self, template, (
+            "**Sub-Agent Driven:**", "default NO; continue asking unless explicitly requested",
+            "**Sub-agent Model:**", "inherit unless the user explicitly requests manual or automatic selection",
+        ))
+        self.assertIn("[model mapping](references/subagent-model-mapping.md)", body)
         self.assertNotIn("always ask user", body)
 
     def test_plan_delivery_guidance_is_conditional_and_kiss_first(self):
-        body = skill_body("nerd-plan")
-        assert_terms(
-            self,
-            body,
-            (
-                "Use KISS by default",
-                "[Comprehensive](references/comprehensive.md)",
-                "[DRY](references/dry.md)",
-                "[selection guide](references/principle-selection.md)",
-            ),
-        )
+        body = normalized(skill_body("nerd-plan"))
+        assert_terms(self, body, (
+            "Use KISS: the simplest sufficient design",
+            "[Comprehensive](references/comprehensive.md) for cross-boundary completeness",
+            "[DRY](references/dry.md) for proven duplication",
+            "[selection guide](references/principle-selection.md) when unclear",
+        ))
+
+    def test_plan_full_example_has_one_task_ledger_per_goal(self):
+        text = (SKILLS / "nerd-plan/templates/templates.md").read_text()
+        example = text.split("## Full Example", 1)[1].split("````markdown\n", 1)[1].rsplit("````", 1)[0]
+        goal_section = example.split("## Goal Ledger\n", 1)[1].split("## Task Ledgers\n", 1)[0]
+        task_section = example.split("## Task Ledgers\n", 1)[1].split("## Tasks\n", 1)[0]
+        goals = re.findall(r"^\| (G\d+) \|", goal_section, re.M)
+        self.assertEqual(goals, ["G1", "G2"])
+        self.assertEqual(re.findall(r"^### (G\d+):", task_section, re.M), goals)
+        self.assertEqual(task_section.count("| Task ID |"), len(goals))
+        self.assertEqual(re.findall(r"^\| (T\d+) \|", task_section, re.M), ["T1", "T2"])
+        rows = re.findall(r"^\| [GT]\d+ \|.*$", goal_section + task_section, re.M)
+        self.assertTrue(all("| queued |" in row for row in rows))
+        lines = example.splitlines()
+        count = len(lines[:lines.index("## Goal Ledger")] + lines[lines.index("## Tasks"):])
+        self.assertIn(f"**Complete plan lines:** {count};", example)
+        headings = re.findall(r"^#+ (.+)$", example, re.M)
+        anchors = {re.sub(r"[^\w -]", "", h.lower()).replace(" ", "-") for h in headings}
+        for anchor in re.findall(r"\]\(#([^)]+)\)", example):
+            self.assertIn(anchor, anchors)
 
     def test_specialties_compose_without_owning_endpoints(self):
         assert_terms(

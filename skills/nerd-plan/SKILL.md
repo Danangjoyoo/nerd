@@ -31,8 +31,8 @@ This contract takes priority over inheritance, prerequisites, and intake rules:
 
 ## Inheritance and Prerequisites
 
-Use `nerd-smart` first. Accept only its resolved **Plan** Focus Record; return to
-Smart if missing, unresolved, or on another endpoint.
+Use `nerd-smart` first. Accept only the **Plan** endpoint with its resolved
+Focus Record. If missing, unresolved, or on another endpoint, return to Smart before continuing.
 
 Plan from confirmed inputs. Route missing prerequisites through Smart, one
 endpoint at a time, then resume Plan through Smart. Reuse existing handoffs:
@@ -97,6 +97,6 @@ Perform one brief self-review before saving; fix findings inline:
 - No placeholders, repeated facts, speculative abstractions, or unrelated work remain.
   Preserve genuine unknowns as blockers.
 
-Report the entry path and ledger anchors/file, then stop before execution.
-Do not implement, commit, push, or make external writes. Execution requires a
+Report the entry path and ledger anchors/file. Stop before execution.
+Do not execute the plan, commit, push, or make external writes. Execution requires a
 new **Execute** Focus Record through Smart.
